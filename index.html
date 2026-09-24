@@ -11,593 +11,128 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0e0c0a;
-      --surface: #17130f;
-      --surface-2: #221c16;
-      --surface-3: #2d261e;
-      --fg: #f5ece0;
-      --muted: #b8a892;
-      --dim: #887864;
-      --border: #383026;
-      --gold: #dfa047;
-      --gold-hover: #f0b45d;
-      --gold-glow: rgba(223, 160, 71, 0.22);
-      --danger: #c94c40;
-      --danger-hover: #e05e52;
-      --success: #3f9e68;
-      --gm-bg: #22170d;
-      --gm-border: #b45309;
-      --gm-text: #fef3c7;
-      --editor-bg: #141724;
-      --editor-border: #4f46e5;
+      --bg:#0e0c0a; --surface:#17130f; --surface-2:#221c16; --surface-3:#2d261e;
+      --fg:#f5ece0; --muted:#b8a892; --dim:#887864; --border:#383026;
+      --gold:#dfa047; --gold-hover:#f0b45d; --gold-glow:rgba(223,160,71,0.22);
+      --danger:#c94c40; --danger-hover:#e05e52; --success:#3f9e68;
+      --gm-bg:#22170d; --gm-border:#b45309; --gm-text:#fef3c7;
+      --editor-bg:#141724; --editor-border:#4f46e5;
     }
+    * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+    html, body { height:100%; background-color:var(--bg); color:var(--fg); font-family:'Outfit',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; overflow:hidden; }
+    .font-serif-title { font-family:'Cinzel',Georgia,serif; letter-spacing:0.03em; }
+    ::-webkit-scrollbar { width:5px; height:5px; }
+    ::-webkit-scrollbar-track { background:var(--surface); }
+    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:9999px; }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    html, body {
-      height: 100%;
-      background-color: var(--bg);
-      color: var(--fg);
-      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      overflow: hidden;
-    }
+    #app { display:flex; flex-direction:column; height:100dvh; max-width:900px; margin:0 auto; border-left:1px solid var(--border); border-right:1px solid var(--border); background-color:var(--bg); position:relative; }
+    header { height:52px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 10px; flex-shrink:0; z-index:20; gap:6px; }
+    .header-btn { background:var(--surface-2); border:1px solid var(--border); color:var(--fg); border-radius:10px; height:34px; padding:0 10px; font-size:12px; font-weight:600; display:flex; align-items:center; gap:5px; cursor:pointer; }
+    .header-pill { background:var(--surface-2); border:1px solid var(--border); color:var(--fg); padding:5px 10px; border-radius:20px; font-size:11.5px; font-weight:500; display:flex; align-items:center; gap:5px; cursor:pointer; max-width:170px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 
-    .font-serif-title {
-      font-family: 'Cinzel', Georgia, serif;
-      letter-spacing: 0.03em;
-    }
+    main { flex:1 1 0%; min-height:0; position:relative; overflow:hidden; display:flex; flex-direction:column; }
+    .view-panel { position:absolute; inset:0; display:none; flex-direction:column; background:var(--bg); overflow-y:auto; -webkit-overflow-scrolling:touch; }
+    .view-panel.active { display:flex; }
+    #chat-messages { flex:1 1 0%; min-height:0; overflow-y:auto; overflow-x:hidden; padding:14px 12px 24px 12px; display:flex; flex-direction:column; gap:12px; }
 
-    /* Scrollbars */
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: var(--surface); }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--dim); }
+    .empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; margin:auto; text-align:center; color:var(--dim); font-size:13.5px; gap:10px; padding:20px; max-width:380px; }
+    .empty-state span { font-size:38px; }
 
-    #app {
-      display: flex;
-      flex-direction: column;
-      height: 100dvh;
-      max-width: 900px;
-      margin: 0 auto;
-      border-left: 1px solid var(--border);
-      border-right: 1px solid var(--border);
-      background-color: var(--bg);
-      position: relative;
-    }
+    .msg { flex-shrink:0 !important; word-break:break-word; line-height:1.6; font-size:14.5px; position:relative; }
+    .msg em { font-style:italic; color:#cbd5e1; }
+    .msg strong { font-weight:700; color:#fff; }
+    .msg.user { align-self:flex-end; background:rgba(223,160,71,0.12); border:1px solid rgba(223,160,71,0.35); border-radius:16px 16px 3px 16px; padding:10px 14px; max-width:86%; }
+    .msg.bot { align-self:flex-start; background:var(--surface); border:1px solid var(--border); border-radius:16px 16px 16px 3px; padding:12px 14px; max-width:90%; }
+    .msg.gm { align-self:stretch; width:100%; background:var(--gm-bg); border:1px solid var(--gm-border); border-radius:14px; padding:12px 14px; color:var(--gm-text); }
+    .msg.combined { align-self:stretch; width:100%; background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; display:flex; flex-direction:column; }
+    .combined-gm-part { background:var(--gm-bg); border-bottom:1px dashed var(--gm-border); padding:12px 14px; color:var(--gm-text); }
+    .combined-gm-header { font-size:11.5px; font-weight:bold; color:var(--gold); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
+    .combined-char-part { padding:12px 14px; border-top:1px solid rgba(255,255,255,0.05); }
+    .msg.editor { align-self:stretch; width:100%; background:var(--editor-bg); border:1px solid var(--editor-border); border-radius:14px; padding:14px; color:var(--fg); }
+    .msg-header { display:flex; align-items:center; gap:7px; margin-bottom:6px; font-size:12.5px; font-weight:600; color:var(--gold); }
 
-    header {
-      height: 52px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 10px;
-      flex-shrink: 0;
-      z-index: 20;
-      gap: 6px;
-    }
+    .think-container { margin:8px 0; border-left:2px solid var(--gold); background:rgba(223,160,71,0.08); border-radius:0 8px 8px 0; overflow:hidden; }
+    .think-container summary { padding:6px 10px; font-size:11.5px; color:var(--muted); cursor:pointer; user-select:none; font-weight:600; }
+    .think-content { padding:8px 10px; font-size:12.5px; line-height:1.45; color:var(--dim); border-top:1px solid rgba(255,255,255,0.05); font-style:italic; white-space:pre-wrap; }
+    .msg-toolbar { display:flex; align-items:center; justify-content:flex-end; gap:6px; margin-top:8px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.06); font-size:11px; }
+    .swipe-controls { display:flex; align-items:center; gap:4px; margin-right:auto; color:var(--muted); font-size:11px; }
+    .msg-action-btn { background:var(--surface-2); border:1px solid var(--border); color:var(--muted); font-size:11px; padding:3px 8px; border-radius:6px; cursor:pointer; min-height:26px; }
+    .cursor::after { content:"▋"; display:inline-block; color:var(--gold); animation:blink 0.8s infinite; margin-left:2px; }
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
 
-    .header-btn {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      color: var(--fg);
-      border-radius: 10px;
-      height: 34px;
-      padding: 0 10px;
-      font-size: 12px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .header-btn:active { transform: scale(0.97); }
+    #status-indicator { font-size:12px; color:var(--gold); padding:5px 12px; background:rgba(223,160,71,0.08); display:none; align-items:center; gap:6px; flex-shrink:0; }
+    #status-indicator.active { display:flex; }
+    .scroll-bottom-btn { position:absolute; bottom:70px; right:14px; width:38px; height:38px; border-radius:50%; background:var(--surface-3); color:var(--fg); border:1px solid var(--border); box-shadow:0 4px 14px rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; font-size:16px; cursor:pointer; z-index:30; }
+    .scroll-bottom-btn.visible { display:flex; }
 
-    .header-pill {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      color: var(--fg);
-      padding: 5px 10px;
-      border-radius: 20px;
-      font-size: 11.5px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      cursor: pointer;
-      max-width: 170px;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
+    .quick-triggers { display:none; gap:6px; padding:6px 10px; background:var(--surface); border-top:1px solid var(--border); overflow-x:auto; flex-shrink:0; }
+    .quick-triggers.visible { display:flex; }
+    .quick-btn { background:var(--surface-2); border:1px solid var(--border); color:var(--muted); font-size:12px; padding:4px 9px; border-radius:12px; white-space:nowrap; cursor:pointer; display:flex; align-items:center; gap:4px; min-height:28px; }
 
-    main {
-      flex: 1 1 0%;
-      min-height: 0;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
+    /* Mindestens 16px zur Vermeidung von iOS Auto-Zoom */
+    input, textarea, select { background-color:var(--surface-2); border:1px solid var(--border); color:var(--fg); border-radius:10px; padding:8px 12px; font-size:16px; outline:none; width:100%; }
+    input:focus, textarea:focus, select:focus { border-color:var(--gold); box-shadow:0 0 0 2px var(--gold-glow); }
+    input[type="checkbox"] { width:18px; height:18px; padding:0; flex-shrink:0; accent-color:var(--gold); }
+    .form-group { display:flex; flex-direction:column; gap:4px; }
+    label { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
 
-    .view-panel {
-      position: absolute;
-      inset: 0;
-      display: none;
-      flex-direction: column;
-      background: var(--bg);
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    .view-panel.active { display: flex; }
+    .input-bar { background:var(--surface); border-top:1px solid var(--border); padding:8px 10px; display:flex; gap:8px; align-items:flex-end; flex-shrink:0; z-index:10; }
+    .input-bar textarea { flex:1; border-radius:18px; min-height:42px; max-height:120px; resize:none; line-height:1.4; padding:9px 14px; font-size:16px; }
+    .send-btn { background:var(--gold); color:#17130f; font-weight:700; border:none; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; box-shadow:0 2px 10px rgba(223,160,71,0.25); }
+    .send-btn.stop { background:var(--danger); color:#fff; }
 
-    #chat-messages {
-      flex: 1 1 0%;
-      min-height: 0;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding: 14px 12px 24px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+    .bottom-nav { height:54px; background:var(--surface); border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-around; flex-shrink:0; z-index:50; padding-bottom:env(safe-area-inset-bottom); }
+    .nav-tab { background:none; border:none; color:var(--dim); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; cursor:pointer; flex:1; height:100%; transition:color 0.15s ease; }
+    .nav-tab.active { color:var(--gold); font-weight:600; }
+    .nav-icon { font-size:17px; }
+    .nav-label { font-size:11px; }
 
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      margin: auto;
-      text-align: center;
-      color: var(--dim);
-      font-size: 13.5px;
-      gap: 10px;
-      padding: 20px;
-      max-width: 380px;
-    }
-    .empty-state span { font-size: 38px; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:10px; }
+    .card-title { font-size:15px; font-weight:bold; }
+    .btn { padding:10px 14px; border-radius:10px; font-size:13.5px; font-weight:600; cursor:pointer; border:none; display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:36px; }
+    .btn-primary { background:var(--gold) !important; color:#17130f !important; }
+    .btn-secondary { background:var(--surface-3) !important; color:var(--fg) !important; border:1px solid var(--border); }
+    .btn-danger { background:var(--danger) !important; color:#fff !important; }
 
-    /* Message Bubbles */
-    .msg {
-      flex-shrink: 0 !important;
-      word-break: break-word;
-      line-height: 1.6;
-      font-size: 14px;
-      position: relative;
-    }
-    .msg em { font-style: italic; color: #cbd5e1; }
-    .msg strong { font-weight: 700; color: #fff; }
-    .msg.user {
-      align-self: flex-end;
-      background: rgba(223, 160, 71, 0.12);
-      border: 1px solid rgba(223, 160, 71, 0.35);
-      border-radius: 16px 16px 3px 16px;
-      padding: 10px 14px;
-      max-width: 86%;
-    }
-    .msg.bot {
-      align-self: flex-start;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px 16px 16px 3px;
-      padding: 12px 14px;
-      max-width: 90%;
-    }
-    .msg.gm {
-      align-self: stretch;
-      width: 100%;
-      background: var(--gm-bg);
-      border: 1px solid var(--gm-border);
-      border-radius: 14px;
-      padding: 12px 14px;
-      color: var(--gm-text);
-    }
-    .msg.combined {
-      align-self: stretch;
-      width: 100%;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-    .combined-gm-part {
-      background: var(--gm-bg);
-      border-bottom: 1px dashed var(--gm-border);
-      padding: 12px 14px;
-      color: var(--gm-text);
-    }
-    .combined-gm-header {
-      font-size: 11.5px;
-      font-weight: bold;
-      color: var(--gold);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .combined-char-part {
-      padding: 12px 14px;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    .msg.editor {
-      align-self: stretch;
-      width: 100%;
-      background: var(--editor-bg);
-      border: 1px solid var(--editor-border);
-      border-radius: 14px;
-      padding: 14px;
-      color: var(--fg);
-    }
+    .order-item { display:flex; align-items:center; justify-content:space-between; background:var(--surface-2); padding:8px 10px; border-radius:8px; border:1px solid var(--border); font-size:13.5px; }
+    .order-controls { display:flex; gap:4px; }
+    .order-btn { background:var(--surface-3); border:none; color:var(--fg); width:32px; height:32px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
 
-    .msg-header {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      margin-bottom: 6px;
-      font-size: 12.5px;
-      font-weight: 600;
-      color: var(--gold);
-    }
-    .think-container {
-      margin: 8px 0;
-      border-left: 2px solid var(--gold);
-      background: rgba(223, 160, 71, 0.08);
-      border-radius: 0 8px 8px 0;
-      overflow: hidden;
-    }
-    .think-container summary {
-      padding: 6px 10px;
-      font-size: 11.5px;
-      color: var(--muted);
-      cursor: pointer;
-      user-select: none;
-      font-weight: 600;
-    }
-    .think-content {
-      padding: 8px 10px;
-      font-size: 12.5px;
-      line-height: 1.45;
-      color: var(--dim);
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      font-style: italic;
-      white-space: pre-wrap;
-    }
-    .msg-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 6px;
-      margin-top: 8px;
-      padding-top: 6px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      font-size: 11px;
-    }
-    .swipe-controls {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      margin-right: auto;
-      color: var(--muted);
-      font-size: 11px;
-    }
-    .msg-action-btn {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 11px;
-      padding: 2px 7px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+    .prog-chip { display:inline-flex; align-items:center; gap:5px; border-radius:12px; padding:4px 9px; font-size:12px; font-weight:500; border:1px solid var(--border); background:var(--surface-3); }
+    .prog-chip.wounds { border-color:rgba(201,76,64,0.4); background:rgba(201,76,64,0.15); color:#fca5a5; }
+    .prog-chip.status { border-color:rgba(168,85,247,0.4); background:rgba(168,85,247,0.15); color:#d8b4fe; }
+    .prog-chip.inv { border-color:rgba(223,160,71,0.4); background:rgba(223,160,71,0.15); color:#fde68a; }
+    .prog-chip.skill { border-color:rgba(99,102,241,0.4); background:rgba(99,102,241,0.15); color:#c7d2fe; }
+    .prog-chip-del { background:none; border:none; color:var(--muted); cursor:pointer; font-size:13px; font-weight:bold; line-height:1; padding:0 2px; }
+    .prog-empty { color:var(--dim); font-style:italic; font-size:12px; padding:10px 0; text-align:center; }
 
-    .cursor::after {
-      content: "▋";
-      display: inline-block;
-      color: var(--gold);
-      animation: blink 0.8s infinite;
-      margin-left: 2px;
-    }
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    .lore-folder { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+    .lore-folder.empty { opacity:0.8; }
+    .lore-folder-header { padding:10px 12px; background:var(--surface-2); display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; }
+    .lore-folder-title { display:flex; align-items:center; gap:8px; font-weight:600; font-size:13.5px; color:var(--fg); }
+    .lore-folder-badge { font-size:10px; padding:2px 6px; border-radius:10px; background:var(--surface-3); color:var(--muted); border:1px solid var(--border); }
+    .lore-folder-actions { display:flex; align-items:center; gap:4px; }
+    .lore-folder-chevron { font-size:11px; color:var(--muted); transition:transform 0.2s ease; }
+    .lore-folder.open .lore-folder-chevron { transform:rotate(90deg); }
+    .lore-folder-content { display:none; flex-direction:column; gap:8px; padding:10px; border-top:1px solid var(--border); }
+    .lore-folder.open .lore-folder-content { display:flex; }
 
-    #status-indicator {
-      font-size: 12px;
-      color: var(--gold);
-      padding: 5px 12px;
-      background: rgba(223, 160, 71, 0.08);
-      display: none;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-    #status-indicator.active { display: flex; }
+    .bag-nav { display:flex; background:var(--surface-2); border-radius:10px; padding:3px; gap:3px; }
+    .bag-nav-btn { flex:1; background:none; border:none; color:var(--muted); padding:8px 4px; font-size:12px; font-weight:600; border-radius:8px; cursor:pointer; text-align:center; }
+    .bag-nav-btn.active { background:var(--surface-3); color:var(--gold); }
+    .char-pill-bar { display:flex; gap:6px; overflow-x:auto; padding:2px 0 6px 0; }
+    .char-pill { background:var(--surface-2); border:1px solid var(--border); border-radius:20px; padding:5px 11px; font-size:12px; color:var(--fg); display:flex; align-items:center; gap:5px; cursor:pointer; white-space:nowrap; }
+    .char-pill.active { border-color:var(--gold); background:rgba(223,160,71,0.15); font-weight:600; }
 
-    .scroll-bottom-btn {
-      position: absolute;
-      bottom: 70px;
-      right: 14px;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: var(--surface-3);
-      color: var(--fg);
-      border: 1px solid var(--border);
-      box-shadow: 0 4px 14px rgba(0,0,0,0.5);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      cursor: pointer;
-      z-index: 30;
-    }
-    .scroll-bottom-btn.visible { display: flex; }
+    .modal { position:fixed; inset:0; background:rgba(0,0,0,0.78); backdrop-filter:blur(3px); z-index:200; display:none; align-items:center; justify-content:center; padding:12px; }
+    .modal.active { display:flex; }
+    .modal-content { background:var(--surface); border:1px solid var(--border); width:100%; max-width:580px; max-height:88dvh; border-radius:16px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 10px 40px rgba(0,0,0,0.7); }
+    .modal-header { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-weight:bold; font-size:15px; }
+    .modal-body { padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; }
 
-    .quick-triggers {
-      display: none;
-      gap: 6px;
-      padding: 5px 10px;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      overflow-x: auto;
-      flex-shrink: 0;
-    }
-    .quick-triggers.visible { display: flex; }
-    .quick-btn {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 12px;
-      padding: 3px 8px;
-      border-radius: 12px;
-      white-space: nowrap;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    /* Inputs & Form */
-    input, textarea, select {
-      background-color: var(--surface-2);
-      border: 1px solid var(--border);
-      color: var(--fg);
-      border-radius: 10px;
-      padding: 8px 12px;
-      font-size: 13.5px;
-      outline: none;
-      width: 100%;
-    }
-    input:focus, textarea:focus, select:focus {
-      border-color: var(--gold);
-      box-shadow: 0 0 0 2px var(--gold-glow);
-    }
-    .form-group { display: flex; flex-direction: column; gap: 4px; }
-    label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-
-    .input-bar {
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      padding: 8px 10px;
-      display: flex;
-      gap: 8px;
-      align-items: flex-end;
-      flex-shrink: 0;
-      z-index: 10;
-    }
-    .input-bar textarea {
-      flex: 1;
-      border-radius: 18px;
-      min-height: 40px;
-      max-height: 120px;
-      resize: none;
-      line-height: 1.4;
-      padding: 9px 14px;
-    }
-
-    .send-btn {
-      background: var(--gold);
-      color: #17130f;
-      font-weight: 700;
-      border: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      flex-shrink: 0;
-      box-shadow: 0 2px 10px rgba(223, 160, 71, 0.25);
-    }
-    .send-btn.stop { background: var(--danger); color: #fff; }
-
-    /* Bottom Navigation */
-    .bottom-nav {
-      height: 54px;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      flex-shrink: 0;
-      z-index: 50;
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-    .nav-tab {
-      background: none;
-      border: none;
-      color: var(--dim);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 2px;
-      cursor: pointer;
-      flex: 1;
-      height: 100%;
-      transition: color 0.15s ease;
-    }
-    .nav-tab.active { color: var(--gold); font-weight: 600; }
-    .nav-icon { font-size: 17px; }
-    .nav-label { font-size: 11px; }
-
-    /* Cards & Buttons */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .card-title { font-size: 15px; font-weight: bold; }
-    .btn {
-      padding: 9px 14px;
-      border-radius: 10px;
-      font-size: 13.5px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: all 0.15s ease;
-    }
-    .btn-primary { background: var(--gold) !important; color: #17130f !important; }
-    .btn-secondary { background: var(--surface-3) !important; color: var(--fg) !important; border: 1px solid var(--border); }
-    .btn-danger { background: var(--danger) !important; color: #fff !important; }
-
-    .order-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--surface-2);
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      font-size: 13.5px;
-    }
-    .order-controls { display: flex; gap: 4px; }
-    .order-btn {
-      background: var(--surface-3);
-      border: none;
-      color: var(--fg);
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Progression Chips */
-    .prog-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      border-radius: 12px;
-      padding: 3px 8px;
-      font-size: 11.5px;
-      font-weight: 500;
-      border: 1px solid var(--border);
-      background: var(--surface-3);
-    }
-    .prog-chip.wounds { border-color: rgba(201, 76, 64, 0.4); background: rgba(201, 76, 64, 0.15); color: #fca5a5; }
-    .prog-chip.status { border-color: rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.15); color: #d8b4fe; }
-    .prog-chip.inv { border-color: rgba(223, 160, 71, 0.4); background: rgba(223, 160, 71, 0.15); color: #fde68a; }
-    .prog-chip.skill { border-color: rgba(99, 102, 241, 0.4); background: rgba(99, 102, 241, 0.15); color: #c7d2fe; }
-    .prog-chip-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 12px; font-weight: bold; line-height: 1; padding: 0 1px; flex-shrink: 0; }
-    .prog-empty { color: var(--dim); font-style: italic; font-size: 11.5px; padding: 8px 0; text-align: center; }
-
-    /* Lorebook Folders */
-    .lore-folder { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-    .lore-folder.empty { opacity: 0.8; }
-    .lore-folder-header { padding: 10px 12px; background: var(--surface-2); display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
-    .lore-folder-title { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13.5px; color: var(--fg); }
-    .lore-folder-badge { font-size: 10px; padding: 1px 6px; border-radius: 10px; background: var(--surface-3); color: var(--muted); border: 1px solid var(--border); }
-    .lore-folder-actions { display: flex; align-items: center; gap: 4px; }
-    .lore-folder-chevron { font-size: 11px; color: var(--muted); transition: transform 0.2s ease; }
-    .lore-folder.open .lore-folder-chevron { transform: rotate(90deg); }
-    .lore-folder-content { display: none; flex-direction: column; gap: 8px; padding: 10px; border-top: 1px solid var(--border); }
-    .lore-folder.open .lore-folder-content { display: flex; }
-
-    .bag-nav { display: flex; background: var(--surface-2); border-radius: 10px; padding: 3px; gap: 3px; }
-    .bag-nav-btn { flex: 1; background: none; border: none; color: var(--muted); padding: 7px 4px; font-size: 12px; font-weight: 600; border-radius: 8px; cursor: pointer; text-align: center; }
-    .bag-nav-btn.active { background: var(--surface-3); color: var(--gold); }
-    .char-pill-bar { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 6px 0; }
-    .char-pill { background: var(--surface-2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; font-size: 12px; color: var(--fg); display: flex; align-items: center; gap: 5px; cursor: pointer; white-space: nowrap; }
-    .char-pill.active { border-color: var(--gold); background: rgba(223, 160, 71, 0.15); font-weight: 600; }
-
-    /* Modals */
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.78);
-      backdrop-filter: blur(3px);
-      z-index: 200;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 12px;
-    }
-    .modal.active { display: flex; }
-    .modal-content {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      width: 100%;
-      max-width: 580px;
-      max-height: 88vh;
-      border-radius: 16px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
-    }
-    .modal-header {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: bold;
-      font-size: 15px;
-    }
-    .modal-body {
-      padding: 16px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    /* Toasts */
-    #toast-layer {
-      position: fixed;
-      top: 14px;
-      right: 14px;
-      z-index: 300;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      pointer-events: none;
-      max-width: 320px;
-    }
-    .toast {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      color: var(--fg);
-      padding: 9px 13px;
-      border-radius: 12px;
-      font-size: 12.5px;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.5);
-      animation: slideIn 0.2s ease-out forwards;
-      pointer-events: auto;
-    }
-    @keyframes slideIn { from { transform: translateY(-8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    #toast-layer { position:fixed; top:14px; right:14px; z-index:300; display:flex; flex-direction:column; gap:8px; pointer-events:none; max-width:320px; }
+    .toast { background:var(--surface-2); border:1px solid var(--border); color:var(--fg); padding:9px 13px; border-radius:12px; font-size:12.5px; box-shadow:0 4px 18px rgba(0,0,0,0.5); animation:slideIn 0.2s ease-out forwards; pointer-events:auto; }
+    @keyframes slideIn { from{transform:translateY(-8px); opacity:0;} to{transform:translateY(0); opacity:1;} }
   </style>
 </head>
 <body>
@@ -605,30 +140,24 @@
 <div id="app">
   <div id="toast-layer"></div>
 
-  <!-- HEADER -->
   <header>
     <button class="header-btn font-serif-title" id="session-modal-btn" title="Abenteuer wechseln">
       <span style="color:var(--gold);">⚔</span>
       <span id="active-session-title">Neues Abenteuer</span>
       <span style="font-size:9px; opacity:0.6;">▼</span>
     </button>
-
     <button class="header-pill" onclick="openWorldModal()" title="Welt & Zeit anpassen">
       <span id="amb-pill-icon">☀️</span>
       <span id="amb-pill-text">Tag 1 • Tag</span>
     </button>
-
     <button class="header-btn" onclick="openBagModal('user')" title="Inventar, Wunden & Status öffnen">
       <span>🎒</span>
       <span id="header-bag-count" style="color:var(--gold);">0</span>
     </button>
-
     <button class="header-btn" id="clear-chat-btn" title="Chat leeren">🗑</button>
   </header>
 
-  <!-- MAIN VIEWS -->
   <main>
-    <!-- TAB 1: CHAT -->
     <section class="view-panel active" id="view-chat">
       <div id="chat-messages"></div>
       <button id="scroll-bottom-btn" class="scroll-bottom-btn" title="Runterscrollen">↓</button>
@@ -641,7 +170,6 @@
       </div>
     </section>
 
-    <!-- TAB 2: GRUPPE & HELD -->
     <section class="view-panel" id="view-party">
       <div style="padding:14px; display:flex; flex-direction:column; gap:12px; max-width:700px; margin:0 auto; width:100%;">
         <div class="card" style="border-color: rgba(223, 160, 71, 0.35);">
@@ -649,11 +177,10 @@
             <div class="font-serif-title" style="font-weight:700; color:var(--gold);" data-i18n="hero_title">👤 Dein Spieler-Charakter</div>
             <button class="order-btn" onclick="document.getElementById('player-expert-details').toggleAttribute('open')" title="KI-Einstellungen">⚙️</button>
           </div>
-
           <div style="display:flex; gap:8px;">
             <div class="form-group" style="flex:2;">
               <label data-i18n="lbl_name">Name</label>
-              <input type="text" id="user-cfg-name" placeholder="Name deines Charakters...">
+              <input type="text" id="user-cfg-name" placeholder="Name deines Helden...">
             </div>
             <div class="form-group" style="flex:1;">
               <label data-i18n="lbl_avatar">Avatar</label>
@@ -664,11 +191,9 @@
             <label data-i18n="lbl_persona">Persona / Beschreibung</label>
             <textarea id="user-cfg-persona" rows="3" data-i18n-ph="ph_persona" placeholder="Klasse, Aussehen, Eigenheiten, Vorgeschichte..."></textarea>
           </div>
-
           <button class="btn btn-secondary" onclick="openBagModal('user')" style="font-size:12.5px;" data-i18n="btn_open_bag_hero">
             🎒 Live-Inventar & Wunden für dieses Abenteuer öffnen
           </button>
-
           <details id="player-expert-details" style="border:1px dashed var(--border); border-radius:8px; padding:8px; background:rgba(0,0,0,0.15);">
             <summary style="font-size:12px; font-weight:600; color:var(--gold); cursor:pointer; user-select:none;" data-i18n="ghostwriter_setup">✨ Ghostwriter & KI-Veredler einrichten</summary>
             <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
@@ -702,36 +227,31 @@
               </div>
             </div>
           </details>
-          <button class="btn btn-primary" id="save-user-profile-btn" style="margin-top: 4px;" data-i18n="btn_save_user">Spieler-Profil speichern</button>
+          <button class="btn btn-primary" id="save-user-profile-btn" style="margin-top:4px;" data-i18n="btn_save_user">Spieler-Profil speichern</button>
         </div>
-
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-primary" style="flex: 1;" id="add-char-btn" data-i18n="btn_add_char">+ Charakter / GM</button>
-          <button class="btn btn-secondary" style="flex: 1;" id="import-png-btn" data-i18n="btn_import_png">📥 Tavern/Chub PNG</button>
-          <input type="file" id="char-png-input" accept="image/png" style="display: none;">
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-primary" style="flex:1;" id="add-char-btn" data-i18n="btn_add_char">+ Charakter / GM</button>
+          <button class="btn btn-secondary" style="flex:1;" id="import-png-btn" data-i18n="btn_import_png">📥 Tavern/Chub PNG</button>
+          <input type="file" id="char-png-input" accept="image/png" style="display:none;">
         </div>
-        <div id="characters-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        <div id="characters-list" style="display:flex; flex-direction:column; gap:10px;"></div>
       </div>
     </section>
 
-    <!-- TAB 3: LOREBOOK -->
     <section class="view-panel" id="view-lorebook">
       <div style="padding:14px; display:flex; flex-direction:column; gap:12px; max-width:700px; margin:0 auto; width:100%;">
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-primary" style="flex: 1.2;" id="add-lore-btn" data-i18n="btn_add_lore">+ Neuer Eintrag</button>
-          <button class="btn btn-secondary" style="flex: 1;" id="add-folder-btn" data-i18n="btn_add_folder">📁 + Ordner</button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-primary" style="flex:1.2;" id="add-lore-btn" data-i18n="btn_add_lore">+ Neuer Eintrag</button>
+          <button class="btn btn-secondary" style="flex:1;" id="add-folder-btn" data-i18n="btn_add_folder">📁 + Ordner</button>
         </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: var(--muted); padding: 0 4px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:11.5px; color:var(--muted); padding:0 4px;">
           <span id="lore-stats-count">0 Einträge in 0 Ordnern</span>
           <button class="msg-action-btn" id="toggle-all-folders-btn" data-i18n="btn_toggle_folders">Alle auf/zu</button>
         </div>
-
-        <div id="lorebook-folders-container" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        <div id="lorebook-folders-container" style="display:flex; flex-direction:column; gap:10px;"></div>
       </div>
     </section>
 
-    <!-- TAB 4: SYSTEM -->
     <section class="view-panel" id="view-settings">
       <div style="padding:14px; display:flex; flex-direction:column; gap:12px; max-width:650px; margin:0 auto; width:100%;">
         <div class="card">
@@ -741,18 +261,16 @@
             <button class="btn lang-btn" style="flex:1;" data-lang="en">🇬🇧 English</button>
           </div>
         </div>
-
         <div class="card">
           <div class="card-title font-serif-title" style="color:var(--gold);" data-i18n="editor_title">✒️ Lektor-Pipeline (Stil-Veredelung)</div>
-          <p style="font-size: 12.5px; color: var(--muted); line-height: 1.4;" data-i18n="editor_desc">
+          <p style="font-size:12.5px; color:var(--muted); line-height:1.4;" data-i18n="editor_desc">
             Verwebt Spielleiter-Kulisse und Begleiter-Reaktionen kaskadierend zu einem dichten Romankapitel.
           </p>
-          <div class="form-group" style="margin-top: 4px;">
+          <div class="form-group" style="margin-top:4px;">
             <label data-i18n="lbl_active_editor">Aktiver Lektor</label>
             <select id="setting-editor"><option value="">Deaktiviert (Direkte Ausgabe)</option></select>
           </div>
         </div>
-
         <div class="card">
           <div class="card-title font-serif-title" style="color:var(--gold);" data-i18n="title_format">Standard-Format (ohne Lektor)</div>
           <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
@@ -760,20 +278,17 @@
             <span><strong data-i18n="combined_chk">Kombinierte Gruppen-Nachricht (GM + Gefährten in einer Blase)</strong></span>
           </label>
         </div>
-
         <div class="card">
           <div class="card-title font-serif-title" style="color:var(--gold);" data-i18n="title_budget">Kontext-Speicher (Dynamisches Budget)</div>
-          <div style="display: flex; justify-content: space-between; font-size: 13px; margin-top: 2px;">
+          <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:2px;">
             <span data-i18n="lbl_budget">Budget:</span><strong id="budget-val" style="color:var(--gold);">3200 Tokens</strong>
           </div>
           <input type="range" id="setting-budget" min="1000" max="8000" step="200" value="3200">
         </div>
-
         <div class="card">
           <div class="card-title font-serif-title" style="color:var(--gold);" data-i18n="turn_order">Ablauf-Reihenfolge (Turn Order)</div>
-          <div id="turn-order-list" style="display: flex; flex-direction: column; gap: 6px;"></div>
+          <div id="turn-order-list" style="display:flex; flex-direction:column; gap:6px;"></div>
         </div>
-
         <div class="card">
           <div class="card-title font-serif-title" style="color:var(--gold);" data-i18n="backup_title">Speicher & Datensicherung</div>
           <div style="display:flex; flex-direction:column; gap:6px; padding:10px; background:var(--surface-2); border-radius:8px;">
@@ -791,55 +306,38 @@
             <button class="btn btn-secondary" style="flex:1;" id="export-btn" data-i18n="btn_export">Backup exportieren</button>
             <button class="btn btn-secondary" style="flex:1;" id="import-btn" data-i18n="btn_import">Backup laden</button>
           </div>
-          <input type="file" id="import-file" accept=".json" style="display: none;">
-          <button class="btn btn-danger" id="reset-btn" style="margin-top: 4px;" data-i18n="btn_reset">Werkseinstellungen zurücksetzen</button>
+          <input type="file" id="import-file" accept=".json" style="display:none;">
+          <button class="btn btn-danger" id="reset-btn" style="margin-top:4px;" data-i18n="btn_reset">Werkseinstellungen zurücksetzen</button>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- NAVIGATION -->
   <nav class="bottom-nav">
-    <button class="nav-tab active" data-view="view-chat">
-      <span class="nav-icon">💬</span>
-      <span class="nav-label" data-i18n="tab_chat">Chat</span>
-    </button>
-    <button class="nav-tab" data-view="view-party">
-      <span class="nav-icon">👥</span>
-      <span class="nav-label" data-i18n="tab_party">Gruppe</span>
-    </button>
-    <button class="nav-tab" data-view="view-lorebook">
-      <span class="nav-icon">📖</span>
-      <span class="nav-label" data-i18n="tab_lore">Lore</span>
-    </button>
-    <button class="nav-tab" data-view="view-settings">
-      <span class="nav-icon">⚙️</span>
-      <span class="nav-label" data-i18n="tab_system">System</span>
-    </button>
+    <button class="nav-tab active" data-view="view-chat"><span class="nav-icon">💬</span><span class="nav-label" data-i18n="tab_chat">Chat</span></button>
+    <button class="nav-tab" data-view="view-party"><span class="nav-icon">👥</span><span class="nav-label" data-i18n="tab_party">Gruppe</span></button>
+    <button class="nav-tab" data-view="view-lorebook"><span class="nav-icon">📖</span><span class="nav-label" data-i18n="tab_lore">Lore</span></button>
+    <button class="nav-tab" data-view="view-settings"><span class="nav-icon">⚙️</span><span class="nav-label" data-i18n="tab_system">System</span></button>
   </nav>
 
-  <!-- MODAL: LIVE-RUCKSACK & VERFASSUNG -->
   <div class="modal" id="bag-modal">
     <div class="modal-content">
       <div class="modal-header">
         <div style="display:flex; align-items:center; gap:8px;">
           <span class="font-serif-title" data-i18n="modal_bag_title">🎒 Verfassung & Ausrüstung</span>
-          <span id="bag-modal-level-badge" onclick="promptChangeLevel()" style="font-size:11px; background:var(--gold); color:#17130f; font-weight:bold; padding:2px 7px; border-radius:10px; cursor:pointer;" title="Klicken, um Stufe anzupassen">Stufe 1</span>
+          <span id="bag-modal-level-badge" onclick="promptChangeLevel()" style="font-size:11px; background:var(--gold); color:#17130f; font-weight:bold; padding:2px 7px; border-radius:10px; cursor:pointer;">Stufe 1</span>
         </div>
         <button class="header-btn" onclick="closeModal('bag-modal')">✕</button>
       </div>
       <div class="modal-body">
         <div class="char-pill-bar" id="bag-char-selector"></div>
-
         <div class="bag-nav">
           <button class="bag-nav-btn active" data-sub="inv" onclick="setBagSubTab('inv')" data-i18n="bag_tab_inv">🎒 Beutel</button>
           <button class="bag-nav-btn" data-sub="wounds" onclick="setBagSubTab('wounds')" data-i18n="bag_tab_wounds">🩹 Wunden</button>
           <button class="bag-nav-btn" data-sub="status" onclick="setBagSubTab('status')" data-i18n="bag_tab_status">🔮 Status</button>
           <button class="bag-nav-btn" data-sub="skills" onclick="setBagSubTab('skills')" data-i18n="bag_tab_skills">⚡ Talente</button>
         </div>
-
         <div id="bag-tab-chips-container" style="display:flex; flex-wrap:wrap; gap:6px; min-height:80px; align-content:flex-start; padding:6px 0;"></div>
-
         <div style="display:flex; gap:6px; margin-top:4px;">
           <input type="text" id="bag-quick-input" data-i18n-ph="ph_bag_input" placeholder="Neuer Eintrag..." style="flex:1;">
           <button class="btn btn-primary" id="bag-quick-add-btn" style="padding:0 14px;">+</button>
@@ -848,7 +346,6 @@
     </div>
   </div>
 
-  <!-- MODAL: TIMELINE BRANCHING -->
   <div class="modal" id="branch-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -856,26 +353,25 @@
         <button class="header-btn" onclick="cancelBranchModal()">✕</button>
       </div>
       <div class="modal-body">
-        <p style="font-size: 13.5px; line-height: 1.5; color: var(--fg);" data-i18n="branch_desc_1">
+        <p style="font-size:13.5px; line-height:1.5; color:var(--fg);" data-i18n="branch_desc_1">
           Du änderst eine frühere Nachricht. Möchtest du ab diesem Punkt einen neuen Chat (parallelen Strang) starten?
         </p>
-        <p style="font-size: 12px; color: var(--muted); line-height: 1.4;" data-i18n="branch_desc_2">
+        <p style="font-size:12px; color:var(--muted); line-height:1.4;" data-i18n="branch_desc_2">
           Dein bisheriges Abenteuer und dessen Zustand bleiben vollständig im Speicher erhalten.
         </p>
-        <div class="form-group" style="margin-top: 4px;">
+        <div class="form-group" style="margin-top:4px;">
           <label data-i18n="lbl_branch_title">Titel des neuen Abenteuers</label>
           <input type="text" id="branch-session-title" placeholder="Abenteuer (Neuer Pfad)">
         </div>
-        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:6px;">
           <button class="btn btn-primary" id="branch-confirm-new-btn" data-i18n="btn_branch_new">🌿 Neuen Chat abzweigen & fortsetzen</button>
           <button class="btn btn-secondary" id="branch-confirm-inplace-btn" data-i18n="btn_branch_inplace">Im selben Chat ändern</button>
-          <button class="btn btn-secondary" onclick="cancelBranchModal()" style="opacity: 0.7;" data-i18n="btn_cancel">Abbrechen</button>
+          <button class="btn btn-secondary" onclick="cancelBranchModal()" style="opacity:0.7;" data-i18n="btn_cancel">Abbrechen</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: SESSION MANAGER -->
   <div class="modal" id="session-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -885,21 +381,20 @@
       <div class="modal-body">
         <div class="form-group">
           <label data-i18n="lbl_active_session">Aktives Abenteuer</label>
-          <div style="display: flex; gap: 6px;">
-            <select id="session-select" style="flex: 1;"></select>
+          <div style="display:flex; gap:6px;">
+            <select id="session-select" style="flex:1;"></select>
             <button class="order-btn" id="new-session-btn" title="Neues Abenteuer anlegen">+</button>
             <button class="order-btn" id="rename-session-btn" title="Umbenennen">✏️</button>
             <button class="order-btn" style="color:var(--danger);" id="delete-session-btn" title="Löschen">🗑</button>
           </div>
         </div>
-        <button class="btn btn-secondary" id="session-first-msg-btn" style="margin-top: 4px;" data-i18n="btn_set_scene">
+        <button class="btn btn-secondary" id="session-first-msg-btn" style="margin-top:4px;" data-i18n="btn_set_scene">
           🎬 Szenen-Auftakt festlegen
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: WORLD ENVIRONMENT -->
   <div class="modal" id="world-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -928,7 +423,6 @@
     </div>
   </div>
 
-  <!-- MODAL: FIRST MSG -->
   <div class="modal" id="first-msg-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -953,7 +447,6 @@
     </div>
   </div>
 
-  <!-- MODAL: CHARAKTER -->
   <div class="modal" id="char-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -965,8 +458,8 @@
         <div class="form-group"><label data-i18n="lbl_name">Name</label><input type="text" id="char-name" placeholder="Name des Charakters..."></div>
         <div class="form-group">
           <label data-i18n="lbl_role_avatar">Rolle & Avatar</label>
-          <div style="display: flex; gap: 8px;">
-            <input type="text" id="char-avatar" style="width: 80px; text-align: center;" value="🎭">
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="char-avatar" style="width:80px; text-align:center;" value="🎭">
             <select id="char-role" style="flex:1;">
               <option value="gm">Spielleiter (Erzähler / Welt & NPCs)</option>
               <option value="companion">Begleiter (Charakter)</option>
@@ -975,9 +468,8 @@
           </div>
         </div>
         <div class="form-group"><label data-i18n="lbl_char_prompt">System-Prompt / Persönlichkeit</label><textarea id="char-prompt" rows="3"></textarea></div>
-
-        <details style="border: 1px dashed var(--border); border-radius: 8px; padding: 8px; background: rgba(0,0,0,0.15);">
-          <summary style="font-size: 12px; font-weight: 600; color: var(--gold); cursor: pointer; user-select: none;" data-i18n="char_expert_box">⚙️ API & Modell-Parameter (Experten)</summary>
+        <details style="border:1px dashed var(--border); border-radius:8px; padding:8px; background:rgba(0,0,0,0.15);">
+          <summary style="font-size:12px; font-weight:600; color:var(--gold); cursor:pointer; user-select:none;" data-i18n="char_expert_box">⚙️ API & Modell-Parameter (Experten)</summary>
           <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
             <div class="form-group">
               <label data-i18n="lbl_provider">Provider</label>
@@ -1009,13 +501,11 @@
             </div>
           </div>
         </details>
-
-        <button class="btn btn-primary" id="save-char-btn" style="margin-top: 4px;" data-i18n="btn_save">Speichern</button>
+        <button class="btn btn-primary" id="save-char-btn" style="margin-top:4px;" data-i18n="btn_save">Speichern</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: LOREBOOK -->
   <div class="modal" id="lore-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -1026,8 +516,8 @@
         <input type="hidden" id="lore-id">
         <div class="form-group">
           <label data-i18n="lbl_lore_folder">Ordner / Kategorie</label>
-          <div style="display: flex; gap: 6px;">
-            <select id="lore-folder-select" style="flex: 1;"></select>
+          <div style="display:flex; gap:6px;">
+            <select id="lore-folder-select" style="flex:1;"></select>
             <button type="button" class="order-btn" id="inline-new-folder-btn" title="Neuen Ordner anlegen">+</button>
           </div>
         </div>
@@ -1040,38 +530,49 @@
           <label data-i18n="lbl_lore_keys">Keywords (kommagetrennt / '+' für UND)</label>
           <input type="text" id="lore-keys" placeholder="schlüsselwort1, schlüsselwort2">
         </div>
-        
-        <div style="display: flex; gap: 8px;">
-          <div class="form-group" style="flex: 1;">
+        <div style="display:flex; gap:8px;">
+          <div class="form-group" style="flex:1;">
             <label data-i18n="lbl_lore_prio">Priorität (1–100)</label>
             <input type="number" id="lore-priority" min="1" max="100" value="10">
           </div>
-          <div class="form-group" style="flex: 1.2;">
+          <div class="form-group" style="flex:1.2;">
             <label data-i18n="lbl_lore_depth">Scan-Tiefe (Msgs)</label>
-            <input type="number" id="lore-depth" min="1" max="50" value="8" title="Wie viele vergangene Nachrichten nach Keywords durchsucht werden">
+            <input type="number" id="lore-depth" min="1" max="50" value="8">
           </div>
-          <div class="form-group" style="flex: 1; justify-content: flex-end;">
+          <div class="form-group" style="flex:1; justify-content:flex-end;">
             <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer; height:38px;">
               <input type="checkbox" id="lore-gmonly"><span data-i18n="lore_gmonly_chk"><strong>Nur GM</strong></span>
             </label>
           </div>
         </div>
-
         <div class="form-group"><label data-i18n="lbl_lore_content">Inhalt / Wissen</label><textarea id="lore-content" rows="4"></textarea></div>
         <button class="btn btn-primary" id="save-lore-btn" data-i18n="btn_save">Speichern</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: CONFIRM -->
   <div class="modal" id="confirm-modal">
     <div class="modal-content" style="max-width:360px;">
       <div class="modal-header"><span class="font-serif-title" data-i18n="confirm_title">Hinweis</span></div>
       <div class="modal-body">
-        <p id="confirm-modal-text" style="font-size: 14.5px; line-height: 1.4;"></p>
-        <div style="display: flex; gap: 8px; margin-top: 8px;">
-          <button class="btn btn-secondary" id="confirm-cancel-btn" style="flex: 1;" data-i18n="btn_cancel">Abbrechen</button>
-          <button class="btn btn-danger" id="confirm-ok-btn" style="flex: 1;">OK</button>
+        <p id="confirm-modal-text" style="font-size:14.5px; line-height:1.4;"></p>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <button class="btn btn-secondary" id="confirm-cancel-btn" style="flex:1;" data-i18n="btn_cancel">Abbrechen</button>
+          <button class="btn btn-danger" id="confirm-ok-btn" style="flex:1;">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="prompt-modal">
+    <div class="modal-content" style="max-width:380px;">
+      <div class="modal-header"><span class="font-serif-title" id="prompt-modal-title">Eingabe</span></div>
+      <div class="modal-body">
+        <p id="prompt-modal-desc" style="font-size:13.5px; line-height:1.4; color:var(--fg);"></p>
+        <input type="text" id="prompt-modal-input">
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <button class="btn btn-secondary" onclick="closeModal('prompt-modal')" style="flex:1;" data-i18n="btn_cancel">Abbrechen</button>
+          <button class="btn btn-primary" id="prompt-modal-ok-btn" style="flex:1;">OK</button>
         </div>
       </div>
     </div>
@@ -1080,11 +581,10 @@
 </div>
 
 <script>
-  // DATENBANK-VERSION 7: Startet immer komplett blanko ohne alte Altlasten
-  const DB_NAME = "MultiRP_Database_v7";
+  const DB_NAME = "MultiRP_Database_v8";
   const STORE_NAME = "app_state";
 
-  // I18N DICTIONARY
+  // BLOCK A: I18N, ÜBERSETZUNGSHELFER & RAF-THROTTLED STREAMING
   const I18N = {
     de: {
       tab_chat: "Chat", tab_party: "Gruppe", tab_lore: "Lore", tab_system: "System",
@@ -1214,9 +714,7 @@
     });
   }
 
-  // RAF-THROTTLED STREAM RENDERING
   const streamRenderQueue = new Map();
-
   function renderThrottled(targetEl, text, shouldAutoScroll = true) {
     if (!targetEl) return;
     if (streamRenderQueue.has(targetEl)) {
@@ -1247,28 +745,56 @@
     streamRenderQueue.clear();
   }
 
+  const jsArg = v => escapeHTML(JSON.stringify(String(v)));
+
+  function snapOf(m) {
+    return m?.snapshots?.[m.currentVariant || 0] || m?.snapshot || null;
+  }
+
+  function stampSnapshot(m) {
+    if (!m.snapshots) m.snapshots = [];
+    m.snapshots[m.currentVariant || 0] = captureCurrentSnapshot();
+  }
+
+  function restoreLatestSnapshot() {
+    for (let i = state.messages.length - 1; i >= 0; i--) {
+      const s = snapOf(state.messages[i]);
+      if (s) { restoreSnapshot(s); return; }
+    }
+  }
+
+  let dbReadFailed = false;
+
+  function generateId(prefix = "id") {
+    return (typeof crypto !== "undefined" && crypto.randomUUID)
+      ? `${prefix}_${crypto.randomUUID()}`
+      : `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  }
+
+  let cachedDbPromise = null;
   function openDB() {
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open(DB_NAME, 1);
-      req.onupgradeneeded = (e) => {
-        const db = e.target.result;
-        if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME);
-      };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
+    if (!cachedDbPromise) {
+      cachedDbPromise = new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = e => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME);
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => { cachedDbPromise = null; reject(req.error); };
+      });
+    }
+    return cachedDbPromise;
   }
 
   async function idbGet(key) {
-    try {
-      const db = await openDB();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, "readonly");
-        const req = tx.objectStore(STORE_NAME).get(key);
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
-    } catch (e) { return null; }
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readonly");
+      const req = tx.objectStore(STORE_NAME).get(key);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
   }
 
   async function idbSet(key, val) {
@@ -1277,9 +803,8 @@
       const tx = db.transaction(STORE_NAME, "readwrite");
       const req = tx.objectStore(STORE_NAME).put(val, key);
       req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
+      req.onerror = () => reject(tx.error || req.error);
       tx.onerror = () => reject(tx.error);
-      tx.onabort = () => reject(tx.error);
     });
   }
 
@@ -1293,25 +818,63 @@
     setTimeout(() => { tEl.remove(); }, 3600);
   }
 
-  function showStatusNotification(msg) {
-    showToast(msg, "info");
-    const statusEl = document.getElementById("status-indicator");
-    const statusText = document.getElementById("status-text");
-    if (statusEl && statusText) {
-      statusText.innerText = msg;
-      statusEl.classList.add("active");
-      setTimeout(() => {
-        if (!isGenerating) statusEl.classList.remove("active");
-      }, 3500);
-    }
+  function showConfirmModal(text, onConfirm) {
+    const modal = document.getElementById("confirm-modal");
+    document.getElementById("confirm-modal-text").innerText = text;
+    modal.classList.add("active");
+    document.getElementById("confirm-ok-btn").onclick = () => { modal.classList.remove("active"); if (onConfirm) onConfirm(); };
+    document.getElementById("confirm-cancel-btn").onclick = () => { modal.classList.remove("active"); };
   }
 
-  // NEUTRALE BASIS-STANDARDS OHNE BEISPIELDATEN
+  function showPromptModal(title, desc, defaultVal, onConfirm) {
+    const modal = document.getElementById("prompt-modal");
+    document.getElementById("prompt-modal-title").innerText = title;
+    document.getElementById("prompt-modal-desc").innerText = desc || "";
+    const input = document.getElementById("prompt-modal-input");
+    input.value = defaultVal || "";
+    modal.classList.add("active");
+    setTimeout(() => { input.focus(); input.select(); }, 40);
+    document.getElementById("prompt-modal-ok-btn").onclick = () => {
+      const val = input.value;
+      modal.classList.remove("active");
+      if (onConfirm) onConfirm(val);
+    };
+    input.onkeydown = (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const val = input.value;
+        modal.classList.remove("active");
+        if (onConfirm) onConfirm(val);
+      }
+    };
+  }
+
   const DEFAULT_WORLD = { day: "Tag 1", time: "Tag", weather: "Klar", location: "Start" };
   const DEFAULT_LORE_CATS = ["Allgemein"];
 
   function createBlankProgression() {
     return { level: "1", inventory: [], wounds: [], status: [], skills: [] };
+  }
+
+  function captureCurrentSnapshot() {
+    const sess = getActiveSession();
+    return {
+      world: JSON.parse(JSON.stringify(state.world || DEFAULT_WORLD)),
+      userProgression: JSON.parse(JSON.stringify(sess.userProgression || createBlankProgression())),
+      companionProgression: JSON.parse(JSON.stringify(sess.companionProgression || {}))
+    };
+  }
+
+  function restoreSnapshot(snap) {
+    if (!snap) return;
+    state.world = JSON.parse(JSON.stringify(snap.world || DEFAULT_WORLD));
+    const sess = getActiveSession();
+    sess.world = state.world;
+    sess.userProgression = JSON.parse(JSON.stringify(snap.userProgression || createBlankProgression()));
+    sess.companionProgression = JSON.parse(JSON.stringify(snap.companionProgression || {}));
+    renderAmbientBar();
+    updateHeaderBagCounter();
+    if (document.getElementById("bag-modal").classList.contains("active")) renderBagModalContent();
   }
 
   const BLANK_STATE = {
@@ -1343,10 +906,8 @@
   let activeStreamMsgRef = null;
   let activeStreamSubRole = "";
   let pendingBranchData = null;
-
   let activeBagCharId = "user";
   let activeBagSubTab = "inv";
-
   const CRASH_BUFFER_KEY = "multi_rp_emergency_buffer";
   let isSaving = false;
   let pendingSave = false;
@@ -1354,7 +915,7 @@
   function getActiveSession() {
     if (!state.sessions || state.sessions.length === 0) {
       const defSess = {
-        id: "sess_" + Date.now(),
+        id: generateId("sess"),
         title: state.lang === "en" ? "New Adventure" : "Neues Abenteuer",
         createdAt: Date.now(),
         messages: [],
@@ -1391,6 +952,7 @@
   }
 
   function writeEmergencyBuffer() {
+    if (dbReadFailed) return;
     try {
       const active = getActiveSession();
       const payload = {
@@ -1406,6 +968,7 @@
   }
 
   async function saveState() {
+    if (dbReadFailed) return;
     writeEmergencyBuffer();
     if (isSaving) { pendingSave = true; return; }
     isSaving = true;
@@ -1430,6 +993,10 @@
   }
 
   async function manualSave() {
+    if (dbReadFailed) {
+      showToast(state.lang === "en" ? "Saving is disabled (database read failed). Reload the page." : "Speichern gesperrt (Datenbank nicht lesbar). Seite neu laden.", "error");
+      return;
+    }
     const saveBtn = document.getElementById("manual-save-btn");
     if (saveBtn) { saveBtn.disabled = true; saveBtn.innerText = state.lang === "en" ? "💾 Saving..." : "💾 Speichere..."; }
     await saveState();
@@ -1442,7 +1009,7 @@
     if (el) {
       const now = new Date();
       const prefix = state.lang === "en" ? "Saved:" : "Zuletzt:";
-      el.innerText = `${prefix} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })} ✓`;
+      el.innerText = `${prefix} ${now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', second:'2-digit' })} ✓`;
       el.style.color = "var(--gold)";
     }
   }
@@ -1586,12 +1153,18 @@
 
   function stripThink(text) {
     if (!text) return "";
-    return text.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<think>[\s\S]*$/gi, '').replace(/\[(?:LIVE_)?MUTATION:[\s\S]*?\]/gi, '').replace(/\[WORLD_UPDATE:[\s\S]*?\]/gi, '').trim();
+    return text.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<think>[\s\S]*$/gi, '')
+      .replace(/\[(?:LIVE_)?(?:MUTATION|STATE_UPDATE|INV_UPDATE|WORLD_UPDATE|WELT_UPDATE|WORLD):[\s\S]*?(\]|$)/gi, '')
+      .replace(/\[\s*[+-](?:ITEM|GEGENSTAND|WOUND|WUNDE|VERLETZUNG|STATUS|ZUSTAND|EFFEKT|SKILL|TALENT|FÄHIGKEIT|FAEHIGKEIT|LEVEL|STUFE)[^\]]*(\]|$)/gi, '')
+      .trim();
   }
 
   function formatMarkdown(raw) {
     if (!raw) return "";
-    let cleaned = raw.replace(/\[(?:LIVE_)?MUTATION:[\s\S]*?(\]|$)/gi, '').replace(/\[WORLD_UPDATE:[\s\S]*?(\]|$)/gi, '');
+    let cleaned = raw
+      .replace(/\[(?:LIVE_)?(?:MUTATION|STATE_UPDATE|INV_UPDATE|WORLD_UPDATE|WELT_UPDATE|WORLD):[\s\S]*?(\]|$)/gi, '')
+      .replace(/\[\s*[+-](?:ITEM|GEGENSTAND|WOUND|WUNDE|VERLETZUNG|STATUS|ZUSTAND|EFFEKT|SKILL|TALENT|FÄHIGKEIT|FAEHIGKEIT|LEVEL|STUFE)[^\]]*(\]|$)/gi, '');
+
     const thinkBlocks = [];
     let s = cleaned.replace(/<think>([\s\S]*?)(?:<\/think>|$)/gi, (match, content) => {
       const isStreaming = !match.includes("</think>");
@@ -1685,7 +1258,7 @@
 
   function processWorldUpdates(rawText) {
     if (!rawText) return rawText;
-    const updateRegex = /\[WORLD_UPDATE:\s*([^\]]+)\]/gi;
+    const updateRegex = /\[(?:WORLD_UPDATE|WELT_UPDATE|WORLD):\s*([^\]]+)\]/gi;
     let match;
     let notices = [];
     const w = state.world || { ...DEFAULT_WORLD };
@@ -1693,15 +1266,15 @@
     while ((match = updateRegex.exec(rawText)) !== null) {
       const parts = match[1].split("|").map(s => s.trim()).filter(Boolean);
       for (const part of parts) {
-        const [keyRaw, ...valParts] = part.split(":");
-        if (!valParts.length) continue;
-        const key = keyRaw.trim().toLowerCase();
-        const val = valParts.join(":").trim();
+        const splitIdx = part.search(/[:=]/);
+        if (splitIdx === -1) continue;
+        const key = part.slice(0, splitIdx).trim().toLowerCase();
+        const val = part.slice(splitIdx + 1).trim();
         if (!val) continue;
         if (key === "day" || key === "tag") { w.day = val; notices.push(`📅 ${val}`); }
         else if (key === "time" || key === "zeit") { w.time = val; notices.push(`${getTimeIcon(val)} ${val}`); }
         else if (key === "weather" || key === "wetter") { w.weather = val; notices.push(`${getWeatherIcon(val)} ${val}`); }
-        else if (key === "location" || key === "ort") { w.location = val; notices.push(`📍 ${val}`); }
+        else if (key === "location" || key === "ort" || key === "kulisse") { w.location = val; notices.push(`📍 ${val}`); }
       }
     }
     if (notices.length > 0) {
@@ -1717,14 +1290,12 @@
   function generateFateDirective(lang, prog = null) {
     const isEn = lang === "en";
     const roll = Math.floor(Math.random() * 100) + 1;
-    
     let penalty = 0;
     if (prog) {
       const woundCount = Array.isArray(prog.wounds) ? prog.wounds.length : 0;
       const statusCount = Array.isArray(prog.status) ? prog.status.length : 0;
       penalty = (woundCount * 6) + (statusCount * 3);
     }
-
     const misfortuneThreshold = Math.min(60, 25 + penalty);
     const frictionThreshold = Math.min(90, 70 + Math.floor(penalty / 2));
 
@@ -1808,25 +1379,35 @@
     return highestScore > 0 ? bestIdx : -1;
   }
 
-  function processLiveMutations(rawText) {
+  function processLiveMutations(rawText, defaultTarget = "user") {
     if (!rawText) return rawText;
-    const mutationRegex = /\[(?:LIVE_)?MUTATION:\s*([^|\]]+)\s*\|([^\]]+)\]/gi;
+    const mutationRegex = /\[(?:LIVE_)?(?:MUTATION|STATE_UPDATE|INV_UPDATE):\s*([^\]]+)\]|\[\s*([+-](?:ITEM|GEGENSTAND|WOUND|WUNDE|VERLETZUNG|STATUS|ZUSTAND|EFFEKT|SKILL|TALENT|FÄHIGKEIT|FAEHIGKEIT|LEVEL|STUFE)[^\]]*)\]/gi;
     let match;
     let notices = [];
 
     while ((match = mutationRegex.exec(rawText)) !== null) {
-      let targetStr = match[1].trim();
-      let actionsStr = match[2];
+      let body = (match[1] || match[2] || "").trim();
+      if (!body) continue;
 
-      if (/^[+-](ITEM|WOUND|STATUS|SKILL)/i.test(targetStr)) {
-        actionsStr = targetStr + (actionsStr ? " | " + actionsStr : "");
-        targetStr = "user";
+      let targetStr = defaultTarget;
+      let actionsStr = body;
+
+      if (body.includes("|")) {
+        const firstPipe = body.indexOf("|");
+        const possibleTarget = body.slice(0, firstPipe).trim();
+        const remaining = body.slice(firstPipe + 1).trim();
+        if (!/^[+-]/i.test(possibleTarget)) {
+          targetStr = possibleTarget;
+          actionsStr = remaining;
+        }
       }
 
       const targetProg = getProgressionFor(targetStr);
-      const targetName = (targetStr.toLowerCase() === "user" || (state.user?.name && targetStr.toLowerCase() === state.user.name.toLowerCase()))
-        ? (state.user?.name || (state.lang === "en" ? "Player" : "Spieler"))
-        : targetStr;
+      const targetChar = state.characters.find(c => c.id === targetStr);
+      const targetName = targetChar ? targetChar.name
+        : (targetStr.toLowerCase() === "user" || (state.user?.name && targetStr.toLowerCase() === state.user.name.toLowerCase()))
+          ? (state.user?.name || (state.lang === "en" ? "Player" : "Spieler"))
+          : targetStr;
 
       if (!targetProg) continue;
       if (!targetProg.wounds) targetProg.wounds = [];
@@ -1836,11 +1417,22 @@
 
       const parts = actionsStr.split(/\|(?![^(]*\))|,(?![^(]*\))/).map(s => s.trim()).filter(Boolean);
       for (const part of parts) {
-        const splitIdx = part.search(/[:=]/);
-        if (splitIdx === -1) continue;
-        const key = part.slice(0, splitIdx).trim().toUpperCase();
-        const rawVal = part.slice(splitIdx + 1).trim();
+        const actionMatch = part.match(/^([+-]?[a-zA-ZäöüÄÖÜ_]+)\s*[:=]?\s*(.*)$/);
+        if (!actionMatch) continue;
+        const rawKey = actionMatch[1].trim().toUpperCase();
+        const rawVal = actionMatch[2].trim();
         if (!rawVal) continue;
+
+        let key = rawKey;
+        if (key === "+GEGENSTAND" || key === "+ITEM") key = "+ITEM";
+        else if (key === "-GEGENSTAND" || key === "-ITEM") key = "-ITEM";
+        else if (key === "+WUNDE" || key === "+VERLETZUNG" || key === "+WOUND") key = "+WOUND";
+        else if (key === "-WUNDE" || key === "-VERLETZUNG" || key === "-WOUND") key = "-WOUND";
+        else if (key === "+ZUSTAND" || key === "+EFFEKT" || key === "+STATUS") key = "+STATUS";
+        else if (key === "-ZUSTAND" || key === "-EFFEKT" || key === "-STATUS") key = "-STATUS";
+        else if (key === "+TALENT" || key === "+FÄHIGKEIT" || key === "+FAEHIGKEIT" || key === "+SKILL") key = "+SKILL";
+        else if (key === "-TALENT" || key === "-FÄHIGKEIT" || key === "-FAEHIGKEIT" || key === "-SKILL") key = "-SKILL";
+        else if (key === "STUFE" || key === "RANG" || key === "LEVEL") key = "LEVEL";
 
         if (key === "+ITEM") {
           const cleanVal = cleanItemName(rawVal);
@@ -1914,13 +1506,14 @@
     const prog = getProgressionFor(activeBagCharId);
     if (!prog) return;
     const promptText = state.lang === "en" ? "Enter new Level / Rank:" : "Neue Stufe / Rang eingeben:";
-    const newLvl = prompt(promptText, prog.level || "1");
-    if (newLvl !== null && newLvl.trim()) {
-      prog.level = newLvl.trim();
-      saveState();
-      renderBagModalContent();
-      showToast(`⭐ ${state.lang === "en" ? "Level set to" : "Stufe auf"} ${prog.level}!`, "success");
-    }
+    showPromptModal(t("modal_bag_title"), promptText, prog.level || "1", (newLvl) => {
+      if (newLvl !== null && newLvl.trim()) {
+        prog.level = newLvl.trim();
+        saveState();
+        renderBagModalContent();
+        showToast(`⭐ ${state.lang === "en" ? "Level set to" : "Stufe auf"} ${prog.level}!`, "success");
+      }
+    });
   }
 
   function setBagSubTab(subTab) {
@@ -1987,7 +1580,7 @@
     container.innerHTML = list.map((item, idx) => `
       <span class="prog-chip ${chipClass}">
         ${formatChipLabel(item)}
-        <button type="button" class="prog-chip-del" onclick="removeProgItemSession('${activeBagCharId}', '${activeBagSubTab}', ${idx})" title="${t("btn_delete")}">✕</button>
+        <button type="button" class="prog-chip-del" onclick="removeProgItemSession(${jsArg(activeBagCharId)}, ${jsArg(activeBagSubTab)}, ${idx})" title="${t("btn_delete")}">✕</button>
       </span>
     `).join("");
   }
@@ -2040,8 +1633,13 @@
     if (parts.length === 0) return false;
     return parts.every(part => {
       const escaped = escapeRegex(part);
-      const pattern = new RegExp(`(?<![\\p{L}\\p{N}_])${escaped}(?![\\p{L}\\p{N}_])`, "iu");
-      return pattern.test(text);
+      try {
+        const pattern = new RegExp(`(?<![\\p{L}\\p{N}_])${escaped}(?![\\p{L}\\p{N}_])`, "iu");
+        return pattern.test(text);
+      } catch (e) {
+        const pattern = new RegExp(`(?:^|[^A-Za-zÀ-ÿ0-9_])${escaped}(?:$|[^A-Za-zÀ-ÿ0-9_])`, "i");
+        return pattern.test(text);
+      }
     });
   }
 
@@ -2156,16 +1754,18 @@
     if (isEn) {
       return `\n\n[MANDATORY RULE: AUTOMATIC INVENTORY, STATS & EFFECTS]:
 Manage gear, tools, and injuries directly through narration.
-1. STATS & FUNCTION REQUIREMENT:
+1. SYNTAX FORMAT (always in brackets):
+   - For player: [+ITEM: Name (Stats & Ability)] or [-ITEM: Name]
+   - For a companion: [MUTATION: CompanionName | +ITEM: Name (Stats)] or [MUTATION: CompanionName | -ITEM: Name]
+   - Wounds: [+WOUND: Injury] or [MUTATION: CompanionName | +WOUND: Injury]
+   - Healing: [-WOUND: Injury] or [MUTATION: CompanionName | -WOUND: Injury]
+   - Status: [+STATUS: Effect] / [-STATUS: Effect]
+2. STATS & FUNCTION REQUIREMENT:
    Every newly acquired, found, or crafted item MUST have a concrete function, stat, or ability in parentheses!
-2. NARRATIVE RELEVANCE:
+3. NARRATIVE RELEVANCE:
    Incorporate these traits organically into your descriptions!
-3. ITEM REMOVAL:
-   When an item is consumed, broken, lost, or handed over, note: -ITEM: <Name>
-4. WOUNDS & STATUS:
-   - Suffer injury: +WOUND: <Injury>
-   - Heal/treat injury: -WOUND: <Injury>
-   - Apply status: +STATUS: <Effect> | -STATUS: <Effect>
+4. PLACEMENT:
+   Always output mutation tags at the very end of your response on a new line!
 
 CURRENT INVENTORY OF ${targetName.toUpperCase()}: [${items}]
 CURRENT WOUNDS: [${wounds}]`;
@@ -2173,17 +1773,18 @@ CURRENT WOUNDS: [${wounds}]`;
 
     return `\n\n[PFLICHT-REGEL: AUTOMATISCHES INVENTAR, STATS & FUNKTIONEN]:
 Du steuerst das Inventar, Werkzeuge und Verletzungen direkt über die Erzählung.
-1. STATS & FUNKTIONSPFLICHT BEI NEUEN ITEMS:
+1. SYNTAX-FORMAT (immer in eckigen Klammern):
+   - Für den Spieler: [+ITEM: Name (Stats & Fähigkeiten)] oder [-ITEM: Name]
+   - Für Gefährten: [MUTATION: GefährtenName | +ITEM: Name (Stats)] oder [MUTATION: GefährtenName | -ITEM: Name]
+   - Wunden: [+WOUND: Verletzung] oder [MUTATION: GefährtenName | +WOUND: Verletzung]
+   - Heilung: [-WOUND: Verletzung] oder [MUTATION: GefährtenName | -WOUND: Verletzung]
+   - Zustände: [+STATUS: Effekt] / [-STATUS: Effekt]
+2. STATS & FUNKTIONSPFLICHT BEI NEUEN ITEMS:
    Jeder gefundene, erhaltene oder gebaute Gegenstand MUSS in Klammern eine konkrete Funktion, Stats oder Fähigkeiten erhalten!
-2. NARRATIVE RELEVANZ:
+3. NARRATIVE RELEVANZ:
    Berücksichtige diese Stats und Funktionen in deinen Beschreibungen!
-3. ENTFERNEN VON ITEMS:
-   Wird ein Gegenstand verbraucht, verloren, zerbrochen oder abgegeben, nenne ihn mit:
-   -ITEM: <Name>
-4. WUNDEN & ZUSTÄNDE:
-   - Verletzung erleiden: +WOUND: <Verletzung>
-   - Verletzung heilen/verbinden: -WOUND: <Verletzung>
-   - Effekt/Zustand: +STATUS: <Effekt> | -STATUS: <Effekt>
+4. PLATZIERUNG:
+   Füge Mutations-Tags immer ganz am Ende deines Beitrags in eine eigene Zeile ein!
 
 AKTUELLES INVENTAR VON ${targetName.toUpperCase()}: [${items}]
 AKTUELLE WUNDEN: [${wounds}]`;
@@ -2194,7 +1795,7 @@ AKTUELLE WUNDEN: [${wounds}]`;
     return Math.ceil(text.length / 2.8);
   }
 
-  function buildCleanHistoryWithinBudget(forCharacter, totalBudget = 3200, systemLoreText = "", cutoffIndex = Infinity) {
+  function buildCleanHistoryWithinBudget(forCharacter, totalBudget = 3200, systemLoreText = "", cutoffIndex = Infinity, skipIndex = -1) {
     if (cutoffIndex < 0) return [];
     const staticPromptTokens = estimateTokens((forCharacter.prompt || "") + getUserPersonaPrompt() + getCompanionLiveProgression(forCharacter) + getWorldAmbientPrompt() + (systemLoreText || ""));
     const availableChatBudget = Math.max(400, totalBudget - staticPromptTokens - 120);
@@ -2202,7 +1803,8 @@ AKTUELLE WUNDEN: [${wounds}]`;
     const sliceEnd = Math.min(state.messages.length, cutoffIndex + 1);
     const candidateMessages = state.messages.slice(0, sliceEnd);
 
-    candidateMessages.forEach(m => {
+    candidateMessages.forEach((m, mi) => {
+      if (mi === skipIndex) return;
       let role = "user";
       let content = "";
       let textToUse = "";
@@ -2284,7 +1886,6 @@ AKTUELLE WUNDEN: [${wounds}]`;
     return merged;
   }
 
-  // CORE LLM STREAMING ENGINE
   async function streamInfermatic(character, messagesList, systemInstruction, onChunk, isWorldMode = false, protectedNames = [], customMaxTokens = 1800) {
     const cleanKey = (character.apiKey || "").trim().replace(/^Bearer\s+/i, '').replace(/^["']|["']$/g, '');
     const cleanModel = (character.model || "").trim().replace(/^["']|["']$/g, '');
@@ -2376,7 +1977,6 @@ AKTUELLE WUNDEN: [${wounds}]`;
                 fullText += deltaContent;
                 partialStreamingText = fullText;
 
-                // ANTI-HALLUZINATIONS-FILTER
                 if (isWorldMode && Array.isArray(protectedNames)) {
                   const hasThink = fullText.includes("<think>");
                   const thinkEnd = fullText.lastIndexOf("</think>");
@@ -2445,6 +2045,23 @@ AKTUELLE WUNDEN: [${wounds}]`;
     }
   }
 
+  function updateStatus(txt) { document.getElementById("status-text").innerText = txt; }
+
+  function ensureMsgVariants(m) {
+    if (!m.variants || m.variants.length === 0) {
+      if (m.type === "combined") {
+        m.variants = [{
+          gmText: m.gmText || "",
+          companionParts: m.companionParts ? JSON.parse(JSON.stringify(m.companionParts)) : [],
+          charName: m.charName || "", charText: m.charText || "", text: m.text || ""
+        }];
+      } else {
+        m.variants = [m.text || m.charText || ""];
+      }
+      m.currentVariant = 0;
+    }
+  }
+  // BLOCK B: GENERIERUNGS-ABBRUCH
   function abortCurrentGeneration() {
     isAborted = true;
     clearAllThrottledRenders();
@@ -2480,6 +2097,7 @@ AKTUELLE WUNDEN: [${wounds}]`;
           activeStreamMsgRef.variants[activeStreamMsgRef.currentVariant || 0] = trimmed;
           if (activeStreamMsgRef.charText) activeStreamMsgRef.charText = trimmed;
         }
+        stampSnapshot(activeStreamMsgRef);
         saveState();
       } else {
         const msgId = activeStreamMsgRef.id;
@@ -2502,6 +2120,7 @@ AKTUELLE WUNDEN: [${wounds}]`;
             getActiveSession().messages = state.messages;
           }
         }
+        restoreLatestSnapshot();
         saveState();
       }
     }
@@ -2515,23 +2134,7 @@ AKTUELLE WUNDEN: [${wounds}]`;
     renderChat();
   }
 
-  function updateStatus(txt) { document.getElementById("status-text").innerText = txt; }
-
-  function ensureMsgVariants(m) {
-    if (!m.variants || m.variants.length === 0) {
-      if (m.type === "combined") {
-        m.variants = [{
-          gmText: m.gmText || "",
-          companionParts: m.companionParts ? JSON.parse(JSON.stringify(m.companionParts)) : [],
-          charName: m.charName || "", charText: m.charText || "", text: m.text || ""
-        }];
-      } else {
-        m.variants = [m.text || m.charText || ""];
-      }
-      m.currentVariant = 0;
-    }
-  }
-
+  // BLOCK C: VARIANTEN, EDIT, BRANCHING, GHOSTWRITER & USER-SEND
   function cycleVariant(msgId, dir) {
     const m = state.messages.find(x => x.id === msgId);
     if (!m || !m.variants || m.variants.length <= 1) return;
@@ -2547,6 +2150,10 @@ AKTUELLE WUNDEN: [${wounds}]`;
       m.text = typeof v === "object" ? (v.text || "") : v;
       if (m.charText) m.charText = m.text;
     }
+    if (state.messages[state.messages.length - 1] === m) {
+      const s = m.snapshots?.[m.currentVariant];
+      if (s) restoreSnapshot(s);
+    }
     saveState();
     renderChat();
   }
@@ -2556,6 +2163,7 @@ AKTUELLE WUNDEN: [${wounds}]`;
     const sess = getActiveSession();
     sess.messages = sess.messages.filter(m => m.id !== msgId);
     state.messages = sess.messages;
+    restoreLatestSnapshot();
     saveState();
     renderChat();
   }
@@ -2581,7 +2189,7 @@ AKTUELLE WUNDEN: [${wounds}]`;
         compFieldsHtml += `
           <div style="margin-top:6px;">
             <label style="font-size:11px; color:var(--gold); font-weight:bold;">${escapeHTML(part.charName)}:</label>
-            <textarea id="edit-comp-${msgId}-${idx}" style="width:100%; min-height:55px; padding:6px; border-radius:6px; background:var(--surface-2); color:var(--fg); border:1px solid var(--border); font-family:inherit; font-size:13.5px;">${escapeHTML(part.text || "")}</textarea>
+            <textarea id="edit-comp-${msgId}-${idx}" style="width:100%; min-height:55px; padding:6px; border-radius:6px; background:var(--surface-2); color:var(--fg); border:1px solid var(--border); font-family:inherit; font-size:16px;">${escapeHTML(part.text || "")}</textarea>
           </div>`;
       });
 
@@ -2589,21 +2197,21 @@ AKTUELLE WUNDEN: [${wounds}]`;
         <div style="display:flex; flex-direction:column; gap:6px;">
           <div>
             <label style="font-size:11px; color:var(--gold); font-weight:bold;">📜 ${escapeHTML(m.gmName || t("role_gm"))}:</label>
-            <textarea id="edit-gm-${msgId}" style="width:100%; min-height:60px; padding:6px; border-radius:6px; background:var(--surface-2); color:var(--fg); border:1px solid var(--border); font-family:inherit; font-size:13.5px;">${escapeHTML(m.gmText || "")}</textarea>
+            <textarea id="edit-gm-${msgId}" style="width:100%; min-height:60px; padding:6px; border-radius:6px; background:var(--surface-2); color:var(--fg); border:1px solid var(--border); font-family:inherit; font-size:16px;">${escapeHTML(m.gmText || "")}</textarea>
           </div>
           ${compFieldsHtml}
           <div style="display:flex; justify-content:flex-end; gap:6px; margin-top:4px;">
             <button class="msg-action-btn" onclick="renderChat()">${t("btn_cancel")}</button>
-            <button class="msg-action-btn" style="background:var(--gold); color:#17130f; font-weight:bold;" onclick="saveEditedMessage('${msgId}')">${t("btn_save")}</button>
+            <button class="msg-action-btn" style="background:var(--gold); color:#17130f; font-weight:bold;" onclick="saveEditedMessage(${jsArg(msgId)})">${t("btn_save")}</button>
           </div>
         </div>`;
     } else {
       const rawVal = (m.variants && m.variants.length > 0) ? (typeof m.variants[m.currentVariant || 0] === 'object' ? m.variants[m.currentVariant || 0].text : m.variants[m.currentVariant || 0]) : (m.text || m.charText || "");
       bodyEl.innerHTML = `
-        <textarea id="edit-input-${msgId}" style="width:100%; min-height:75px; padding:6px; border-radius:6px; background:var(--surface-2); color:var(--fg); border:1px solid var(--gold); font-family:inherit; font-size:14px;">${escapeHTML(rawVal)}</textarea>
+        <textarea id="edit-input-${msgId}" style="width:100%; min-height:75px; padding:6px; border-radius:6px; background:var(--surface-2); color:var(--fg); border:1px solid var(--gold); font-family:inherit; font-size:16px;">${escapeHTML(rawVal)}</textarea>
         <div style="display:flex; justify-content:flex-end; gap:6px; margin-top:6px;">
           <button class="msg-action-btn" onclick="renderChat()">${t("btn_cancel")}</button>
-          <button class="msg-action-btn" style="background:var(--gold); color:#17130f; font-weight:bold;" onclick="saveEditedMessage('${msgId}')">${t("btn_save")}</button>
+          <button class="msg-action-btn" style="background:var(--gold); color:#17130f; font-weight:bold;" onclick="saveEditedMessage(${jsArg(msgId)})">${t("btn_save")}</button>
         </div>`;
     }
   }
@@ -2685,10 +2293,22 @@ AKTUELLE WUNDEN: [${wounds}]`;
     if (!pendingBranchData) return;
     const { msgIdx, updatedData } = pendingBranchData;
     const titleInput = document.getElementById("branch-session-title").value.trim() || `${state.lang === "en" ? "Branch" : "Abzweig"} ${state.sessions.length + 1}`;
-    const oldSess = getActiveSession();
 
     const slicedMessages = JSON.parse(JSON.stringify(state.messages.slice(0, msgIdx + 1)));
     const branchedMsg = slicedMessages[msgIdx];
+
+    let baseSnapshot = null;
+    for (let i = msgIdx - 1; i >= 0; i--) {
+      const s = snapOf(slicedMessages[i]);
+      if (s) { baseSnapshot = s; break; }
+    }
+    if (!baseSnapshot) {
+      baseSnapshot = {
+        world: JSON.parse(JSON.stringify(DEFAULT_WORLD)),
+        userProgression: createBlankProgression(),
+        companionProgression: {}
+      };
+    }
 
     if (updatedData.type === "combined") {
       branchedMsg.gmText = updatedData.gmText;
@@ -2707,13 +2327,13 @@ AKTUELLE WUNDEN: [${wounds}]`;
     }
 
     const newSession = {
-      id: "sess_" + Date.now(),
+      id: generateId("sess"),
       title: titleInput,
       createdAt: Date.now(),
       messages: slicedMessages,
-      world: JSON.parse(JSON.stringify(state.world || DEFAULT_WORLD)),
-      userProgression: JSON.parse(JSON.stringify(oldSess.userProgression || createBlankProgression())),
-      companionProgression: JSON.parse(JSON.stringify(oldSess.companionProgression || {}))
+      world: JSON.parse(JSON.stringify(baseSnapshot.world)),
+      userProgression: JSON.parse(JSON.stringify(baseSnapshot.userProgression)),
+      companionProgression: JSON.parse(JSON.stringify(baseSnapshot.companionProgression))
     };
 
     state.sessions.unshift(newSession);
@@ -2726,7 +2346,13 @@ AKTUELLE WUNDEN: [${wounds}]`;
     pendingBranchData = null;
     showToast(state.lang === "en" ? `🌿 New Branch: "${titleInput}" active!` : `🌿 Neuer Strang: "${titleInput}" aktiv!`, "success");
 
-    if (branchedMsg.type === "user") {
+    if (branchedMsg.type !== "user") {
+      processWorldUpdates(branchedMsg.text);
+      processLiveMutations(branchedMsg.text);
+      stampSnapshot(branchedMsg);
+      saveState();
+    } else {
+      stampSnapshot(branchedMsg);
       runStreamingTurnOrder(branchedMsg.text, null, msgIdx - 1);
     }
   };
@@ -2773,7 +2399,7 @@ KÖRPERLICHE VERFASSUNG: [${woundsSummary}]
 STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens vor. Beziehe bei Bedarf Gegenstände aus deinem Beutel oder deine Verfassung organisch ein. Keine NPC-Vorwegnahme. Reiner Text.`;
 
     try {
-      const suggestion = await streamInfermatic(getUserAICharObject(), [], suggestInstruction, null, false, [], 180);
+      const suggestion = await streamInfermatic(getUserAICharObject(), [], suggestInstruction, null, false, [], 300);
       if (suggestion && !isAborted) {
         const inputEl = document.getElementById("user-input");
         inputEl.value = stripThink(suggestion).replace(/^["']|["']$/g, '').trim();
@@ -2808,7 +2434,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       const rewriteInstruction = isEn ? `### ROLE: STYLE REFINER FOR ${(state.user.name || "Player").toUpperCase()}\nRAW INPUT: "${text}"\nSTRICT: Transform this into 1-2 dense sentences in present tense fitting the character. Zero invention. Do not preempt NPCs. Pure text.`
         : `### ROLLE: STIL-VEREDLER FÜR ${(state.user.name || "Spieler").toUpperCase()}\nROH-EINGABE: "${text}"\nSTRIKT: Verwandle das in 1-2 dichte Sätze im Präsens passend zur Figur. Zero-Invention. Keine NPC-Vorwegnahme. Reiner Text.`;
       try {
-        const polished = await streamInfermatic(getUserAICharObject(), [], rewriteInstruction, null, false, [], 220);
+        const polished = await streamInfermatic(getUserAICharObject(), [], rewriteInstruction, null, false, [], 350);
         if (polished && !isAborted) text = stripThink(polished).replace(/^["']|["']$/g, '').trim();
       } catch (e) {
       } finally {
@@ -2817,11 +2443,80 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       if (isAborted) return;
     }
 
-    state.messages.push({ id: "msg_" + Date.now(), type: "user", senderId: "user", senderName: state.user.name || "User", text, variants: [text], currentVariant: 0 });
+    const userMsg = {
+      id: generateId("msg"),
+      type: "user",
+      senderId: "user",
+      senderName: state.user.name || "User",
+      text,
+      variants: [text],
+      currentVariant: 0
+    };
+    stampSnapshot(userMsg);
+    state.messages.push(userMsg);
     renderChat(); autoScroll(true); saveState();
     await runStreamingTurnOrder(text, null, state.messages.length - 2);
   }
 
+  // PROMPT BUILDER & ACTOR EXECUTION
+  function buildGMPromptContent(userName, triggerText, fateDirective, gmProgressionGuide, protectedListStr, isEn) {
+    return isEn ? `[PLAYER ACTION BY ${userName.toUpperCase()}]:\n"${triggerText}"\n\n[DIRECTION & LOGICAL EFFECT]:
+1. The player's input is AN ATTEMPT, never a fait accompli!
+2. LOGICAL TIERS:
+   - TRIVIAL: 100% success. Never force comical stumbles!
+   - IMPOSSIBLE: 100% failure against uncompromising physical resistance.
+   - DARING / COMBAT: Momentum >> ${fateDirective} <<
+3. Describe environment, sensory details, and NPC resistance in 2–3 dense sentences.
+4. STRICT PROHIBITION: NEVER control actions or words of: ${protectedListStr}!${gmProgressionGuide}`
+      : `[SPIELER-AKTION VON ${userName.toUpperCase()}]:\n"${triggerText}"\n\n[REGIE & LOGISCHE WIRKUNG]:
+1. Die Eingabe des Spielers ist EIN VERSUCH, niemals vollendetes Faktum!
+2. LOGISCHE STUFEN:
+   - TRIVIAL: Gelingt zu 100%. Niemals alberne Stolperer erzwingen!
+   - UNMÖGLICH: Scheitert zu 100% mit kompromisslosem Widerstand.
+   - GEWAGT / KAMPF: Nutze Momentum >> ${fateDirective} <<
+3. Beschreibe in 2–3 dichten Sätzen Kulisse, Sinne und NPC-Gegenwehr.
+4. STRIKTES VERBOT: Steuere NIEMALS Handlungen oder Worte von: ${protectedListStr}!${gmProgressionGuide}`;
+  }
+
+  function buildCompanionPromptContent(comp, userName, triggerText, cleanGmScene, companionsContext, compInventoryGuide, isEn) {
+    return isEn ? `[CURRENT WORLD SCENE]:\n${cleanGmScene || "The surroundings remain unchanged."}\n\n[ACTION BY ${userName.toUpperCase()}]:\n"${triggerText}"\n\n${companionsContext ? `[PREVIOUS REACTIONS OF COMPANIONS]:\n${companionsContext}\n\n` : ""}[DIRECTION FOR ${comp.name.toUpperCase()}]: React directly to the scene, to ${userName}, and interact with present companions. Stay in character.${compInventoryGuide}`
+      : `[AKTUELLE SZENE DER WELT]:\n${cleanGmScene || "Die Umgebung bleibt unverändert."}\n\n[AKTION VON ${userName.toUpperCase()}]:\n"${triggerText}"\n\n${companionsContext ? `[BISHERIGE REAKTIONEN DEINER GEFÄHRTEN]:\n${companionsContext}\n\n` : ""}[REGIE FÜR ${comp.name.toUpperCase()}]: Reagiere unmittelbar auf die Kulisse, auf ${userName} und beziehe anwesende Gefährten ein. Bleibe in deiner Figur.${compInventoryGuide}`;
+  }
+
+  async function executeActorTurn({ actor, effectiveHistory, userPromptContent, systemTask = "", onChunk = null, customMaxTokens = 1400, isGM = false, skipIndex = -1 }) {
+    const isEn = state.lang === "en";
+    const budget = state.settings.maxTokenBudget || 3200;
+    const protectedNames = getProtectedNames();
+    const lore = scanLorebookRecursive(effectiveHistory, userPromptContent, isGM);
+    const history = buildCleanHistoryWithinBudget(actor, budget, lore, effectiveHistory.length - 1, skipIndex);
+
+    let systemInstruction = actor.role === "gm"
+      ? (isEn ? `### ROLE: WORLD & GAME MASTER\nYou are the world, physics, atmosphere, and NPCs. Strictly enforce plausible cause and effect. NEVER puppet ${protectedNames.join(", ")}.${lore}`
+              : `### ROLLE: WELT & SPIELLEITER\nDu bist die Spielwelt, Physik, Atmosphäre und alle NPCs. Setze kompromisslose Plausibilität durch. Steuere NIEMALS ${protectedNames.join(", ")}.${lore}`)
+      : (actor.role === "companion"
+          ? (isEn ? `### ROLE: ${actor.name.toUpperCase()}\nStay strictly in character. Describe only your own actions, gestures, and dialogue.${lore}`
+                  : `### ROLLE: ${actor.name.toUpperCase()}\nBleibe streng in deiner Figur. Beschreibe nur eigene Mimik, Gestik und Worte.${lore}`)
+          : lore);
+
+    if (systemTask) systemInstruction += "\n\n" + systemTask;
+
+    const promptTunnel = [
+      ...history,
+      { role: "user", content: userPromptContent }
+    ];
+
+    partialStreamingText = "";
+    const rawResponse = await streamInfermatic(actor, promptTunnel, systemInstruction, onChunk, isGM, isGM ? protectedNames : [], customMaxTokens);
+
+    if (!isAborted && rawResponse) {
+      processWorldUpdates(rawResponse);
+      processLiveMutations(rawResponse, actor.role === "companion" ? actor.id : "user");
+    }
+
+    return { raw: rawResponse, clean: stripThink(rawResponse) };
+  }
+
+  // TURN-ORDER ENGINE
   async function runStreamingTurnOrder(triggerText, appendToExistingMsgId = null, historyCutoffIndex = state.messages.length - 2) {
     if (state.settings.order.length === 0 && state.characters.length > 0) {
       state.settings.order = state.characters.filter(c => c.role !== 'editor').map(c => c.id);
@@ -2833,12 +2528,11 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
     const protectedNames = getProtectedNames();
     const protectedListStr = protectedNames.join(", ");
-    const budget = state.settings.maxTokenBudget || 3200;
     const isEn = state.lang === "en";
 
-    const effectiveHistoryForScan = (historyCutoffIndex !== undefined && historyCutoffIndex >= 0)
+    const effectiveHistoryForScan = historyCutoffIndex >= 0
       ? state.messages.slice(0, historyCutoffIndex + 1)
-      : state.messages;
+      : [];
 
     try {
       const gmChar = state.characters.find(c => c.role === "gm");
@@ -2851,72 +2545,30 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       const fateDirective = generateFateDirective(state.lang, userProg);
       const gmProgressionGuide = getInventoryPromptDirective(userName, userProg);
 
-      // MODUS A: DREISTUFIGE KASKADE MIT LEKTOR
+      // MODUS A: LEKTOR-PIPELINE
       if (editorChar && gmChar && companions.length > 0) {
         updateStatus(gmChar.name + (isEn ? " designs setting..." : " entwirft Welt & Kulisse..."));
-        const gmLore = scanLorebookRecursive(effectiveHistoryForScan, triggerText, true);
-        const gmHistory = buildCleanHistoryWithinBudget(gmChar, budget, gmLore, historyCutoffIndex);
-
-        const gmPromptTunnel = [
-          ...gmHistory,
-          {
-            role: "user",
-            content: isEn ? `[PLAYER ACTION BY ${userName.toUpperCase()}]:\n"${triggerText}"\n\n[DIRECTION & LOGICAL EFFECT]:
-1. The player's input is AN ATTEMPT, never a fait accompli!
-2. LOGICAL TIERS:
-   - TRIVIAL: 100% success. Never force comical stumbles!
-   - IMPOSSIBLE: 100% failure against uncompromising physical resistance.
-   - DARING / COMBAT: Momentum >> ${fateDirective} <<
-3. Describe environment, sensory details, and NPC resistance in 2–3 dense sentences.
-4. STRICT PROHIBITION: NEVER control actions or words of: ${protectedListStr}!${gmProgressionGuide}`
-              : `[SPIELER-AKTION VON ${userName.toUpperCase()}]:\n"${triggerText}"\n\n[REGIE & LOGISCHE WIRKUNG]:
-1. Die Eingabe des Spielers ist EIN VERSUCH, niemals vollendetes Faktum!
-2. LOGISCHE STUFEN:
-   - TRIVIAL: Gelingt zu 100%. Niemals alberne Stolperer erzwingen!
-   - UNMÖGLICH: Scheitert zu 100% mit kompromisslosem Widerstand.
-   - GEWAGT / KAMPF: Nutze Momentum >> ${fateDirective} <<
-3. Beschreibe in 2–3 dichten Sätzen Kulisse, Sinne und NPC-Gegenwehr.
-4. STRIKTES VERBOT: Steuere NIEMALS Handlungen oder Worte von: ${protectedListStr}!${gmProgressionGuide}`
-          }
-        ];
-
-        const gmInstruction = isEn ? `### ROLE: WORLD & GAME MASTER\nYou are the world, physics, atmosphere, and NPCs. Strictly enforce plausible cause and effect. NEVER puppet ${protectedListStr}.${gmLore}`
-          : `### ROLLE: WELT & SPIELLEITER\nDu bist die Spielwelt, Physik, Atmosphäre und alle NPCs. Setze kompromisslose Plausibilität durch. Steuere NIEMALS ${protectedListStr}.${gmLore}`;
-        
-        const rawGmScene = await streamInfermatic(gmChar, gmPromptTunnel, gmInstruction, null, true, protectedNames, 300);
+        const gmPrompt = buildGMPromptContent(userName, triggerText, fateDirective, gmProgressionGuide, protectedListStr, isEn);
+        const gmTurn = await executeActorTurn({
+          actor: gmChar, effectiveHistory: effectiveHistoryForScan, userPromptContent: gmPrompt, isGM: true, customMaxTokens: 1400
+        });
         if (isAborted) return;
-
-        processWorldUpdates(rawGmScene);
-        processLiveMutations(rawGmScene);
-        const cleanGmScene = stripThink(rawGmScene);
 
         const accumulatedCompanions = [];
         for (const comp of companions) {
           if (isAborted) return;
           updateStatus(comp.name + (isEn ? " reacts..." : " reagiert..."));
-          const compLore = scanLorebookRecursive(effectiveHistoryForScan, triggerText, false);
-          const compHistory = buildCleanHistoryWithinBudget(comp, budget, compLore, historyCutoffIndex);
-          const companionsContext = accumulatedCompanions.map(c => `[${isEn ? "REACTION OF" : "REAKTION VON"} ${c.name.toUpperCase()}]:\n${c.text}`).join("\n\n");
           const compProg = getProgressionFor(comp.id);
           const compInventoryGuide = getInventoryPromptDirective(comp.name, compProg);
+          const companionsContext = accumulatedCompanions.map(c => `[${isEn ? "REACTION OF" : "REAKTION VON"} ${c.name.toUpperCase()}]:\n${c.text}`).join("\n\n");
+          const compPrompt = buildCompanionPromptContent(comp, userName, triggerText, gmTurn.clean, companionsContext, compInventoryGuide, isEn);
 
-          const compPromptTunnel = [
-            ...compHistory,
-            {
-              role: "user",
-              content: isEn ? `[CURRENT WORLD SCENE]:\n${cleanGmScene || "The surroundings remain unchanged."}\n\n[ACTION BY ${userName.toUpperCase()}]:\n"${triggerText}"\n\n${companionsContext ? `[PREVIOUS REACTIONS OF COMPANIONS]:\n${companionsContext}\n\n` : ""}[DIRECTION FOR ${comp.name.toUpperCase()}]: React directly to the scene, to ${userName}, and interact with present companions. Stay in character.${compInventoryGuide}`
-                : `[AKTUELLE SZENE DER WELT]:\n${cleanGmScene || "Die Umgebung bleibt unverändert."}\n\n[AKTION VON ${userName.toUpperCase()}]:\n"${triggerText}"\n\n${companionsContext ? `[BISHERIGE REAKTIONEN DEINER GEFÄHRTEN]:\n${companionsContext}\n\n` : ""}[REGIE FÜR ${comp.name.toUpperCase()}]: Reagiere unmittelbar auf die Kulisse, auf ${userName} und beziehe anwesende Gefährten ein. Bleibe in deiner Figur.${compInventoryGuide}`
-            }
-          ];
-
-          const compInstruction = isEn ? `### ROLE: COMPANION (${comp.name.toUpperCase()})\nStay strictly in character. Describe only your own actions, gestures, and dialogue.${compLore}`
-            : `### ROLLE: BEGLEITER (${comp.name.toUpperCase()})\nBleibe streng in deiner Figur. Beschreibe nur eigene Mimik, Gestik und Worte.${compLore}`;
-          
-          const rawComp = await streamInfermatic(comp, compPromptTunnel, compInstruction, null, false, [], 300);
+          const compTurn = await executeActorTurn({
+            actor: comp, effectiveHistory: effectiveHistoryForScan, userPromptContent: compPrompt, isGM: false, customMaxTokens: 1400
+          });
           if (isAborted) return;
 
-          processLiveMutations(rawComp);
-          accumulatedCompanions.push({ name: comp.name, text: stripThink(rawComp) });
+          accumulatedCompanions.push({ name: comp.name, text: compTurn.clean });
         }
 
         updateStatus(editorChar.name + (isEn ? " crafting novel chapter..." : " verfasst Kapitel..."));
@@ -2933,7 +2585,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           contentEl = document.getElementById("body-" + appendToExistingMsgId);
           if (contentEl) { contentEl.innerHTML = ""; contentEl.classList.add("cursor"); }
         } else {
-          editorMsgObj = { id: "msg_" + Date.now(), type: "editor", senderId: editorChar.id, editorName: editorChar.name, text: "", variants: [""], currentVariant: 0 };
+          editorMsgObj = { id: generateId("msg"), type: "editor", senderId: editorChar.id, editorName: editorChar.name, text: "", variants: [""], currentVariant: 0 };
           state.messages.push(editorMsgObj);
           renderChat();
           contentEl = document.getElementById("body-" + editorMsgObj.id);
@@ -2942,34 +2594,25 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         activeStreamMsgRef = editorMsgObj;
         autoScroll(true);
 
-        const editorHistory = buildCleanHistoryWithinBudget(editorChar, budget, "", historyCutoffIndex);
         const allCompanionsFormatted = accumulatedCompanions.map(c => `[${isEn ? "ACTION & DIALOGUE OF" : "HANDLUNG & DIALOG VON"} ${c.name.toUpperCase()}]:\n${c.text}`).join("\n\n");
-        const editorPrompt = [
-          ...editorHistory,
-          {
-            role: "user",
-            content: isEn ? `Synthesize the drafts into a dense, immersive novel chapter:\n[PLAYER ACTION BY ${userName.toUpperCase()}]:\n"${triggerText}"\n\n[WORLD & NPCS]:\n${cleanGmScene || "No events."}\n\n${allCompanionsFormatted}\n\nEDITORIAL RULES:\n1. ZERO HALLUCINATION: Do not invent unrelated events!\n2. PRESERVE DIALOGUE: All spoken words from NPCs and companions must remain.\n3. FLOWING PROSE: Weave everything into seamless literary storytelling.`
-              : `Führe die folgenden Entwürfe zu einem dichten, packenden Romankapitel zusammen:\n[SPIELER-AKTION VON ${userName.toUpperCase()}]:\n"${triggerText}"\n\n[WELT & NPCS]:\n${cleanGmScene || "Keine Ereignisse."}\n\n${allCompanionsFormatted}\n\nLEKTORATS-REGELN:\n1. ZERO-HALLUCINATION: Erfinde keine neuen Handlungen oder Ereignisse dazu!\n2. DIALOG-TREUE: Alle gesprochenen Worte von NPCs und Gefährten müssen erhalten bleiben.\n3. FLIESSENDE PROSA: Verwebe alles zu nahtloser Romanliteratur.`
-          }
-        ];
+        const editorPrompt = isEn ? `Synthesize the drafts into a dense, immersive novel chapter:\n[PLAYER ACTION BY ${userName.toUpperCase()}]:\n"${triggerText}"\n\n[WORLD & NPCS]:\n${gmTurn.clean || "No events."}\n\n${allCompanionsFormatted}\n\nEDITORIAL RULES:\n1. ZERO HALLUCINATION: Do not invent unrelated events!\n2. PRESERVE DIALOGUE: All spoken words from NPCs and companions must remain.\n3. FLOWING PROSE: Weave everything into seamless literary storytelling.`
+          : `Führe die folgenden Entwürfe zu einem dichten, packenden Romankapitel zusammen:\n[SPIELER-AKTION VON ${userName.toUpperCase()}]:\n"${triggerText}"\n\n[WELT & NPCS]:\n${gmTurn.clean || "Keine Ereignisse."}\n\n${allCompanionsFormatted}\n\nLEKTORATS-REGELN:\n1. ZERO-HALLUCINATION: Erfinde keine neuen Handlungen oder Ereignisse dazu!\n2. DIALOG-TREUE: Alle gesprochenen Worte von NPCs und Gefährten müssen erhalten bleiben.\n3. FLIESSENDE PROSA: Verwebe alles zu nahtloser Romanliteratur.`;
 
-        const editorInstruction = isEn ? `### CHIEF EDITOR (${editorChar.name})\nWeave backdrop and all companions into polished prose without altering facts or dialogue.`
-          : `### CHEFLEKTOR (${editorChar.name})\nDu verwebst Kulisse und alle Gefährten zu vollendeter Prosa, ohne Fakten oder Worte zu verfälschen.`;
-        
-        const finalStory = await streamInfermatic(editorChar, editorPrompt, editorInstruction, (chunkText) => {
-          renderThrottled(contentEl, chunkText);
-        }, false, [], 1800);
+        const editorTurn = await executeActorTurn({
+          actor: editorChar, effectiveHistory: effectiveHistoryForScan, userPromptContent: editorPrompt,
+          onChunk: (chunkText) => renderThrottled(contentEl, chunkText), customMaxTokens: 2400
+        });
 
-        flushThrottled(contentEl, finalStory);
+        flushThrottled(contentEl, editorTurn.raw);
         if (contentEl) contentEl.classList.remove("cursor");
-        if (finalStory && !isAborted && editorMsgObj) {
-          processLiveMutations(finalStory);
-          editorMsgObj.text = finalStory;
+        if (editorTurn.raw && !isAborted && editorMsgObj) {
+          editorMsgObj.text = editorTurn.raw;
           ensureMsgVariants(editorMsgObj);
-          editorMsgObj.variants[editorMsgObj.currentVariant || 0] = finalStory;
+          editorMsgObj.variants[editorMsgObj.currentVariant || 0] = editorTurn.raw;
+          stampSnapshot(editorMsgObj);
         }
 
-      // MODUS B: KOMBINIERTE GRUPPEN-BLASE
+      // MODUS B: KOMBINIERTE GRUPPENBLASE
       } else if (state.settings.combined && gmChar && companions.length > 0) {
         let combinedMsgObj;
         if (appendToExistingMsgId) {
@@ -2979,7 +2622,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           combinedMsgObj.currentVariant = combinedMsgObj.variants.length - 1;
           combinedMsgObj.gmText = ""; combinedMsgObj.companionParts = []; combinedMsgObj.text = "";
         } else {
-          combinedMsgObj = { id: "msg_" + Date.now(), type: "combined", senderId: "group", gmName: gmChar.name, gmText: "", companionParts: [], text: "", variants: [{ gmText: "", companionParts: [], text: "" }], currentVariant: 0 };
+          combinedMsgObj = { id: generateId("msg"), type: "combined", senderId: "group", gmName: gmChar.name, gmText: "", companionParts: [], text: "", variants: [{ gmText: "", companionParts: [], text: "" }], currentVariant: 0 };
           state.messages.push(combinedMsgObj);
         }
         activeStreamMsgRef = combinedMsgObj;
@@ -3000,46 +2643,16 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
         updateStatus(gmChar.name + (isEn ? " describes setting..." : " beschreibt die Welt..."));
         activeStreamSubRole = "gm";
-        const gmLore = scanLorebookRecursive(effectiveHistoryForScan, triggerText, true);
-        const gmHistory = buildCleanHistoryWithinBudget(gmChar, budget, gmLore, historyCutoffIndex);
 
-        const gmPromptTunnel = [
-          ...gmHistory,
-          {
-            role: "user",
-            content: isEn ? `[ACTION BY ${userName.toUpperCase()}]:\n"${triggerText}"\n\n[LOGICAL EFFECT]:
-- TRIVIAL: 100% success.
-- IMPOSSIBLE: 100% failure against hard resistance.
-- DARING / COMBAT: Momentum >> ${fateDirective} <<
-Describe environment, sensory details, and control NPC reactions. NEVER puppet ${protectedListStr}!${gmProgressionGuide}`
-              : `[AKTION VON ${userName.toUpperCase()}]:\n"${triggerText}"\n\n[LOGISCHE WIRKUNG]:
-- TRIVIAL: 100% Erfolg ohne Stolpern.
-- UNMÖGLICH: 100% Scheitern mit harter Gegenwehr.
-- GEWAGT: Momentum >> ${fateDirective} <<
-Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NPC-Reaktionen. Steuere NIEMALS ${protectedListStr}!${gmProgressionGuide}`
-          }
-        ];
+        const gmPrompt = buildGMPromptContent(userName, triggerText, fateDirective, gmProgressionGuide, protectedListStr, isEn);
+        const gmTurn = await executeActorTurn({
+          actor: gmChar, effectiveHistory: effectiveHistoryForScan, userPromptContent: gmPrompt,
+          onChunk: (chunkText) => renderThrottled(gmContent, chunkText), isGM: true, customMaxTokens: 1400
+        });
 
-        const gmInstruction = isEn ? `### ROLE: GAME MASTER & WORLD\nDescribe the world and NPCs realistically. NEVER control ${protectedListStr}.${gmLore}`
-          : `### ROLLE: SPIELLEITER & WELT\nBeschreibe Kulisse und steuere NPCs realistisch. Steuere NIEMALS ${protectedListStr}.${gmLore}`;
-        
-        let gmResponse = "";
-        try {
-          partialStreamingText = "";
-          gmResponse = await streamInfermatic(gmChar, gmPromptTunnel, gmInstruction, (chunkText) => {
-            renderThrottled(gmContent, chunkText);
-          }, true, protectedNames, 340);
-        } catch (gmErr) {
-          if (isAborted) return;
-          if (gmContent) gmContent.innerHTML = `<span style="color:var(--danger)">Error GM: ${escapeHTML(gmErr.message)}</span>`;
-          throw gmErr;
-        }
-        flushThrottled(gmContent, gmResponse);
+        flushThrottled(gmContent, gmTurn.raw);
         if (gmContent) gmContent.classList.remove("cursor");
-
-        processWorldUpdates(gmResponse);
-        processLiveMutations(gmResponse);
-        combinedMsgObj.gmText = gmResponse;
+        combinedMsgObj.gmText = gmTurn.raw;
 
         if (isAborted) return;
 
@@ -3059,49 +2672,31 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
           const compStreamEl = compPartDiv.querySelector(`.comp-stream-${comp.id}`);
           updateStatus(comp.name + (isEn ? " answers..." : " antwortet..."));
 
-          const compLore = scanLorebookRecursive(effectiveHistoryForScan, triggerText, false);
-          const compHistory = buildCleanHistoryWithinBudget(comp, budget, compLore, historyCutoffIndex);
-          const companionsContext = finishedCompanions.map(c => `[${isEn ? "REACTION OF" : "REAKTION VON"} ${c.charName.toUpperCase()}]:\n${stripThink(c.text)}`).join("\n\n");
           const compProg = getProgressionFor(comp.id);
           const compInventoryGuide = getInventoryPromptDirective(comp.name, compProg);
+          const companionsContext = finishedCompanions.map(c => `[${isEn ? "REACTION OF" : "REAKTION VON"} ${c.charName.toUpperCase()}]:\n${stripThink(c.text)}`).join("\n\n");
+          const compPrompt = buildCompanionPromptContent(comp, userName, triggerText, gmTurn.clean, companionsContext, compInventoryGuide, isEn);
 
-          const compPromptTunnel = [
-            ...compHistory,
-            {
-              role: "user",
-              content: isEn ? `[CURRENT WORLD HAPPENINGS]:\n${stripThink(gmResponse) || "No special occurrences."}\n\n[ACTION BY ${userName.toUpperCase()}]:\n"${triggerText}"\n\n${companionsContext ? `[PREVIOUS REACTIONS OF COMPANIONS]:\n${companionsContext}\n\n` : ""}[YOUR TURN]: React directly to the scene, ${userName}, and companions. Act and speak!${compInventoryGuide}`
-                : `[WAS GERADE IN DER WELT GESCHIEHT]:\n${stripThink(gmResponse) || "Keine besonderen Vorkommnisse."}\n\n[AKTION VON ${userName.toUpperCase()}]:\n"${triggerText}"\n\n${companionsContext ? `[BISHERIGE REAKTIONEN DEINER GEFÄHRTEN]:\n${companionsContext}\n\n` : ""}[DEIN ZUG]: Reagiere direkt auf Kulisse, ${userName} und deine Gefährten. Handle und sprich!${compInventoryGuide}`
-            }
-          ];
+          const compTurn = await executeActorTurn({
+            actor: comp, effectiveHistory: effectiveHistoryForScan, userPromptContent: compPrompt,
+            onChunk: (chunkText) => renderThrottled(compStreamEl, chunkText), isGM: false, customMaxTokens: 1400
+          });
 
-          const compInstruction = isEn ? `### ROLE: ${comp.name}\nReact immediately with actions and dialogue to the setting, ${userName}, and companions.${compLore}`
-            : `### ROLLE: ${comp.name}\nReagiere sofort mit eigener Handlung und Sprache auf Kulisse, ${userName} und Gefährten.${compLore}`;
-          
-          let compReply = "";
-          try {
-            partialStreamingText = "";
-            compReply = await streamInfermatic(comp, compPromptTunnel, compInstruction, (chunkText) => {
-              renderThrottled(compStreamEl, chunkText);
-            }, false, [], 600);
-          } catch (compErr) {
-            if (isAborted) return;
-            if (compStreamEl) compStreamEl.innerHTML = `<span style="color:var(--danger)">Error: ${escapeHTML(compErr.message)}</span>`;
-          }
-          flushThrottled(compStreamEl, compReply);
+          flushThrottled(compStreamEl, compTurn.raw);
           if (compStreamEl) compStreamEl.classList.remove("cursor");
 
-          processLiveMutations(compReply);
-          finishedCompanions.push({ charId: comp.id, charName: comp.name, avatar: comp.avatar, text: compReply });
+          finishedCompanions.push({ charId: comp.id, charName: comp.name, avatar: comp.avatar, text: compTurn.raw });
         }
 
         combinedMsgObj.companionParts = finishedCompanions;
         const compCombinedText = finishedCompanions.map(c => `[${c.charName}]: ${c.text}`).join("\n\n");
-        const totalText = `${gmResponse}\n\n${compCombinedText}`.trim();
+        const totalText = `${gmTurn.raw}\n\n${compCombinedText}`.trim();
         combinedMsgObj.text = totalText;
         ensureMsgVariants(combinedMsgObj);
         combinedMsgObj.variants[combinedMsgObj.currentVariant || 0] = {
-          gmText: gmResponse, companionParts: JSON.parse(JSON.stringify(finishedCompanions)), text: totalText
+          gmText: gmTurn.raw, companionParts: JSON.parse(JSON.stringify(finishedCompanions)), text: totalText
         };
+        stampSnapshot(combinedMsgObj);
 
       // MODUS C: SEPARATE BLASEN
       } else {
@@ -3121,7 +2716,7 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
             botMsgObj.currentVariant = botMsgObj.variants.length - 1;
             botMsgObj.text = "";
           } else {
-            botMsgObj = { id: "msg_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4), type: isGM ? "gm" : "bot", senderId: char.id, senderName: char.name, text: "", variants: [""], currentVariant: 0 };
+            botMsgObj = { id: generateId("msg"), type: isGM ? "gm" : "bot", senderId: char.id, senderName: char.name, text: "", variants: [""], currentVariant: 0 };
             state.messages.push(botMsgObj);
           }
           activeStreamMsgRef = botMsgObj;
@@ -3132,31 +2727,28 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
           autoScroll(true);
 
           const dynamicHistoryForStep = state.messages.slice(0, runningCutoff + 1);
-          const lore = scanLorebookRecursive(dynamicHistoryForStep, triggerText, isGM);
-          const history = buildCleanHistoryWithinBudget(char, budget, lore, runningCutoff);
-
-          let customGmTask = lore;
+          let turnPrompt = "";
           if (isGM) {
-            customGmTask += isEn ? `\n\n[LOGICAL EFFECT]:\n- TRIVIAL: 100% success.\n- IMPOSSIBLE: 100% failure.\n- DARING / COMBAT: Momentum >> ${fateDirective} <<${gmProgressionGuide}`
-              : `\n\n[LOGISCHE WIRKUNG]:\n- TRIVIAL: 100% Erfolg.\n- UNMÖGLICH: 100% Scheitern.\n- GEWAGT: Momentum >> ${fateDirective} <<${gmProgressionGuide}`;
+            turnPrompt = buildGMPromptContent(userName, triggerText, fateDirective, gmProgressionGuide, protectedListStr, isEn);
           } else {
             const charProg = getProgressionFor(char.id);
-            customGmTask += getInventoryPromptDirective(char.name, charProg);
+            const compGuide = getInventoryPromptDirective(char.name, charProg);
+            turnPrompt = buildCompanionPromptContent(char, userName, triggerText, "", "", compGuide, isEn);
           }
 
-          partialStreamingText = "";
-          const reply = await streamInfermatic(char, history, customGmTask, (chunkText) => {
-            renderThrottled(contentEl, chunkText);
-          }, isGM, isGM ? protectedNames : [], 800);
+          const turnResult = await executeActorTurn({
+            actor: char, effectiveHistory: dynamicHistoryForStep, userPromptContent: turnPrompt,
+            onChunk: (chunkText) => renderThrottled(contentEl, chunkText), isGM, customMaxTokens: 1400,
+            skipIndex: historyCutoffIndex + 1
+          });
 
-          flushThrottled(contentEl, reply);
+          flushThrottled(contentEl, turnResult.raw);
           if (contentEl) contentEl.classList.remove("cursor");
-          if (reply && !isAborted) {
-            processWorldUpdates(reply);
-            processLiveMutations(reply);
-            botMsgObj.text = reply;
+          if (turnResult.raw && !isAborted) {
+            botMsgObj.text = turnResult.raw;
             ensureMsgVariants(botMsgObj);
-            botMsgObj.variants[botMsgObj.currentVariant || 0] = reply;
+            botMsgObj.variants[botMsgObj.currentVariant || 0] = turnResult.raw;
+            stampSnapshot(botMsgObj);
             runningCutoff = state.messages.indexOf(botMsgObj);
           }
         }
@@ -3169,6 +2761,7 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
     }
   }
 
+  // MODUS C EINZEL-TRIGGER (Bezugspunkt Spieleraktion / Claude #2 Optional Fix)
   async function triggerSingleBot(charId, appendToExistingMsgId = null) {
     if (isGenerating) return;
     const char = state.characters.find(c => c.id === charId);
@@ -3182,7 +2775,6 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
     const isGM = char.role === "gm";
     const isEditor = char.role === "editor";
     const protectedNames = getProtectedNames();
-    const budget = state.settings.maxTokenBudget || 3200;
 
     let botMsgObj;
     if (appendToExistingMsgId) {
@@ -3192,7 +2784,7 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
       botMsgObj.currentVariant = botMsgObj.variants.length - 1;
       botMsgObj.text = "";
     } else {
-      botMsgObj = { id: "msg_" + Date.now(), type: isEditor ? "editor" : (isGM ? "gm" : "bot"), senderId: char.id, senderName: char.name, editorName: char.name, text: "", variants: [""], currentVariant: 0 };
+      botMsgObj = { id: generateId("msg"), type: isEditor ? "editor" : (isGM ? "gm" : "bot"), senderId: char.id, senderName: char.name, editorName: char.name, text: "", variants: [""], currentVariant: 0 };
       state.messages.push(botMsgObj);
     }
     activeStreamMsgRef = botMsgObj;
@@ -3205,37 +2797,49 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
     try {
       const targetIdx = state.messages.findIndex(m => m.id === botMsgObj.id);
       const cutoff = targetIdx - 1;
-      const lastMsg = cutoff >= 0 ? state.messages[cutoff] : null;
-      const lastText = lastMsg ? (lastMsg.text || lastMsg.charText || "") : "";
-      const historySlice = cutoff >= 0 ? state.messages.slice(0, cutoff + 1) : [];
-      const lore = scanLorebookRecursive(historySlice, lastText, isGM);
-      const history = cutoff >= 0 ? buildCleanHistoryWithinBudget(char, budget, lore, cutoff) : [];
+      const historySlice = cutoff > 0 ? state.messages.slice(0, cutoff) : [];
 
-      let gmInstruction = lore;
+      let userPrompt = "";
       if (isGM) {
+        const lastMsg = cutoff >= 0 ? state.messages[cutoff] : null;
+        userPrompt = (lastMsg ? (lastMsg.text || lastMsg.charText || "") : "") || (isEn ? "[Continue with the scene]" : "[Fahre mit der Szene fort]");
         const uProg = getProgressionFor("user");
         const fateDirective = generateFateDirective(state.lang, uProg);
         const uName = state.user?.name || (isEn ? "Player" : "Spieler");
-        gmInstruction += isEn ? `\n\n[LOGICAL EFFECT]:\n- TRIVIAL: 100% success.\n- IMPOSSIBLE: 100% failure.\n- DARING / COMBAT: Momentum >> ${fateDirective} <<` + getInventoryPromptDirective(uName, uProg)
-          : `\n\n[LOGISCHE WIRKUNG]:\n- TRIVIAL: 100% Erfolg.\n- UNMÖGLICH: 100% Scheitern.\n- GEWAGT: Momentum >> ${fateDirective} <<` + getInventoryPromptDirective(uName, uProg);
+        const gmGuide = getInventoryPromptDirective(uName, uProg);
+        userPrompt = buildGMPromptContent(uName, userPrompt, fateDirective, gmGuide, protectedNames.join(", "), isEn);
       } else {
+        let lastUserAction = "";
+        for (let i = cutoff; i >= 0; i--) {
+          if (state.messages[i]?.type === "user") {
+            lastUserAction = state.messages[i].text || "";
+            break;
+          }
+        }
+        let lastGmScene = "";
+        for (let i = cutoff; i >= 0; i--) {
+          if (state.messages[i]?.type === "gm" || state.messages[i]?.gmText) {
+            lastGmScene = stripThink(state.messages[i].gmText || state.messages[i].text || "");
+            break;
+          }
+        }
         const charProg = getProgressionFor(char.id);
-        gmInstruction += getInventoryPromptDirective(char.name, charProg);
+        const compGuide = getInventoryPromptDirective(char.name, charProg);
+        userPrompt = buildCompanionPromptContent(char, state.user?.name || "Player", lastUserAction || (isEn ? "Stay alert." : "Bleib wachsam."), lastGmScene, "", compGuide, isEn);
       }
 
-      partialStreamingText = "";
-      const reply = await streamInfermatic(char, history, gmInstruction, (chunkText) => {
-        renderThrottled(contentEl, chunkText);
-      }, isGM, isGM ? protectedNames : [], 900);
+      const turnResult = await executeActorTurn({
+        actor: char, effectiveHistory: historySlice, userPromptContent: userPrompt,
+        onChunk: (chunkText) => renderThrottled(contentEl, chunkText), isGM, customMaxTokens: 1400
+      });
 
-      flushThrottled(contentEl, reply);
+      flushThrottled(contentEl, turnResult.raw);
       if (contentEl) contentEl.classList.remove("cursor");
-      if (reply && !isAborted) {
-        processWorldUpdates(reply);
-        processLiveMutations(reply);
-        botMsgObj.text = reply;
+      if (turnResult.raw && !isAborted) {
+        botMsgObj.text = turnResult.raw;
         ensureMsgVariants(botMsgObj);
-        botMsgObj.variants[botMsgObj.currentVariant || 0] = reply;
+        botMsgObj.variants[botMsgObj.currentVariant || 0] = turnResult.raw;
+        stampSnapshot(botMsgObj);
       }
     } catch (err) {
       if (!isAborted && err.name !== "AbortError") showConfirmModal(err.message, () => {});
@@ -3251,6 +2855,14 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
       const msgIdx = state.messages.findIndex(m => m.id === targetMsgId);
       if (msgIdx === -1) return;
       const targetMsg = state.messages[msgIdx];
+
+      if (msgIdx === state.messages.length - 1) {
+        for (let i = msgIdx - 1; i >= 0; i--) {
+          const s = snapOf(state.messages[i]);
+          if (s) { restoreSnapshot(s); break; }
+        }
+      }
+
       if (targetMsg.type === "bot" || targetMsg.type === "gm") {
         const char = state.characters.find(c => c.id === targetMsg.senderId || c.name === targetMsg.senderName);
         if (char) { await triggerSingleBot(char.id, targetMsg.id); return; }
@@ -3300,7 +2912,16 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
     processWorldUpdates(text);
     processLiveMutations(text);
 
-    const firstMsg = { id: "msg_init_" + Date.now(), type: roleType === "companion" ? "bot" : roleType, senderId, senderName, text, variants: [text], currentVariant: 0 };
+    const firstMsg = {
+      id: generateId("msg"),
+      type: roleType === "companion" ? "bot" : roleType,
+      senderId,
+      senderName,
+      text,
+      variants: [text],
+      currentVariant: 0
+    };
+    stampSnapshot(firstMsg);
     if (state.messages.length === 0) state.messages.unshift(firstMsg);
     else state.messages.push(firstMsg);
     getActiveSession().messages = state.messages;
@@ -3309,6 +2930,7 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
     closeModal("first-msg-modal");
   };
 
+  // UI RENDERING
   function renderChat() {
     chatContainer.innerHTML = "";
     if (state.messages.length === 0) {
@@ -3361,14 +2983,14 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
       if (m.type !== "user" && m.variants && m.variants.length > 1) {
         const swipes = document.createElement("div");
         swipes.className = "swipe-controls";
-        swipes.innerHTML = `<button class="order-btn" style="width:22px;height:22px;" onclick="cycleVariant('${m.id}', -1)">◀</button><span>${(m.currentVariant || 0) + 1} / ${m.variants.length}</span><button class="order-btn" style="width:22px;height:22px;" onclick="cycleVariant('${m.id}', 1)">▶</button>`;
+        swipes.innerHTML = `<button class="order-btn" style="width:24px;height:24px;" onclick="cycleVariant(${jsArg(m.id)}, -1)">◀</button><span>${(m.currentVariant || 0) + 1} / ${m.variants.length}</span><button class="order-btn" style="width:24px;height:24px;" onclick="cycleVariant(${jsArg(m.id)}, 1)">▶</button>`;
         toolbar.appendChild(swipes);
       }
       toolbar.innerHTML += `
-        <button class="msg-action-btn" onclick="startEditMessage('${m.id}')" title="${t("btn_edit")}">${t("btn_edit")}</button>
-        <button class="msg-action-btn" style="color:var(--danger);" onclick="deleteSingleMessage('${m.id}')" title="${t("btn_delete")}">${t("btn_delete")}</button>`;
+        <button class="msg-action-btn" onclick="startEditMessage(${jsArg(m.id)})" title="${t("btn_edit")}">${t("btn_edit")}</button>
+        <button class="msg-action-btn" style="color:var(--danger);" onclick="deleteSingleMessage(${jsArg(m.id)})" title="${t("btn_delete")}">${t("btn_delete")}</button>`;
       if (m.type !== "user" && !isGenerating) {
-        toolbar.innerHTML += `<button class="msg-action-btn" onclick="regenerateLastTurn('${m.id}')">${t("btn_swipe")}</button>`;
+        toolbar.innerHTML += `<button class="msg-action-btn" onclick="regenerateLastTurn(${jsArg(m.id)})">${t("btn_swipe")}</button>`;
       }
       div.appendChild(toolbar);
       chatContainer.appendChild(div);
@@ -3439,7 +3061,7 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
       let bagBtnHtml = "";
       if (c.role === 'companion') {
         bagBtnHtml = `
-          <button class="btn btn-secondary" onclick="openBagModal('${c.id}')" style="font-size:12px; margin-top:4px;">
+          <button class="btn btn-secondary" onclick="openBagModal(${jsArg(c.id)})" style="font-size:12px; margin-top:4px;">
             ${t("companion_bag_btn")}
           </button>`;
       }
@@ -3453,8 +3075,8 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
             </div>
           </div>
           <div style="display:flex; gap:6px;">
-            <button class="order-btn" onclick="editChar('${c.id}')">✏️</button>
-            <button class="order-btn" style="color:var(--danger);" onclick="deleteChar('${c.id}')">🗑</button>
+            <button class="order-btn" onclick="editChar(${jsArg(c.id)})">✏️</button>
+            <button class="order-btn" style="color:var(--danger);" onclick="deleteChar(${jsArg(c.id)})">🗑</button>
           </div>
         </div>
         ${bagBtnHtml}`;
@@ -3486,6 +3108,7 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
     state.loreCategories.forEach(catName => {
       const entriesInCat = state.lorebook.filter(e => e.category === catName);
       const isOpen = openFoldersState.has(catName);
+      const encodedCat = encodeURIComponent(catName);
 
       const folderEl = document.createElement("div");
       folderEl.className = `lore-folder ${isOpen ? 'open' : ''} ${entriesInCat.length === 0 ? 'empty' : ''}`;
@@ -3511,8 +3134,8 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
                   </div>
                 </div>
                 <div style="display:flex; gap:4px;">
-                  <button class="order-btn" style="width:26px; height:26px;" onclick="editLore('${l.id}')">✏️</button>
-                  <button class="order-btn" style="width:26px; height:26px; color:var(--danger);" onclick="deleteLore('${l.id}')">🗑</button>
+                  <button class="order-btn" style="width:28px; height:28px;" onclick="editLore(${jsArg(l.id)})">✏️</button>
+                  <button class="order-btn" style="width:28px; height:28px; color:var(--danger);" onclick="deleteLore(${jsArg(l.id)})">🗑</button>
                 </div>
               </div>
               <div style="font-size:11.5px; color:var(--gold); margin-top:4px;">${t("label_keys")} ${escapeHTML(l.keys || "(Dauerhaft aktiv / Keine Keys)")}</div>
@@ -3521,17 +3144,17 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
       }
 
       folderEl.innerHTML = `
-        <div class="lore-folder-header" onclick="toggleFolder('${escapeHTML(catName)}')">
+        <div class="lore-folder-header" data-folder-action="toggle" data-folder="${encodedCat}">
           <div class="lore-folder-title">
             <span class="lore-folder-chevron">▶</span>
             <span>📁 ${escapeHTML(catName)}</span>
             <span class="lore-folder-badge">${entriesInCat.length}</span>
           </div>
-          <div class="lore-folder-actions" onclick="event.stopPropagation()">
-            <button class="order-btn" style="width:26px; height:26px;" onclick="addEntryToSpecificFolder('${escapeHTML(catName)}')" title="${t("btn_add_lore")}">+</button>
+          <div class="lore-folder-actions">
+            <button class="order-btn" style="width:28px; height:28px;" data-folder-action="add" data-folder="${encodedCat}" title="${t("btn_add_lore")}">+</button>
             ${catName !== "Allgemein" ? `
-              <button class="order-btn" style="width:26px; height:26px;" onclick="renameFolder('${escapeHTML(catName)}')" title="${t("tooltip_rename")}">✏️</button>
-              <button class="order-btn" style="width:26px; height:26px; color:var(--danger);" onclick="deleteFolder('${escapeHTML(catName)}')" title="${t("tooltip_delete")}">🗑</button>
+              <button class="order-btn" style="width:28px; height:28px;" data-folder-action="rename" data-folder="${encodedCat}" title="${t("tooltip_rename")}">✏️</button>
+              <button class="order-btn" style="width:28px; height:28px; color:var(--danger);" data-folder-action="delete" data-folder="${encodedCat}" title="${t("tooltip_delete")}">🗑</button>
             ` : ''}
           </div>
         </div>
@@ -3541,6 +3164,19 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
       `;
       container.appendChild(folderEl);
     });
+
+    container.onclick = (e) => {
+      const btn = e.target.closest("[data-folder-action]");
+      if (btn) {
+        e.stopPropagation();
+        const action = btn.dataset.folderAction;
+        const folderName = decodeURIComponent(btn.dataset.folder);
+        if (action === "toggle") toggleFolder(folderName);
+        else if (action === "add") addEntryToSpecificFolder(folderName);
+        else if (action === "rename") renameFolder(folderName);
+        else if (action === "delete") deleteFolder(folderName);
+      }
+    };
   }
 
   function toggleFolder(catName) {
@@ -3558,46 +3194,49 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
   function createNewFolder() {
     const promptText = state.lang === "en" ? "Name of the new Lorebook folder:" : "Name des neuen Lorebook-Ordners:";
     const defName = state.lang === "en" ? "New Folder" : "Neuer Ordner";
-    const name = prompt(promptText, defName);
-    if (!name || !name.trim()) return;
-    const cleanName = name.trim();
-    if (state.loreCategories.includes(cleanName)) {
-      showConfirmModal(state.lang === "en" ? "A folder with this name already exists." : "Ein Ordner mit diesem Namen existiert bereits.", () => {});
-      return;
-    }
-    state.loreCategories.push(cleanName);
-    openFoldersState.add(cleanName);
-    saveState();
-    renderLorebook();
+    showPromptModal(t("btn_add_folder"), promptText, defName, (name) => {
+      if (!name || !name.trim()) return;
+      const cleanName = name.trim();
+      if (state.loreCategories.includes(cleanName)) {
+        showConfirmModal(state.lang === "en" ? "A folder with this name already exists." : "Ein Ordner mit diesem Namen existiert bereits.", () => {});
+        return;
+      }
+      state.loreCategories.push(cleanName);
+      openFoldersState.add(cleanName);
+      saveState();
+      renderLorebook();
+    });
   }
 
   document.getElementById("add-folder-btn").onclick = createNewFolder;
   document.getElementById("inline-new-folder-btn").onclick = () => {
     const promptText = state.lang === "en" ? "Name of the new Lorebook folder:" : "Name des neuen Lorebook-Ordners:";
     const defName = state.lang === "en" ? "New Folder" : "Neuer Ordner";
-    const name = prompt(promptText, defName);
-    if (!name || !name.trim()) return;
-    const cleanName = name.trim();
-    if (!state.loreCategories.includes(cleanName)) {
-      state.loreCategories.push(cleanName);
-      openFoldersState.add(cleanName);
-      saveState();
-      updateLoreFolderDropdown(cleanName);
-      renderLorebook();
-    }
+    showPromptModal(t("btn_add_folder"), promptText, defName, (name) => {
+      if (!name || !name.trim()) return;
+      const cleanName = name.trim();
+      if (!state.loreCategories.includes(cleanName)) {
+        state.loreCategories.push(cleanName);
+        openFoldersState.add(cleanName);
+        saveState();
+        updateLoreFolderDropdown(cleanName);
+        renderLorebook();
+      }
+    });
   };
 
   function renameFolder(oldName) {
     const promptText = state.lang === "en" ? `New name for "${oldName}":` : `Neuer Name für "${oldName}":`;
-    const newName = prompt(promptText, oldName);
-    if (!newName || !newName.trim() || newName.trim() === oldName) return;
-    const cleanNew = newName.trim();
-    const idx = state.loreCategories.indexOf(oldName);
-    if (idx !== -1) state.loreCategories[idx] = cleanNew;
-    state.lorebook.forEach(entry => { if (entry.category === oldName) entry.category = cleanNew; });
-    if (openFoldersState.has(oldName)) { openFoldersState.delete(oldName); openFoldersState.add(cleanNew); }
-    saveState();
-    renderLorebook();
+    showPromptModal(t("tooltip_rename"), promptText, oldName, (newName) => {
+      if (!newName || !newName.trim() || newName.trim() === oldName) return;
+      const cleanNew = newName.trim();
+      const idx = state.loreCategories.indexOf(oldName);
+      if (idx !== -1) state.loreCategories[idx] = cleanNew;
+      state.lorebook.forEach(entry => { if (entry.category === oldName) entry.category = cleanNew; });
+      if (openFoldersState.has(oldName)) { openFoldersState.delete(oldName); openFoldersState.add(cleanNew); }
+      saveState();
+      renderLorebook();
+    });
   }
 
   function deleteFolder(catName) {
@@ -3657,7 +3296,7 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
   }
 
   document.getElementById("save-lore-btn").onclick = () => {
-    const id = document.getElementById("lore-id").value || "lore_" + Date.now();
+    const id = document.getElementById("lore-id").value || generateId("lore");
     const selectedCat = document.getElementById("lore-folder-select").value || "Allgemein";
     const parsedDepth = parseInt(document.getElementById("lore-depth").value);
     const newLore = {
@@ -3753,36 +3392,38 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
     if (isGenerating) return;
     const promptText = state.lang === "en" ? "Title of the new adventure:" : "Titel des neuen Abenteuers:";
     const defTitle = (state.lang === "en" ? "Adventure " : "Abenteuer ") + (state.sessions.length + 1);
-    const title = prompt(promptText, defTitle);
-    if (!title?.trim()) return;
-    const newSess = {
-      id: "sess_" + Date.now(),
-      title: title.trim(),
-      createdAt: Date.now(),
-      messages: [],
-      world: { ...DEFAULT_WORLD },
-      userProgression: createBlankProgression(),
-      companionProgression: {}
-    };
-    state.sessions.unshift(newSess);
-    state.activeSessionId = newSess.id;
-    syncActiveMessages();
-    saveState();
-    renderSessionsUI();
-    renderChat();
-    closeModal("session-modal");
+    showPromptModal(t("session_title"), promptText, defTitle, (title) => {
+      if (!title?.trim()) return;
+      const newSess = {
+        id: generateId("sess"),
+        title: title.trim(),
+        createdAt: Date.now(),
+        messages: [],
+        world: { ...DEFAULT_WORLD },
+        userProgression: createBlankProgression(),
+        companionProgression: {}
+      };
+      state.sessions.unshift(newSess);
+      state.activeSessionId = newSess.id;
+      syncActiveMessages();
+      saveState();
+      renderSessionsUI();
+      renderChat();
+      closeModal("session-modal");
+    });
   };
 
   document.getElementById("rename-session-btn").onclick = () => {
     if (isGenerating) return;
     const current = getActiveSession();
     const promptText = state.lang === "en" ? "New title for this adventure:" : "Neuer Titel für dieses Abenteuer:";
-    const title = prompt(promptText, current.title);
-    if (!title?.trim()) return;
-    current.title = title.trim();
-    document.getElementById("active-session-title").innerText = current.title;
-    saveState();
-    renderSessionsUI();
+    showPromptModal(t("tooltip_rename"), promptText, current.title, (title) => {
+      if (!title?.trim()) return;
+      current.title = title.trim();
+      document.getElementById("active-session-title").innerText = current.title;
+      saveState();
+      renderSessionsUI();
+    });
   };
 
   document.getElementById("delete-session-btn").onclick = () => {
@@ -3835,14 +3476,6 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
   });
 
   function closeModal(id) { document.getElementById(id).classList.remove("active"); }
-
-  function showConfirmModal(text, onConfirm) {
-    const modal = document.getElementById("confirm-modal");
-    document.getElementById("confirm-modal-text").innerText = text;
-    modal.classList.add("active");
-    document.getElementById("confirm-ok-btn").onclick = () => { modal.classList.remove("active"); if (onConfirm) onConfirm(); };
-    document.getElementById("confirm-cancel-btn").onclick = () => { modal.classList.remove("active"); };
-  }
 
   document.getElementById("user-cfg-provider-preset").onchange = (e) => {
     if (e.target.value !== "custom") document.getElementById("user-cfg-baseurl").value = e.target.value;
@@ -3929,7 +3562,7 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
   }
 
   document.getElementById("save-char-btn").onclick = () => {
-    const id = document.getElementById("char-id").value || "char_" + Date.now();
+    const id = document.getElementById("char-id").value || generateId("char");
     const role = document.getElementById("char-role").value;
     const parsedTemp = parseFloat(document.getElementById("char-temp").value);
     const parsedTopP = parseFloat(document.getElementById("char-topp").value);
@@ -3975,6 +3608,7 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
     });
   }
 
+  // TAVERN / CHUB PNG PARSER
   async function decompressZlib(bytes) {
     const rawBytes = new Uint8Array(bytes);
     try {
@@ -4083,7 +3717,7 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
       const avatarUrl = await compressImageToDataUrl(new Blob([buffer], { type: "image/png" }), 96);
       const importedPrompt = [d.system_prompt, d.personality ? `[Personality]: ${d.personality}` : "", d.description ? `[Description]: ${d.description}` : "", d.scenario ? `[Scenario]: ${d.scenario}` : "", d.mes_example ? `[Dialogues]:\n${d.mes_example}` : ""].filter(Boolean).join("\n\n");
       const newChar = {
-        id: "char_" + Date.now(), name: d.name || file.name.replace(/\.png$/i, ''), avatar: avatarUrl, role: "companion",
+        id: generateId("char"), name: d.name || file.name.replace(/\.png$/i, ''), avatar: avatarUrl, role: "companion",
         baseUrl: state.user?.baseUrl || "https://openrouter.ai/api/v1", apiKey: state.user?.apiKey || "", model: state.user?.model || "",
         temp: 0.7, topP: 0.9, repPenalty: 1.1, prompt: importedPrompt
       };
@@ -4157,8 +3791,8 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
         if (imported && (Array.isArray(imported.characters) || Array.isArray(imported.sessions))) {
           state = { ...BLANK_STATE, ...imported, world: { ...DEFAULT_WORLD, ...(imported.world || {}) }, user: { ...BLANK_STATE.user, ...(imported.user || {}) }, settings: { ...BLANK_STATE.settings, ...(imported.settings || {}) } };
           if (!state.sessions?.length) {
-            state.sessions = [{ id: "sess_def", title: state.lang === "en" ? "Standard" : "Standard", createdAt: Date.now(), messages: state.messages || [], world: { ...state.world }, userProgression: createBlankProgression(), companionProgression: {} }];
-            state.activeSessionId = "sess_def";
+            state.sessions = [{ id: generateId("sess"), title: state.lang === "en" ? "Standard" : "Standard", createdAt: Date.now(), messages: state.messages || [], world: { ...state.world }, userProgression: createBlankProgression(), companionProgression: {} }];
+            state.activeSessionId = state.sessions[0].id;
           } else {
             state.sessions.forEach(sess => {
               if (!sess.userProgression) sess.userProgression = createBlankProgression();
@@ -4193,7 +3827,20 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 
   async function initApp() {
-    let loadedState = await idbGet("state");
+    let loadedState = null;
+    try {
+      loadedState = await idbGet("state");
+    } catch (err) {
+      console.error("Datenbank-Lesefehler:", err);
+      dbReadFailed = true;
+      showConfirmModal(
+        state.lang === "en" 
+          ? "CRITICAL: Database read failed. Automatic saving disabled to prevent data loss." 
+          : "FEHLER: Datenbank konnte nicht gelesen werden. Speichern pausiert, um Datenverlust zu verhindern.",
+        () => {}
+      );
+    }
+
     if (loadedState) {
       state = {
         ...BLANK_STATE,
@@ -4207,12 +3854,12 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
 
       if (!state.sessions?.length) {
         state.sessions = [{
-          id: "sess_migrated", title: state.lang === "en" ? "New Adventure" : "Neues Abenteuer", createdAt: Date.now(),
+          id: generateId("sess"), title: state.lang === "en" ? "New Adventure" : "Neues Abenteuer", createdAt: Date.now(),
           messages: state.messages || [], world: { ...state.world },
           userProgression: loadedState.user?.progression || createBlankProgression(),
           companionProgression: {}
         }];
-        state.activeSessionId = "sess_migrated";
+        state.activeSessionId = state.sessions[0].id;
       } else {
         state.sessions.forEach(sess => {
           if (!sess.userProgression) sess.userProgression = loadedState.user?.progression || createBlankProgression();
@@ -4224,11 +3871,13 @@ Beschreibe in 2–3 dichten Sätzen die Auswirkungen auf Umgebung und steuere NP
         });
       }
     }
+
     syncActiveMessages();
-    await checkCrashRecovery();
-    await saveState();
+    if (!dbReadFailed) {
+      await checkCrashRecovery();
+      await saveState();
+    }
     
-    // Initialisiere Sprache
     const activeLang = state.lang || "de";
     document.querySelectorAll(".lang-btn").forEach(btn => {
       const isAct = btn.dataset.lang === activeLang;
