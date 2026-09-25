@@ -3706,7 +3706,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         const targetBytes = rawBytes.length > 2 ? rawBytes.slice(2) : rawBytes.slice(0);
         writerRaw.write(targetBytes);
         writerRaw.close();
-        const buf = await new Response(ds.readable).arrayBuffer();
+        const buf = await new Response(dsRaw.readable).arrayBuffer();
         return new TextDecoder("utf-8").decode(buf);
       } catch (e2) {
         const dsRawDirect = new DecompressionStream("deflate-raw");
