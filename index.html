@@ -583,7 +583,7 @@
   const DB_NAME = "MultiRP_Database_v8";
   const STORE_NAME = "app_state";
 
-  // BLOCK A: I18N, HILFSFUNKTIONEN & RAF-THROTTLED STREAMING
+  // BLOCK A: I18N, SANITIZER & HILFSFUNKTIONEN
   const I18N = {
     de: {
       tab_chat: "Chat", tab_party: "Gruppe", tab_lore: "Lore", tab_system: "System",
@@ -744,11 +744,19 @@
     streamRenderQueue.clear();
   }
 
-  // FIX 1: Absicherung von IDs gegen XSS-Ausbrüche in HTML-Attributen
-  function sanitizeId(id, prefix = "id") {
-    if (!id || typeof id !== "string") return generateId(prefix);
+  // FIX 1 & FIX 5: Absicherung von IDs mit allowEmpty-Support
+  function sanitizeId(id, prefix = "id", allowEmpty = false) {
+    if (!id || typeof id !== "string") return allowEmpty ? "" : generateId(prefix);
     const cleaned = id.replace(/[^a-zA-Z0-9_\-]/g, '_');
-    return cleaned.length > 0 ? cleaned : generateId(prefix);
+    if (cleaned.length === 0) return allowEmpty ? "" : generateId(prefix);
+    return cleaned;
+  }
+
+  // FIX 1: Strikter Ganzzahl-Sanitizer gegen XSS über Zahlenfelder
+  function sanitizeInt(val, min, max, fallback) {
+    const num = parseInt(val, 10);
+    if (isNaN(num)) return fallback;
+    return Math.max(min, Math.min(max, num));
   }
 
   function escapeHTML(str) {
@@ -775,7 +783,7 @@
   }
 
   let dbReadFailed = false;
-  let isResetting = false; // FIX 4: Sperr-Flag gegen Zurückschreiben von Zombie-Daten
+  let isResetting = false; // FIX 4: Sperr-Flag gegen Zombie-Pufferung
 
   function generateId(prefix = "id") {
     const raw = (typeof crypto !== "undefined" && crypto.randomUUID)
@@ -947,7 +955,7 @@
     return curr;
   }
 
-  // FIX 2: Typsichere String-Umwandlung für alle Bezeichner & Rollen
+  // FIX 2: Typsichere Abfrage für IDs und Namen
   function getProgressionFor(targetId) {
     const sess = getActiveSession();
     const cleanId = String(targetId || "").toLowerCase();
@@ -965,7 +973,7 @@
     return null;
   }
 
-  // FIX 4: Abbruch bei aktiver Rücksetzung (verhindert Zombie-Pufferung)
+  // FIX 4: Notfallpuffer blockieren, wenn ein Reset aktiv ist
   function writeEmergencyBuffer() {
     if (dbReadFailed || isResetting) return;
     try {
@@ -1124,7 +1132,7 @@
     else btn.style.display = "none";
   }
 
-  // FIX 2: Absturzsicher bei nicht-textuellen Namen in fremden Karten
+  // FIX 2: Absturzsicher bei nicht-textuellen Namen
   function getProtectedNames() {
     const names = [];
     const uName = String(state.user?.name || "").trim();
@@ -1232,12 +1240,14 @@
     return "🌤️";
   }
 
+  // FIX 5: Saubere Behandlung des Tageszählers gegen "undefined"
   function renderAmbientBar() {
     const w = state.world || DEFAULT_WORLD;
     const pillTextEl = document.getElementById("amb-pill-text");
     const pillIconEl = document.getElementById("amb-pill-icon");
-    const dayLabel = state.lang === "en" ? (String(w.day).replace(/^Tag/i, "Day")) : w.day;
-    if (pillTextEl) pillTextEl.innerText = `${dayLabel || "Tag 1"} • ${w.time || "Tag"} • ${w.location || "Start"} ${getWeatherIcon(w.weather)}`;
+    const rawDay = (w.day !== undefined && w.day !== null && String(w.day).trim()) ? String(w.day).trim() : "Tag 1";
+    const dayLabel = state.lang === "en" ? rawDay.replace(/^Tag/i, "Day") : rawDay;
+    if (pillTextEl) pillTextEl.innerText = `${dayLabel} • ${w.time || "Tag"} • ${w.location || "Start"} ${getWeatherIcon(w.weather)}`;
     if (pillIconEl) pillIconEl.innerText = getTimeIcon(w.time);
   }
 
@@ -2187,9 +2197,9 @@ AKTUELLE WUNDEN: [${wounds}]`;
 
   function startEditMessage(msgId) {
     if (isGenerating) return;
-    const m = state.messages.find(x => x.id === msgId);
-    if (!m) return;
     const safeId = sanitizeId(msgId, "msg");
+    const m = state.messages.find(x => x.id === safeId);
+    if (!m) return;
     const bodyEl = document.getElementById("body-" + safeId);
     if (!bodyEl) return;
 
@@ -2973,9 +2983,11 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     state.messages.forEach((m) => {
       ensureMsgVariants(m);
       m.id = sanitizeId(m.id, "msg");
+      // FIX 1: Typisierung verhindert String-Konkatenations-XSS in Variantenswipes
+      m.currentVariant = sanitizeInt(m.currentVariant, 0, Math.max(0, (m.variants?.length || 1) - 1), 0);
       const safeId = m.id;
       const div = document.createElement("div");
-      const v = m.variants[m.currentVariant || 0];
+      const v = m.variants[m.currentVariant];
       const currentText = typeof v === 'object' ? (v.text || "") : v;
 
       if (m.type === "user") {
@@ -3011,7 +3023,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       if (m.type !== "user" && m.variants && m.variants.length > 1) {
         const swipes = document.createElement("div");
         swipes.className = "swipe-controls";
-        swipes.innerHTML = `<button class="order-btn" style="width:24px;height:24px;" onclick="cycleVariant(${jsArg(safeId)}, -1)">◀</button><span>${(m.currentVariant || 0) + 1} / ${m.variants.length}</span><button class="order-btn" style="width:24px;height:24px;" onclick="cycleVariant(${jsArg(safeId)}, 1)">▶</button>`;
+        swipes.innerHTML = `<button class="order-btn" style="width:24px;height:24px;" onclick="cycleVariant(${jsArg(safeId)}, -1)">◀</button><span>${m.currentVariant + 1} / ${m.variants.length}</span><button class="order-btn" style="width:24px;height:24px;" onclick="cycleVariant(${jsArg(safeId)}, 1)">▶</button>`;
         toolbar.appendChild(swipes);
       }
       toolbar.innerHTML += `
@@ -3119,14 +3131,18 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     if (!container) return;
     container.innerHTML = "";
 
-    if (!state.loreCategories || state.loreCategories.length === 0) {
+    if (!Array.isArray(state.loreCategories) || state.loreCategories.length === 0) {
       state.loreCategories = [...DEFAULT_LORE_CATS];
+    }
+    if (!Array.isArray(state.lorebook)) {
+      state.lorebook = [];
     }
 
     state.lorebook.forEach(entry => {
       entry.id = sanitizeId(entry.id, "lore");
       if (!entry.category || !state.loreCategories.includes(entry.category)) entry.category = "Allgemein";
-      if (!entry.scanDepth) entry.scanDepth = 8;
+      entry.scanDepth = sanitizeInt(entry.scanDepth, 1, 50, 8);
+      entry.priority = sanitizeInt(entry.priority, 1, 100, 10);
     });
 
     const totalEntries = state.lorebook.length;
@@ -3150,7 +3166,9 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       } else {
         entriesInCat.forEach(l => {
           const safeLoreId = sanitizeId(l.id, "lore");
-          const depthVal = l.scanDepth || 8;
+          // FIX 1: Strikte Typisierung gegen HTML-Injection über Zahlenstrings
+          const depthVal = sanitizeInt(l.scanDepth, 1, 50, 8);
+          const prioVal = sanitizeInt(l.priority, 1, 100, 10);
           entriesHtml += `
             <div class="card" style="margin:0; background:var(--surface-2); padding:10px;">
               <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -3161,7 +3179,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
                   </div>
                   <div style="font-size:11px; margin-top:2px; display:flex; gap:6px; flex-wrap:wrap;">
                     ${l.gmOnly ? `<span style="color:#f59e0b; font-weight:bold;">${t("badge_gm_only")}</span>` : `<span style="color:var(--success);">${t("badge_public")}</span>`}
-                    <span style="color:var(--muted);">${t("label_prio")} ${l.priority || 10}</span>
+                    <span style="color:var(--muted);">${t("label_prio")} ${prioVal}</span>
                     <span style="color:var(--gold); background:rgba(223,160,71,0.12); padding:0 4px; border-radius:4px;">${t("label_depth")} ${depthVal} Msgs</span>
                   </div>
                 </div>
@@ -3320,8 +3338,8 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     document.getElementById("lore-title").value = l.title;
     document.getElementById("lore-constant").checked = !!l.constant;
     document.getElementById("lore-keys").value = l.keys || "";
-    document.getElementById("lore-priority").value = l.priority || 10;
-    document.getElementById("lore-depth").value = l.scanDepth || 8;
+    document.getElementById("lore-priority").value = sanitizeInt(l.priority, 1, 100, 10);
+    document.getElementById("lore-depth").value = sanitizeInt(l.scanDepth, 1, 50, 8);
     document.getElementById("lore-gmonly").checked = !!l.gmOnly;
     document.getElementById("lore-content").value = l.content || "";
     updateLoreFolderDropdown(l.category || "Allgemein");
@@ -3332,14 +3350,13 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     const rawId = document.getElementById("lore-id").value;
     const id = rawId ? sanitizeId(rawId, "lore") : generateId("lore");
     const selectedCat = document.getElementById("lore-folder-select").value || "Allgemein";
-    const parsedDepth = parseInt(document.getElementById("lore-depth").value);
     const newLore = {
       id, category: selectedCat,
       title: document.getElementById("lore-title").value.trim() || (state.lang === "en" ? "Untitled" : "Ohne Titel"),
       constant: document.getElementById("lore-constant").checked,
       keys: document.getElementById("lore-keys").value.trim(),
-      priority: parseInt(document.getElementById("lore-priority").value) || 10,
-      scanDepth: isNaN(parsedDepth) ? 8 : Math.max(1, parsedDepth),
+      priority: sanitizeInt(document.getElementById("lore-priority").value, 1, 100, 10),
+      scanDepth: sanitizeInt(document.getElementById("lore-depth").value, 1, 50, 8),
       gmOnly: document.getElementById("lore-gmonly").checked,
       content: document.getElementById("lore-content").value.trim()
     };
@@ -3367,7 +3384,8 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     state.characters.filter(c => c.role === "editor").forEach(c => {
       const opt = document.createElement("option");
       opt.value = sanitizeId(c.id, "char"); 
-      opt.innerText = `${escapeHTML(c.name)} (${escapeHTML(c.model || "Standard")})`;
+      // FIX: textContent verhindert Double-Escaping (z.B. &amp; statt &)
+      opt.textContent = `${c.name || "Nameless"} (${c.model || "Standard"})`;
       editorSelect.appendChild(opt);
     });
     editorSelect.value = state.settings.editorId || "";
@@ -3379,7 +3397,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
     const orderList = document.getElementById("turn-order-list");
     orderList.innerHTML = "";
-    const activeOrderIds = state.settings.order.filter(id => {
+    const activeOrderIds = (state.settings.order || []).filter(id => {
       const c = state.characters.find(x => x.id === id);
       return c && c.role !== "editor";
     });
@@ -3608,7 +3626,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     const parsedTopP = parseFloat(document.getElementById("char-topp").value);
     const parsedRep = parseFloat(document.getElementById("char-reppenalty").value);
 
-    // FIX 2: String-Konvertierung zur Vermeidung von TypeErrors
+    // FIX 2: Typsicherheit gegen Abstürze durch Nicht-Strings
     const newChar = {
       id, 
       name: String(document.getElementById("char-name").value || "").trim() || (state.lang === "en" ? "Nameless" : "Ohne Namen"),
@@ -3752,7 +3770,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
   document.getElementById("import-png-btn").onclick = () => { if (!isGenerating) document.getElementById("char-png-input").click(); };
   
-  // FIX 2: Absturzsicherer Import - alle Felder werden garantiert zu Strings gecastet
+  // FIX 2: Absturzsicherer PNG-Import mit strikter Typisierung aller Felder
   document.getElementById("char-png-input").onchange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -3808,7 +3826,11 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     saveState(); renderSettings();
   }
 
-  document.getElementById("setting-editor").onchange = (e) => { state.settings.editorId = sanitizeId(e.target.value, "char"); saveState(); };
+  // FIX: allowEmpty=true erlaubt das Deaktivieren des Lektors ohne Zufalls-ID
+  document.getElementById("setting-editor").onchange = (e) => { 
+    state.settings.editorId = e.target.value ? sanitizeId(e.target.value, "char", true) : ""; 
+    saveState(); 
+  };
   document.getElementById("setting-combined").onchange = (e) => { state.settings.combined = e.target.checked; saveState(); };
   document.getElementById("setting-budget").oninput = (e) => {
     state.settings.maxTokenBudget = parseInt(e.target.value);
@@ -3825,7 +3847,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     });
   };
 
-  // FIX 4: Vollständig atomarer Reset ohne Zombie-Daten im localStorage
+  // FIX 4: Atomarer Reset ohne Zombie-Daten im Puffer
   document.getElementById("reset-btn").onclick = () => {
     showConfirmModal(state.lang === "en" ? "Reset everything to factory default?" : "Alles auf Werkseinstellungen zurücksetzen?", async () => {
       isResetting = true;
@@ -3857,7 +3879,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
-  // FIX 3: Transaktionaler Import - überschreibt den Live-State erst NACH erfolgreicher Validierung
+  // FIX 1 & FIX 3: Transaktionaler Import mit strikter Typen- und Schema-Validierung
   const importFileInput = document.getElementById("import-file");
   document.getElementById("import-btn").onclick = () => importFileInput.click();
   importFileInput.onchange = (e) => {
@@ -3870,37 +3892,50 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         if (!imported || typeof imported !== "object") {
           throw new Error(state.lang === "en" ? "Invalid backup file structure." : "Ungültige Dateistruktur.");
         }
-        if (!Array.isArray(imported.characters) && !Array.isArray(imported.sessions)) {
-          throw new Error(state.lang === "en" ? "No characters or adventures found." : "Keine Charaktere oder Abenteuer in Datei gefunden.");
-        }
 
-        // Isoliertes Kandidaten-Objekt zur sicheren Vorab-Prüfung
+        // Schema-Normalisierung: Typerzwingung gegen Type-Confusion-Crashes
         const candidateState = {
           ...BLANK_STATE,
           ...imported,
           world: { ...DEFAULT_WORLD, ...(imported.world || {}) },
           user: { ...BLANK_STATE.user, ...(imported.user || {}) },
-          settings: { ...BLANK_STATE.settings, ...(imported.settings || {}) }
+          settings: { ...BLANK_STATE.settings, ...(imported.settings || {}) },
+          characters: Array.isArray(imported.characters) ? imported.characters : [],
+          lorebook: Array.isArray(imported.lorebook) ? imported.lorebook : [],
+          loreCategories: Array.isArray(imported.loreCategories) ? imported.loreCategories : [...DEFAULT_LORE_CATS],
+          sessions: Array.isArray(imported.sessions) ? imported.sessions : []
         };
 
-        // FIX 1 & 2: Sanitisierung aller IDs und Typen im Import
-        if (Array.isArray(candidateState.characters)) {
-          candidateState.characters = candidateState.characters.map(c => ({
-            ...c,
-            id: sanitizeId(c.id, "char"),
-            name: String(c.name || (candidateState.lang === "en" ? "Nameless" : "Ohne Namen"))
-          }));
-        }
+        // Turn-Order und Lektor typisieren
+        candidateState.settings.order = Array.isArray(candidateState.settings.order) 
+          ? candidateState.settings.order.map(id => sanitizeId(id, "char")) 
+          : [];
+        candidateState.settings.editorId = candidateState.settings.editorId 
+          ? sanitizeId(candidateState.settings.editorId, "char", true) 
+          : "";
 
-        if (Array.isArray(candidateState.lorebook)) {
-          candidateState.lorebook = candidateState.lorebook.map(l => ({
-            ...l,
-            id: sanitizeId(l.id, "lore"),
-            title: String(l.title || "Untitled")
-          }));
-        }
+        // Charaktere typisieren & absichern
+        candidateState.characters = candidateState.characters.map(c => ({
+          ...c,
+          id: sanitizeId(c.id, "char"),
+          name: String(c.name || (candidateState.lang === "en" ? "Nameless" : "Ohne Namen")),
+          model: String(c.model || ""),
+          role: ["gm", "companion", "editor"].includes(c.role) ? c.role : "companion"
+        }));
 
-        if (!candidateState.sessions?.length) {
+        // Lorebook typisieren & Zahlenfelder sanitizen
+        candidateState.lorebook = candidateState.lorebook.map(l => ({
+          ...l,
+          id: sanitizeId(l.id, "lore"),
+          title: String(l.title || "Untitled"),
+          priority: sanitizeInt(l.priority, 1, 100, 10),
+          scanDepth: sanitizeInt(l.scanDepth, 1, 50, 8),
+          keys: String(l.keys || ""),
+          content: String(l.content || "")
+        }));
+
+        // Sessions inklusive inaktiver Sessions sanitizen
+        if (!candidateState.sessions.length) {
           candidateState.sessions = [{
             id: generateId("sess"),
             title: candidateState.lang === "en" ? "Standard" : "Standard",
@@ -3910,23 +3945,33 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
             userProgression: createBlankProgression(),
             companionProgression: {}
           }];
-          candidateState.activeSessionId = candidateState.sessions[0].id;
         } else {
           candidateState.sessions.forEach(sess => {
             sess.id = sanitizeId(sess.id, "sess");
-            if (!sess.userProgression) sess.userProgression = createBlankProgression();
-            if (!sess.companionProgression) sess.companionProgression = {};
-            if (!sess.world) sess.world = { ...DEFAULT_WORLD };
-            if (Array.isArray(sess.messages)) {
-              sess.messages.forEach(m => { m.id = sanitizeId(m.id, "msg"); });
-            }
+            sess.title = String(sess.title || "Adventure");
+            sess.world = { ...DEFAULT_WORLD, ...(sess.world || {}) };
+            sess.userProgression = sess.userProgression && typeof sess.userProgression === "object" 
+              ? sess.userProgression 
+              : createBlankProgression();
+            sess.companionProgression = sess.companionProgression && typeof sess.companionProgression === "object" 
+              ? sess.companionProgression 
+              : {};
+
+            sess.messages = Array.isArray(sess.messages) ? sess.messages.map(m => ({
+              ...m,
+              id: sanitizeId(m.id, "msg"),
+              currentVariant: sanitizeInt(m.currentVariant, 0, Math.max(0, (m.variants?.length || 1) - 1), 0),
+              variants: Array.isArray(m.variants) ? m.variants : [m.text || ""]
+            })) : [];
           });
-          if (!candidateState.sessions.some(s => s.id === candidateState.activeSessionId)) {
-            candidateState.activeSessionId = candidateState.sessions[0].id;
-          }
         }
 
-        // Erst wenn IndexedDB den Stand sauber akzeptiert, wird der Runtime-State aktualisiert
+        candidateState.activeSessionId = sanitizeId(candidateState.activeSessionId, "sess");
+        if (!candidateState.sessions.some(s => s.id === candidateState.activeSessionId)) {
+          candidateState.activeSessionId = candidateState.sessions[0].id;
+        }
+
+        // Atomares Schreiben: Runtime-State wird erst nach IDB-Erfolg aktualisiert
         await idbSet("state", candidateState);
         state = candidateState;
         localStorage.removeItem(CRASH_BUFFER_KEY);
@@ -3977,26 +4022,34 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         ...loadedState,
         world: { ...DEFAULT_WORLD, ...(loadedState.world || {}) },
         user: { ...BLANK_STATE.user, ...(loadedState.user || {}) },
-        settings: { ...BLANK_STATE.settings, ...(loadedState.settings || {}) }
+        settings: { ...BLANK_STATE.settings, ...(loadedState.settings || {}) },
+        characters: Array.isArray(loadedState.characters) ? loadedState.characters : [],
+        lorebook: Array.isArray(loadedState.lorebook) ? loadedState.lorebook : [],
+        loreCategories: Array.isArray(loadedState.loreCategories) ? loadedState.loreCategories : [...DEFAULT_LORE_CATS],
+        sessions: Array.isArray(loadedState.sessions) ? loadedState.sessions : []
       };
 
-      // FIX 2: Legacy-Daten absichern
-      if (Array.isArray(state.characters)) {
-        state.characters.forEach(c => {
-          c.id = sanitizeId(c.id, "char");
-          c.name = String(c.name || (state.lang === "en" ? "Nameless" : "Ohne Namen"));
-        });
-      }
+      // Legacy-Daten im IDB-State absichern
+      state.characters.forEach(c => {
+        c.id = sanitizeId(c.id, "char");
+        c.name = String(c.name || (state.lang === "en" ? "Nameless" : "Ohne Namen"));
+      });
 
-      if (!state.loreCategories || state.loreCategories.length === 0) state.loreCategories = [...DEFAULT_LORE_CATS];
+      state.lorebook.forEach(l => {
+        l.id = sanitizeId(l.id, "lore");
+        l.priority = sanitizeInt(l.priority, 1, 100, 10);
+        l.scanDepth = sanitizeInt(l.scanDepth, 1, 50, 8);
+      });
+
       if (!state.settings.maxTokenBudget) state.settings.maxTokenBudget = 3200;
+      state.settings.editorId = sanitizeId(state.settings.editorId, "char", true);
 
-      if (!state.sessions?.length) {
+      if (!state.sessions.length) {
         state.sessions = [{
           id: generateId("sess"), 
           title: state.lang === "en" ? "New Adventure" : "Neues Abenteuer", 
           createdAt: Date.now(),
-          messages: state.messages || [], 
+          messages: Array.isArray(state.messages) ? state.messages : [], 
           world: { ...state.world },
           userProgression: loadedState.user?.progression || createBlankProgression(),
           companionProgression: {}
@@ -4012,7 +4065,10 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           if (!sess.userProgression.skills) sess.userProgression.skills = [];
           if (!sess.companionProgression) sess.companionProgression = {};
           if (Array.isArray(sess.messages)) {
-            sess.messages.forEach(m => { m.id = sanitizeId(m.id, "msg"); });
+            sess.messages.forEach(m => { 
+              m.id = sanitizeId(m.id, "msg"); 
+              m.currentVariant = sanitizeInt(m.currentVariant, 0, Math.max(0, (m.variants?.length || 1) - 1), 0);
+            });
           }
         });
       }
