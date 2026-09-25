@@ -759,6 +759,18 @@
     return Math.max(min, Math.min(max, num));
   }
 
+  // FIX: Strikte Absicherung des Progression-Schemas (Listen vs. Text)
+  function sanitizeProgression(p) {
+    if (!p || typeof p !== "object") return createBlankProgression();
+    return {
+      level: String(p.level || "1"),
+      inventory: Array.isArray(p.inventory) ? p.inventory.map(String) : [],
+      wounds: Array.isArray(p.wounds) ? p.wounds.map(String) : [],
+      status: Array.isArray(p.status) ? p.status.map(String) : [],
+      skills: Array.isArray(p.skills) ? p.skills.map(String) : []
+    };
+  }
+
   function escapeHTML(str) {
     if (str === null || str === undefined) return "";
     return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
@@ -881,7 +893,7 @@
     const sess = getActiveSession();
     return {
       world: JSON.parse(JSON.stringify(state.world || DEFAULT_WORLD)),
-      userProgression: JSON.parse(JSON.stringify(sess.userProgression || createBlankProgression())),
+      userProgression: sanitizeProgression(sess.userProgression),
       companionProgression: JSON.parse(JSON.stringify(sess.companionProgression || {}))
     };
   }
@@ -891,8 +903,13 @@
     state.world = JSON.parse(JSON.stringify(snap.world || DEFAULT_WORLD));
     const sess = getActiveSession();
     sess.world = state.world;
-    sess.userProgression = JSON.parse(JSON.stringify(snap.userProgression || createBlankProgression()));
-    sess.companionProgression = JSON.parse(JSON.stringify(snap.companionProgression || {}));
+    sess.userProgression = sanitizeProgression(snap.userProgression);
+    sess.companionProgression = {};
+    if (snap.companionProgression && typeof snap.companionProgression === "object") {
+      for (const cId in snap.companionProgression) {
+        sess.companionProgression[cId] = sanitizeProgression(snap.companionProgression[cId]);
+      }
+    }
     renderAmbientBar();
     updateHeaderBagCounter();
     if (document.getElementById("bag-modal").classList.contains("active")) renderBagModalContent();
@@ -950,7 +967,7 @@
     let curr = state.sessions.find(s => s.id === state.activeSessionId);
     if (!curr) { curr = state.sessions[0]; state.activeSessionId = curr.id; }
     if (!curr.world) curr.world = { ...DEFAULT_WORLD };
-    if (!curr.userProgression) curr.userProgression = createBlankProgression();
+    curr.userProgression = sanitizeProgression(curr.userProgression);
     if (!curr.companionProgression) curr.companionProgression = {};
     return curr;
   }
@@ -961,13 +978,13 @@
     const cleanId = String(targetId || "").toLowerCase();
     const uName = String(state.user?.name || "").toLowerCase();
     if (cleanId === "user" || (uName && cleanId === uName) || cleanId === "spieler" || cleanId === "player") {
-      if (!sess.userProgression) sess.userProgression = createBlankProgression();
+      sess.userProgression = sanitizeProgression(sess.userProgression);
       return sess.userProgression;
     }
     const char = state.characters.find(c => c.id === targetId || String(c.name || "").toLowerCase() === cleanId);
     if (char) {
       if (!sess.companionProgression) sess.companionProgression = {};
-      if (!sess.companionProgression[char.id]) sess.companionProgression[char.id] = createBlankProgression();
+      sess.companionProgression[char.id] = sanitizeProgression(sess.companionProgression[char.id]);
       return sess.companionProgression[char.id];
     }
     return null;
@@ -1051,7 +1068,7 @@
         session.messages.push(...missing);
         state.messages = session.messages;
         if (crashData.world) { session.world = crashData.world; state.world = crashData.world; }
-        if (crashData.userProgression) session.userProgression = crashData.userProgression;
+        if (crashData.userProgression) session.userProgression = sanitizeProgression(crashData.userProgression);
         await saveState();
         showConfirmModal(state.lang === "en" ? "Crash Recovery: Unsaved data restored!" : "Notfall-Wiederherstellung: Ungespeicherte Daten gerettet!", () => {});
       } else {
@@ -1081,7 +1098,7 @@
 
   function updateHeaderBagCounter() {
     const sess = getActiveSession();
-    const p = sess.userProgression || createBlankProgression();
+    const p = sanitizeProgression(sess.userProgression);
     const count = (p.inventory?.length || 0) + (p.wounds?.length || 0) + (p.status?.length || 0);
     const badge = document.getElementById("header-bag-count");
     if (badge) badge.innerText = count;
@@ -1435,10 +1452,10 @@
           : String(targetStr);
 
       if (!targetProg) continue;
-      if (!targetProg.wounds) targetProg.wounds = [];
-      if (!targetProg.inventory) targetProg.inventory = [];
-      if (!targetProg.status) targetProg.status = [];
-      if (!targetProg.skills) targetProg.skills = [];
+      if (!Array.isArray(targetProg.wounds)) targetProg.wounds = [];
+      if (!Array.isArray(targetProg.inventory)) targetProg.inventory = [];
+      if (!Array.isArray(targetProg.status)) targetProg.status = [];
+      if (!Array.isArray(targetProg.skills)) targetProg.skills = [];
 
       const parts = actionsStr.split(/\|(?![^(]*\))|,(?![^(]*\))/).map(s => s.trim()).filter(Boolean);
       for (const part of parts) {
@@ -1586,7 +1603,10 @@
     if (!prog || !container) return;
 
     if (lvlBadge) lvlBadge.innerText = `${state.lang === "en" ? "Level" : "Stufe"} ${prog.level || '1'}`;
-    if (!prog.wounds) prog.wounds = [];
+    if (!Array.isArray(prog.wounds)) prog.wounds = [];
+    if (!Array.isArray(prog.inventory)) prog.inventory = [];
+    if (!Array.isArray(prog.status)) prog.status = [];
+    if (!Array.isArray(prog.skills)) prog.skills = [];
 
     let list = [];
     let chipClass = "inv";
@@ -1636,7 +1656,7 @@
     if (!prog) return;
 
     if (activeBagSubTab === "inv") prog.inventory.push(val);
-    else if (activeBagSubTab === "wounds") { if (!prog.wounds) prog.wounds = []; prog.wounds.push(val); }
+    else if (activeBagSubTab === "wounds") { if (!Array.isArray(prog.wounds)) prog.wounds = []; prog.wounds.push(val); }
     else if (activeBagSubTab === "status") prog.status.push(val);
     else if (activeBagSubTab === "skills") prog.skills.push(val);
 
@@ -2361,7 +2381,7 @@ AKTUELLE WUNDEN: [${wounds}]`;
       createdAt: Date.now(),
       messages: slicedMessages,
       world: JSON.parse(JSON.stringify(baseSnapshot.world)),
-      userProgression: JSON.parse(JSON.stringify(baseSnapshot.userProgression)),
+      userProgression: sanitizeProgression(baseSnapshot.userProgression),
       companionProgression: JSON.parse(JSON.stringify(baseSnapshot.companionProgression))
     };
 
@@ -2983,7 +3003,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     state.messages.forEach((m) => {
       ensureMsgVariants(m);
       m.id = sanitizeId(m.id, "msg");
-      // FIX 1: Typisierung verhindert String-Konkatenations-XSS in Variantenswipes
+      // FIX 1: Typisierung verhindert String-Konkatenation & XSS bei Variantenswipes
       m.currentVariant = sanitizeInt(m.currentVariant, 0, Math.max(0, (m.variants?.length || 1) - 1), 0);
       const safeId = m.id;
       const div = document.createElement("div");
@@ -3384,7 +3404,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     state.characters.filter(c => c.role === "editor").forEach(c => {
       const opt = document.createElement("option");
       opt.value = sanitizeId(c.id, "char"); 
-      // FIX: textContent verhindert Double-Escaping (z.B. &amp; statt &)
+      // FIX: textContent verhindert Double-Escaping (z. B. &amp; statt &)
       opt.textContent = `${c.name || "Nameless"} (${c.model || "Standard"})`;
       editorSelect.appendChild(opt);
     });
@@ -3686,7 +3706,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         const targetBytes = rawBytes.length > 2 ? rawBytes.slice(2) : rawBytes.slice(0);
         writerRaw.write(targetBytes);
         writerRaw.close();
-        const buf = await new Response(dsRaw.readable).arrayBuffer();
+        const buf = await new Response(ds.readable).arrayBuffer();
         return new TextDecoder("utf-8").decode(buf);
       } catch (e2) {
         const dsRawDirect = new DecompressionStream("deflate-raw");
@@ -3826,7 +3846,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     saveState(); renderSettings();
   }
 
-  // FIX: allowEmpty=true erlaubt das Deaktivieren des Lektors ohne Zufalls-ID
+  // FIX: allowEmpty=true erlaubt das saubere Deaktivieren des Lektors ohne Zufalls-ID
   document.getElementById("setting-editor").onchange = (e) => { 
     state.settings.editorId = e.target.value ? sanitizeId(e.target.value, "char", true) : ""; 
     saveState(); 
@@ -3864,22 +3884,30 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     });
   };
 
+  // FIX: Export mit offiziellem Kennzeichen versehen
   document.getElementById("export-btn").onclick = () => {
     const strip = document.getElementById("setting-strip-keys").checked;
     const backup = JSON.parse(JSON.stringify(state));
+
+    backup._app = "multi-rp-studio";
+    backup._version = 1;
+
     if (strip) {
       if (backup.user) backup.user.apiKey = "";
       if (Array.isArray(backup.characters)) backup.characters.forEach(c => { c.apiKey = ""; });
     }
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url;
+    const a = document.createElement('a'); 
+    a.href = url;
     a.download = `multi_rp_backup_${Date.now()}.json`;
-    document.body.appendChild(a); a.click(); a.remove();
+    document.body.appendChild(a); 
+    a.click(); 
+    a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
-  // FIX 1 & FIX 3: Transaktionaler Import mit strikter Typen- und Schema-Validierung
+  // FIX 1 & FIX 3: Gehärteter Import mit Kennzeichenprüfung, Vorschau & Progression-Sanitizing
   const importFileInput = document.getElementById("import-file");
   document.getElementById("import-btn").onclick = () => importFileInput.click();
   importFileInput.onchange = (e) => {
@@ -3889,11 +3917,22 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     reader.onload = async (event) => {
       try {
         const imported = JSON.parse(event.target.result);
-        if (!imported || typeof imported !== "object") {
-          throw new Error(state.lang === "en" ? "Invalid backup file structure." : "Ungültige Dateistruktur.");
+
+        // 1. Grundprüfung: Muss ein Objekt sein, darf KEIN Array sein
+        if (!imported || typeof imported !== "object" || Array.isArray(imported)) {
+          throw new Error(state.lang === "en" ? "File is not a valid JSON object." : "Datei ist kein gültiges JSON-Objekt.");
         }
 
-        // Schema-Normalisierung: Typerzwingung gegen Type-Confusion-Crashes
+        // 2. Echtheitsprüfung: Stempel ODER gültige Listen vorhanden?
+        const isOfficial = imported._app === "multi-rp-studio";
+        const hasLegacyData = Array.isArray(imported.characters) || Array.isArray(imported.sessions);
+        if (!isOfficial && !hasLegacyData) {
+          throw new Error(state.lang === "en" 
+            ? "Unrecognized file. This does not appear to be a Multi-RP Studio backup." 
+            : "Nicht erkannt: Diese Datei ist kein Multi-RP Studio Backup.");
+        }
+
+        // 3. Schema vorbereiten & Progressionen absichern
         const candidateState = {
           ...BLANK_STATE,
           ...imported,
@@ -3906,7 +3945,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           sessions: Array.isArray(imported.sessions) ? imported.sessions : []
         };
 
-        // Turn-Order und Lektor typisieren
+        // Turn-Order & Lektor typisieren
         candidateState.settings.order = Array.isArray(candidateState.settings.order) 
           ? candidateState.settings.order.map(id => sanitizeId(id, "char")) 
           : [];
@@ -3934,7 +3973,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           content: String(l.content || "")
         }));
 
-        // Sessions inklusive inaktiver Sessions sanitizen
+        // Sessions inklusive Progressionen (Spieler & Gefährten) strikt typisieren
         if (!candidateState.sessions.length) {
           candidateState.sessions = [{
             id: generateId("sess"),
@@ -3950,12 +3989,16 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
             sess.id = sanitizeId(sess.id, "sess");
             sess.title = String(sess.title || "Adventure");
             sess.world = { ...DEFAULT_WORLD, ...(sess.world || {}) };
-            sess.userProgression = sess.userProgression && typeof sess.userProgression === "object" 
-              ? sess.userProgression 
-              : createBlankProgression();
-            sess.companionProgression = sess.companionProgression && typeof sess.companionProgression === "object" 
-              ? sess.companionProgression 
-              : {};
+            
+            // FIX: Progression gegen falsche Datentypen schützen
+            sess.userProgression = sanitizeProgression(sess.userProgression);
+            if (sess.companionProgression && typeof sess.companionProgression === "object") {
+              for (const cId in sess.companionProgression) {
+                sess.companionProgression[cId] = sanitizeProgression(sess.companionProgression[cId]);
+              }
+            } else {
+              sess.companionProgression = {};
+            }
 
             sess.messages = Array.isArray(sess.messages) ? sess.messages.map(m => ({
               ...m,
@@ -3971,11 +4014,20 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           candidateState.activeSessionId = candidateState.sessions[0].id;
         }
 
-        // Atomares Schreiben: Runtime-State wird erst nach IDB-Erfolg aktualisiert
-        await idbSet("state", candidateState);
-        state = candidateState;
-        localStorage.removeItem(CRASH_BUFFER_KEY);
-        showConfirmModal(state.lang === "en" ? "Backup loaded successfully!" : "Backup geladen!", () => location.reload());
+        // 4. Sicherheitsabfrage mit Inhaltsvorschau vor dem Überschreiben anzeigen
+        const charCount = candidateState.characters.length;
+        const sessCount = candidateState.sessions.length;
+        const confirmText = state.lang === "en"
+          ? `Load backup containing ${charCount} character(s) and ${sessCount} adventure(s)?\n\nWARNING: All current data will be overwritten.`
+          : `Backup mit ${charCount} Charakter(en) und ${sessCount} Abenteuer(n) laden?\n\nHINWEIS: Alle aktuellen Daten werden vollständig überschrieben.`;
+
+        showConfirmModal(confirmText, async () => {
+          await idbSet("state", candidateState);
+          state = candidateState;
+          localStorage.removeItem(CRASH_BUFFER_KEY);
+          location.reload();
+        });
+
       } catch (err) {
         showConfirmModal((state.lang === "en" ? "Import failed: " : "Import fehlgeschlagen: ") + (err.message || String(err)), () => {});
       } finally {
@@ -4051,19 +4103,21 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           createdAt: Date.now(),
           messages: Array.isArray(state.messages) ? state.messages : [], 
           world: { ...state.world },
-          userProgression: loadedState.user?.progression || createBlankProgression(),
+          userProgression: sanitizeProgression(loadedState.user?.progression),
           companionProgression: {}
         }];
         state.activeSessionId = state.sessions[0].id;
       } else {
         state.sessions.forEach(sess => {
           sess.id = sanitizeId(sess.id, "sess");
-          if (!sess.userProgression) sess.userProgression = loadedState.user?.progression || createBlankProgression();
-          if (!sess.userProgression.wounds) sess.userProgression.wounds = [];
-          if (!sess.userProgression.status) sess.userProgression.status = [];
-          if (!sess.userProgression.inventory) sess.userProgression.inventory = [];
-          if (!sess.userProgression.skills) sess.userProgression.skills = [];
-          if (!sess.companionProgression) sess.companionProgression = {};
+          sess.userProgression = sanitizeProgression(sess.userProgression || loadedState.user?.progression);
+          if (sess.companionProgression && typeof sess.companionProgression === "object") {
+            for (const cId in sess.companionProgression) {
+              sess.companionProgression[cId] = sanitizeProgression(sess.companionProgression[cId]);
+            }
+          } else {
+            sess.companionProgression = {};
+          }
           if (Array.isArray(sess.messages)) {
             sess.messages.forEach(m => { 
               m.id = sanitizeId(m.id, "msg"); 
