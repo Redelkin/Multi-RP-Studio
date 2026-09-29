@@ -519,7 +519,7 @@
         </div>
         <div class="form-group"><label data-i18n="lbl_char_prompt">System-Prompt / Persönlichkeit</label><textarea id="char-prompt" rows="3"></textarea></div>
         <details style="border:1px dashed var(--border); border-radius:8px; padding:8px; background:rgba(0,0,0,0.15);">
-          <summary style="font-size:12px; font-weight:600; color:var(--gold); cursor:pointer; user-select:none;" data-i18n="char_expert_box">⚙️️ API & Modell-Parameter (Experten)</summary>
+          <summary style="font-size:12px; font-weight:600; color:var(--gold); cursor:pointer; user-select:none;" data-i18n="char_expert_box">⚙️ API & Modell-Parameter (Experten)</summary>
           <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
             <div class="form-group">
               <label data-i18n="lbl_provider">Provider</label>
@@ -632,8 +632,10 @@
 <script>
   const DB_NAME = "MultiRP_Database_v8";
   const STORE_NAME = "app_state";
+  const LOCAL_STORAGE_BACKUP = "multi_rp_ls_state_mirror";
+  const CRASH_BUFFER_KEY = "multi_rp_emergency_buffer";
 
-  // BLOCK A: I18N & HILFSFUNKTIONEN
+  // BLOCK A: I18N
   const I18N = {
     de: {
       tab_chat: "Chat", tab_party: "Gruppe", tab_lore: "Lore", tab_system: "System",
@@ -680,7 +682,7 @@
       empty_party: "Noch keine Charaktere angelegt.", empty_folder: "Keine Einträge in diesem Ordner.",
       empty_bag: "Der Beutel ist leer.", empty_wounds: "Keine Wunden / unversehrt.",
       empty_status: "Keine aktiven Zustände.", empty_skills: "Keine gelernten Talente.",
-      btn_edit: "✏️️", btn_delete: "🗑", btn_swipe: "🔄 Swipe",
+      btn_edit: "✏️", btn_delete: "🗑", btn_swipe: "🔄 Swipe",
       status_ready: "Bereit", status_stopped: "Generierung gestoppt",
       summary_thoughts: "💭 Gedankengang", trigger_label: "Trigger:",
       role_gm: "Spielleiter", role_companion: "Begleiter", role_editor: "Lektor",
@@ -748,7 +750,7 @@
   };
 
   function t(key) {
-    const lang = state.lang === "en" ? "en" : "de";
+    const lang = (state && state.lang === "en") ? "en" : "de";
     return I18N[lang]?.[key] || I18N["de"]?.[key] || key;
   }
 
@@ -763,37 +765,87 @@
     });
   }
 
-  const streamRenderQueue = new Map();
-  function renderThrottled(targetEl, text, shouldAutoScroll = true) {
-    if (!targetEl) return;
-    if (streamRenderQueue.has(targetEl)) {
-      streamRenderQueue.get(targetEl).text = text;
-      return;
+  // FAILSAFE INDEXEDDB MIT TIMEOUT & BLOCKED-BEHANDLUNG
+  let cachedDbPromise = null;
+  function openDB() {
+    if (!cachedDbPromise) {
+      cachedDbPromise = new Promise((resolve, reject) => {
+        let settled = false;
+        const timer = setTimeout(() => {
+          if (!settled) {
+            settled = true;
+            cachedDbPromise = null;
+            reject(new Error("IndexedDB Open Timeout"));
+          }
+        }, 1200);
+
+        try {
+          const req = indexedDB.open(DB_NAME, 1);
+          req.onblocked = () => {
+            if (!settled) {
+              settled = true;
+              clearTimeout(timer);
+              cachedDbPromise = null;
+              reject(new Error("IndexedDB Blocked"));
+            }
+          };
+          req.onupgradeneeded = e => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+              db.createObjectStore(STORE_NAME);
+            }
+          };
+          req.onsuccess = () => {
+            if (!settled) {
+              settled = true;
+              clearTimeout(timer);
+              resolve(req.result);
+            }
+          };
+          req.onerror = () => {
+            if (!settled) {
+              settled = true;
+              clearTimeout(timer);
+              cachedDbPromise = null;
+              reject(req.error || new Error("IDB Error"));
+            }
+          };
+        } catch (err) {
+          clearTimeout(timer);
+          cachedDbPromise = null;
+          reject(err);
+        }
+      });
     }
-    const entry = { text, shouldAutoScroll };
-    streamRenderQueue.set(targetEl, entry);
-    entry.rafId = requestAnimationFrame(() => {
-      targetEl.innerHTML = formatMarkdown(entry.text);
-      if (entry.shouldAutoScroll) autoScroll();
-      streamRenderQueue.delete(targetEl);
+    return cachedDbPromise;
+  }
+
+  async function idbGet(key) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      try {
+        const tx = db.transaction(STORE_NAME, "readonly");
+        const req = tx.objectStore(STORE_NAME).get(key);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      } catch (e) { reject(e); }
     });
   }
 
-  function flushThrottled(targetEl, text) {
-    if (!targetEl) return;
-    if (streamRenderQueue.has(targetEl)) {
-      cancelAnimationFrame(streamRenderQueue.get(targetEl).rafId);
-      streamRenderQueue.delete(targetEl);
-    }
-    targetEl.innerHTML = formatMarkdown(text);
-    autoScroll();
+  async function idbSet(key, val) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      try {
+        const tx = db.transaction(STORE_NAME, "readwrite");
+        const req = tx.objectStore(STORE_NAME).put(val, key);
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(tx.error || req.error);
+        tx.onerror = () => reject(tx.error);
+      } catch (e) { reject(e); }
+    });
   }
 
-  function clearAllThrottledRenders() {
-    streamRenderQueue.forEach(entry => cancelAnimationFrame(entry.rafId));
-    streamRenderQueue.clear();
-  }
-
+  // BLOCK B: SANITIZER & HILFSFUNKTIONEN
   function sanitizeId(id, prefix = "id", allowEmpty = false) {
     if (!id || typeof id !== "string") return allowEmpty ? "" : generateId(prefix);
     const cleaned = id.replace(/[^a-zA-Z0-9_\-]/g, '_');
@@ -825,68 +877,11 @@
 
   const jsArg = v => escapeHTML(JSON.stringify(String(v)));
 
-  function snapOf(m) {
-    return m?.snapshots?.[m.currentVariant || 0] || m?.snapshot || null;
-  }
-
-  function stampSnapshot(m) {
-    if (!m.snapshots) m.snapshots = [];
-    m.snapshots[m.currentVariant || 0] = captureCurrentSnapshot();
-  }
-
-  function restoreLatestSnapshot() {
-    if (!Array.isArray(state.messages)) return;
-    for (let i = state.messages.length - 1; i >= 0; i--) {
-      const s = snapOf(state.messages[i]);
-      if (s) { restoreSnapshot(s); return; }
-    }
-  }
-
-  let dbReadFailed = false;
-  let isResetting = false;
-
   function generateId(prefix = "id") {
     const raw = (typeof crypto !== "undefined" && crypto.randomUUID)
       ? `${prefix}_${crypto.randomUUID()}`
       : `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     return raw.replace(/[^a-zA-Z0-9_\-]/g, '_');
-  }
-
-  let cachedDbPromise = null;
-  function openDB() {
-    if (!cachedDbPromise) {
-      cachedDbPromise = new Promise((resolve, reject) => {
-        const req = indexedDB.open(DB_NAME, 1);
-        req.onupgradeneeded = e => {
-          const db = e.target.result;
-          if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME);
-        };
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => { cachedDbPromise = null; reject(req.error); };
-      });
-    }
-    return cachedDbPromise;
-  }
-
-  async function idbGet(key) {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, "readonly");
-      const req = tx.objectStore(STORE_NAME).get(key);
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-  }
-
-  async function idbSet(key, val) {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, "readwrite");
-      const req = tx.objectStore(STORE_NAME).put(val, key);
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(tx.error || req.error);
-      tx.onerror = () => reject(tx.error);
-    });
   }
 
   function showToast(msg, type = "info") {
@@ -901,6 +896,7 @@
 
   function showConfirmModal(text, onConfirm) {
     const modal = document.getElementById("confirm-modal");
+    if (!modal) return;
     document.getElementById("confirm-modal-text").innerText = text;
     modal.classList.add("active");
     document.getElementById("confirm-ok-btn").onclick = () => { modal.classList.remove("active"); if (onConfirm) onConfirm(); };
@@ -909,6 +905,7 @@
 
   function showPromptModal(title, desc, defaultVal, onConfirm) {
     const modal = document.getElementById("prompt-modal");
+    if (!modal) return;
     document.getElementById("prompt-modal-title").innerText = title;
     document.getElementById("prompt-modal-desc").innerText = desc || "";
     const input = document.getElementById("prompt-modal-input");
@@ -935,32 +932,6 @@
 
   function createBlankProgression() {
     return { level: "1", inventory: [], wounds: [], status: [], skills: [] };
-  }
-
-  function captureCurrentSnapshot() {
-    const sess = getActiveSession();
-    return {
-      world: JSON.parse(JSON.stringify(state.world || DEFAULT_WORLD)),
-      userProgression: sanitizeProgression(sess.userProgression),
-      companionProgression: JSON.parse(JSON.stringify(sess.companionProgression || {}))
-    };
-  }
-
-  function restoreSnapshot(snap) {
-    if (!snap) return;
-    state.world = JSON.parse(JSON.stringify(snap.world || DEFAULT_WORLD));
-    const sess = getActiveSession();
-    sess.world = state.world;
-    sess.userProgression = sanitizeProgression(snap.userProgression);
-    sess.companionProgression = {};
-    if (snap.companionProgression && typeof snap.companionProgression === "object") {
-      for (const cId in snap.companionProgression) {
-        sess.companionProgression[cId] = sanitizeProgression(snap.companionProgression[cId]);
-      }
-    }
-    renderAmbientBar();
-    updateHeaderBagCounter();
-    if (document.getElementById("bag-modal").classList.contains("active")) renderBagModalContent();
   }
 
   const BLANK_STATE = {
@@ -994,9 +965,10 @@
   let pendingBranchData = null;
   let activeBagCharId = "user";
   let activeBagSubTab = "inv";
-  const CRASH_BUFFER_KEY = "multi_rp_emergency_buffer";
   let isSaving = false;
   let pendingSave = false;
+  let dbReadFailed = false;
+  let isResetting = false;
 
   function getActiveSession() {
     if (!state.sessions || !Array.isArray(state.sessions) || state.sessions.length === 0) {
@@ -1020,6 +992,7 @@
     if (!curr.companionProgression || typeof curr.companionProgression !== "object") curr.companionProgression = {};
     return curr;
   }
+
   function getProgressionFor(targetId) {
     const sess = getActiveSession();
     const cleanId = String(targetId || "").toLowerCase();
@@ -1037,6 +1010,50 @@
     return null;
   }
 
+  function captureCurrentSnapshot() {
+    const sess = getActiveSession();
+    return {
+      world: JSON.parse(JSON.stringify(state.world || DEFAULT_WORLD)),
+      userProgression: sanitizeProgression(sess.userProgression),
+      companionProgression: JSON.parse(JSON.stringify(sess.companionProgression || {}))
+    };
+  }
+
+  function restoreSnapshot(snap) {
+    if (!snap) return;
+    state.world = JSON.parse(JSON.stringify(snap.world || DEFAULT_WORLD));
+    const sess = getActiveSession();
+    sess.world = state.world;
+    sess.userProgression = sanitizeProgression(snap.userProgression);
+    sess.companionProgression = {};
+    if (snap.companionProgression && typeof snap.companionProgression === "object") {
+      for (const cId in snap.companionProgression) {
+        sess.companionProgression[cId] = sanitizeProgression(snap.companionProgression[cId]);
+      }
+    }
+    renderAmbientBar();
+    updateHeaderBagCounter();
+    if (document.getElementById("bag-modal").classList.contains("active")) renderBagModalContent();
+  }
+
+  function snapOf(m) {
+    return m?.snapshots?.[m.currentVariant || 0] || m?.snapshot || null;
+  }
+
+  function stampSnapshot(m) {
+    if (!m) return;
+    if (!m.snapshots) m.snapshots = [];
+    m.snapshots[m.currentVariant || 0] = captureCurrentSnapshot();
+  }
+
+  function restoreLatestSnapshot() {
+    if (!Array.isArray(state.messages)) return;
+    for (let i = state.messages.length - 1; i >= 0; i--) {
+      const s = snapOf(state.messages[i]);
+      if (s) { restoreSnapshot(s); return; }
+    }
+  }
+
   function writeEmergencyBuffer() {
     if (dbReadFailed || isResetting) return;
     try {
@@ -1050,6 +1067,7 @@
         userProgression: active.userProgression
       };
       localStorage.setItem(CRASH_BUFFER_KEY, JSON.stringify(payload));
+      localStorage.setItem(LOCAL_STORAGE_BACKUP, JSON.stringify(state));
     } catch (e) {}
   }
 
@@ -1066,11 +1084,12 @@
       updateLastSavedIndicator();
       localStorage.removeItem(CRASH_BUFFER_KEY);
     } catch (err) {
-      console.error("Speicherfehler:", err);
-      if (err?.name === "QuotaExceededError") {
-        showToast(state.lang === "en" ? "Storage limit reached!" : "Speicherlimit erreicht!", "error");
-      } else {
-        showToast(state.lang === "en" ? `Persistence error: ${err.message || err}` : `Speicherfehler: ${err.message || err}`, "error");
+      console.warn("IndexedDB Speicherfehler, sichere in LocalStorage:", err);
+      try {
+        localStorage.setItem(LOCAL_STORAGE_BACKUP, JSON.stringify(state));
+        updateLastSavedIndicator();
+      } catch (e) {
+        showToast(state.lang === "en" ? "Storage quota exceeded!" : "Speicherlimit erreicht!", "error");
       }
     } finally {
       isSaving = false;
@@ -1138,7 +1157,7 @@
     state.messages = Array.isArray(sess.messages) ? sess.messages : [];
     state.world = sess.world || { ...DEFAULT_WORLD };
     const titleEl = document.getElementById("active-session-title");
-    if (titleEl) titleEl.innerText = sess.title;
+    if (titleEl) titleEl.innerText = sess.title || "Neues Abenteuer";
     renderAmbientBar();
     updateHeaderBagCounter();
   }
@@ -1207,24 +1226,65 @@
     });
     return Array.from(new Set(names));
   }
+  // BLOCK C: RENDER-THROTTLING, CHAT-SCROLL & TEXT-FILTER
+  const streamRenderQueue = new Map();
+  function renderThrottled(targetEl, text, shouldAutoScroll = true) {
+    if (!targetEl) return;
+    if (streamRenderQueue.has(targetEl)) {
+      streamRenderQueue.get(targetEl).text = text;
+      return;
+    }
+    const entry = { text, shouldAutoScroll };
+    streamRenderQueue.set(targetEl, entry);
+    entry.rafId = requestAnimationFrame(() => {
+      targetEl.innerHTML = formatMarkdown(entry.text);
+      if (entry.shouldAutoScroll) autoScroll();
+      streamRenderQueue.delete(targetEl);
+    });
+  }
+
+  function flushThrottled(targetEl, text) {
+    if (!targetEl) return;
+    if (streamRenderQueue.has(targetEl)) {
+      cancelAnimationFrame(streamRenderQueue.get(targetEl).rafId);
+      streamRenderQueue.delete(targetEl);
+    }
+    targetEl.innerHTML = formatMarkdown(text);
+    autoScroll();
+  }
+
+  function clearAllThrottledRenders() {
+    streamRenderQueue.forEach(entry => cancelAnimationFrame(entry.rafId));
+    streamRenderQueue.clear();
+  }
 
   const chatContainer = document.getElementById("chat-messages");
   const scrollBottomBtn = document.getElementById("scroll-bottom-btn");
   let userScrolledUp = false;
 
-  chatContainer.addEventListener("scroll", () => {
-    const dist = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight;
-    if (dist > 80) { userScrolledUp = true; scrollBottomBtn.classList.add("visible"); }
-    else { userScrolledUp = false; scrollBottomBtn.classList.remove("visible"); }
-  });
+  if (chatContainer) {
+    chatContainer.addEventListener("scroll", () => {
+      const dist = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight;
+      if (dist > 80) {
+        userScrolledUp = true;
+        if (scrollBottomBtn) scrollBottomBtn.classList.add("visible");
+      } else {
+        userScrolledUp = false;
+        if (scrollBottomBtn) scrollBottomBtn.classList.remove("visible");
+      }
+    });
+  }
 
-  scrollBottomBtn.onclick = () => {
-    userScrolledUp = false;
-    scrollBottomBtn.classList.remove("visible");
-    chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: "smooth" });
-  };
+  if (scrollBottomBtn) {
+    scrollBottomBtn.onclick = () => {
+      userScrolledUp = false;
+      scrollBottomBtn.classList.remove("visible");
+      if (chatContainer) chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: "smooth" });
+    };
+  }
 
   function autoScroll(force = false) {
+    if (!chatContainer) return;
     if (force || !userScrolledUp) {
       requestAnimationFrame(() => { chatContainer.scrollTop = chatContainer.scrollHeight; });
     }
@@ -1286,7 +1346,7 @@
   function getTimeIcon(timeStr) {
     const tVal = String(timeStr || "").toLowerCase();
     if (tVal.includes("morgen") || tVal.includes("dawn") || tVal.includes("morning")) return "🌅";
-    if (tVal.includes("mittag") || tVal.includes("noon")) return "☀️";
+    if (tVal.includes("mittag") || tVal.includes("noon")) return "☀️️";
     if (tVal.includes("nachmittag") || tVal.includes("afternoon")) return "🌤️";
     if (tVal.includes("dämmerung") || tVal.includes("dusk") || tVal.includes("twilight")) return "🌇";
     if (tVal.includes("nacht") || tVal.includes("night")) return "🌙";
@@ -1296,7 +1356,7 @@
   function getWeatherIcon(weatherStr) {
     const w = String(weatherStr || "").toLowerCase();
     if (w.includes("regen") || w.includes("rain")) return "🌧️";
-    if (w.includes("sturm") || w.includes("storm") || w.includes("gewitter")) return "⛈️️";
+    if (w.includes("sturm") || w.includes("storm") || w.includes("gewitter")) return "⛈️";
     if (w.includes("nebel") || w.includes("fog")) return "🌫️";
     if (w.includes("schnee") || w.includes("snow") || w.includes("eis")) return "❄️";
     if (w.includes("klar") || w.includes("clear") || w.includes("sonn") || w.includes("sun")) return "☀️";
@@ -1323,18 +1383,21 @@
     document.getElementById("world-modal").classList.add("active");
   };
 
-  document.getElementById("save-world-cfg-btn").onclick = () => {
-    const day = document.getElementById("world-cfg-day").value.trim() || (state.lang === "en" ? "Day 1" : "Tag 1");
-    const time = document.getElementById("world-cfg-time").value;
-    const weather = document.getElementById("world-cfg-weather").value.trim() || (state.lang === "en" ? "Clear" : "Klar");
-    const location = document.getElementById("world-cfg-location").value.trim() || (state.lang === "en" ? "Unknown Area" : "Start");
-    state.world = { day, time, weather, location };
-    getActiveSession().world = state.world;
-    saveState();
-    renderAmbientBar();
-    closeModal("world-modal");
-    showToast(state.lang === "en" ? `World State: ${day} • ${time} • ${location}` : `Welt-Status: ${day} • ${time} • ${location}`, "success");
-  };
+  const saveWorldCfgBtn = document.getElementById("save-world-cfg-btn");
+  if (saveWorldCfgBtn) {
+    saveWorldCfgBtn.onclick = () => {
+      const day = document.getElementById("world-cfg-day").value.trim() || (state.lang === "en" ? "Day 1" : "Tag 1");
+      const time = document.getElementById("world-cfg-time").value;
+      const weather = document.getElementById("world-cfg-weather").value.trim() || (state.lang === "en" ? "Clear" : "Klar");
+      const location = document.getElementById("world-cfg-location").value.trim() || (state.lang === "en" ? "Unknown Area" : "Start");
+      state.world = { day, time, weather, location };
+      getActiveSession().world = state.world;
+      saveState();
+      renderAmbientBar();
+      closeModal("world-modal");
+      showToast(state.lang === "en" ? `World State: ${day} • ${time} • ${location}` : `Welt-Status: ${day} • ${time} • ${location}`, "success");
+    };
+  }
 
   function getWorldAmbientPrompt() {
     const w = state.world || DEFAULT_WORLD;
@@ -1399,7 +1462,7 @@
     }
   }
 
-  // PRÄZISE MUTATIONS- & STATUS-ENGINE (FIX: KLAMMERN, DUPLIKATE & LEVEL)
+  // BLOCK D: STATUS-, INVENTAR- & MUTATIONS-ENGINE
   function cleanItemName(raw) {
     if (raw === null || raw === undefined) return "";
     let s = String(raw).trim().replace(/^["']|["']$/g, '').trim();
@@ -1474,7 +1537,6 @@
         } else if (key === "+STATUS") {
           const cleanVal = cleanItemName(rawVal);
           const baseName = getBaseItemName(cleanVal);
-          // Verhindert Mehrfacheinträge und aktualisiert bestehende Beschreibung
           const existingIdx = targetProg.status.findIndex(s => getBaseItemName(s) === baseName);
           if (existingIdx !== -1) {
             targetProg.status[existingIdx] = cleanVal;
@@ -1521,7 +1583,8 @@
     activeBagCharId = defaultCharId || "user";
     renderBagModalCharSelector();
     renderBagModalContent();
-    document.getElementById("bag-modal").classList.add("active");
+    const modal = document.getElementById("bag-modal");
+    if (modal) modal.classList.add("active");
   }
 
   function promptChangeLevel() {
@@ -1628,35 +1691,44 @@
     }
   }
 
-  document.getElementById("bag-quick-add-btn").onclick = () => {
-    const input = document.getElementById("bag-quick-input");
-    const val = cleanItemName(input.value);
-    if (!val) return;
-    const prog = getProgressionFor(activeBagCharId);
-    if (!prog) return;
+  const bagQuickAddBtn = document.getElementById("bag-quick-add-btn");
+  if (bagQuickAddBtn) {
+    bagQuickAddBtn.onclick = () => {
+      const input = document.getElementById("bag-quick-input");
+      if (!input) return;
+      const val = cleanItemName(input.value);
+      if (!val) return;
+      const prog = getProgressionFor(activeBagCharId);
+      if (!prog) return;
 
-    if (activeBagSubTab === "inv") prog.inventory.push(val);
-    else if (activeBagSubTab === "wounds") { if (!Array.isArray(prog.wounds)) prog.wounds = []; prog.wounds.push(val); }
-    else if (activeBagSubTab === "status") {
-      const baseName = getBaseItemName(val);
-      const exIdx = prog.status.findIndex(s => getBaseItemName(s) === baseName);
-      if (exIdx !== -1) prog.status[exIdx] = val;
-      else prog.status.push(val);
-    }
-    else if (activeBagSubTab === "skills") prog.skills.push(val);
+      if (activeBagSubTab === "inv") prog.inventory.push(val);
+      else if (activeBagSubTab === "wounds") { if (!Array.isArray(prog.wounds)) prog.wounds = []; prog.wounds.push(val); }
+      else if (activeBagSubTab === "status") {
+        const baseName = getBaseItemName(val);
+        const exIdx = prog.status.findIndex(s => getBaseItemName(s) === baseName);
+        if (exIdx !== -1) prog.status[exIdx] = val;
+        else prog.status.push(val);
+      }
+      else if (activeBagSubTab === "skills") prog.skills.push(val);
 
-    input.value = "";
-    saveState();
-    updateHeaderBagCounter();
-    renderBagModalContent();
-  };
+      input.value = "";
+      saveState();
+      updateHeaderBagCounter();
+      renderBagModalContent();
+    };
+  }
 
-  document.getElementById("bag-quick-input").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      document.getElementById("bag-quick-add-btn").click();
-    }
-  });
+  const bagQuickInput = document.getElementById("bag-quick-input");
+  if (bagQuickInput) {
+    bagQuickInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const btn = document.getElementById("bag-quick-add-btn");
+        if (btn) btn.click();
+      }
+    });
+  }
+  // BLOCK D: LOREBOOK-ENGINE, PROMPT-ASSEMBLY & STREAMING
   function matchLoreKeyGroup(groupStr, text) {
     const parts = String(groupStr).split("+").map(p => p.trim()).filter(Boolean);
     if (parts.length === 0) return false;
@@ -1712,7 +1784,7 @@
         if (activeEntries.some(e => e.id === entry.id)) return;
         if (!entry.keys || !String(entry.keys).trim()) return;
 
-        const depth = Math.max(1, parseInt(entry.scanDepth) || 8);
+        const depth = Math.max(1, parseInt(entry.scanDepth, 10) || 8);
         const historyScanContext = getLoreContextForDepth(messagesList, depth, currentTriggerText);
         const fullScanText = historyScanContext + " " + activatedLoreTextPool;
 
@@ -1725,7 +1797,7 @@
       });
     }
 
-    activeEntries.sort((a, b) => (parseInt(b.priority) || 10) - (parseInt(a.priority) || 10));
+    activeEntries.sort((a, b) => (parseInt(b.priority, 10) || 10) - (parseInt(a.priority, 10) || 10));
     let budgetUsed = 0;
     const budgeted = [];
     for (const entry of activeEntries) {
@@ -1841,7 +1913,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
 
       if (m.type === "user") {
         role = "user";
-        content = `[${m.senderName || state.user.name || "User"}]: ${textToUse}`;
+        content = `[${m.senderName || state.user?.name || "User"}]: ${textToUse}`;
       } else if (m.type === "editor") {
         role = (forCharacter.role === "editor") ? "assistant" : "user";
         content = (role === "assistant") ? textToUse : `[${state.lang === "en" ? "Previous Events" : "Bisheriges Geschehen"}]: ${textToUse}`;
@@ -1860,7 +1932,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
             const gmClean = stripThink(m.gmText.trim());
             fullHistory.push({ role: "user", content: `[${state.lang === "en" ? "Environment & NPCs" : "Umgebung & NPCs"}]: ` + gmClean, tokens: estimateTokens(gmClean) });
           }
-          const ownPart = (m.companionParts || []).find(p => p.charId === forCharacter.id || String(p.charName) === String(forCharacter.name));
+          const ownPart = (m.companionParts || []).find(p => p && (p.charId === forCharacter.id || String(p.charName) === String(forCharacter.name)));
           if (ownPart) { role = "assistant"; content = stripThink(ownPart.text); }
           else if (m.charText && (String(forCharacter.name) === String(m.charName) || forCharacter.id === m.senderId)) { role = "assistant"; content = stripThink(m.charText); }
           else { role = "user"; content = textToUse; }
@@ -2044,11 +2116,11 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
   }
 
   function getUserAICharObject() {
-    const parsedTemp = parseFloat(state.user.temp);
+    const parsedTemp = parseFloat(state.user?.temp);
     return {
-      id: "user_internal", name: state.user.name || "User", avatar: state.user.avatar || "👤", role: "user",
-      baseUrl: state.user.baseUrl || "https://openrouter.ai/api/v1", apiKey: state.user.apiKey || "",
-      model: state.user.model || "", temp: isNaN(parsedTemp) ? 0.6 : parsedTemp, topP: 0.9, repPenalty: 1.1, prompt: ""
+      id: "user_internal", name: state.user?.name || "User", avatar: state.user?.avatar || "👤", role: "user",
+      baseUrl: state.user?.baseUrl || "https://openrouter.ai/api/v1", apiKey: state.user?.apiKey || "",
+      model: state.user?.model || "", temp: isNaN(parsedTemp) ? 0.6 : parsedTemp, topP: 0.9, repPenalty: 1.1, prompt: ""
     };
   }
 
@@ -2057,14 +2129,19 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     const sendBtn = document.getElementById("send-btn");
     const statusInd = document.getElementById("status-indicator");
     if (loading) {
-      sendBtn.innerHTML = "⏹"; sendBtn.classList.add("stop"); statusInd.classList.add("active");
+      if (sendBtn) { sendBtn.innerHTML = "⏹"; sendBtn.classList.add("stop"); }
+      if (statusInd) statusInd.classList.add("active");
     } else {
-      sendBtn.innerHTML = "➤"; sendBtn.classList.remove("stop"); statusInd.classList.remove("active");
+      if (sendBtn) { sendBtn.innerHTML = "➤"; sendBtn.classList.remove("stop"); }
+      if (statusInd) statusInd.classList.remove("active");
       updateStatus(t("status_ready"));
     }
   }
 
-  function updateStatus(txt) { document.getElementById("status-text").innerText = txt; }
+  function updateStatus(txt) { 
+    const el = document.getElementById("status-text");
+    if (el) el.innerText = txt;
+  }
 
   function ensureMsgVariants(m) {
     if (!m) return;
@@ -2097,7 +2174,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
             activeStreamMsgRef.gmText = trimmed;
           } else if (activeStreamSubRole) {
             if (!activeStreamMsgRef.companionParts) activeStreamMsgRef.companionParts = [];
-            const part = activeStreamMsgRef.companionParts.find(p => p.charId === activeStreamSubRole);
+            const part = activeStreamMsgRef.companionParts.find(p => p && p.charId === activeStreamSubRole);
             if (part) part.text = trimmed;
             else {
               const comp = state.characters.find(c => c && c.id === activeStreamSubRole);
@@ -2310,95 +2387,101 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     renderChat();
   }
 
-  document.getElementById("branch-confirm-new-btn").onclick = () => {
-    if (!pendingBranchData) return;
-    const { msgIdx, updatedData } = pendingBranchData;
-    const titleInput = document.getElementById("branch-session-title").value.trim() || `${state.lang === "en" ? "Branch" : "Abzweig"} ${state.sessions.length + 1}`;
+  const branchNewBtn = document.getElementById("branch-confirm-new-btn");
+  if (branchNewBtn) {
+    branchNewBtn.onclick = () => {
+      if (!pendingBranchData) return;
+      const { msgIdx, updatedData } = pendingBranchData;
+      const titleInput = document.getElementById("branch-session-title").value.trim() || `${state.lang === "en" ? "Branch" : "Abzweig"} ${state.sessions.length + 1}`;
 
-    const slicedMessages = JSON.parse(JSON.stringify(state.messages.slice(0, msgIdx + 1)));
-    const branchedMsg = slicedMessages[msgIdx];
+      const slicedMessages = JSON.parse(JSON.stringify(state.messages.slice(0, msgIdx + 1)));
+      const branchedMsg = slicedMessages[msgIdx];
 
-    let baseSnapshot = null;
-    for (let i = msgIdx - 1; i >= 0; i--) {
-      const s = snapOf(slicedMessages[i]);
-      if (s) { baseSnapshot = s; break; }
-    }
-    if (!baseSnapshot) {
-      baseSnapshot = {
-        world: JSON.parse(JSON.stringify(DEFAULT_WORLD)),
-        userProgression: createBlankProgression(),
-        companionProgression: {}
+      let baseSnapshot = null;
+      for (let i = msgIdx - 1; i >= 0; i--) {
+        const s = snapOf(slicedMessages[i]);
+        if (s) { baseSnapshot = s; break; }
+      }
+      if (!baseSnapshot) {
+        baseSnapshot = {
+          world: JSON.parse(JSON.stringify(DEFAULT_WORLD)),
+          userProgression: createBlankProgression(),
+          companionProgression: {}
+        };
+      }
+
+      if (updatedData.type === "combined") {
+        branchedMsg.gmText = updatedData.gmText;
+        branchedMsg.companionParts = updatedData.companionParts;
+        if (updatedData.charText) branchedMsg.charText = updatedData.charText;
+        branchedMsg.text = updatedData.fullTotal;
+        if (!branchedMsg.variants) branchedMsg.variants = [];
+        branchedMsg.variants[branchedMsg.currentVariant || 0] = {
+          gmText: updatedData.gmText, companionParts: updatedData.companionParts, text: updatedData.fullTotal
+        };
+      } else {
+        branchedMsg.text = updatedData.text;
+        if (!branchedMsg.variants) branchedMsg.variants = [];
+        branchedMsg.variants[branchedMsg.currentVariant || 0] = updatedData.text;
+        if (branchedMsg.charText) branchedMsg.charText = updatedData.text;
+      }
+
+      const newSession = {
+        id: generateId("sess"),
+        title: titleInput,
+        createdAt: Date.now(),
+        messages: slicedMessages,
+        world: JSON.parse(JSON.stringify(baseSnapshot.world)),
+        userProgression: sanitizeProgression(baseSnapshot.userProgression),
+        companionProgression: JSON.parse(JSON.stringify(baseSnapshot.companionProgression))
       };
-    }
 
-    if (updatedData.type === "combined") {
-      branchedMsg.gmText = updatedData.gmText;
-      branchedMsg.companionParts = updatedData.companionParts;
-      if (updatedData.charText) branchedMsg.charText = updatedData.charText;
-      branchedMsg.text = updatedData.fullTotal;
-      if (!branchedMsg.variants) branchedMsg.variants = [];
-      branchedMsg.variants[branchedMsg.currentVariant || 0] = {
-        gmText: updatedData.gmText, companionParts: updatedData.companionParts, text: updatedData.fullTotal
-      };
-    } else {
-      branchedMsg.text = updatedData.text;
-      if (!branchedMsg.variants) branchedMsg.variants = [];
-      branchedMsg.variants[branchedMsg.currentVariant || 0] = updatedData.text;
-      if (branchedMsg.charText) branchedMsg.charText = updatedData.text;
-    }
-
-    const newSession = {
-      id: generateId("sess"),
-      title: titleInput,
-      createdAt: Date.now(),
-      messages: slicedMessages,
-      world: JSON.parse(JSON.stringify(baseSnapshot.world)),
-      userProgression: sanitizeProgression(baseSnapshot.userProgression),
-      companionProgression: JSON.parse(JSON.stringify(baseSnapshot.companionProgression))
-    };
-
-    state.sessions.unshift(newSession);
-    state.activeSessionId = newSession.id;
-    syncActiveMessages();
-    saveState();
-    renderSessionsUI();
-    renderChat();
-    closeModal("branch-modal");
-    pendingBranchData = null;
-    showToast(state.lang === "en" ? `🌿 New Branch: "${titleInput}"!` : `🌿 Neuer Strang: "${titleInput}"!`, "success");
-
-    if (branchedMsg.type !== "user") {
-      processWorldUpdates(branchedMsg.text);
-      processLiveMutations(branchedMsg.text);
-      stampSnapshot(branchedMsg);
+      state.sessions.unshift(newSession);
+      state.activeSessionId = newSession.id;
+      syncActiveMessages();
       saveState();
-    } else {
-      stampSnapshot(branchedMsg);
-      runStreamingTurnOrder(branchedMsg.text, null, msgIdx - 1);
-    }
-  };
+      renderSessionsUI();
+      renderChat();
+      closeModal("branch-modal");
+      pendingBranchData = null;
+      showToast(state.lang === "en" ? `🌿 New Branch: "${titleInput}"!` : `🌿 Neuer Strang: "${titleInput}"!`, "success");
 
-  document.getElementById("branch-confirm-inplace-btn").onclick = () => {
-    if (!pendingBranchData) return;
-    const { msgIdx, updatedData } = pendingBranchData;
-    applyMessageEdit(msgIdx, updatedData);
-    saveState();
-    renderChat();
-    closeModal("branch-modal");
-    pendingBranchData = null;
-    showToast(state.lang === "en" ? "Message updated." : "Nachricht aktualisiert.");
-  };
+      if (branchedMsg.type !== "user") {
+        processWorldUpdates(branchedMsg.text);
+        processLiveMutations(branchedMsg.text);
+        stampSnapshot(branchedMsg);
+        saveState();
+      } else {
+        stampSnapshot(branchedMsg);
+        runStreamingTurnOrder(branchedMsg.text, null, msgIdx - 1);
+      }
+    };
+  }
+
+  const branchInplaceBtn = document.getElementById("branch-confirm-inplace-btn");
+  if (branchInplaceBtn) {
+    branchInplaceBtn.onclick = () => {
+      if (!pendingBranchData) return;
+      const { msgIdx, updatedData } = pendingBranchData;
+      applyMessageEdit(msgIdx, updatedData);
+      saveState();
+      renderChat();
+      closeModal("branch-modal");
+      pendingBranchData = null;
+      showToast(state.lang === "en" ? "Message updated." : "Nachricht aktualisiert.");
+    };
+  }
 
   async function handleSuggestAction() {
     if (isGenerating) return;
-    if (!state.user.model?.trim()) { 
+    if (!state.user?.model?.trim()) { 
       showConfirmModal(state.lang === "en" ? "Please enter an AI model for your character first." : "Bitte zuerst ein KI-Modell für deine Spielfigur eintragen.", () => {}); 
       return; 
     }
     isAborted = false; activeAbortController = new AbortController(); setGenerating(true);
     const isEn = state.lang === "en";
-    updateStatus((state.user.name || "User") + (isEn ? " is thinking..." : " denkt nach..."));
-    const uName = String(state.user.name || (isEn ? "Player" : "Spieler")).toUpperCase();
+    updateStatus((state.user?.name || "User") + (isEn ? " is thinking..." : " denkt nach..."));
+    const uName = String(state.user?.name || (isEn ? "Player" : "Spieler")).toUpperCase();
     const lastMsg = state.messages.length > 0 ? state.messages[state.messages.length - 1] : null;
     const lastSituation = lastMsg ? (lastMsg.text || lastMsg.charText || lastMsg.gmText || "") : (isEn ? "Beginning of adventure." : "Beginn des Abenteuers.");
     
@@ -2423,10 +2506,12 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       const suggestion = await streamInfermatic(getUserAICharObject(), [], suggestInstruction, null, false, [], 300);
       if (suggestion && !isAborted) {
         const inputEl = document.getElementById("user-input");
-        inputEl.value = stripThink(suggestion).replace(/^["']|["']$/g, '').trim();
-        inputEl.style.height = "auto";
-        inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + "px";
-        inputEl.focus();
+        if (inputEl) {
+          inputEl.value = stripThink(suggestion).replace(/^["']|["']$/g, '').trim();
+          inputEl.style.height = "auto";
+          inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + "px";
+          inputEl.focus();
+        }
         writeEmergencyBuffer();
       }
     } catch (err) {
@@ -2438,17 +2523,19 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
   async function handleUserSend() {
     const inputEl = document.getElementById("user-input");
+    if (!inputEl) return;
     let text = inputEl.value.trim();
     if (!text || isGenerating) return;
-    if (state.characters.length === 0) { 
+    if (!Array.isArray(state.characters) || state.characters.length === 0) { 
       showConfirmModal(state.lang === "en" ? "Please create characters first." : "Erstelle zuerst Charaktere.", () => {}); 
       return; 
     }
 
     inputEl.value = ""; inputEl.style.height = "40px";
-    userScrolledUp = false; scrollBottomBtn.classList.remove("visible");
+    userScrolledUp = false; 
+    if (scrollBottomBtn) scrollBottomBtn.classList.remove("visible");
 
-    if (state.user.enableAutoRewrite && state.user.model?.trim()) {
+    if (state.user?.enableAutoRewrite && state.user?.model?.trim()) {
       isAborted = false; activeAbortController = new AbortController(); setGenerating(true);
       const isEn = state.lang === "en";
       updateStatus((state.user.name || "User") + (isEn ? " refining input..." : " veredelt Eingabe..."));
@@ -2468,12 +2555,13 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       id: generateId("msg"),
       type: "user",
       senderId: "user",
-      senderName: state.user.name || "User",
+      senderName: state.user?.name || "User",
       text,
       variants: [text],
       currentVariant: 0
     };
     stampSnapshot(userMsg);
+    if (!Array.isArray(state.messages)) state.messages = [];
     state.messages.push(userMsg);
     renderChat(); autoScroll(true); saveState();
     await runStreamingTurnOrder(text, null, state.messages.length - 2);
@@ -2538,7 +2626,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
     return { raw: rawResponse, clean: stripThink(rawResponse) };
   }
-  // TURN-ORDER ENGINE
+  // BLOCK E: TURN-ORDER ENGINE & MODAL-TRIGGER
   async function runStreamingTurnOrder(triggerText, appendToExistingMsgId = null, historyCutoffIndex = (Array.isArray(state.messages) ? state.messages.length - 2 : -1)) {
     if (!Array.isArray(state.settings.order)) state.settings.order = [];
     if (state.settings.order.length === 0 && Array.isArray(state.characters) && state.characters.length > 0) {
@@ -2546,8 +2634,12 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     }
     if (!Array.isArray(state.characters) || state.characters.length === 0) return;
 
-    isAborted = false; activeAbortController = new AbortController(); setGenerating(true);
-    partialStreamingText = ""; activeStreamMsgRef = null; activeStreamSubRole = "";
+    isAborted = false; 
+    activeAbortController = new AbortController(); 
+    setGenerating(true);
+    partialStreamingText = ""; 
+    activeStreamMsgRef = null; 
+    activeStreamSubRole = "";
 
     const protectedNames = getProtectedNames();
     const protectedListStr = protectedNames.join(", ");
@@ -2782,19 +2874,26 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     } catch (err) {
       if (!isAborted && err.name !== "AbortError") showConfirmModal(err.message, () => {});
     } finally {
-      activeAbortController = null; activeStreamMsgRef = null; activeStreamSubRole = ""; partialStreamingText = "";
-      setGenerating(false); renderChat(); saveState();
+      activeAbortController = null; 
+      activeStreamMsgRef = null; 
+      activeStreamSubRole = ""; 
+      partialStreamingText = "";
+      setGenerating(false); 
+      renderChat(); 
+      saveState();
     }
   }
 
-  // MODUS C EINZEL-TRIGGER
   async function triggerSingleBot(charId, appendToExistingMsgId = null) {
     if (isGenerating) return;
     const char = state.characters.find(c => c && c.id === charId);
     if (!char) return;
 
-    userScrolledUp = false; scrollBottomBtn.classList.remove("visible");
-    isAborted = false; activeAbortController = new AbortController(); setGenerating(true);
+    userScrolledUp = false; 
+    if (scrollBottomBtn) scrollBottomBtn.classList.remove("visible");
+    isAborted = false; 
+    activeAbortController = new AbortController(); 
+    setGenerating(true);
     const isEn = state.lang === "en";
     updateStatus(char.name + (isEn ? " answers..." : " antwortet..."));
 
@@ -2871,8 +2970,13 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     } catch (err) {
       if (!isAborted && err.name !== "AbortError") showConfirmModal(err.message, () => {});
     } finally {
-      activeAbortController = null; activeStreamMsgRef = null; activeStreamSubRole = ""; partialStreamingText = "";
-      setGenerating(false); renderChat(); saveState();
+      activeAbortController = null; 
+      activeStreamMsgRef = null; 
+      activeStreamSubRole = ""; 
+      partialStreamingText = "";
+      setGenerating(false); 
+      renderChat(); 
+      saveState();
     }
   }
 
@@ -2911,55 +3015,64 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
   function openFirstMsgModal() {
     if (isGenerating) return;
-    document.getElementById("first-msg-text").value = "";
-    document.getElementById("first-msg-modal").classList.add("active");
+    const textEl = document.getElementById("first-msg-text");
+    if (textEl) textEl.value = "";
+    const modal = document.getElementById("first-msg-modal");
+    if (modal) modal.classList.add("active");
   }
 
-  document.getElementById("session-first-msg-btn").onclick = () => { closeModal("session-modal"); openFirstMsgModal(); };
+  const sessionFirstMsgBtn = document.getElementById("session-first-msg-btn");
+  if (sessionFirstMsgBtn) {
+    sessionFirstMsgBtn.onclick = () => { closeModal("session-modal"); openFirstMsgModal(); };
+  }
 
-  document.getElementById("save-first-msg-btn").onclick = () => {
-    const text = document.getElementById("first-msg-text").value.trim();
-    if (!text) return;
-    const roleType = document.getElementById("first-msg-sender").value;
-    let senderId = "gm";
-    let senderName = t("role_gm");
+  const saveFirstMsgBtn = document.getElementById("save-first-msg-btn");
+  if (saveFirstMsgBtn) {
+    saveFirstMsgBtn.onclick = () => {
+      const textEl = document.getElementById("first-msg-text");
+      const text = textEl ? textEl.value.trim() : "";
+      if (!text) return;
+      const roleType = document.getElementById("first-msg-sender").value;
+      let senderId = "gm";
+      let senderName = t("role_gm");
 
-    if (roleType === "gm") {
-      const gm = state.characters.find(c => c && c.role === "gm");
-      if (gm) { senderId = gm.id; senderName = gm.name; }
-    } else if (roleType === "companion") {
-      const comp = state.characters.find(c => c && c.role === "companion");
-      if (comp) { senderId = comp.id; senderName = comp.name; }
-      else senderName = t("role_companion");
-    } else if (roleType === "editor") {
-      const ed = state.characters.find(c => c && c.role === "editor");
-      if (ed) { senderId = ed.id; senderName = ed.name; }
-      else senderName = t("role_editor");
-    }
+      if (roleType === "gm") {
+        const gm = state.characters.find(c => c && c.role === "gm");
+        if (gm) { senderId = gm.id; senderName = gm.name; }
+      } else if (roleType === "companion") {
+        const comp = state.characters.find(c => c && c.role === "companion");
+        if (comp) { senderId = comp.id; senderName = comp.name; }
+        else senderName = t("role_companion");
+      } else if (roleType === "editor") {
+        const ed = state.characters.find(c => c && c.role === "editor");
+        if (ed) { senderId = ed.id; senderName = ed.name; }
+        else senderName = t("role_editor");
+      }
 
-    processWorldUpdates(text);
-    processLiveMutations(text);
+      processWorldUpdates(text);
+      processLiveMutations(text);
 
-    const firstMsg = {
-      id: generateId("msg"),
-      type: roleType === "companion" ? "bot" : roleType,
-      senderId,
-      senderName,
-      text,
-      variants: [text],
-      currentVariant: 0
+      const firstMsg = {
+        id: generateId("msg"),
+        type: roleType === "companion" ? "bot" : roleType,
+        senderId,
+        senderName,
+        text,
+        variants: [text],
+        currentVariant: 0
+      };
+      stampSnapshot(firstMsg);
+      if (!Array.isArray(state.messages)) state.messages = [];
+      if (state.messages.length === 0) state.messages.unshift(firstMsg);
+      else state.messages.push(firstMsg);
+      getActiveSession().messages = state.messages;
+      saveState();
+      renderChat();
+      closeModal("first-msg-modal");
     };
-    stampSnapshot(firstMsg);
-    if (!Array.isArray(state.messages)) state.messages = [];
-    if (state.messages.length === 0) state.messages.unshift(firstMsg);
-    else state.messages.push(firstMsg);
-    getActiveSession().messages = state.messages;
-    saveState();
-    renderChat();
-    closeModal("first-msg-modal");
-  };
+  }
 
-  // UI RENDERING (SICHER GEGEN BLACKSCREEN)
+  // BLOCK F: UI-RENDERING
   function renderChat() {
     if (!chatContainer) return;
     chatContainer.innerHTML = "";
@@ -3235,11 +3348,14 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     renderLorebook();
   }
 
-  document.getElementById("toggle-all-folders-btn").onclick = () => {
-    if (openFoldersState.size > 0) openFoldersState.clear();
-    else state.loreCategories.forEach(c => openFoldersState.add(c));
-    renderLorebook();
-  };
+  const toggleAllFoldersBtn = document.getElementById("toggle-all-folders-btn");
+  if (toggleAllFoldersBtn) {
+    toggleAllFoldersBtn.onclick = () => {
+      if (openFoldersState.size > 0) openFoldersState.clear();
+      else state.loreCategories.forEach(c => openFoldersState.add(c));
+      renderLorebook();
+    };
+  }
 
   function createNewFolder() {
     const promptText = state.lang === "en" ? "Name of the new Lorebook folder:" : "Name des neuen Lorebook-Ordners:";
@@ -3258,22 +3374,27 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     });
   }
 
-  document.getElementById("add-folder-btn").onclick = createNewFolder;
-  document.getElementById("inline-new-folder-btn").onclick = () => {
-    const promptText = state.lang === "en" ? "Name of the new Lorebook folder:" : "Name des neuen Lorebook-Ordners:";
-    const defName = state.lang === "en" ? "New Folder" : "Neuer Ordner";
-    showPromptModal(t("btn_add_folder"), promptText, defName, (name) => {
-      if (!name || !name.trim()) return;
-      const cleanName = name.trim();
-      if (!state.loreCategories.includes(cleanName)) {
-        state.loreCategories.push(cleanName);
-        openFoldersState.add(cleanName);
-        saveState();
-        updateLoreFolderDropdown(cleanName);
-        renderLorebook();
-      }
-    });
-  };
+  const addFolderBtn = document.getElementById("add-folder-btn");
+  if (addFolderBtn) addFolderBtn.onclick = createNewFolder;
+
+  const inlineNewFolderBtn = document.getElementById("inline-new-folder-btn");
+  if (inlineNewFolderBtn) {
+    inlineNewFolderBtn.onclick = () => {
+      const promptText = state.lang === "en" ? "Name of the new Lorebook folder:" : "Name des neuen Lorebook-Ordners:";
+      const defName = state.lang === "en" ? "New Folder" : "Neuer Ordner";
+      showPromptModal(t("btn_add_folder"), promptText, defName, (name) => {
+        if (!name || !name.trim()) return;
+        const cleanName = name.trim();
+        if (!state.loreCategories.includes(cleanName)) {
+          state.loreCategories.push(cleanName);
+          openFoldersState.add(cleanName);
+          saveState();
+          updateLoreFolderDropdown(cleanName);
+          renderLorebook();
+        }
+      });
+    };
+  }
 
   function renameFolder(oldName) {
     const promptText = state.lang === "en" ? `New name for "${oldName}":` : `Neuer Name für "${oldName}":`;
@@ -3314,7 +3435,8 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
   }
 
   function addEntryToSpecificFolder(folderName) { openLoreModalForNew(folderName); }
-  document.getElementById("add-lore-btn").onclick = () => { openLoreModalForNew("Allgemein"); };
+  const addLoreBtn = document.getElementById("add-lore-btn");
+  if (addLoreBtn) addLoreBtn.onclick = () => { openLoreModalForNew("Allgemein"); };
 
   function openLoreModalForNew(defaultCategory = "Allgemein") {
     document.getElementById("lore-modal-title").innerText = t("btn_add_lore");
@@ -3327,7 +3449,8 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     document.getElementById("lore-gmonly").checked = false;
     document.getElementById("lore-content").value = "";
     updateLoreFolderDropdown(defaultCategory);
-    document.getElementById("lore-modal").classList.add("active");
+    const modal = document.getElementById("lore-modal");
+    if (modal) modal.classList.add("active");
   }
 
   function editLore(id) {
@@ -3344,31 +3467,35 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     document.getElementById("lore-gmonly").checked = !!l.gmOnly;
     document.getElementById("lore-content").value = l.content || "";
     updateLoreFolderDropdown(l.category || "Allgemein");
-    document.getElementById("lore-modal").classList.add("active");
+    const modal = document.getElementById("lore-modal");
+    if (modal) modal.classList.add("active");
   }
 
-  document.getElementById("save-lore-btn").onclick = () => {
-    const rawId = document.getElementById("lore-id").value;
-    const id = rawId ? sanitizeId(rawId, "lore") : generateId("lore");
-    const selectedCat = document.getElementById("lore-folder-select").value || "Allgemein";
-    const newLore = {
-      id, category: selectedCat,
-      title: document.getElementById("lore-title").value.trim() || (state.lang === "en" ? "Untitled" : "Ohne Titel"),
-      constant: document.getElementById("lore-constant").checked,
-      keys: document.getElementById("lore-keys").value.trim(),
-      priority: sanitizeInt(document.getElementById("lore-priority").value, 1, 100, 10),
-      scanDepth: sanitizeInt(document.getElementById("lore-depth").value, 1, 50, 8),
-      gmOnly: document.getElementById("lore-gmonly").checked,
-      content: document.getElementById("lore-content").value.trim()
+  const saveLoreBtn = document.getElementById("save-lore-btn");
+  if (saveLoreBtn) {
+    saveLoreBtn.onclick = () => {
+      const rawId = document.getElementById("lore-id").value;
+      const id = rawId ? sanitizeId(rawId, "lore") : generateId("lore");
+      const selectedCat = document.getElementById("lore-folder-select").value || "Allgemein";
+      const newLore = {
+        id, category: selectedCat,
+        title: document.getElementById("lore-title").value.trim() || (state.lang === "en" ? "Untitled" : "Ohne Titel"),
+        constant: document.getElementById("lore-constant").checked,
+        keys: document.getElementById("lore-keys").value.trim(),
+        priority: sanitizeInt(document.getElementById("lore-priority").value, 1, 100, 10),
+        scanDepth: sanitizeInt(document.getElementById("lore-depth").value, 1, 50, 8),
+        gmOnly: document.getElementById("lore-gmonly").checked,
+        content: document.getElementById("lore-content").value.trim()
+      };
+      const idx = state.lorebook.findIndex(x => x && x.id === id);
+      if (idx >= 0) state.lorebook[idx] = newLore;
+      else state.lorebook.push(newLore);
+      openFoldersState.add(selectedCat);
+      saveState();
+      renderLorebook();
+      closeModal("lore-modal");
     };
-    const idx = state.lorebook.findIndex(x => x && x.id === id);
-    if (idx >= 0) state.lorebook[idx] = newLore;
-    else state.lorebook.push(newLore);
-    openFoldersState.add(selectedCat);
-    saveState();
-    renderLorebook();
-    closeModal("lore-modal");
-  };
+  }
 
   function deleteLore(id) {
     const safeId = sanitizeId(id, "lore");
@@ -3378,7 +3505,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       renderLorebook();
     });
   }
-
+  // BLOCK E: SYSTEM-EINSTELLUNGEN & SESSIONS-UI
   function renderSettings() {
     const editorSelect = document.getElementById("setting-editor");
     if (editorSelect) {
@@ -3441,94 +3568,113 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     if (titleEl) titleEl.innerText = active.title || "Adventure";
   }
 
-  document.getElementById("session-select").onchange = (e) => {
-    if (isGenerating) return;
-    state.activeSessionId = sanitizeId(e.target.value, "sess");
-    syncActiveMessages();
-    saveState();
-    renderChat();
-  };
-
-  document.getElementById("session-modal-btn").onclick = () => {
-    renderSessionsUI();
-    document.getElementById("session-modal").classList.add("active");
-  };
-
-  document.getElementById("new-session-btn").onclick = () => {
-    if (isGenerating) return;
-    const promptText = state.lang === "en" ? "Title of the new adventure:" : "Titel des neuen Abenteuers:";
-    const defTitle = (state.lang === "en" ? "Adventure " : "Abenteuer ") + (state.sessions.length + 1);
-    showPromptModal(t("session_title"), promptText, defTitle, (title) => {
-      if (!title?.trim()) return;
-      const newSess = {
-        id: generateId("sess"),
-        title: title.trim(),
-        createdAt: Date.now(),
-        messages: [],
-        world: { ...DEFAULT_WORLD },
-        userProgression: createBlankProgression(),
-        companionProgression: {}
-      };
-      state.sessions.unshift(newSess);
-      state.activeSessionId = newSess.id;
+  const sessionSelect = document.getElementById("session-select");
+  if (sessionSelect) {
+    sessionSelect.onchange = (e) => {
+      if (isGenerating) return;
+      state.activeSessionId = sanitizeId(e.target.value, "sess");
       syncActiveMessages();
       saveState();
-      renderSessionsUI();
       renderChat();
-      closeModal("session-modal");
-    });
-  };
+    };
+  }
 
-  document.getElementById("rename-session-btn").onclick = () => {
-    if (isGenerating) return;
-    const current = getActiveSession();
-    const promptText = state.lang === "en" ? "New title for this adventure:" : "Neuer Titel für dieses Abenteuer:";
-    showPromptModal(t("tooltip_rename"), promptText, current.title, (title) => {
-      if (!title?.trim()) return;
-      current.title = title.trim();
-      document.getElementById("active-session-title").innerText = current.title;
-      saveState();
+  const sessionModalBtn = document.getElementById("session-modal-btn");
+  if (sessionModalBtn) {
+    sessionModalBtn.onclick = () => {
       renderSessionsUI();
-    });
-  };
+      const modal = document.getElementById("session-modal");
+      if (modal) modal.classList.add("active");
+    };
+  }
 
-  document.getElementById("delete-session-btn").onclick = () => {
-    if (isGenerating) return;
-    if (state.sessions.length <= 1) {
-      showConfirmModal(state.lang === "en" ? "Clear chat history for this adventure?" : "Möchtest du den Verlauf leeren?", () => {
-        state.messages = [];
-        const curr = getActiveSession();
-        curr.messages = [];
-        state.world = { ...DEFAULT_WORLD };
-        curr.world = { ...DEFAULT_WORLD };
-        curr.userProgression = createBlankProgression();
-        curr.companionProgression = {};
+  const newSessionBtn = document.getElementById("new-session-btn");
+  if (newSessionBtn) {
+    newSessionBtn.onclick = () => {
+      if (isGenerating) return;
+      const promptText = state.lang === "en" ? "Title of the new adventure:" : "Titel des neuen Abenteuers:";
+      const defTitle = (state.lang === "en" ? "Adventure " : "Abenteuer ") + (state.sessions.length + 1);
+      showPromptModal(t("session_title"), promptText, defTitle, (title) => {
+        if (!title?.trim()) return;
+        const newSess = {
+          id: generateId("sess"),
+          title: title.trim(),
+          createdAt: Date.now(),
+          messages: [],
+          world: { ...DEFAULT_WORLD },
+          userProgression: createBlankProgression(),
+          companionProgression: {}
+        };
+        state.sessions.unshift(newSess);
+        state.activeSessionId = newSess.id;
+        syncActiveMessages();
         saveState();
+        renderSessionsUI();
         renderChat();
-        renderAmbientBar();
-        updateHeaderBagCounter();
         closeModal("session-modal");
       });
-      return;
-    }
-    showConfirmModal(state.lang === "en" ? "Delete adventure?" : "Abenteuer wirklich löschen?", () => {
-      state.sessions = state.sessions.filter(s => s && s.id !== state.activeSessionId);
-      state.activeSessionId = state.sessions[0].id;
-      syncActiveMessages();
-      saveState();
-      renderSessionsUI();
-      renderChat();
-      closeModal("session-modal");
-    });
-  };
+    };
+  }
 
+  const renameSessionBtn = document.getElementById("rename-session-btn");
+  if (renameSessionBtn) {
+    renameSessionBtn.onclick = () => {
+      if (isGenerating) return;
+      const current = getActiveSession();
+      const promptText = state.lang === "en" ? "New title for this adventure:" : "Neuer Titel für dieses Abenteuer:";
+      showPromptModal(t("tooltip_rename"), promptText, current.title, (title) => {
+        if (!title?.trim()) return;
+        current.title = title.trim();
+        const activeTitleEl = document.getElementById("active-session-title");
+        if (activeTitleEl) activeTitleEl.innerText = current.title;
+        saveState();
+        renderSessionsUI();
+      });
+    };
+  }
+
+  const deleteSessionBtn = document.getElementById("delete-session-btn");
+  if (deleteSessionBtn) {
+    deleteSessionBtn.onclick = () => {
+      if (isGenerating) return;
+      if (state.sessions.length <= 1) {
+        showConfirmModal(state.lang === "en" ? "Clear chat history for this adventure?" : "Möchtest du den Verlauf leeren?", () => {
+          state.messages = [];
+          const curr = getActiveSession();
+          curr.messages = [];
+          state.world = { ...DEFAULT_WORLD };
+          curr.world = { ...DEFAULT_WORLD };
+          curr.userProgression = createBlankProgression();
+          curr.companionProgression = {};
+          saveState();
+          renderChat();
+          renderAmbientBar();
+          updateHeaderBagCounter();
+          closeModal("session-modal");
+        });
+        return;
+      }
+      showConfirmModal(state.lang === "en" ? "Delete adventure?" : "Abenteuer wirklich löschen?", () => {
+        state.sessions = state.sessions.filter(s => s && s.id !== state.activeSessionId);
+        state.activeSessionId = state.sessions[0].id;
+        syncActiveMessages();
+        saveState();
+        renderSessionsUI();
+        renderChat();
+        closeModal("session-modal");
+      });
+    };
+  }
+
+  // NAVIGATION & PROFIL-LISTENERS
   document.querySelectorAll(".nav-tab").forEach(tab => {
     tab.onclick = () => {
       const targetView = tab.dataset.view;
       document.querySelectorAll(".nav-tab").forEach(tEl => tEl.classList.remove("active"));
       tab.classList.add("active");
       document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
-      document.getElementById(targetView).classList.add("active");
+      const panel = document.getElementById(targetView);
+      if (panel) panel.classList.add("active");
 
       if (targetView === "view-chat") autoScroll(true);
       if (targetView === "view-party") { renderPlayerConfig(); renderCharacters(); }
@@ -3541,63 +3687,89 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     btn.onclick = () => setLanguage(btn.dataset.lang);
   });
 
-  function closeModal(id) { document.getElementById(id).classList.remove("active"); }
+  function closeModal(id) { 
+    const el = document.getElementById(id);
+    if (el) el.classList.remove("active"); 
+  }
 
-  document.getElementById("user-cfg-provider-preset").onchange = (e) => {
-    if (e.target.value !== "custom") document.getElementById("user-cfg-baseurl").value = e.target.value;
-  };
+  const userPresetEl = document.getElementById("user-cfg-provider-preset");
+  if (userPresetEl) {
+    userPresetEl.onchange = (e) => {
+      if (e.target.value !== "custom") {
+        const bUrl = document.getElementById("user-cfg-baseurl");
+        if (bUrl) bUrl.value = e.target.value;
+      }
+    };
+  }
 
-  document.getElementById("save-user-profile-btn").onclick = () => {
-    const name = String(document.getElementById("user-cfg-name").value || "").trim();
-    const avatar = String(document.getElementById("user-cfg-avatar").value || "").trim() || "👤";
-    const persona = String(document.getElementById("user-cfg-persona").value || "").trim();
-    const enableAssistBtn = document.getElementById("user-cfg-assist-btn").checked;
-    const enableAutoRewrite = document.getElementById("user-cfg-auto-rewrite").checked;
-    const baseUrl = String(document.getElementById("user-cfg-baseurl").value || "").trim() || "https://openrouter.ai/api/v1";
-    const apiKey = String(document.getElementById("user-cfg-apikey").value || "").trim();
-    const model = String(document.getElementById("user-cfg-model").value || "").trim();
-    const parsedTemp = parseFloat(document.getElementById("user-cfg-temp").value);
-    const temp = isNaN(parsedTemp) ? 0.6 : parsedTemp;
-    const providerPreset = document.getElementById("user-cfg-provider-preset").value;
+  const saveUserProfileBtn = document.getElementById("save-user-profile-btn");
+  if (saveUserProfileBtn) {
+    saveUserProfileBtn.onclick = () => {
+      const name = String(document.getElementById("user-cfg-name")?.value || "").trim();
+      const avatar = String(document.getElementById("user-cfg-avatar")?.value || "").trim() || "👤";
+      const persona = String(document.getElementById("user-cfg-persona")?.value || "").trim();
+      const enableAssistBtn = !!document.getElementById("user-cfg-assist-btn")?.checked;
+      const enableAutoRewrite = !!document.getElementById("user-cfg-auto-rewrite")?.checked;
+      const baseUrl = String(document.getElementById("user-cfg-baseurl")?.value || "").trim() || "https://openrouter.ai/api/v1";
+      const apiKey = String(document.getElementById("user-cfg-apikey")?.value || "").trim();
+      const model = String(document.getElementById("user-cfg-model")?.value || "").trim();
+      const parsedTemp = parseFloat(document.getElementById("user-cfg-temp")?.value);
+      const temp = isNaN(parsedTemp) ? 0.6 : parsedTemp;
+      const providerPreset = document.getElementById("user-cfg-provider-preset")?.value || "custom";
 
-    state.user = { ...state.user, name, avatar, persona, enableAssistBtn, enableAutoRewrite, baseUrl, apiKey, model, temp, providerPreset };
-    saveState();
-    renderChat();
-    updateAssistBtnVisibility();
-    showToast(state.lang === "en" ? "Player profile saved!" : "Spieler-Profil gespeichert!", "success");
-  };
+      state.user = { ...state.user, name, avatar, persona, enableAssistBtn, enableAutoRewrite, baseUrl, apiKey, model, temp, providerPreset };
+      saveState();
+      renderChat();
+      updateAssistBtnVisibility();
+      showToast(state.lang === "en" ? "Player profile saved!" : "Spieler-Profil gespeichert!", "success");
+    };
+  }
 
-  document.getElementById("char-provider-preset").onchange = (e) => {
-    if (e.target.value !== "custom") document.getElementById("char-baseurl").value = e.target.value;
-  };
+  const charPresetEl = document.getElementById("char-provider-preset");
+  if (charPresetEl) {
+    charPresetEl.onchange = (e) => {
+      if (e.target.value !== "custom") {
+        const cUrl = document.getElementById("char-baseurl");
+        if (cUrl) cUrl.value = e.target.value;
+      }
+    };
+  }
 
-  document.getElementById("char-role").onchange = (e) => {
-    const av = document.getElementById("char-avatar");
-    if (e.target.value === "editor" && (av.value === "🎭" || av.value === "📜")) av.value = "✒️";
-    if (e.target.value === "gm" && (av.value === "🎭" || av.value === "✒️")) av.value = "📜";
-    if (e.target.value === "companion" && (av.value === "📜" || av.value === "✒️")) av.value = "🎭";
-  };
+  const charRoleEl = document.getElementById("char-role");
+  if (charRoleEl) {
+    charRoleEl.onchange = (e) => {
+      const av = document.getElementById("char-avatar");
+      if (!av) return;
+      if (e.target.value === "editor" && (av.value === "🎭" || av.value === "📜")) av.value = "✒️";
+      if (e.target.value === "gm" && (av.value === "🎭" || av.value === "✒️")) av.value = "📜";
+      if (e.target.value === "companion" && (av.value === "📜" || av.value === "✒️")) av.value = "🎭";
+    };
+  }
 
-  document.getElementById("add-char-btn").onclick = () => {
-    if (isGenerating) return;
-    document.getElementById("char-modal-title").innerText = t("char_modal_title");
-    document.getElementById("char-id").value = "";
-    document.getElementById("char-name").value = "";
-    document.getElementById("char-avatar").value = "🎭";
-    document.getElementById("char-role").value = "companion";
-    document.getElementById("char-provider-preset").value = "custom";
-    document.getElementById("char-baseurl").value = "https://openrouter.ai/api/v1";
-    document.getElementById("char-apikey").value = "";
-    document.getElementById("char-model").value = "";
-    document.getElementById("char-temp").value = "0.7";
-    document.getElementById("temp-val").innerText = "0.7";
-    document.getElementById("char-topp").value = "0.9";
-    document.getElementById("topp-val").innerText = "0.9";
-    document.getElementById("char-reppenalty").value = "1.1";
-    document.getElementById("reppenalty-val").innerText = "1.1";
-    document.getElementById("char-prompt").value = "";
-    document.getElementById("char-modal").classList.add("active");
-  };
+  const addCharBtn = document.getElementById("add-char-btn");
+  if (addCharBtn) {
+    addCharBtn.onclick = () => {
+      if (isGenerating) return;
+      document.getElementById("char-modal-title").innerText = t("char_modal_title");
+      document.getElementById("char-id").value = "";
+      document.getElementById("char-name").value = "";
+      document.getElementById("char-avatar").value = "🎭";
+      document.getElementById("char-role").value = "companion";
+      document.getElementById("char-provider-preset").value = "custom";
+      document.getElementById("char-baseurl").value = "https://openrouter.ai/api/v1";
+      document.getElementById("char-apikey").value = "";
+      document.getElementById("char-model").value = "";
+      document.getElementById("char-temp").value = "0.7";
+      document.getElementById("temp-val").innerText = "0.7";
+      document.getElementById("char-topp").value = "0.9";
+      document.getElementById("topp-val").innerText = "0.9";
+      document.getElementById("char-reppenalty").value = "1.1";
+      document.getElementById("reppenalty-val").innerText = "1.1";
+      document.getElementById("char-prompt").value = "";
+      const modal = document.getElementById("char-modal");
+      if (modal) modal.classList.add("active");
+    };
+  }
 
   function editChar(id) {
     if (isGenerating) return;
@@ -3612,7 +3784,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     const bUrl = c.baseUrl || "https://openrouter.ai/api/v1";
     document.getElementById("char-baseurl").value = bUrl;
     const presetSelect = document.getElementById("char-provider-preset");
-    presetSelect.value = Array.from(presetSelect.options).some(o => o.value === bUrl) ? bUrl : "custom";
+    if (presetSelect) presetSelect.value = Array.from(presetSelect.options).some(o => o.value === bUrl) ? bUrl : "custom";
     document.getElementById("char-apikey").value = c.apiKey || "";
     document.getElementById("char-model").value = c.model || "";
     const cTemp = c.temp !== undefined ? c.temp : 0.7;
@@ -3625,44 +3797,48 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     document.getElementById("char-reppenalty").value = cRep;
     document.getElementById("reppenalty-val").innerText = cRep;
     document.getElementById("char-prompt").value = c.prompt || "";
-    document.getElementById("char-modal").classList.add("active");
+    const modal = document.getElementById("char-modal");
+    if (modal) modal.classList.add("active");
   }
 
-  document.getElementById("save-char-btn").onclick = () => {
-    const rawId = document.getElementById("char-id").value;
-    const id = rawId ? sanitizeId(rawId, "char") : generateId("char");
-    const role = document.getElementById("char-role").value;
-    const parsedTemp = parseFloat(document.getElementById("char-temp").value);
-    const parsedTopP = parseFloat(document.getElementById("char-topp").value);
-    const parsedRep = parseFloat(document.getElementById("char-reppenalty").value);
+  const saveCharBtn = document.getElementById("save-char-btn");
+  if (saveCharBtn) {
+    saveCharBtn.onclick = () => {
+      const rawId = document.getElementById("char-id").value;
+      const id = rawId ? sanitizeId(rawId, "char") : generateId("char");
+      const role = document.getElementById("char-role").value;
+      const parsedTemp = parseFloat(document.getElementById("char-temp").value);
+      const parsedTopP = parseFloat(document.getElementById("char-topp").value);
+      const parsedRep = parseFloat(document.getElementById("char-reppenalty").value);
 
-    const newChar = {
-      id, 
-      name: String(document.getElementById("char-name").value || "").trim() || (state.lang === "en" ? "Nameless" : "Ohne Namen"),
-      avatar: String(document.getElementById("char-avatar").value || "").trim() || "🎭",
-      role,
-      baseUrl: String(document.getElementById("char-baseurl").value || "").trim() || "https://openrouter.ai/api/v1",
-      apiKey: String(document.getElementById("char-apikey").value || "").trim(),
-      model: String(document.getElementById("char-model").value || "").trim(),
-      temp: isNaN(parsedTemp) ? 0.7 : parsedTemp,
-      topP: isNaN(parsedTopP) ? 0.9 : parsedTopP,
-      repPenalty: isNaN(parsedRep) ? 1.1 : parsedRep,
-      prompt: String(document.getElementById("char-prompt").value || "").trim()
+      const newChar = {
+        id, 
+        name: String(document.getElementById("char-name")?.value || "").trim() || (state.lang === "en" ? "Nameless" : "Ohne Namen"),
+        avatar: String(document.getElementById("char-avatar")?.value || "").trim() || "🎭",
+        role,
+        baseUrl: String(document.getElementById("char-baseurl")?.value || "").trim() || "https://openrouter.ai/api/v1",
+        apiKey: String(document.getElementById("char-apikey")?.value || "").trim(),
+        model: String(document.getElementById("char-model")?.value || "").trim(),
+        temp: isNaN(parsedTemp) ? 0.7 : parsedTemp,
+        topP: isNaN(parsedTopP) ? 0.9 : parsedTopP,
+        repPenalty: isNaN(parsedRep) ? 1.1 : parsedRep,
+        prompt: String(document.getElementById("char-prompt")?.value || "").trim()
+      };
+
+      const idx = state.characters.findIndex(x => x && x.id === id);
+      if (idx >= 0) state.characters[idx] = newChar;
+      else state.characters.push(newChar);
+
+      if (role === "editor") state.settings.order = state.settings.order.filter(oId => oId !== id);
+      else if (!state.settings.order.includes(id)) state.settings.order.push(id);
+
+      saveState();
+      renderCharacters();
+      renderSettings();
+      renderChat();
+      closeModal("char-modal");
     };
-
-    const idx = state.characters.findIndex(x => x && x.id === id);
-    if (idx >= 0) state.characters[idx] = newChar;
-    else state.characters.push(newChar);
-
-    if (role === "editor") state.settings.order = state.settings.order.filter(oId => oId !== id);
-    else if (!state.settings.order.includes(id)) state.settings.order.push(id);
-
-    saveState();
-    renderCharacters();
-    renderSettings();
-    renderChat();
-    closeModal("char-modal");
-  };
+  }
 
   function deleteChar(id) {
     if (isGenerating) return;
@@ -3772,53 +3948,64 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     return charaData.data || charaData;
   }
 
-  document.getElementById("import-png-btn").onclick = () => { if (!isGenerating) document.getElementById("char-png-input").click(); };
+  const importPngBtn = document.getElementById("import-png-btn");
+  if (importPngBtn) {
+    importPngBtn.onclick = () => {
+      if (!isGenerating) {
+        const fileInput = document.getElementById("char-png-input");
+        if (fileInput) fileInput.click();
+      }
+    };
+  }
   
-  document.getElementById("char-png-input").onchange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    try {
-      const buffer = await file.arrayBuffer();
-      const d = await parsePngCharacterMetadata(buffer);
-      const avatarUrl = await compressImageToDataUrl(new Blob([buffer], { type: "image/png" }), 96);
-      
-      const rawName = (d && d.name !== undefined && d.name !== null) ? String(d.name).trim() : file.name.replace(/\.png$/i, '');
-      const safeName = rawName || (state.lang === "en" ? "Nameless" : "Ohne Namen");
+  const charPngInput = document.getElementById("char-png-input");
+  if (charPngInput) {
+    charPngInput.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const buffer = await file.arrayBuffer();
+        const d = await parsePngCharacterMetadata(buffer);
+        const avatarUrl = await compressImageToDataUrl(new Blob([buffer], { type: "image/png" }), 96);
+        
+        const rawName = (d && d.name !== undefined && d.name !== null) ? String(d.name).trim() : file.name.replace(/\.png$/i, '');
+        const safeName = rawName || (state.lang === "en" ? "Nameless" : "Ohne Namen");
 
-      const sysPrompt = d.system_prompt ? String(d.system_prompt) : "";
-      const personality = d.personality ? `[Personality]: ${String(d.personality)}` : "";
-      const description = d.description ? `[Description]: ${String(d.description)}` : "";
-      const scenario = d.scenario ? `[Scenario]: ${String(d.scenario)}` : "";
-      const mesExample = d.mes_example ? `[Dialogues]:\n${String(d.mes_example)}` : "";
+        const sysPrompt = d.system_prompt ? String(d.system_prompt) : "";
+        const personality = d.personality ? `[Personality]: ${String(d.personality)}` : "";
+        const description = d.description ? `[Description]: ${String(d.description)}` : "";
+        const scenario = d.scenario ? `[Scenario]: ${String(d.scenario)}` : "";
+        const mesExample = d.mes_example ? `[Dialogues]:\n${String(d.mes_example)}` : "";
 
-      const importedPrompt = [sysPrompt, personality, description, scenario, mesExample].filter(Boolean).join("\n\n");
-      const newChar = {
-        id: generateId("char"), 
-        name: safeName, 
-        avatar: avatarUrl, 
-        role: "companion",
-        baseUrl: state.user?.baseUrl || "https://openrouter.ai/api/v1", 
-        apiKey: state.user?.apiKey || "", 
-        model: state.user?.model || "",
-        temp: 0.7, 
-        topP: 0.9, 
-        repPenalty: 1.1, 
-        prompt: importedPrompt
-      };
+        const importedPrompt = [sysPrompt, personality, description, scenario, mesExample].filter(Boolean).join("\n\n");
+        const newChar = {
+          id: generateId("char"), 
+          name: safeName, 
+          avatar: avatarUrl, 
+          role: "companion",
+          baseUrl: state.user?.baseUrl || "https://openrouter.ai/api/v1", 
+          apiKey: state.user?.apiKey || "", 
+          model: state.user?.model || "",
+          temp: 0.7, 
+          topP: 0.9, 
+          repPenalty: 1.1, 
+          prompt: importedPrompt
+        };
 
-      state.characters.push(newChar);
-      state.settings.order.push(newChar.id);
-      saveState(); 
-      renderCharacters(); 
-      renderSettings(); 
-      renderChat();
-      showToast(state.lang === "en" ? "Character card imported!" : "Charakterkarte importiert!", "success");
-    } catch (err) {
-      showConfirmModal(err.message || String(err), () => {});
-    } finally { 
-      e.target.value = ""; 
-    }
-  };
+        state.characters.push(newChar);
+        state.settings.order.push(newChar.id);
+        saveState(); 
+        renderCharacters(); 
+        renderSettings(); 
+        renderChat();
+        showToast(state.lang === "en" ? "Character card imported!" : "Charakterkarte importiert!", "success");
+      } catch (err) {
+        showConfirmModal(err.message || String(err), () => {});
+      } finally { 
+        e.target.value = ""; 
+      }
+    };
+  }
 
   function moveOrder(index, delta) {
     const target = index + delta;
@@ -3826,211 +4013,289 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     const temp = state.settings.order[index];
     state.settings.order[index] = state.settings.order[target];
     state.settings.order[target] = temp;
-    saveState(); renderSettings();
+    saveState(); 
+    renderSettings();
   }
 
-  document.getElementById("setting-editor").onchange = (e) => { 
-    state.settings.editorId = e.target.value ? sanitizeId(e.target.value, "char", true) : ""; 
-    saveState(); 
-  };
-  document.getElementById("setting-combined").onchange = (e) => { state.settings.combined = e.target.checked; saveState(); };
-  document.getElementById("setting-budget").oninput = (e) => {
-    state.settings.maxTokenBudget = parseInt(e.target.value, 10);
-    document.getElementById("budget-val").innerText = state.settings.maxTokenBudget + " Tokens";
-    saveState();
-  };
-  document.getElementById("setting-strip-keys").onchange = (e) => { state.settings.stripKeysOnExport = e.target.checked; saveState(); };
-
-  document.getElementById("clear-chat-btn").onclick = () => {
-    if (isGenerating) abortCurrentGeneration();
-    if (!Array.isArray(state.messages) || state.messages.length === 0) return;
-    showConfirmModal(state.lang === "en" ? "Clear entire history for this adventure?" : "Gesamten Verlauf dieses Abenteuers leeren?", () => {
-      state.messages = []; getActiveSession().messages = []; saveState(); renderChat();
-    });
-  };
-
-  document.getElementById("reset-btn").onclick = () => {
-    showConfirmModal(state.lang === "en" ? "Reset everything to factory default?" : "Alles auf Werkseinstellungen zurücksetzen?", async () => {
-      isResetting = true;
-      try {
-        localStorage.removeItem(CRASH_BUFFER_KEY);
-        const freshState = JSON.parse(JSON.stringify(BLANK_STATE));
-        await idbSet("state", freshState);
-        state = freshState;
-        location.reload();
-      } catch (err) {
-        console.error("Reset-Fehler:", err);
-        location.reload();
-      }
-    });
-  };
-
-  document.getElementById("export-btn").onclick = () => {
-    const strip = document.getElementById("setting-strip-keys").checked;
-    const backup = JSON.parse(JSON.stringify(state));
-
-    backup._app = "multi-rp-studio";
-    backup._version = 1;
-
-    if (strip) {
-      if (backup.user) backup.user.apiKey = "";
-      if (Array.isArray(backup.characters)) backup.characters.forEach(c => { if (c) c.apiKey = ""; });
-    }
-    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); 
-    a.href = url;
-    a.download = `multi_rp_backup_${Date.now()}.json`;
-    document.body.appendChild(a); 
-    a.click(); 
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  };
-
-  // ROBUSTER JSON-IMPORT (AKZEPTIERT JEDE GÜLTIGE MULTI-RP / BACKUP DATEI)
-  const importFileInput = document.getElementById("import-file");
-  document.getElementById("import-btn").onclick = () => importFileInput.click();
-  importFileInput.onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      try {
-        const imported = JSON.parse(event.target.result);
-
-        if (!imported || typeof imported !== "object" || Array.isArray(imported)) {
-          throw new Error(state.lang === "en" ? "File is not a valid JSON object." : "Datei ist kein gültiges JSON-Objekt.");
-        }
-
-        // Fehlertolerante Strukturprüfung
-        const candidateState = {
-          ...BLANK_STATE,
-          ...imported,
-          world: { ...DEFAULT_WORLD, ...(imported.world || {}) },
-          user: { ...BLANK_STATE.user, ...(imported.user || {}) },
-          settings: { ...BLANK_STATE.settings, ...(imported.settings || {}) },
-          characters: Array.isArray(imported.characters) ? imported.characters : [],
-          lorebook: Array.isArray(imported.lorebook) ? imported.lorebook : [],
-          loreCategories: Array.isArray(imported.loreCategories) ? imported.loreCategories : [...DEFAULT_LORE_CATS],
-          sessions: Array.isArray(imported.sessions) ? imported.sessions : []
-        };
-
-        candidateState.settings.order = Array.isArray(candidateState.settings.order) 
-          ? candidateState.settings.order.map(id => sanitizeId(id, "char")) 
-          : [];
-        candidateState.settings.editorId = candidateState.settings.editorId 
-          ? sanitizeId(candidateState.settings.editorId, "char", true) 
-          : "";
-
-        candidateState.characters = candidateState.characters.map(c => ({
-          ...c,
-          id: sanitizeId(c?.id, "char"),
-          name: String(c?.name || (candidateState.lang === "en" ? "Nameless" : "Ohne Namen")),
-          model: String(c?.model || ""),
-          role: ["gm", "companion", "editor"].includes(c?.role) ? c.role : "companion"
-        }));
-
-        candidateState.lorebook = candidateState.lorebook.map(l => ({
-          ...l,
-          id: sanitizeId(l?.id, "lore"),
-          title: String(l?.title || "Untitled"),
-          priority: sanitizeInt(l?.priority, 1, 100, 10),
-          scanDepth: sanitizeInt(l?.scanDepth, 1, 50, 8),
-          keys: String(l?.keys || ""),
-          content: String(l?.content || "")
-        }));
-
-        if (!candidateState.sessions.length) {
-          candidateState.sessions = [{
-            id: generateId("sess"),
-            title: candidateState.lang === "en" ? "Standard" : "Standard",
-            createdAt: Date.now(),
-            messages: Array.isArray(candidateState.messages) ? candidateState.messages : [],
-            world: { ...candidateState.world },
-            userProgression: createBlankProgression(),
-            companionProgression: {}
-          }];
-        } else {
-          candidateState.sessions.forEach(sess => {
-            if (!sess) return;
-            sess.id = sanitizeId(sess.id, "sess");
-            sess.title = String(sess.title || "Adventure");
-            sess.world = { ...DEFAULT_WORLD, ...(sess.world || {}) };
-            sess.userProgression = sanitizeProgression(sess.userProgression);
-            if (sess.companionProgression && typeof sess.companionProgression === "object") {
-              for (const cId in sess.companionProgression) {
-                sess.companionProgression[cId] = sanitizeProgression(sess.companionProgression[cId]);
-              }
-            } else {
-              sess.companionProgression = {};
-            }
-
-            sess.messages = Array.isArray(sess.messages) ? sess.messages.map(m => ({
-              ...m,
-              id: sanitizeId(m?.id, "msg"),
-              currentVariant: sanitizeInt(m?.currentVariant, 0, Math.max(0, (m?.variants?.length || 1) - 1), 0),
-              variants: Array.isArray(m?.variants) ? m.variants : [m?.text || ""]
-            })) : [];
-          });
-        }
-
-        candidateState.activeSessionId = sanitizeId(candidateState.activeSessionId, "sess");
-        if (!candidateState.sessions.some(s => s && s.id === candidateState.activeSessionId)) {
-          candidateState.activeSessionId = candidateState.sessions[0].id;
-        }
-
-        const charCount = candidateState.characters.length;
-        const sessCount = candidateState.sessions.length;
-        const confirmText = state.lang === "en"
-          ? `Load backup containing ${charCount} character(s) and ${sessCount} adventure(s)?\n\nWARNING: All current data will be overwritten.`
-          : `Backup mit ${charCount} Charakter(en) und ${sessCount} Abenteuer(n) laden?\n\nHINWEIS: Alle aktuellen Daten werden überschrieben.`;
-
-        showConfirmModal(confirmText, async () => {
-          await idbSet("state", candidateState);
-          state = candidateState;
-          localStorage.removeItem(CRASH_BUFFER_KEY);
-          location.reload();
-        });
-
-      } catch (err) {
-        showConfirmModal((state.lang === "en" ? "Import failed: " : "Import fehlgeschlagen: ") + (err.message || String(err)), () => {});
-      } finally {
-        importFileInput.value = "";
-      }
+  const setEditorEl = document.getElementById("setting-editor");
+  if (setEditorEl) {
+    setEditorEl.onchange = (e) => { 
+      state.settings.editorId = e.target.value ? sanitizeId(e.target.value, "char", true) : ""; 
+      saveState(); 
     };
-    reader.readAsText(file);
-  };
+  }
 
-  const inputField = document.getElementById("user-input");
-  inputField.addEventListener("input", function() {
-    this.style.height = "auto";
-    this.style.height = Math.min(this.scrollHeight, 120) + "px";
-    writeEmergencyBuffer();
-  });
+  const setCombEl = document.getElementById("setting-combined");
+  if (setCombEl) {
+    setCombEl.onchange = (e) => { state.settings.combined = e.target.checked; saveState(); };
+  }
 
-  inputField.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (!isGenerating) handleUserSend(); }
-  });
+  const setBudgEl = document.getElementById("setting-budget");
+  if (setBudgEl) {
+    setBudgEl.oninput = (e) => {
+      state.settings.maxTokenBudget = parseInt(e.target.value, 10);
+      const bVal = document.getElementById("budget-val");
+      if (bVal) bVal.innerText = state.settings.maxTokenBudget + " Tokens";
+      saveState();
+    };
+  }
 
-  document.getElementById("assist-suggest-btn").onclick = handleSuggestAction;
-  document.getElementById("send-btn").onclick = () => { if (isGenerating) abortCurrentGeneration(); else handleUserSend(); };
+  const setStripEl = document.getElementById("setting-strip-keys");
+  if (setStripEl) {
+    setStripEl.onchange = (e) => { state.settings.stripKeysOnExport = e.target.checked; saveState(); };
+  }
+
+  const clearChatBtn = document.getElementById("clear-chat-btn");
+  if (clearChatBtn) {
+    clearChatBtn.onclick = () => {
+      if (isGenerating) abortCurrentGeneration();
+      if (!Array.isArray(state.messages) || state.messages.length === 0) return;
+      showConfirmModal(state.lang === "en" ? "Clear entire history for this adventure?" : "Gesamten Verlauf dieses Abenteuers leeren?", () => {
+        state.messages = []; 
+        getActiveSession().messages = []; 
+        saveState(); 
+        renderChat();
+      });
+    };
+  }
+
+  const resetBtn = document.getElementById("reset-btn");
+  if (resetBtn) {
+    resetBtn.onclick = () => {
+      showConfirmModal(state.lang === "en" ? "Reset everything to factory default?" : "Alles auf Werkseinstellungen zurücksetzen?", async () => {
+        isResetting = true;
+        try {
+          localStorage.removeItem(CRASH_BUFFER_KEY);
+          localStorage.removeItem(LOCAL_STORAGE_BACKUP);
+          const freshState = JSON.parse(JSON.stringify(BLANK_STATE));
+          await idbSet("state", freshState);
+          state = freshState;
+          location.reload();
+        } catch (err) {
+          console.error("Reset-Fehler:", err);
+          location.reload();
+        }
+      });
+    };
+  }
+
+  const exportBtn = document.getElementById("export-btn");
+  if (exportBtn) {
+    exportBtn.onclick = () => {
+      const stripEl = document.getElementById("setting-strip-keys");
+      const strip = stripEl ? stripEl.checked : true;
+      const backup = JSON.parse(JSON.stringify(state));
+
+      backup._app = "multi-rp-studio";
+      backup._version = 1;
+
+      if (strip) {
+        if (backup.user) backup.user.apiKey = "";
+        if (Array.isArray(backup.characters)) backup.characters.forEach(c => { if (c) c.apiKey = ""; });
+      }
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); 
+      a.href = url;
+      a.download = `multi_rp_backup_${Date.now()}.json`;
+      document.body.appendChild(a); 
+      a.click(); 
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    };
+  }
+
+  // ROBUSTER JSON-IMPORT
+  const importFileInputEl = document.getElementById("import-file");
+  const importBtn = document.getElementById("import-btn");
+  if (importBtn && importFileInputEl) importBtn.onclick = () => importFileInputEl.click();
+
+  if (importFileInputEl) {
+    importFileInputEl.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          let imported = JSON.parse(event.target.result);
+
+          if (!imported || typeof imported !== "object" || Array.isArray(imported)) {
+            throw new Error(state.lang === "en" ? "File is not a valid JSON object." : "Datei ist kein gültiges JSON-Objekt.");
+          }
+
+          if (imported.state && typeof imported.state === "object") {
+            imported = imported.state;
+          }
+
+          const candidateState = {
+            ...BLANK_STATE,
+            ...imported,
+            world: { ...DEFAULT_WORLD, ...(imported.world || {}) },
+            user: { ...BLANK_STATE.user, ...(imported.user || {}) },
+            settings: { ...BLANK_STATE.settings, ...(imported.settings || {}) },
+            characters: Array.isArray(imported.characters) ? imported.characters : [],
+            lorebook: Array.isArray(imported.lorebook) ? imported.lorebook : [],
+            loreCategories: Array.isArray(imported.loreCategories) ? imported.loreCategories : [...DEFAULT_LORE_CATS],
+            sessions: Array.isArray(imported.sessions) ? imported.sessions : []
+          };
+
+          candidateState.settings.order = Array.isArray(candidateState.settings.order) 
+            ? candidateState.settings.order.map(id => sanitizeId(id, "char")) 
+            : [];
+          candidateState.settings.editorId = candidateState.settings.editorId 
+            ? sanitizeId(candidateState.settings.editorId, "char", true) 
+            : "";
+
+          candidateState.characters = candidateState.characters.map(c => ({
+            ...c,
+            id: sanitizeId(c?.id, "char"),
+            name: String(c?.name || (candidateState.lang === "en" ? "Nameless" : "Ohne Namen")),
+            model: String(c?.model || ""),
+            role: ["gm", "companion", "editor"].includes(c?.role) ? c.role : "companion"
+          }));
+
+          candidateState.lorebook = candidateState.lorebook.map(l => ({
+            ...l,
+            id: sanitizeId(l?.id, "lore"),
+            title: String(l?.title || "Untitled"),
+            priority: sanitizeInt(l?.priority, 1, 100, 10),
+            scanDepth: sanitizeInt(l?.scanDepth, 1, 50, 8),
+            keys: String(l?.keys || ""),
+            content: String(l?.content || "")
+          }));
+
+          if (!candidateState.sessions.length) {
+            candidateState.sessions = [{
+              id: generateId("sess"),
+              title: candidateState.lang === "en" ? "Standard" : "Standard",
+              createdAt: Date.now(),
+              messages: Array.isArray(candidateState.messages) ? candidateState.messages : [],
+              world: { ...candidateState.world },
+              userProgression: createBlankProgression(),
+              companionProgression: {}
+            }];
+          } else {
+            candidateState.sessions.forEach(sess => {
+              if (!sess) return;
+              sess.id = sanitizeId(sess.id, "sess");
+              sess.title = String(sess.title || "Adventure");
+              sess.world = { ...DEFAULT_WORLD, ...(sess.world || {}) };
+              sess.userProgression = sanitizeProgression(sess.userProgression);
+              if (sess.companionProgression && typeof sess.companionProgression === "object") {
+                for (const cId in sess.companionProgression) {
+                  sess.companionProgression[cId] = sanitizeProgression(sess.companionProgression[cId]);
+                }
+              } else {
+                sess.companionProgression = {};
+              }
+
+              sess.messages = Array.isArray(sess.messages) ? sess.messages.map(m => ({
+                ...m,
+                id: sanitizeId(m?.id, "msg"),
+                currentVariant: sanitizeInt(m?.currentVariant, 0, Math.max(0, (m?.variants?.length || 1) - 1), 0),
+                variants: Array.isArray(m?.variants) ? m.variants : [m?.text || ""]
+              })) : [];
+            });
+          }
+
+          candidateState.activeSessionId = sanitizeId(candidateState.activeSessionId, "sess");
+          if (!candidateState.sessions.some(s => s && s.id === candidateState.activeSessionId)) {
+            candidateState.activeSessionId = candidateState.sessions[0].id;
+          }
+
+          const charCount = candidateState.characters.length;
+          const sessCount = candidateState.sessions.length;
+          const confirmText = state.lang === "en"
+            ? `Load backup containing ${charCount} character(s) and ${sessCount} adventure(s)?\n\nWARNING: Current data will be overwritten.`
+            : `Backup mit ${charCount} Charakter(en) und ${sessCount} Abenteuer(n) laden?\n\nHINWEIS: Aktuelle Daten werden überschrieben.`;
+
+          showConfirmModal(confirmText, async () => {
+            state = candidateState;
+            syncActiveMessages();
+            renderSessionsUI();
+            renderAmbientBar();
+            renderChat();
+            renderPlayerConfig();
+            renderCharacters();
+            renderLorebook();
+            renderSettings();
+            updateAssistBtnVisibility();
+            updateHeaderBagCounter();
+            await saveState();
+            showToast(state.lang === "en" ? "Backup restored successfully! ✓" : "Backup erfolgreich geladen! ✓", "success");
+          });
+
+        } catch (err) {
+          showConfirmModal((state.lang === "en" ? "Import failed: " : "Import fehlgeschlagen: ") + (err.message || String(err)), () => {});
+        } finally {
+          importFileInputEl.value = "";
+        }
+      };
+      reader.readAsText(file);
+    };
+  }
+
+  // CHAT-INPUT LOGIC
+  const chatInputField = document.getElementById("user-input");
+  if (chatInputField) {
+    chatInputField.addEventListener("input", function() {
+      this.style.height = "auto";
+      this.style.height = Math.min(this.scrollHeight, 120) + "px";
+      writeEmergencyBuffer();
+    });
+
+    chatInputField.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) { 
+        e.preventDefault(); 
+        if (!isGenerating) handleUserSend(); 
+      }
+    });
+  }
+
+  const assistSuggestBtn = document.getElementById("assist-suggest-btn");
+  if (assistSuggestBtn) assistSuggestBtn.onclick = handleSuggestAction;
+
+  const sendBtnEl = document.getElementById("send-btn");
+  if (sendBtnEl) {
+    sendBtnEl.onclick = () => { 
+      if (isGenerating) abortCurrentGeneration(); 
+      else handleUserSend(); 
+    };
+  }
 
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 
-  // GEHÄRTETE INITIALISIERUNG
+  // GEHÄRTETE & SOFORTIGE INITIALISIERUNG (VERHINDERT BLACKSCREEN)
   async function initApp() {
+    // 1. Sofort synchron das Standard-UI zeichnen (0 Millisekunden)
+    applyTranslations();
+    renderSessionsUI();
+    renderAmbientBar();
+    renderChat();
+    renderPlayerConfig();
+    renderCharacters();
+    renderLorebook();
+    renderSettings();
+    updateAssistBtnVisibility();
+    updateHeaderBagCounter();
+
+    // 2. Im Hintergrund asynchron aus IndexedDB oder LocalStorage laden
     let loadedState = null;
     try {
       loadedState = await idbGet("state");
     } catch (err) {
-      console.error("Datenbank-Lesefehler:", err);
-      dbReadFailed = true;
-      showConfirmModal(
-        state.lang === "en" 
-          ? "CRITICAL: Database read failed. Automatic saving disabled to prevent data loss." 
-          : "FEHLER: Datenbank konnte nicht gelesen werden. Speichern pausiert, um Datenverlust zu verhindern.",
-        () => {}
-      );
+      console.warn("IndexedDB nicht lesbar, prüfe LocalStorage:", err);
+      try {
+        const lsRaw = localStorage.getItem(LOCAL_STORAGE_BACKUP);
+        if (lsRaw) loadedState = JSON.parse(lsRaw);
+      } catch (e) {}
+    }
+
+    if (!loadedState) {
+      try {
+        const lsRaw = localStorage.getItem(LOCAL_STORAGE_BACKUP);
+        if (lsRaw) loadedState = JSON.parse(lsRaw);
+      } catch (e) {}
     }
 
     if (loadedState && typeof loadedState === "object") {
@@ -4101,11 +4366,9 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     if (!Array.isArray(state.messages)) state.messages = [];
 
     syncActiveMessages();
-    if (!dbReadFailed) {
-      await checkCrashRecovery();
-      await saveState();
-    }
-    
+    await checkCrashRecovery();
+    await saveState();
+
     const activeLang = state.lang || "de";
     document.querySelectorAll(".lang-btn").forEach(btn => {
       const isAct = btn.dataset.lang === activeLang;
@@ -4114,6 +4377,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     });
     applyTranslations();
 
+    // 3. UI mit den geladenen Daten final auffrischen
     renderSessionsUI();
     renderAmbientBar();
     renderChat();
@@ -4126,6 +4390,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     updateHeaderBagCounter();
   }
 
+  // App starten
   initApp();
 </script>
 </body>
