@@ -69,7 +69,6 @@
     .quick-triggers.visible { display:flex; }
     .quick-btn { background:var(--surface-2); border:1px solid var(--border); color:var(--muted); font-size:12px; padding:4px 9px; border-radius:12px; white-space:nowrap; cursor:pointer; display:flex; align-items:center; gap:4px; min-height:28px; }
 
-    /* Mindestens 16px zur Vermeidung von iOS Auto-Zoom */
     input, textarea, select { background-color:var(--surface-2); border:1px solid var(--border); color:var(--fg); border-radius:10px; padding:8px 12px; font-size:16px; outline:none; width:100%; }
     input:focus, textarea:focus, select:focus { border-color:var(--gold); box-shadow:0 0 0 2px var(--gold-glow); }
     input[type="checkbox"] { width:18px; height:18px; padding:0; flex-shrink:0; accent-color:var(--gold); }
@@ -98,13 +97,55 @@
     .order-controls { display:flex; gap:4px; }
     .order-btn { background:var(--surface-3); border:none; color:var(--fg); width:32px; height:32px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
 
-    .prog-chip { display:inline-flex; align-items:center; gap:5px; border-radius:12px; padding:4px 9px; font-size:12px; font-weight:500; border:1px solid var(--border); background:var(--surface-3); }
+    /* LAYOUT-FIX FÜR CHIPS & STATUS-ZEILEN */
+    #bag-tab-chips-container {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-height: 120px;
+      padding: 6px 0 10px 0;
+      overflow-y: auto;
+    }
+    .prog-chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: 8px;
+      padding: 7px 11px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      background: var(--surface-3);
+      gap: 10px;
+      word-break: normal;
+      hyphens: none;
+    }
+    .prog-chip-body {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 6px;
+      flex: 1;
+      min-width: 0;
+    }
+    .prog-chip-body strong {
+      white-space: nowrap;
+      color: #f8fafc;
+      font-weight: 600;
+    }
+    .prog-chip-body small {
+      font-size: 11px;
+      color: var(--muted);
+      opacity: 0.85;
+      word-break: break-word;
+    }
     .prog-chip.wounds { border-color:rgba(201,76,64,0.4); background:rgba(201,76,64,0.15); color:#fca5a5; }
     .prog-chip.status { border-color:rgba(168,85,247,0.4); background:rgba(168,85,247,0.15); color:#d8b4fe; }
     .prog-chip.inv { border-color:rgba(223,160,71,0.4); background:rgba(223,160,71,0.15); color:#fde68a; }
     .prog-chip.skill { border-color:rgba(99,102,241,0.4); background:rgba(99,102,241,0.15); color:#c7d2fe; }
-    .prog-chip-del { background:none; border:none; color:var(--muted); cursor:pointer; font-size:13px; font-weight:bold; line-height:1; padding:0 2px; }
-    .prog-empty { color:var(--dim); font-style:italic; font-size:12px; padding:10px 0; text-align:center; }
+    .prog-chip-del { background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; font-weight:bold; line-height:1; padding:2px 6px; border-radius:4px; flex-shrink:0; }
+    .prog-chip-del:hover { color:var(--danger); background:rgba(201,76,64,0.2); }
+    .prog-empty { color:var(--dim); font-style:italic; font-size:12px; padding:16px 0; text-align:center; }
 
     .lore-folder { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
     .lore-folder.empty { opacity:0.8; }
@@ -129,6 +170,16 @@
     .modal-content { background:var(--surface); border:1px solid var(--border); width:100%; max-width:580px; max-height:88dvh; border-radius:16px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 10px 40px rgba(0,0,0,0.7); }
     .modal-header { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-weight:bold; font-size:15px; }
     .modal-body { padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; }
+
+    /* SPEZIFISCHER MODAL-BODY FIX FÜR INVENTAR & STATUS */
+    #bag-modal .modal-body {
+      max-height: 80dvh;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      padding-bottom: 16px;
+    }
 
     #toast-layer { position:fixed; top:14px; right:14px; z-index:300; display:flex; flex-direction:column; gap:8px; pointer-events:none; max-width:320px; }
     .toast { background:var(--surface-2); border:1px solid var(--border); color:var(--fg); padding:9px 13px; border-radius:12px; font-size:12.5px; box-shadow:0 4px 18px rgba(0,0,0,0.5); animation:slideIn 0.2s ease-out forwards; pointer-events:auto; }
@@ -337,8 +388,8 @@
           <button class="bag-nav-btn" data-sub="status" onclick="setBagSubTab('status')" data-i18n="bag_tab_status">🔮 Status</button>
           <button class="bag-nav-btn" data-sub="skills" onclick="setBagSubTab('skills')" data-i18n="bag_tab_skills">⚡ Talente</button>
         </div>
-        <div id="bag-tab-chips-container" style="display:flex; flex-wrap:wrap; gap:6px; min-height:80px; align-content:flex-start; padding:6px 0;"></div>
-        <div style="display:flex; gap:6px; margin-top:4px;">
+        <div id="bag-tab-chips-container"></div>
+        <div style="display:flex; gap:6px; margin-top:auto;">
           <input type="text" id="bag-quick-input" data-i18n-ph="ph_bag_input" placeholder="Neuer Eintrag..." style="flex:1;">
           <button class="btn btn-primary" id="bag-quick-add-btn" style="padding:0 14px;">+</button>
         </div>
@@ -744,7 +795,6 @@
     streamRenderQueue.clear();
   }
 
-  // FIX 1 & FIX 5: Absicherung von IDs mit allowEmpty-Support
   function sanitizeId(id, prefix = "id", allowEmpty = false) {
     if (!id || typeof id !== "string") return allowEmpty ? "" : generateId(prefix);
     const cleaned = id.replace(/[^a-zA-Z0-9_\-]/g, '_');
@@ -752,14 +802,12 @@
     return cleaned;
   }
 
-  // FIX 1: Strikter Ganzzahl-Sanitizer gegen XSS über Zahlenfelder
   function sanitizeInt(val, min, max, fallback) {
     const num = parseInt(val, 10);
     if (isNaN(num)) return fallback;
     return Math.max(min, Math.min(max, num));
   }
 
-  // FIX: Strikte Absicherung des Progression-Schemas (Listen vs. Text)
   function sanitizeProgression(p) {
     if (!p || typeof p !== "object") return createBlankProgression();
     return {
@@ -795,7 +843,7 @@
   }
 
   let dbReadFailed = false;
-  let isResetting = false; // FIX 4: Sperr-Flag gegen Zombie-Pufferung
+  let isResetting = false;
 
   function generateId(prefix = "id") {
     const raw = (typeof crypto !== "undefined" && crypto.randomUUID)
@@ -972,7 +1020,6 @@
     return curr;
   }
 
-  // FIX 2: Typsichere Abfrage für IDs und Namen
   function getProgressionFor(targetId) {
     const sess = getActiveSession();
     const cleanId = String(targetId || "").toLowerCase();
@@ -990,7 +1037,6 @@
     return null;
   }
 
-  // FIX 4: Notfallpuffer blockieren, wenn ein Reset aktiv ist
   function writeEmergencyBuffer() {
     if (dbReadFailed || isResetting) return;
     try {
@@ -1022,7 +1068,7 @@
     } catch (err) {
       console.error("Speicherfehler:", err);
       if (err?.name === "QuotaExceededError") {
-        showToast(state.lang === "en" ? "Storage limit reached! Please export and clear old chats." : "Speicherlimit erreicht! Bitte Backup exportieren und alte Abenteuer leeren.", "error");
+        showToast(state.lang === "en" ? "Storage limit reached!" : "Speicherlimit erreicht!", "error");
       } else {
         showToast(state.lang === "en" ? `Persistence error: ${err.message || err}` : `Speicherfehler: ${err.message || err}`, "error");
       }
@@ -1041,7 +1087,7 @@
     if (saveBtn) { saveBtn.disabled = true; saveBtn.innerText = state.lang === "en" ? "💾 Saving..." : "💾 Speichere..."; }
     await saveState();
     if (saveBtn) { saveBtn.disabled = false; saveBtn.innerText = t("manual_save_btn"); }
-    showToast(state.lang === "en" ? "Successfully saved to persistent storage! ✓" : "Erfolgreich im Langzeitspeicher gesichert! ✓", "success");
+    showToast(state.lang === "en" ? "Successfully saved! ✓" : "Erfolgreich gesichert! ✓", "success");
   }
 
   function updateLastSavedIndicator() {
@@ -1070,7 +1116,7 @@
         if (crashData.world) { session.world = crashData.world; state.world = crashData.world; }
         if (crashData.userProgression) session.userProgression = sanitizeProgression(crashData.userProgression);
         await saveState();
-        showConfirmModal(state.lang === "en" ? "Crash Recovery: Unsaved data restored!" : "Notfall-Wiederherstellung: Ungespeicherte Daten gerettet!", () => {});
+        showConfirmModal(state.lang === "en" ? "Crash Recovery: Data restored!" : "Notfall-Wiederherstellung: Daten gerettet!", () => {});
       } else {
         syncActiveMessages();
       }
@@ -1120,7 +1166,7 @@
     renderSessionsUI();
     renderAmbientBar();
     updateAssistBtnVisibility();
-    showToast(lang === "en" ? "Language switched to English!" : "Sprache auf Deutsch umgestellt!", "success");
+    showToast(lang === "en" ? "Language switched!" : "Sprache umgestellt!", "success");
   }
 
   function formatAvatar(av, size = 18) {
@@ -1149,7 +1195,6 @@
     else btn.style.display = "none";
   }
 
-  // FIX 2: Absturzsicher bei nicht-textuellen Namen
   function getProtectedNames() {
     const names = [];
     const uName = String(state.user?.name || "").trim();
@@ -1199,16 +1244,16 @@
   function stripThink(text) {
     if (!text) return "";
     return String(text).replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<think>[\s\S]*$/gi, '')
-      .replace(/\[(?:LIVE_)?(?:MUTATION|STATE_UPDATE|INV_UPDATE|WORLD_UPDATE|WELT_UPDATE|WORLD):[\s\S]*?(\]|$)/gi, '')
-      .replace(/\[\s*[+-](?:ITEM|GEGENSTAND|WOUND|WUNDE|VERLETZUNG|STATUS|ZUSTAND|EFFEKT|SKILL|TALENT|FÄHIGKEIT|FAEHIGKEIT|LEVEL|STUFE)[^\]]*(\]|$)/gi, '')
+      .replace(/\[(?:LIVE_)?(?:MUTATION\vert{}STATE_UPDATE\vert{}INV_UPDATE\vert{}WORLD_UPDATE\vert{}WELT_UPDATE\vert{}WORLD):[\s\S]*?(\]|$)/gi, '')
+      .replace(/\[\s*[+-](?:ITEM\vert{}GEGENSTAND\vert{}WOUND\vert{}WUNDE\vert{}VERLETZUNG\vert{}STATUS\vert{}ZUSTAND\vert{}EFFEKT\vert{}SKILL\vert{}TALENT\vert{}FÄHIGKEIT\vert{}FAEHIGKEIT\vert{}LEVEL\vert{}STUFE)[^\]]*(\]|$)/gi, '')
       .trim();
   }
 
   function formatMarkdown(raw) {
     if (!raw) return "";
     let cleaned = String(raw)
-      .replace(/\[(?:LIVE_)?(?:MUTATION|STATE_UPDATE|INV_UPDATE|WORLD_UPDATE|WELT_UPDATE|WORLD):[\s\S]*?(\]|$)/gi, '')
-      .replace(/\[\s*[+-](?:ITEM|GEGENSTAND|WOUND|WUNDE|VERLETZUNG|STATUS|ZUSTAND|EFFEKT|SKILL|TALENT|FÄHIGKEIT|FAEHIGKEIT|LEVEL|STUFE)[^\]]*(\]|$)/gi, '');
+      .replace(/\[(?:LIVE_)?(?:MUTATION\vert{}STATE_UPDATE\vert{}INV_UPDATE\vert{}WORLD_UPDATE\vert{}WELT_UPDATE\vert{}WORLD):[\s\S]*?(\]|$)/gi, '')
+      .replace(/\[\s*[+-](?:ITEM\vert{}GEGENSTAND\vert{}WOUND\vert{}WUNDE\vert{}VERLETZUNG\vert{}STATUS\vert{}ZUSTAND\vert{}EFFEKT\vert{}SKILL\vert{}TALENT\vert{}FÄHIGKEIT\vert{}FAEHIGKEIT\vert{}LEVEL\vert{}STUFE)[^\]]*(\]|$)/gi, '');
 
     const thinkBlocks = [];
     let s = cleaned.replace(/<think>([\s\S]*?)(?:<\/think>|$)/gi, (match, content) => {
@@ -1257,7 +1302,6 @@
     return "🌤️";
   }
 
-  // FIX 5: Saubere Behandlung des Tageszählers gegen "undefined"
   function renderAmbientBar() {
     const w = state.world || DEFAULT_WORLD;
     const pillTextEl = document.getElementById("amb-pill-text");
@@ -1300,7 +1344,7 @@
 
   function processWorldUpdates(rawText) {
     if (!rawText) return rawText;
-    const updateRegex = /\[(?:WORLD_UPDATE|WELT_UPDATE|WORLD):\s*([^\]]+)\]/gi;
+    const updateRegex = /\[(?:WORLD_UPDATE\vert{}WELT_UPDATE\vert{}WORLD):\s*([^\]]+)\]/gi;
     let match;
     let notices = [];
     const w = state.world || { ...DEFAULT_WORLD };
@@ -1353,6 +1397,7 @@
     }
   }
 
+  // PRÄZISE MUTATIONS- & STATUS-ENGINE (FIX: KLAMMERN, DUPLIKATE & LEVEL)
   function cleanItemName(raw) {
     if (raw === null || raw === undefined) return "";
     let s = String(raw).trim().replace(/^["']|["']$/g, '').trim();
@@ -1364,100 +1409,7 @@
 
   function getBaseItemName(str) {
     if (!str) return "";
-    return cleanItemName(String(str).replace(/\s*[\(\[].*?[\)\]]/g, '')).trim().toLowerCase();
-  }
-
-  function findBestMatchingItemIndex(list, query, contextText = "") {
-    if (!list || list.length === 0 || !query) return -1;
-    const qClean = cleanItemName(query).toLowerCase();
-    const qBase = getBaseItemName(query);
-
-    let exactIdx = list.findIndex(item => String(item).toLowerCase() === qClean);
-    if (exactIdx !== -1) return exactIdx;
-
-    exactIdx = list.findIndex(item => getBaseItemName(item) === qBase && qBase.length > 2);
-    if (exactIdx !== -1) return exactIdx;
-
-    const qWords = qBase.split(/\s+/).filter(w => w.length > 2);
-    const contextLower = String(contextText || "").toLowerCase();
-
-    let bestIdx = -1;
-    let highestScore = -1;
-
-    list.forEach((item, i) => {
-      const itemLower = String(item).toLowerCase();
-      const itemBase = getBaseItemName(item);
-      const itemWords = itemBase.split(/\s+/).filter(w => w.length > 2);
-
-      const hasOverlap = itemBase.includes(qBase) || qBase.includes(itemBase) ||
-                         qWords.some(qw => itemWords.some(iw => iw.includes(qw) || qw.includes(iw)));
-
-      if (!hasOverlap) return;
-      let score = 0;
-
-      for (const qw of qWords) {
-        if (itemWords.some(iw => iw === qw)) score += 12;
-        else if (itemWords.some(iw => iw.includes(qw) || qw.includes(iw))) score += 6;
-      }
-
-      if (contextLower) {
-        if (contextLower.includes(itemBase)) score += 60;
-        for (const iw of itemWords) {
-          if (contextLower.includes(iw)) score += 8;
-        }
-      }
-
-      const nobleTerms = ["legendär", "legendary", "episch", "epic", "uralt", "ancient", "sonnen", "sun", "magisch", "magic", "artefakt", "artifact", "meister", "master", "göttlich", "divine", "flammend", "flaming"];
-      const isNoble = nobleTerms.some(t => itemLower.includes(t));
-      const queryHasNoble = nobleTerms.some(t => qClean.includes(t));
-      if (isNoble && !queryHasNoble) score -= 20;
-
-      if (score > highestScore) {
-        highestScore = score;
-        bestIdx = i;
-      }
-    });
-
-    return highestScore > 0 ? bestIdx : -1;
-  }
-
-  function processLiveMutations(rawText, defaultTarget = "user") {
-    if (!rawText) return rawText;
-    const mutationRegex = /\[(?:LIVE_)?(?:MUTATION|STATE_UPDATE|INV_UPDATE):\s*([^\]]+)\]|\[\s*([+-](?:ITEM|GEGENSTAND|WOUND|WUNDE|VERLETZUNG|STATUS|ZUSTAND|EFFEKT|SKILL|TALENT|FÄHIGKEIT|FAEHIGKEIT|LEVEL|STUFE)[^\]]*)\]/gi;
-    let match;
-    let notices = [];
-
-    while ((match = mutationRegex.exec(rawText)) !== null) {
-      let body = (match[1] || match[2] || "").trim();
-      if (!body) continue;
-
-      let targetStr = defaultTarget;
-      let actionsStr = body;
-
-      if (body.includes("|")) {
-        const firstPipe = body.indexOf("|");
-        const possibleTarget = body.slice(0, firstPipe).trim();
-        const remaining = body.slice(firstPipe + 1).trim();
-        if (!/^[+-]/i.test(possibleTarget)) {
-          targetStr = possibleTarget;
-          actionsStr = remaining;
-        }
-      }
-
-      const targetProg = getProgressionFor(targetStr);
-      const targetChar = state.characters.find(c => c.id === targetStr);
-      const targetName = targetChar ? String(targetChar.name)
-        : (String(targetStr).toLowerCase() === "user" || (state.user?.name && String(targetStr).toLowerCase() === String(state.user.name).toLowerCase()))
-          ? (state.user?.name || (state.lang === "en" ? "Player" : "Spieler"))
-          : String(targetStr);
-
-      if (!targetProg) continue;
-      if (!Array.isArray(targetProg.wounds)) targetProg.wounds = [];
-      if (!Array.isArray(targetProg.inventory)) targetProg.inventory = [];
-      if (!Array.isArray(targetProg.status)) targetProg.status = [];
-      if (!Array.isArray(targetProg.skills)) targetProg.skills = [];
-
-      const parts = actionsStr.split(/\|(?![^(]*\))|,(?![^(]*\))/).map(s => s.trim()).filter(Boolean);
+    return cleanItemName(String(str).replace(/\s*[\(\[].*?[\)\]]/g, '')).trim().toLowerCase();   }    function findBestMatchingItemIndex(list, query, contextText = "") {     if (!list \vert{}\vert{} list.length === 0 \vert{}\vert{} !query) return -1;     const qClean = cleanItemName(query).toLowerCase();     const qBase = getBaseItemName(query);      let exactIdx = list.findIndex(item => String(item).toLowerCase() === qClean);     if (exactIdx !== -1) return exactIdx;      exactIdx = list.findIndex(item => getBaseItemName(item) === qBase && qBase.length > 2);     if (exactIdx !== -1) return exactIdx;      const qWords = qBase.split(/\s+/).filter(w => w.length > 2);     let bestIdx = -1;     let highestScore = -1;      list.forEach((item, i) => {       const itemBase = getBaseItemName(item);       const itemWords = itemBase.split(/\s+/).filter(w => w.length > 2);       const hasOverlap = itemBase.includes(qBase) \vert{}\vert{} qBase.includes(itemBase) \vert{}\vert{}                          qWords.some(qw => itemWords.some(iw => iw.includes(qw) \vert{}\vert{} qw.includes(iw)));       if (!hasOverlap) return;       let score = 0;       for (const qw of qWords) {         if (itemWords.some(iw => iw === qw)) score += 12;         else if (itemWords.some(iw => iw.includes(qw) \vert{}\vert{} qw.includes(iw))) score += 6;       }       if (score > highestScore) {         highestScore = score;         bestIdx = i;       }     });      return highestScore > 0 ? bestIdx : -1;   }    function processLiveMutations(rawText, defaultTarget = "user") {     if (!rawText) return rawText;     const mutationRegex = /\[(?:LIVE_)?(?:MUTATION\vert{}STATE_UPDATE\vert{}INV_UPDATE):\s*([^\]]+)\]\vert{}\[\s*([+-]?(?:ITEM\vert{}GEGENSTAND\vert{}WOUND\vert{}WUNDE\vert{}VERLETZUNG\vert{}STATUS\vert{}ZUSTAND\vert{}EFFEKT\vert{}SKILL\vert{}TALENT\vert{}FÄHIGKEIT\vert{}FAEHIGKEIT\vert{}LEVEL\vert{}STUFE)[^\]]*)\]/gi;     let match;     let notices = [];      while ((match = mutationRegex.exec(rawText)) !== null) {       let body = (match[1] \vert{}\vert{} match[2] \vert{}\vert{} "").trim();       if (!body) continue;        let targetStr = defaultTarget;       let actionsStr = body;        if (body.includes("\vert{}")) {         const firstPipe = body.indexOf("\vert{}");         const possibleTarget = body.slice(0, firstPipe).trim();         const remaining = body.slice(firstPipe + 1).trim();         if (!/^[+-]/i.test(possibleTarget)) {           targetStr = possibleTarget;           actionsStr = remaining;         }       }        const targetProg = getProgressionFor(targetStr);       const targetChar = state.characters.find(c => c.id === targetStr);       const targetName = targetChar ? String(targetChar.name)         : (String(targetStr).toLowerCase() === "user" \vert{}\vert{} (state.user?.name && String(targetStr).toLowerCase() === String(state.user.name).toLowerCase()))           ? (state.user?.name \vert{}\vert{} (state.lang === "en" ? "Player" : "Spieler"))           : String(targetStr);        if (!targetProg) continue;       if (!Array.isArray(targetProg.wounds)) targetProg.wounds = [];       if (!Array.isArray(targetProg.inventory)) targetProg.inventory = [];       if (!Array.isArray(targetProg.status)) targetProg.status = [];       if (!Array.isArray(targetProg.skills)) targetProg.skills = [];        const parts = actionsStr.split(/\Vert{}(?![^(]*\))|,(?![^(]*\))/).map(s => s.trim()).filter(Boolean);
       for (const part of parts) {
         const actionMatch = part.match(/^([+-]?[a-zA-ZäöüÄÖÜ_]+)\s*[:=]?\s*(.*)$/);
         if (!actionMatch) continue;
@@ -1474,11 +1426,24 @@
         else if (key === "-ZUSTAND" || key === "-EFFEKT" || key === "-STATUS") key = "-STATUS";
         else if (key === "+TALENT" || key === "+FÄHIGKEIT" || key === "+FAEHIGKEIT" || key === "+SKILL") key = "+SKILL";
         else if (key === "-TALENT" || key === "-FÄHIGKEIT" || key === "-FAEHIGKEIT" || key === "-SKILL") key = "-SKILL";
-        else if (key === "STUFE" || key === "RANG" || key === "LEVEL") key = "LEVEL";
+        else if (key === "STUFE" || key === "RANG" || key === "LEVEL" || key === "+LEVEL" || key === "+STUFE") key = "LEVEL";
+
+        // LEVEL-ABFANGJÄGER: Falls der GM Stufe/Level in den Status geschrieben hat
+        const levelMatch = rawVal.match(/(?:level|stufe)\s*(\d+)/i);
+        if (levelMatch && (key === "+STATUS" || key === "LEVEL")) {
+          const newLvl = levelMatch[1];
+          targetProg.level = String(newLvl);
+          notices.push(`⭐ ${targetName}: ${state.lang === "en" ? "Level" : "Stufe"} ${newLvl}!`);
+          if (/^(?:level|stufe)\s*\d+$/i.test(getBaseItemName(rawVal))) continue;
+        }
 
         if (key === "+ITEM") {
           const cleanVal = cleanItemName(rawVal);
-          if (cleanVal && !targetProg.inventory.some(i => String(i).toLowerCase() === cleanVal.toLowerCase())) {
+          const baseName = getBaseItemName(cleanVal);
+          const existingIdx = targetProg.inventory.findIndex(i => getBaseItemName(i) === baseName);
+          if (existingIdx !== -1) {
+            targetProg.inventory[existingIdx] = cleanVal;
+          } else {
             targetProg.inventory.push(cleanVal);
             notices.push(`🎒 ${targetName}: +Item (${cleanVal})`);
           }
@@ -1490,7 +1455,11 @@
           }
         } else if (key === "+WOUND") {
           const cleanVal = cleanItemName(rawVal);
-          if (cleanVal && !targetProg.wounds.some(w => String(w).toLowerCase() === cleanVal.toLowerCase())) {
+          const baseName = getBaseItemName(cleanVal);
+          const existingIdx = targetProg.wounds.findIndex(w => getBaseItemName(w) === baseName);
+          if (existingIdx !== -1) {
+            targetProg.wounds[existingIdx] = cleanVal;
+          } else {
             targetProg.wounds.push(cleanVal);
             notices.push(`🩹 ${targetName}: +${state.lang === "en" ? "Wound" : "Wunde"} (${cleanVal})`);
           }
@@ -1502,11 +1471,17 @@
           }
         } else if (key === "+STATUS") {
           const cleanVal = cleanItemName(rawVal);
-          if (cleanVal && !targetProg.status.some(s => String(s).toLowerCase() === cleanVal.toLowerCase())) {
+          const baseName = getBaseItemName(cleanVal);
+          // FIX: Verhindert Mehrfacheinträge und aktualisiert bestehende Beschreibung
+          const existingIdx = targetProg.status.findIndex(s => getBaseItemName(s) === baseName);
+          if (existingIdx !== -1) {
+            targetProg.status[existingIdx] = cleanVal;
+          } else {
             targetProg.status.push(cleanVal);
             notices.push(`🔮 ${targetName}: +Status (${cleanVal})`);
           }
         } else if (key === "-STATUS") {
+          // FIX: Löscht Status anhand des Basistags verlässlich
           const idx = findBestMatchingItemIndex(targetProg.status, rawVal, rawText);
           if (idx !== -1) {
             const rem = targetProg.status.splice(idx, 1)[0];
@@ -1514,7 +1489,11 @@
           }
         } else if (key === "+SKILL") {
           const cleanVal = cleanItemName(rawVal);
-          if (cleanVal && !targetProg.skills.some(sk => String(sk).toLowerCase() === cleanVal.toLowerCase())) {
+          const baseName = getBaseItemName(cleanVal);
+          const existingIdx = targetProg.skills.findIndex(sk => getBaseItemName(sk) === baseName);
+          if (existingIdx !== -1) {
+            targetProg.skills[existingIdx] = cleanVal;
+          } else {
             targetProg.skills.push(cleanVal);
             notices.push(`⚡ ${targetName}: +${state.lang === "en" ? "Skill" : "Talent"} (${cleanVal})`);
           }
@@ -1591,9 +1570,9 @@
     if (!itemStr) return "";
     const match = String(itemStr).match(/^([^(]+)\s*\((.*?)\)$/);
     if (match) {
-      return `<strong>${escapeHTML(match[1].trim())}</strong> <small style="opacity:0.8; font-size:10.5px; margin-left:2px;">(${escapeHTML(match[2].trim())})</small>`;
+      return `<div class="prog-chip-body"><strong>${escapeHTML(match[1].trim())}</strong> <small>(${escapeHTML(match[2].trim())})</small></div>`;
     }
-    return `<span>${escapeHTML(itemStr)}</span>`;
+    return `<div class="prog-chip-body"><strong>${escapeHTML(itemStr)}</strong></div>`;
   }
 
   function renderBagModalContent() {
@@ -1618,15 +1597,15 @@
     else if (activeBagSubTab === "skills") { list = prog.skills; chipClass = "skill"; emptyMsg = t("empty_skills"); }
 
     if (!list || list.length === 0) {
-      container.innerHTML = `<div class="prog-empty" style="width:100%;">${emptyMsg}</div>`;
+      container.innerHTML = `<div class="prog-empty">${emptyMsg}</div>`;
       return;
     }
 
     container.innerHTML = list.map((item, idx) => `
-      <span class="prog-chip ${chipClass}">
+      <div class="prog-chip ${chipClass}">
         ${formatChipLabel(item)}
         <button type="button" class="prog-chip-del" onclick="removeProgItemSession(${jsArg(activeBagCharId)}, ${jsArg(activeBagSubTab)}, ${idx})" title="${t("btn_delete")}">✕</button>
-      </span>
+      </div>
     `).join("");
   }
 
@@ -1657,7 +1636,12 @@
 
     if (activeBagSubTab === "inv") prog.inventory.push(val);
     else if (activeBagSubTab === "wounds") { if (!Array.isArray(prog.wounds)) prog.wounds = []; prog.wounds.push(val); }
-    else if (activeBagSubTab === "status") prog.status.push(val);
+    else if (activeBagSubTab === "status") {
+      const baseName = getBaseItemName(val);
+      const exIdx = prog.status.findIndex(s => getBaseItemName(s) === baseName);
+      if (exIdx !== -1) prog.status[exIdx] = val;
+      else prog.status.push(val);
+    }
     else if (activeBagSubTab === "skills") prog.skills.push(val);
 
     input.value = "";
@@ -1672,7 +1656,6 @@
       document.getElementById("bag-quick-add-btn").click();
     }
   });
-
   function matchLoreKeyGroup(groupStr, text) {
     const parts = String(groupStr).split("+").map(p => p.trim()).filter(Boolean);
     if (parts.length === 0) return false;
@@ -1798,42 +1781,28 @@
       : (isEn ? "None (unharmed)" : "Keine (unversehrt)");
 
     if (isEn) {
-      return `\n\n[MANDATORY RULE: AUTOMATIC INVENTORY, STATS & EFFECTS]:
-Manage gear, tools, and injuries directly through narration.
+      return `\n\n[MANDATORY RULE: AUTOMATIC INVENTORY, LEVEL & STATUS]:
+Manage gear, level, and conditions directly via system tags at the very end of your response.
 1. SYNTAX FORMAT (always in brackets):
-   - For player: [+ITEM: Name (Stats & Ability)] or [-ITEM: Name]
-   - For a companion: [MUTATION: CompanionName | +ITEM: Name (Stats)] or [MUTATION: CompanionName | -ITEM: Name]
-   - Wounds: [+WOUND: Injury] or [MUTATION: CompanionName | +WOUND: Injury]
-   - Healing: [-WOUND: Injury] or [MUTATION: CompanionName | -WOUND: Injury]
-   - Status: [+STATUS: Effect] / [-STATUS: Effect]
-2. STATS & FUNCTION REQUIREMENT:
-   Every newly acquired, found, or crafted item MUST have a concrete function, stat, or ability in parentheses!
-3. NARRATIVE RELEVANCE:
-   Incorporate these traits organically into your descriptions!
-4. PLACEMENT:
-   Always output mutation tags at the very end of your response on a new line!
-
-CURRENT INVENTORY OF ${safeTarget}: [${items}]
-CURRENT WOUNDS: [${wounds}]`;
+   - Level-Up (PLAYER ONLY): [LEVEL: 2] (NEVER put Level into +STATUS!)
+   - Items: [+ITEM: Name (Stats & Ability)] or [-ITEM: Name]
+   - Companion Items: [MUTATION: CompanionName | +ITEM: Name (Stats)]
+   - Wounds: [+WOUND: Injury] or [-WOUND: Injury]
+   - Status: [+STATUS: Effect (Details)] or [-STATUS: Effect]
+2. REMOVAL: When removing a status or wound, use [-STATUS: BaseName] without parentheses.
+3. NO LEVEL AS STATUS: Level increases MUST use [LEVEL: X]!`;
     }
 
-    return `\n\n[PFLICHT-REGEL: AUTOMATISCHES INVENTAR, STATS & FUNKTIONEN]:
-Du steuerst das Inventar, Werkzeuge und Verletzungen direkt über die Erzählung.
-1. SYNTAX-FORMAT (immer in eckigen Klammern):
-   - Für den Spieler: [+ITEM: Name (Stats & Fähigkeiten)] oder [-ITEM: Name]
-   - Für Gefährten: [MUTATION: GefährtenName | +ITEM: Name (Stats)] oder [MUTATION: GefährtenName | -ITEM: Name]
-   - Wunden: [+WOUND: Verletzung] oder [MUTATION: GefährtenName | +WOUND: Verletzung]
-   - Heilung: [-WOUND: Verletzung] oder [MUTATION: GefährtenName | -WOUND: Verletzung]
-   - Zustände: [+STATUS: Effekt] / [-STATUS: Effekt]
-2. STATS & FUNKTIONSPFLICHT BEI NEUEN ITEMS:
-   Jeder gefundene, erhaltene oder gebaute Gegenstand MUSS in Klammern eine konkrete Funktion, Stats oder Fähigkeiten erhalten!
-3. NARRATIVE RELEVANZ:
-   Berücksichtige diese Stats und Funktionen in deinen Beschreibungen!
-4. PLATZIERUNG:
-   Füge Mutations-Tags immer ganz am Ende deines Beitrags in eine eigene Zeile ein!
-
-AKTUELLES INVENTAR VON ${safeTarget}: [${items}]
-AKTUELLE WUNDEN: [${wounds}]`;
+    return `\n\n[PFLICHT-REGEL: AUTOMATISCHES INVENTAR, LEVEL & STATUS]:
+Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags am Ende deines Texts.
+1. SYNTAX-FORMAT (stets in eckigen Klammern):
+   - Stufenaufstieg (NUR SPIELER): [LEVEL: 2] (NIEMALS Level oder Stufe in +STATUS eintragen!)
+   - Gegenstände: [+ITEM: Name (Funktion & Details)] oder [-ITEM: Name]
+   - Gefährten-Items: [MUTATION: GefährtenName | +ITEM: Name (Details)]
+   - Wunden: [+WOUND: Wunde] oder [-WOUND: Wunde]
+   - Zustände: [+STATUS: Zustand (Wirkung)] oder [-STATUS: Zustand]
+2. BEENDEN / ENTFERNEN: Verwende zum Entfernen [-STATUS: Name] ohne Klammerzusatz.
+3. KEIN LEVEL ALS STATUS: Ein Level-Up MUSS zwingend als [LEVEL: X] gesetzt werden!`;
   }
 
   function estimateTokens(text) {
@@ -2108,7 +2077,6 @@ AKTUELLE WUNDEN: [${wounds}]`;
     }
   }
 
-  // BLOCK B: GENERIERUNGS-ABBRUCH
   function abortCurrentGeneration() {
     isAborted = true;
     clearAllThrottledRenders();
@@ -2181,7 +2149,6 @@ AKTUELLE WUNDEN: [${wounds}]`;
     renderChat();
   }
 
-  // BLOCK C: VARIANTEN, EDIT, BRANCHING, GHOSTWRITER & USER-SEND
   function cycleVariant(msgId, dir) {
     const m = state.messages.find(x => x.id === msgId);
     if (!m || !m.variants || m.variants.length <= 1) return;
@@ -2393,7 +2360,7 @@ AKTUELLE WUNDEN: [${wounds}]`;
     renderChat();
     closeModal("branch-modal");
     pendingBranchData = null;
-    showToast(state.lang === "en" ? `🌿 New Branch: "${titleInput}" active!` : `🌿 Neuer Strang: "${titleInput}" aktiv!`, "success");
+    showToast(state.lang === "en" ? `🌿 New Branch: "${titleInput}"!` : `🌿 Neuer Strang: "${titleInput}"!`, "success");
 
     if (branchedMsg.type !== "user") {
       processWorldUpdates(branchedMsg.text);
@@ -2414,7 +2381,7 @@ AKTUELLE WUNDEN: [${wounds}]`;
     renderChat();
     closeModal("branch-modal");
     pendingBranchData = null;
-    showToast(state.lang === "en" ? "Message updated in current chat." : "Nachricht im aktuellen Chat aktualisiert.");
+    showToast(state.lang === "en" ? "Message updated." : "Nachricht aktualisiert.");
   };
 
   async function handleSuggestAction() {
@@ -2507,7 +2474,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     await runStreamingTurnOrder(text, null, state.messages.length - 2);
   }
 
-  // PROMPT BUILDER & ACTOR EXECUTION
   function buildGMPromptContent(userName, triggerText, fateDirective, gmProgressionGuide, protectedListStr, isEn) {
     const safeUser = String(userName || "Player").toUpperCase();
     return isEn ? `[PLAYER ACTION BY ${safeUser}]:\n"${triggerText}"\n\n[DIRECTION & LOGICAL EFFECT]:
@@ -2567,7 +2533,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
     return { raw: rawResponse, clean: stripThink(rawResponse) };
   }
-
   // TURN-ORDER ENGINE
   async function runStreamingTurnOrder(triggerText, appendToExistingMsgId = null, historyCutoffIndex = state.messages.length - 2) {
     if (state.settings.order.length === 0 && state.characters.length > 0) {
@@ -2986,6 +2951,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     renderChat();
     closeModal("first-msg-modal");
   };
+
   // UI RENDERING
   function renderChat() {
     chatContainer.innerHTML = "";
@@ -3003,7 +2969,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     state.messages.forEach((m) => {
       ensureMsgVariants(m);
       m.id = sanitizeId(m.id, "msg");
-      // FIX 1: Typisierung verhindert String-Konkatenation & XSS bei Variantenswipes
       m.currentVariant = sanitizeInt(m.currentVariant, 0, Math.max(0, (m.variants?.length || 1) - 1), 0);
       const safeId = m.id;
       const div = document.createElement("div");
@@ -3186,7 +3151,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       } else {
         entriesInCat.forEach(l => {
           const safeLoreId = sanitizeId(l.id, "lore");
-          // FIX 1: Strikte Typisierung gegen HTML-Injection über Zahlenstrings
           const depthVal = sanitizeInt(l.scanDepth, 1, 50, 8);
           const prioVal = sanitizeInt(l.priority, 1, 100, 10);
           entriesHtml += `
@@ -3404,7 +3368,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     state.characters.filter(c => c.role === "editor").forEach(c => {
       const opt = document.createElement("option");
       opt.value = sanitizeId(c.id, "char"); 
-      // FIX: textContent verhindert Double-Escaping (z. B. &amp; statt &)
       opt.textContent = `${c.name || "Nameless"} (${c.model || "Standard"})`;
       editorSelect.appendChild(opt);
     });
@@ -3646,7 +3609,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     const parsedTopP = parseFloat(document.getElementById("char-topp").value);
     const parsedRep = parseFloat(document.getElementById("char-reppenalty").value);
 
-    // FIX 2: Typsicherheit gegen Abstürze durch Nicht-Strings
     const newChar = {
       id, 
       name: String(document.getElementById("char-name").value || "").trim() || (state.lang === "en" ? "Nameless" : "Ohne Namen"),
@@ -3790,7 +3752,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
   document.getElementById("import-png-btn").onclick = () => { if (!isGenerating) document.getElementById("char-png-input").click(); };
   
-  // FIX 2: Absturzsicherer PNG-Import mit strikter Typisierung aller Felder
   document.getElementById("char-png-input").onchange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -3846,7 +3807,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     saveState(); renderSettings();
   }
 
-  // FIX: allowEmpty=true erlaubt das saubere Deaktivieren des Lektors ohne Zufalls-ID
   document.getElementById("setting-editor").onchange = (e) => { 
     state.settings.editorId = e.target.value ? sanitizeId(e.target.value, "char", true) : ""; 
     saveState(); 
@@ -3867,7 +3827,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     });
   };
 
-  // FIX 4: Atomarer Reset ohne Zombie-Daten im Puffer
   document.getElementById("reset-btn").onclick = () => {
     showConfirmModal(state.lang === "en" ? "Reset everything to factory default?" : "Alles auf Werkseinstellungen zurücksetzen?", async () => {
       isResetting = true;
@@ -3884,7 +3843,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     });
   };
 
-  // FIX: Export mit offiziellem Kennzeichen versehen
   document.getElementById("export-btn").onclick = () => {
     const strip = document.getElementById("setting-strip-keys").checked;
     const backup = JSON.parse(JSON.stringify(state));
@@ -3907,7 +3865,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
-  // FIX 1 & FIX 3: Gehärteter Import mit Kennzeichenprüfung, Vorschau & Progression-Sanitizing
   const importFileInput = document.getElementById("import-file");
   document.getElementById("import-btn").onclick = () => importFileInput.click();
   importFileInput.onchange = (e) => {
@@ -3918,12 +3875,10 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       try {
         const imported = JSON.parse(event.target.result);
 
-        // 1. Grundprüfung: Muss ein Objekt sein, darf KEIN Array sein
         if (!imported || typeof imported !== "object" || Array.isArray(imported)) {
           throw new Error(state.lang === "en" ? "File is not a valid JSON object." : "Datei ist kein gültiges JSON-Objekt.");
         }
 
-        // 2. Echtheitsprüfung: Stempel ODER gültige Listen vorhanden?
         const isOfficial = imported._app === "multi-rp-studio";
         const hasLegacyData = Array.isArray(imported.characters) || Array.isArray(imported.sessions);
         if (!isOfficial && !hasLegacyData) {
@@ -3932,7 +3887,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
             : "Nicht erkannt: Diese Datei ist kein Multi-RP Studio Backup.");
         }
 
-        // 3. Schema vorbereiten & Progressionen absichern
         const candidateState = {
           ...BLANK_STATE,
           ...imported,
@@ -3945,7 +3899,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           sessions: Array.isArray(imported.sessions) ? imported.sessions : []
         };
 
-        // Turn-Order & Lektor typisieren
         candidateState.settings.order = Array.isArray(candidateState.settings.order) 
           ? candidateState.settings.order.map(id => sanitizeId(id, "char")) 
           : [];
@@ -3953,7 +3906,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           ? sanitizeId(candidateState.settings.editorId, "char", true) 
           : "";
 
-        // Charaktere typisieren & absichern
         candidateState.characters = candidateState.characters.map(c => ({
           ...c,
           id: sanitizeId(c.id, "char"),
@@ -3962,7 +3914,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           role: ["gm", "companion", "editor"].includes(c.role) ? c.role : "companion"
         }));
 
-        // Lorebook typisieren & Zahlenfelder sanitizen
         candidateState.lorebook = candidateState.lorebook.map(l => ({
           ...l,
           id: sanitizeId(l.id, "lore"),
@@ -3973,7 +3924,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           content: String(l.content || "")
         }));
 
-        // Sessions inklusive Progressionen (Spieler & Gefährten) strikt typisieren
         if (!candidateState.sessions.length) {
           candidateState.sessions = [{
             id: generateId("sess"),
@@ -3990,7 +3940,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
             sess.title = String(sess.title || "Adventure");
             sess.world = { ...DEFAULT_WORLD, ...(sess.world || {}) };
             
-            // FIX: Progression gegen falsche Datentypen schützen
             sess.userProgression = sanitizeProgression(sess.userProgression);
             if (sess.companionProgression && typeof sess.companionProgression === "object") {
               for (const cId in sess.companionProgression) {
@@ -4014,7 +3963,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           candidateState.activeSessionId = candidateState.sessions[0].id;
         }
 
-        // 4. Sicherheitsabfrage mit Inhaltsvorschau vor dem Überschreiben anzeigen
         const charCount = candidateState.characters.length;
         const sessCount = candidateState.sessions.length;
         const confirmText = state.lang === "en"
@@ -4081,7 +4029,6 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         sessions: Array.isArray(loadedState.sessions) ? loadedState.sessions : []
       };
 
-      // Legacy-Daten im IDB-State absichern
       state.characters.forEach(c => {
         c.id = sanitizeId(c.id, "char");
         c.name = String(c.name || (state.lang === "en" ? "Nameless" : "Ohne Namen"));
