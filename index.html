@@ -97,7 +97,7 @@
     .order-controls { display:flex; gap:4px; }
     .order-btn { background:var(--surface-3); border:none; color:var(--fg); width:32px; height:32px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
 
-    /* LAYOUT-FIX FÜR CHIPS & STATUS-ZEILEN */
+    /* LAYOUT-FIX FÜR STATUS & INVENTAR-CHIPS */
     #bag-tab-chips-container {
       display: flex;
       flex-direction: column;
@@ -171,7 +171,6 @@
     .modal-header { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-weight:bold; font-size:15px; }
     .modal-body { padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; }
 
-    /* SPEZIFISCHER MODAL-BODY FIX FÜR INVENTAR & STATUS */
     #bag-modal .modal-body {
       max-height: 80dvh;
       display: flex;
@@ -520,7 +519,7 @@
         </div>
         <div class="form-group"><label data-i18n="lbl_char_prompt">System-Prompt / Persönlichkeit</label><textarea id="char-prompt" rows="3"></textarea></div>
         <details style="border:1px dashed var(--border); border-radius:8px; padding:8px; background:rgba(0,0,0,0.15);">
-          <summary style="font-size:12px; font-weight:600; color:var(--gold); cursor:pointer; user-select:none;" data-i18n="char_expert_box">⚙️ API & Modell-Parameter (Experten)</summary>
+          <summary style="font-size:12px; font-weight:600; color:var(--gold); cursor:pointer; user-select:none;" data-i18n="char_expert_box">⚙️️ API & Modell-Parameter (Experten)</summary>
           <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
             <div class="form-group">
               <label data-i18n="lbl_provider">Provider</label>
@@ -634,7 +633,7 @@
   const DB_NAME = "MultiRP_Database_v8";
   const STORE_NAME = "app_state";
 
-  // BLOCK A: I18N, SANITIZER & HILFSFUNKTIONEN
+  // BLOCK A: I18N & HILFSFUNKTIONEN
   const I18N = {
     de: {
       tab_chat: "Chat", tab_party: "Gruppe", tab_lore: "Lore", tab_system: "System",
@@ -681,7 +680,7 @@
       empty_party: "Noch keine Charaktere angelegt.", empty_folder: "Keine Einträge in diesem Ordner.",
       empty_bag: "Der Beutel ist leer.", empty_wounds: "Keine Wunden / unversehrt.",
       empty_status: "Keine aktiven Zustände.", empty_skills: "Keine gelernten Talente.",
-      btn_edit: "✏️", btn_delete: "🗑", btn_swipe: "🔄 Swipe",
+      btn_edit: "✏️️", btn_delete: "🗑", btn_swipe: "🔄 Swipe",
       status_ready: "Bereit", status_stopped: "Generierung gestoppt",
       summary_thoughts: "💭 Gedankengang", trigger_label: "Trigger:",
       role_gm: "Spielleiter", role_companion: "Begleiter", role_editor: "Lektor",
@@ -836,6 +835,7 @@
   }
 
   function restoreLatestSnapshot() {
+    if (!Array.isArray(state.messages)) return;
     for (let i = state.messages.length - 1; i >= 0; i--) {
       const s = snapOf(state.messages[i]);
       if (s) { restoreSnapshot(s); return; }
@@ -999,7 +999,7 @@
   let pendingSave = false;
 
   function getActiveSession() {
-    if (!state.sessions || state.sessions.length === 0) {
+    if (!state.sessions || !Array.isArray(state.sessions) || state.sessions.length === 0) {
       const defSess = {
         id: generateId("sess"),
         title: state.lang === "en" ? "New Adventure" : "Neues Abenteuer",
@@ -1012,14 +1012,14 @@
       state.sessions = [defSess];
       state.activeSessionId = defSess.id;
     }
-    let curr = state.sessions.find(s => s.id === state.activeSessionId);
+    let curr = state.sessions.find(s => s && s.id === state.activeSessionId);
     if (!curr) { curr = state.sessions[0]; state.activeSessionId = curr.id; }
     if (!curr.world) curr.world = { ...DEFAULT_WORLD };
+    if (!Array.isArray(curr.messages)) curr.messages = [];
     curr.userProgression = sanitizeProgression(curr.userProgression);
-    if (!curr.companionProgression) curr.companionProgression = {};
+    if (!curr.companionProgression || typeof curr.companionProgression !== "object") curr.companionProgression = {};
     return curr;
   }
-
   function getProgressionFor(targetId) {
     const sess = getActiveSession();
     const cleanId = String(targetId || "").toLowerCase();
@@ -1028,9 +1028,9 @@
       sess.userProgression = sanitizeProgression(sess.userProgression);
       return sess.userProgression;
     }
-    const char = state.characters.find(c => c.id === targetId || String(c.name || "").toLowerCase() === cleanId);
+    const char = state.characters.find(c => c && (c.id === targetId || String(c.name || "").toLowerCase() === cleanId));
     if (char) {
-      if (!sess.companionProgression) sess.companionProgression = {};
+      if (!sess.companionProgression || typeof sess.companionProgression !== "object") sess.companionProgression = {};
       sess.companionProgression[char.id] = sanitizeProgression(sess.companionProgression[char.id]);
       return sess.companionProgression[char.id];
     }
@@ -1044,7 +1044,7 @@
       const payload = {
         sessionId: state.activeSessionId,
         timestamp: Date.now(),
-        recentMessages: (active.messages || []).slice(-6),
+        recentMessages: Array.isArray(active.messages) ? active.messages.slice(-6) : [],
         userInput: document.getElementById("user-input")?.value || "",
         world: state.world || DEFAULT_WORLD,
         userProgression: active.userProgression
@@ -1060,7 +1060,7 @@
     isSaving = true;
     try {
       const sess = getActiveSession();
-      sess.messages = state.messages;
+      sess.messages = Array.isArray(state.messages) ? state.messages : [];
       sess.world = state.world;
       await idbSet("state", state);
       updateLastSavedIndicator();
@@ -1106,10 +1106,11 @@
       if (!raw) return;
       const crashData = JSON.parse(raw);
       if (!crashData?.recentMessages?.length) { localStorage.removeItem(CRASH_BUFFER_KEY); return; }
-      const session = state.sessions.find(s => s.id === crashData.sessionId) || getActiveSession();
+      const session = state.sessions.find(s => s && s.id === crashData.sessionId) || getActiveSession();
       state.activeSessionId = session.id;
+      if (!Array.isArray(session.messages)) session.messages = [];
       const existingIds = new Set(session.messages.map(m => m.id));
-      const missing = crashData.recentMessages.filter(m => !existingIds.has(m.id));
+      const missing = crashData.recentMessages.filter(m => m && !existingIds.has(m.id));
       if (missing.length > 0) {
         session.messages.push(...missing);
         state.messages = session.messages;
@@ -1134,7 +1135,7 @@
 
   function syncActiveMessages() {
     const sess = getActiveSession();
-    state.messages = sess.messages;
+    state.messages = Array.isArray(sess.messages) ? sess.messages : [];
     state.world = sess.world || { ...DEFAULT_WORLD };
     const titleEl = document.getElementById("active-session-title");
     if (titleEl) titleEl.innerText = sess.title;
@@ -1179,13 +1180,14 @@
   }
 
   function getMsgAvatar(m, size = 18) {
-    if (m.type === "user") return formatAvatar(state.user.avatar || "👤", size);
+    if (!m) return formatAvatar("🎭", size);
+    if (m.type === "user") return formatAvatar(state.user?.avatar || "👤", size);
     if (m.type === "editor") {
-      const ed = state.characters.find(c => c.id === (m.senderId || state.settings.editorId) || c.role === "editor");
+      const ed = state.characters.find(c => c && (c.id === (m.senderId || state.settings.editorId) || c.role === "editor"));
       return formatAvatar(ed ? ed.avatar : "✒️", size);
     }
     if (m.type === "gm" || m.type === "combined") return formatAvatar("📜", size);
-    const char = state.characters.find(c => c.id === m.senderId || String(c.name) === String(m.senderName));
+    const char = state.characters.find(c => c && (c.id === m.senderId || String(c.name) === String(m.senderName)));
     return formatAvatar(char ? char.avatar : "🎭", size);
   }
 
@@ -1294,7 +1296,7 @@
   function getWeatherIcon(weatherStr) {
     const w = String(weatherStr || "").toLowerCase();
     if (w.includes("regen") || w.includes("rain")) return "🌧️";
-    if (w.includes("sturm") || w.includes("storm") || w.includes("gewitter")) return "⛈️";
+    if (w.includes("sturm") || w.includes("storm") || w.includes("gewitter")) return "⛈️️";
     if (w.includes("nebel") || w.includes("fog")) return "🌫️";
     if (w.includes("schnee") || w.includes("snow") || w.includes("eis")) return "❄️";
     if (w.includes("klar") || w.includes("clear") || w.includes("sonn") || w.includes("sun")) return "☀️";
@@ -1409,7 +1411,7 @@
 
   function getBaseItemName(str) {
     if (!str) return "";
-    return cleanItemName(String(str).replace(/\s*[\(\[].*?[\)\]]/g, '')).trim().toLowerCase();   }    function findBestMatchingItemIndex(list, query, contextText = "") {     if (!list \vert{}\vert{} list.length === 0 \vert{}\vert{} !query) return -1;     const qClean = cleanItemName(query).toLowerCase();     const qBase = getBaseItemName(query);      let exactIdx = list.findIndex(item => String(item).toLowerCase() === qClean);     if (exactIdx !== -1) return exactIdx;      exactIdx = list.findIndex(item => getBaseItemName(item) === qBase && qBase.length > 2);     if (exactIdx !== -1) return exactIdx;      const qWords = qBase.split(/\s+/).filter(w => w.length > 2);     let bestIdx = -1;     let highestScore = -1;      list.forEach((item, i) => {       const itemBase = getBaseItemName(item);       const itemWords = itemBase.split(/\s+/).filter(w => w.length > 2);       const hasOverlap = itemBase.includes(qBase) \vert{}\vert{} qBase.includes(itemBase) \vert{}\vert{}                          qWords.some(qw => itemWords.some(iw => iw.includes(qw) \vert{}\vert{} qw.includes(iw)));       if (!hasOverlap) return;       let score = 0;       for (const qw of qWords) {         if (itemWords.some(iw => iw === qw)) score += 12;         else if (itemWords.some(iw => iw.includes(qw) \vert{}\vert{} qw.includes(iw))) score += 6;       }       if (score > highestScore) {         highestScore = score;         bestIdx = i;       }     });      return highestScore > 0 ? bestIdx : -1;   }    function processLiveMutations(rawText, defaultTarget = "user") {     if (!rawText) return rawText;     const mutationRegex = /\[(?:LIVE_)?(?:MUTATION\vert{}STATE_UPDATE\vert{}INV_UPDATE):\s*([^\]]+)\]\vert{}\[\s*([+-]?(?:ITEM\vert{}GEGENSTAND\vert{}WOUND\vert{}WUNDE\vert{}VERLETZUNG\vert{}STATUS\vert{}ZUSTAND\vert{}EFFEKT\vert{}SKILL\vert{}TALENT\vert{}FÄHIGKEIT\vert{}FAEHIGKEIT\vert{}LEVEL\vert{}STUFE)[^\]]*)\]/gi;     let match;     let notices = [];      while ((match = mutationRegex.exec(rawText)) !== null) {       let body = (match[1] \vert{}\vert{} match[2] \vert{}\vert{} "").trim();       if (!body) continue;        let targetStr = defaultTarget;       let actionsStr = body;        if (body.includes("\vert{}")) {         const firstPipe = body.indexOf("\vert{}");         const possibleTarget = body.slice(0, firstPipe).trim();         const remaining = body.slice(firstPipe + 1).trim();         if (!/^[+-]/i.test(possibleTarget)) {           targetStr = possibleTarget;           actionsStr = remaining;         }       }        const targetProg = getProgressionFor(targetStr);       const targetChar = state.characters.find(c => c.id === targetStr);       const targetName = targetChar ? String(targetChar.name)         : (String(targetStr).toLowerCase() === "user" \vert{}\vert{} (state.user?.name && String(targetStr).toLowerCase() === String(state.user.name).toLowerCase()))           ? (state.user?.name \vert{}\vert{} (state.lang === "en" ? "Player" : "Spieler"))           : String(targetStr);        if (!targetProg) continue;       if (!Array.isArray(targetProg.wounds)) targetProg.wounds = [];       if (!Array.isArray(targetProg.inventory)) targetProg.inventory = [];       if (!Array.isArray(targetProg.status)) targetProg.status = [];       if (!Array.isArray(targetProg.skills)) targetProg.skills = [];        const parts = actionsStr.split(/\Vert{}(?![^(]*\))|,(?![^(]*\))/).map(s => s.trim()).filter(Boolean);
+    return cleanItemName(String(str).replace(/\s*[\(\[].*?[\)\]]/g, '')).trim().toLowerCase();   }    function findBestMatchingItemIndex(list, query, contextText = "") {     if (!list \vert{}\vert{} list.length === 0 \vert{}\vert{} !query) return -1;     const qClean = cleanItemName(query).toLowerCase();     const qBase = getBaseItemName(query);      let exactIdx = list.findIndex(item => String(item).toLowerCase() === qClean);     if (exactIdx !== -1) return exactIdx;      exactIdx = list.findIndex(item => getBaseItemName(item) === qBase && qBase.length > 2);     if (exactIdx !== -1) return exactIdx;      const qWords = qBase.split(/\s+/).filter(w => w.length > 2);     let bestIdx = -1;     let highestScore = -1;      list.forEach((item, i) => {       const itemBase = getBaseItemName(item);       const itemWords = itemBase.split(/\s+/).filter(w => w.length > 2);       const hasOverlap = itemBase.includes(qBase) \vert{}\vert{} qBase.includes(itemBase) \vert{}\vert{}                          qWords.some(qw => itemWords.some(iw => iw.includes(qw) \vert{}\vert{} qw.includes(iw)));       if (!hasOverlap) return;       let score = 0;       for (const qw of qWords) {         if (itemWords.some(iw => iw === qw)) score += 12;         else if (itemWords.some(iw => iw.includes(qw) \vert{}\vert{} qw.includes(iw))) score += 6;       }       if (score > highestScore) {         highestScore = score;         bestIdx = i;       }     });      return highestScore > 0 ? bestIdx : -1;   }    function processLiveMutations(rawText, defaultTarget = "user") {     if (!rawText) return rawText;     const mutationRegex = /\[(?:LIVE_)?(?:MUTATION\vert{}STATE_UPDATE\vert{}INV_UPDATE):\s*([^\]]+)\]\vert{}\[\s*([+-]?(?:ITEM\vert{}GEGENSTAND\vert{}WOUND\vert{}WUNDE\vert{}VERLETZUNG\vert{}STATUS\vert{}ZUSTAND\vert{}EFFEKT\vert{}SKILL\vert{}TALENT\vert{}FÄHIGKEIT\vert{}FAEHIGKEIT\vert{}LEVEL\vert{}STUFE)[^\]]*)\]/gi;     let match;     let notices = [];      while ((match = mutationRegex.exec(rawText)) !== null) {       let body = (match[1] \vert{}\vert{} match[2] \vert{}\vert{} "").trim();       if (!body) continue;        let targetStr = defaultTarget;       let actionsStr = body;        if (body.includes("\vert{}")) {         const firstPipe = body.indexOf("\vert{}");         const possibleTarget = body.slice(0, firstPipe).trim();         const remaining = body.slice(firstPipe + 1).trim();         if (!/^[+-]/i.test(possibleTarget)) {           targetStr = possibleTarget;           actionsStr = remaining;         }       }        const targetProg = getProgressionFor(targetStr);       const targetChar = state.characters.find(c => c && c.id === targetStr);       const targetName = targetChar ? String(targetChar.name)         : (String(targetStr).toLowerCase() === "user" \vert{}\vert{} (state.user?.name && String(targetStr).toLowerCase() === String(state.user.name).toLowerCase()))           ? (state.user?.name \vert{}\vert{} (state.lang === "en" ? "Player" : "Spieler"))           : String(targetStr);        if (!targetProg) continue;       if (!Array.isArray(targetProg.wounds)) targetProg.wounds = [];       if (!Array.isArray(targetProg.inventory)) targetProg.inventory = [];       if (!Array.isArray(targetProg.status)) targetProg.status = [];       if (!Array.isArray(targetProg.skills)) targetProg.skills = [];        const parts = actionsStr.split(/\Vert{}(?![^(]*\))|,(?![^(]*\))/).map(s => s.trim()).filter(Boolean);
       for (const part of parts) {
         const actionMatch = part.match(/^([+-]?[a-zA-ZäöüÄÖÜ_]+)\s*[:=]?\s*(.*)$/);
         if (!actionMatch) continue;
@@ -1428,7 +1430,7 @@
         else if (key === "-TALENT" || key === "-FÄHIGKEIT" || key === "-FAEHIGKEIT" || key === "-SKILL") key = "-SKILL";
         else if (key === "STUFE" || key === "RANG" || key === "LEVEL" || key === "+LEVEL" || key === "+STUFE") key = "LEVEL";
 
-        // LEVEL-ABFANGJÄGER: Falls der GM Stufe/Level in den Status geschrieben hat
+        // LEVEL-ABFANGJÄGER: Level-Up nicht als Status abspeichern
         const levelMatch = rawVal.match(/(?:level|stufe)\s*(\d+)/i);
         if (levelMatch && (key === "+STATUS" || key === "LEVEL")) {
           const newLvl = levelMatch[1];
@@ -1472,7 +1474,7 @@
         } else if (key === "+STATUS") {
           const cleanVal = cleanItemName(rawVal);
           const baseName = getBaseItemName(cleanVal);
-          // FIX: Verhindert Mehrfacheinträge und aktualisiert bestehende Beschreibung
+          // Verhindert Mehrfacheinträge und aktualisiert bestehende Beschreibung
           const existingIdx = targetProg.status.findIndex(s => getBaseItemName(s) === baseName);
           if (existingIdx !== -1) {
             targetProg.status[existingIdx] = cleanVal;
@@ -1481,7 +1483,6 @@
             notices.push(`🔮 ${targetName}: +Status (${cleanVal})`);
           }
         } else if (key === "-STATUS") {
-          // FIX: Löscht Status anhand des Basistags verlässlich
           const idx = findBestMatchingItemIndex(targetProg.status, rawVal, rawText);
           if (idx !== -1) {
             const rem = targetProg.status.splice(idx, 1)[0];
@@ -1551,7 +1552,7 @@
     const pills = [
       { id: "user", name: state.user?.name || (state.lang === "en" ? "Player" : "Spieler"), avatar: state.user?.avatar || "👤" }
     ];
-    state.characters.filter(c => c.role === "companion").forEach(c => pills.push({ id: c.id, name: c.name, avatar: c.avatar }));
+    state.characters.filter(c => c && c.role === "companion").forEach(c => pills.push({ id: c.id, name: c.name, avatar: c.avatar }));
 
     pills.forEach(p => {
       const btn = document.createElement("button");
@@ -1672,8 +1673,9 @@
   }
 
   function getLoreContextForDepth(messages, depth, additionalText = "") {
-    const msgs = messages || [];
+    const msgs = Array.isArray(messages) ? messages : [];
     const slice = msgs.slice(-depth).map(m => {
+      if (!m) return "";
       if (m.type === "combined") {
         const compTexts = (m.companionParts && m.companionParts.length > 0)
           ? m.companionParts.map(p => p.text).join(" ")
@@ -1686,11 +1688,12 @@
   }
 
   function scanLorebookRecursive(messagesList, currentTriggerText, isGM, maxLoreBudget = 1200) {
-    if (!state.lorebook || state.lorebook.length === 0) return "";
+    if (!state.lorebook || !Array.isArray(state.lorebook) || state.lorebook.length === 0) return "";
     let activeEntries = [];
     let activatedLoreTextPool = currentTriggerText || "";
 
     state.lorebook.forEach(entry => {
+      if (!entry) return;
       if (!isGM && entry.gmOnly) return;
       if (entry.constant && !activeEntries.some(e => e.id === entry.id)) {
         activeEntries.push(entry);
@@ -1704,6 +1707,7 @@
       added = false;
       depthPass++;
       state.lorebook.forEach(entry => {
+        if (!entry) return;
         if (!isGM && entry.gmOnly) return;
         if (activeEntries.some(e => e.id === entry.id)) return;
         if (!entry.keys || !String(entry.keys).trim()) return;
@@ -1811,7 +1815,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
   }
 
   function buildCleanHistoryWithinBudget(forCharacter, totalBudget = 3200, systemLoreText = "", cutoffIndex = Infinity, skipIndex = -1) {
-    if (cutoffIndex < 0) return [];
+    if (cutoffIndex < 0 || !Array.isArray(state.messages)) return [];
     const staticPromptTokens = estimateTokens((forCharacter.prompt || "") + getUserPersonaPrompt() + getCompanionLiveProgression(forCharacter) + getWorldAmbientPrompt() + (systemLoreText || ""));
     const availableChatBudget = Math.max(400, totalBudget - staticPromptTokens - 120);
     const fullHistory = [];
@@ -1819,7 +1823,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     const candidateMessages = state.messages.slice(0, sliceEnd);
 
     candidateMessages.forEach((m, mi) => {
-      if (mi === skipIndex) return;
+      if (!m || mi === skipIndex) return;
       let role = "user";
       let content = "";
       let textToUse = "";
@@ -1889,7 +1893,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     const isEn = state.lang === "en";
     const merged = [];
     for (const m of messages) {
-      if (!m.content || !String(m.content).trim()) continue;
+      if (!m || !m.content || !String(m.content).trim()) continue;
       const last = merged[merged.length - 1];
       if (last && last.role === m.role) last.content += "\n\n" + m.content;
       else merged.push({ role: m.role, content: m.content });
@@ -2063,7 +2067,8 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
   function updateStatus(txt) { document.getElementById("status-text").innerText = txt; }
 
   function ensureMsgVariants(m) {
-    if (!m.variants || m.variants.length === 0) {
+    if (!m) return;
+    if (!m.variants || !Array.isArray(m.variants) || m.variants.length === 0) {
       if (m.type === "combined") {
         m.variants = [{
           gmText: m.gmText || "",
@@ -2095,7 +2100,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
             const part = activeStreamMsgRef.companionParts.find(p => p.charId === activeStreamSubRole);
             if (part) part.text = trimmed;
             else {
-              const comp = state.characters.find(c => c.id === activeStreamSubRole);
+              const comp = state.characters.find(c => c && c.id === activeStreamSubRole);
               activeStreamMsgRef.companionParts.push({ charId: activeStreamSubRole, charName: comp ? comp.name : (state.lang === "en" ? "Companion" : "Gefährte"), avatar: comp ? comp.avatar : "🎭", text: trimmed });
             }
           }
@@ -2116,7 +2121,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
         saveState();
       } else {
         const msgId = activeStreamMsgRef.id;
-        const idx = state.messages.findIndex(m => m.id === msgId);
+        const idx = state.messages.findIndex(m => m && m.id === msgId);
         if (idx !== -1) {
           const m = state.messages[idx];
           if (m.variants && m.variants.length > 1 && (m.currentVariant === m.variants.length - 1)) {
@@ -2150,7 +2155,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
   }
 
   function cycleVariant(msgId, dir) {
-    const m = state.messages.find(x => x.id === msgId);
+    const m = state.messages.find(x => x && x.id === msgId);
     if (!m || !m.variants || m.variants.length <= 1) return;
     m.currentVariant = (m.currentVariant + dir + m.variants.length) % m.variants.length;
     const v = m.variants[m.currentVariant];
@@ -2175,7 +2180,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
   function deleteSingleMessage(msgId) {
     if (isGenerating) return;
     const sess = getActiveSession();
-    sess.messages = sess.messages.filter(m => m.id !== msgId);
+    sess.messages = sess.messages.filter(m => m && m.id !== msgId);
     state.messages = sess.messages;
     restoreLatestSnapshot();
     saveState();
@@ -2185,7 +2190,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
   function startEditMessage(msgId) {
     if (isGenerating) return;
     const safeId = sanitizeId(msgId, "msg");
-    const m = state.messages.find(x => x.id === safeId);
+    const m = state.messages.find(x => x && x.id === safeId);
     if (!m) return;
     const bodyEl = document.getElementById("body-" + safeId);
     if (!bodyEl) return;
@@ -2233,7 +2238,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
 
   function saveEditedMessage(msgId) {
     const safeId = sanitizeId(msgId, "msg");
-    const msgIdx = state.messages.findIndex(x => x.id === safeId);
+    const msgIdx = state.messages.findIndex(x => x && x.id === safeId);
     if (msgIdx === -1) return;
     const m = state.messages[msgIdx];
 
@@ -2394,7 +2399,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     const isEn = state.lang === "en";
     updateStatus((state.user.name || "User") + (isEn ? " is thinking..." : " denkt nach..."));
     const uName = String(state.user.name || (isEn ? "Player" : "Spieler")).toUpperCase();
-    const lastMsg = state.messages[state.messages.length - 1];
+    const lastMsg = state.messages.length > 0 ? state.messages[state.messages.length - 1] : null;
     const lastSituation = lastMsg ? (lastMsg.text || lastMsg.charText || lastMsg.gmText || "") : (isEn ? "Beginning of adventure." : "Beginn des Abenteuers.");
     
     const uProg = getProgressionFor("user");
@@ -2534,11 +2539,12 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     return { raw: rawResponse, clean: stripThink(rawResponse) };
   }
   // TURN-ORDER ENGINE
-  async function runStreamingTurnOrder(triggerText, appendToExistingMsgId = null, historyCutoffIndex = state.messages.length - 2) {
-    if (state.settings.order.length === 0 && state.characters.length > 0) {
-      state.settings.order = state.characters.filter(c => c.role !== 'editor').map(c => c.id);
+  async function runStreamingTurnOrder(triggerText, appendToExistingMsgId = null, historyCutoffIndex = (Array.isArray(state.messages) ? state.messages.length - 2 : -1)) {
+    if (!Array.isArray(state.settings.order)) state.settings.order = [];
+    if (state.settings.order.length === 0 && Array.isArray(state.characters) && state.characters.length > 0) {
+      state.settings.order = state.characters.filter(c => c && c.role !== 'editor').map(c => c.id);
     }
-    if (state.characters.length === 0) return;
+    if (!Array.isArray(state.characters) || state.characters.length === 0) return;
 
     isAborted = false; activeAbortController = new AbortController(); setGenerating(true);
     partialStreamingText = ""; activeStreamMsgRef = null; activeStreamSubRole = "";
@@ -2547,16 +2553,16 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     const protectedListStr = protectedNames.join(", ");
     const isEn = state.lang === "en";
 
-    const effectiveHistoryForScan = historyCutoffIndex >= 0
+    const effectiveHistoryForScan = (historyCutoffIndex >= 0 && Array.isArray(state.messages))
       ? state.messages.slice(0, historyCutoffIndex + 1)
       : [];
 
     try {
-      const gmChar = state.characters.find(c => c.role === "gm");
-      const editorChar = state.characters.find(c => c.id === state.settings.editorId && c.role === "editor");
-      const userName = state.user.name || (isEn ? "Player" : "Spieler");
-      let companions = state.settings.order.map(id => state.characters.find(c => c.id === id)).filter(c => c && c.role === 'companion');
-      if (companions.length === 0) companions = state.characters.filter(c => c.role === 'companion');
+      const gmChar = state.characters.find(c => c && c.role === "gm");
+      const editorChar = state.characters.find(c => c && c.id === state.settings.editorId && c.role === "editor");
+      const userName = state.user?.name || (isEn ? "Player" : "Spieler");
+      let companions = state.settings.order.map(id => state.characters.find(c => c && c.id === id)).filter(c => c && c.role === 'companion');
+      if (companions.length === 0) companions = state.characters.filter(c => c && c.role === 'companion');
 
       const userProg = getProgressionFor("user");
       const fateDirective = generateFateDirective(state.lang, userProg);
@@ -2594,7 +2600,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
         if (appendToExistingMsgId) {
           const safeAppId = sanitizeId(appendToExistingMsgId, "msg");
-          editorMsgObj = state.messages.find(m => m.id === safeAppId);
+          editorMsgObj = state.messages.find(m => m && m.id === safeAppId);
           ensureMsgVariants(editorMsgObj);
           editorMsgObj.variants.push("");
           editorMsgObj.currentVariant = editorMsgObj.variants.length - 1;
@@ -2635,7 +2641,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         let combinedMsgObj;
         if (appendToExistingMsgId) {
           const safeAppId = sanitizeId(appendToExistingMsgId, "msg");
-          combinedMsgObj = state.messages.find(m => m.id === safeAppId);
+          combinedMsgObj = state.messages.find(m => m && m.id === safeAppId);
           ensureMsgVariants(combinedMsgObj);
           combinedMsgObj.variants.push({ gmText: "", companionParts: [], text: "" });
           combinedMsgObj.currentVariant = combinedMsgObj.variants.length - 1;
@@ -2722,7 +2728,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         let runningCutoff = historyCutoffIndex + 1;
         for (const charId of state.settings.order) {
           if (isAborted) break;
-          const char = state.characters.find(c => c.id === charId);
+          const char = state.characters.find(c => c && c.id === charId);
           if (!char || char.role === 'editor') continue;
           const isGM = char.role === "gm";
           updateStatus(char.name + (isEn ? " generating..." : " generiert..."));
@@ -2730,7 +2736,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           let botMsgObj;
           if (appendToExistingMsgId && charId === state.settings.order[0]) {
             const safeAppId = sanitizeId(appendToExistingMsgId, "msg");
-            botMsgObj = state.messages.find(m => m.id === safeAppId);
+            botMsgObj = state.messages.find(m => m && m.id === safeAppId);
             ensureMsgVariants(botMsgObj);
             botMsgObj.variants.push("");
             botMsgObj.currentVariant = botMsgObj.variants.length - 1;
@@ -2784,7 +2790,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
   // MODUS C EINZEL-TRIGGER
   async function triggerSingleBot(charId, appendToExistingMsgId = null) {
     if (isGenerating) return;
-    const char = state.characters.find(c => c.id === charId);
+    const char = state.characters.find(c => c && c.id === charId);
     if (!char) return;
 
     userScrolledUp = false; scrollBottomBtn.classList.remove("visible");
@@ -2799,7 +2805,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     let botMsgObj;
     if (appendToExistingMsgId) {
       const safeAppId = sanitizeId(appendToExistingMsgId, "msg");
-      botMsgObj = state.messages.find(m => m.id === safeAppId);
+      botMsgObj = state.messages.find(m => m && m.id === safeAppId);
       ensureMsgVariants(botMsgObj);
       botMsgObj.variants.push("");
       botMsgObj.currentVariant = botMsgObj.variants.length - 1;
@@ -2816,7 +2822,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     autoScroll(true);
 
     try {
-      const targetIdx = state.messages.findIndex(m => m.id === botMsgObj.id);
+      const targetIdx = state.messages.findIndex(m => m && m.id === botMsgObj.id);
       const cutoff = targetIdx - 1;
       const historySlice = cutoff > 0 ? state.messages.slice(0, cutoff) : [];
 
@@ -2874,7 +2880,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     if (isGenerating) return;
     if (targetMsgId) {
       const safeTargetId = sanitizeId(targetMsgId, "msg");
-      const msgIdx = state.messages.findIndex(m => m.id === safeTargetId);
+      const msgIdx = state.messages.findIndex(m => m && m.id === safeTargetId);
       if (msgIdx === -1) return;
       const targetMsg = state.messages[msgIdx];
 
@@ -2886,16 +2892,16 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       }
 
       if (targetMsg.type === "bot" || targetMsg.type === "gm") {
-        const char = state.characters.find(c => c.id === targetMsg.senderId || String(c.name) === String(targetMsg.senderName));
+        const char = state.characters.find(c => c && (c.id === targetMsg.senderId || String(c.name) === String(targetMsg.senderName)));
         if (char) { await triggerSingleBot(char.id, targetMsg.id); return; }
       }
       let userIdx = -1;
-      for (let i = msgIdx - 1; i >= 0; i--) { if (state.messages[i].type === "user") { userIdx = i; break; } }
+      for (let i = msgIdx - 1; i >= 0; i--) { if (state.messages[i]?.type === "user") { userIdx = i; break; } }
       const triggerText = userIdx !== -1 ? state.messages[userIdx].text : "";
       await runStreamingTurnOrder(triggerText, targetMsg.id, userIdx - 1);
       return;
     }
-    const lastUserIdx = state.messages.map(m => m.type).lastIndexOf("user");
+    const lastUserIdx = state.messages.map(m => m?.type).lastIndexOf("user");
     if (lastUserIdx === -1) return;
     const triggerText = state.messages[lastUserIdx].text;
     const targetAssistantMsg = state.messages[lastUserIdx + 1];
@@ -2919,14 +2925,14 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     let senderName = t("role_gm");
 
     if (roleType === "gm") {
-      const gm = state.characters.find(c => c.role === "gm");
+      const gm = state.characters.find(c => c && c.role === "gm");
       if (gm) { senderId = gm.id; senderName = gm.name; }
     } else if (roleType === "companion") {
-      const comp = state.characters.find(c => c.role === "companion");
+      const comp = state.characters.find(c => c && c.role === "companion");
       if (comp) { senderId = comp.id; senderName = comp.name; }
       else senderName = t("role_companion");
     } else if (roleType === "editor") {
-      const ed = state.characters.find(c => c.role === "editor");
+      const ed = state.characters.find(c => c && c.role === "editor");
       if (ed) { senderId = ed.id; senderName = ed.name; }
       else senderName = t("role_editor");
     }
@@ -2944,6 +2950,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       currentVariant: 0
     };
     stampSnapshot(firstMsg);
+    if (!Array.isArray(state.messages)) state.messages = [];
     if (state.messages.length === 0) state.messages.unshift(firstMsg);
     else state.messages.push(firstMsg);
     getActiveSession().messages = state.messages;
@@ -2952,10 +2959,11 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     closeModal("first-msg-modal");
   };
 
-  // UI RENDERING
+  // UI RENDERING (SICHER GEGEN BLACKSCREEN)
   function renderChat() {
+    if (!chatContainer) return;
     chatContainer.innerHTML = "";
-    if (state.messages.length === 0) {
+    if (!Array.isArray(state.messages) || state.messages.length === 0) {
       chatContainer.innerHTML = `
         <div class="empty-state">
           <span>📖</span>
@@ -2967,6 +2975,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     }
 
     state.messages.forEach((m) => {
+      if (!m) return;
       ensureMsgVariants(m);
       m.id = sanitizeId(m.id, "msg");
       m.currentVariant = sanitizeInt(m.currentVariant, 0, Math.max(0, (m.variants?.length || 1) - 1), 0);
@@ -2977,20 +2986,21 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
       if (m.type === "user") {
         div.className = "msg user";
-        div.innerHTML = `<div style="font-size:11px; color:var(--gold); margin-bottom:4px; font-weight:700; text-align:right;">${escapeHTML(m.senderName || state.user.name || "You")} ${getMsgAvatar(m, 14)}</div><div id="body-${safeId}">${formatMarkdown(currentText)}</div>`;
+        div.innerHTML = `<div style="font-size:11px; color:var(--gold); margin-bottom:4px; font-weight:700; text-align:right;">${escapeHTML(m.senderName || state.user?.name || "You")} ${getMsgAvatar(m, 14)}</div><div id="body-${safeId}">${formatMarkdown(currentText)}</div>`;
       } else if (m.type === "editor") {
         div.className = "msg editor";
         div.innerHTML = `<div class="msg-header"><span>${getMsgAvatar(m, 17)}</span><span>${escapeHTML(m.editorName || m.senderName || t("role_editor"))}</span><span style="font-size:11px; opacity:0.7; margin-left:auto;">${t("label_editor_synth")}</span></div><div id="body-${safeId}">${formatMarkdown(currentText)}</div>`;
       } else if (m.type === "combined") {
         div.className = "msg combined";
         let curGm = m.gmText;
-        let curComps = m.companionParts || [];
+        let curComps = Array.isArray(m.companionParts) ? m.companionParts : [];
         if (typeof v === 'object') { curGm = v.gmText !== undefined ? v.gmText : curGm; curComps = v.companionParts || curComps; }
 
         let gmHtml = curGm?.trim() ? `<div class="combined-gm-part"><div class="combined-gm-header">📜 ${escapeHTML(m.gmName || t("role_gm"))}</div><div>${formatMarkdown(curGm)}</div></div>` : "";
         let compsHtml = "";
         curComps.forEach(comp => {
-          const charObj = state.characters.find(c => c.id === comp.charId || String(c.name) === String(comp.charName));
+          if (!comp) return;
+          const charObj = state.characters.find(c => c && (c.id === comp.charId || String(c.name) === String(comp.charName)));
           const av = charObj ? charObj.avatar : comp.avatar;
           compsHtml += `<div class="combined-char-part"><div class="msg-header"><span>${formatAvatar(av, 17)}</span><span>${escapeHTML(comp.charName)}</span></div><div>${formatMarkdown(comp.text)}</div></div>`;
         });
@@ -3026,10 +3036,12 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
   function renderQuickTriggers() {
     const bar = document.getElementById("quick-triggers");
-    if (state.characters.length === 0) { bar.classList.remove("visible"); return; }
+    if (!bar) return;
+    if (!Array.isArray(state.characters) || state.characters.length === 0) { bar.classList.remove("visible"); return; }
     bar.classList.add("visible");
     bar.innerHTML = `<span style="font-size:11px; color:var(--dim); display:flex; align-items:center;">${t("trigger_label")}</span>`;
     state.characters.forEach(c => {
+      if (!c) return;
       const btn = document.createElement("button");
       btn.className = "quick-btn";
       btn.innerHTML = `${formatAvatar(c.avatar, 15)} <span>${escapeHTML(c.name)}</span>`;
@@ -3074,12 +3086,14 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
   function renderCharacters() {
     const list = document.getElementById("characters-list");
+    if (!list) return;
     list.innerHTML = "";
-    if (state.characters.length === 0) {
+    if (!Array.isArray(state.characters) || state.characters.length === 0) {
       list.innerHTML = `<div class="empty-state"><span>🎭</span><p>${t("empty_party")}</p></div>`;
       return;
     }
     state.characters.forEach(c => {
+      if (!c) return;
       c.id = sanitizeId(c.id, "char");
       const safeCharId = c.id;
       const card = document.createElement("div");
@@ -3124,6 +3138,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     }
 
     state.lorebook.forEach(entry => {
+      if (!entry) return;
       entry.id = sanitizeId(entry.id, "lore");
       if (!entry.category || !state.loreCategories.includes(entry.category)) entry.category = "Allgemein";
       entry.scanDepth = sanitizeInt(entry.scanDepth, 1, 50, 8);
@@ -3138,7 +3153,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     }
 
     state.loreCategories.forEach(catName => {
-      const entriesInCat = state.lorebook.filter(e => e.category === catName);
+      const entriesInCat = state.lorebook.filter(e => e && e.category === catName);
       const isOpen = openFoldersState.has(catName);
       const encodedCat = encodeURIComponent(catName);
 
@@ -3150,6 +3165,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         entriesHtml = `<div style="text-align:center; padding:10px; font-size:12px; color:var(--dim); font-style:italic;">${t("empty_folder")}</div>`;
       } else {
         entriesInCat.forEach(l => {
+          if (!l) return;
           const safeLoreId = sanitizeId(l.id, "lore");
           const depthVal = sanitizeInt(l.scanDepth, 1, 50, 8);
           const prioVal = sanitizeInt(l.priority, 1, 100, 10);
@@ -3266,7 +3282,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       const cleanNew = newName.trim();
       const idx = state.loreCategories.indexOf(oldName);
       if (idx !== -1) state.loreCategories[idx] = cleanNew;
-      state.lorebook.forEach(entry => { if (entry.category === oldName) entry.category = cleanNew; });
+      state.lorebook.forEach(entry => { if (entry && entry.category === oldName) entry.category = cleanNew; });
       if (openFoldersState.has(oldName)) { openFoldersState.delete(oldName); openFoldersState.add(cleanNew); }
       saveState();
       renderLorebook();
@@ -3277,7 +3293,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     const confirmMsg = state.lang === "en" ? `Delete folder "${catName}"? All contained entries will be moved to "Allgemein".` : `Ordner "${catName}" wirklich entfernen? Alle enthaltenen Einträge werden nach "Allgemein" verschoben.`;
     showConfirmModal(confirmMsg, () => {
       state.loreCategories = state.loreCategories.filter(c => c !== catName);
-      state.lorebook.forEach(entry => { if (entry.category === catName) entry.category = "Allgemein"; });
+      state.lorebook.forEach(entry => { if (entry && entry.category === catName) entry.category = "Allgemein"; });
       openFoldersState.delete(catName);
       saveState();
       renderLorebook();
@@ -3286,6 +3302,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
   function updateLoreFolderDropdown(selectedCategory = "Allgemein") {
     const select = document.getElementById("lore-folder-select");
+    if (!select) return;
     select.innerHTML = "";
     state.loreCategories.forEach(cat => {
       const opt = document.createElement("option");
@@ -3315,7 +3332,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
   function editLore(id) {
     const safeId = sanitizeId(id, "lore");
-    const l = state.lorebook.find(x => x.id === safeId);
+    const l = state.lorebook.find(x => x && x.id === safeId);
     if (!l) return;
     document.getElementById("lore-modal-title").innerText = state.lang === "en" ? "Edit Lorebook Entry" : "Lore-Eintrag bearbeiten";
     document.getElementById("lore-id").value = l.id;
@@ -3344,7 +3361,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       gmOnly: document.getElementById("lore-gmonly").checked,
       content: document.getElementById("lore-content").value.trim()
     };
-    const idx = state.lorebook.findIndex(x => x.id === id);
+    const idx = state.lorebook.findIndex(x => x && x.id === id);
     if (idx >= 0) state.lorebook[idx] = newLore;
     else state.lorebook.push(newLore);
     openFoldersState.add(selectedCat);
@@ -3356,7 +3373,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
   function deleteLore(id) {
     const safeId = sanitizeId(id, "lore");
     showConfirmModal(state.lang === "en" ? "Delete Lorebook entry?" : "Lore-Eintrag löschen?", () => {
-      state.lorebook = state.lorebook.filter(x => x.id !== safeId);
+      state.lorebook = state.lorebook.filter(x => x && x.id !== safeId);
       saveState();
       renderLorebook();
     });
@@ -3364,28 +3381,35 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
   function renderSettings() {
     const editorSelect = document.getElementById("setting-editor");
-    editorSelect.innerHTML = `<option value="">${state.lang === "en" ? "Disabled (Direct Output)" : "Deaktiviert (Direkte Ausgabe)"}</option>`;
-    state.characters.filter(c => c.role === "editor").forEach(c => {
-      const opt = document.createElement("option");
-      opt.value = sanitizeId(c.id, "char"); 
-      opt.textContent = `${c.name || "Nameless"} (${c.model || "Standard"})`;
-      editorSelect.appendChild(opt);
-    });
-    editorSelect.value = state.settings.editorId || "";
+    if (editorSelect) {
+      editorSelect.innerHTML = `<option value="">${state.lang === "en" ? "Disabled (Direct Output)" : "Deaktiviert (Direkte Ausgabe)"}</option>`;
+      state.characters.filter(c => c && c.role === "editor").forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = sanitizeId(c.id, "char"); 
+        opt.textContent = `${c.name || "Nameless"} (${c.model || "Standard"})`;
+        editorSelect.appendChild(opt);
+      });
+      editorSelect.value = state.settings.editorId || "";
+    }
 
-    document.getElementById("setting-combined").checked = state.settings.combined;
-    document.getElementById("setting-budget").value = state.settings.maxTokenBudget || 3200;
-    document.getElementById("budget-val").innerText = (state.settings.maxTokenBudget || 3200) + " Tokens";
-    document.getElementById("setting-strip-keys").checked = !!state.settings.stripKeysOnExport;
+    const combEl = document.getElementById("setting-combined");
+    if (combEl) combEl.checked = !!state.settings.combined;
+    const budgEl = document.getElementById("setting-budget");
+    if (budgEl) budgEl.value = state.settings.maxTokenBudget || 3200;
+    const budgValEl = document.getElementById("budget-val");
+    if (budgValEl) budgValEl.innerText = (state.settings.maxTokenBudget || 3200) + " Tokens";
+    const stripEl = document.getElementById("setting-strip-keys");
+    if (stripEl) stripEl.checked = !!state.settings.stripKeysOnExport;
 
     const orderList = document.getElementById("turn-order-list");
+    if (!orderList) return;
     orderList.innerHTML = "";
     const activeOrderIds = (state.settings.order || []).filter(id => {
-      const c = state.characters.find(x => x.id === id);
+      const c = state.characters.find(x => x && x.id === id);
       return c && c.role !== "editor";
     });
     activeOrderIds.forEach((id, index) => {
-      const char = state.characters.find(c => c.id === id);
+      const char = state.characters.find(c => c && c.id === id);
       if (!char) return;
       const div = document.createElement("div");
       div.className = "order-item";
@@ -3401,17 +3425,20 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
   function renderSessionsUI() {
     const select = document.getElementById("session-select");
+    if (!select) return;
     select.innerHTML = "";
     state.sessions.forEach(sess => {
+      if (!sess) return;
       sess.id = sanitizeId(sess.id, "sess");
       const opt = document.createElement("option");
       opt.value = sess.id; 
-      opt.innerText = sess.title;
+      opt.innerText = sess.title || "Adventure";
       if (sess.id === state.activeSessionId) opt.selected = true;
       select.appendChild(opt);
     });
     const active = getActiveSession();
-    document.getElementById("active-session-title").innerText = active.title;
+    const titleEl = document.getElementById("active-session-title");
+    if (titleEl) titleEl.innerText = active.title || "Adventure";
   }
 
   document.getElementById("session-select").onchange = (e) => {
@@ -3485,7 +3512,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       return;
     }
     showConfirmModal(state.lang === "en" ? "Delete adventure?" : "Abenteuer wirklich löschen?", () => {
-      state.sessions = state.sessions.filter(s => s.id !== state.activeSessionId);
+      state.sessions = state.sessions.filter(s => s && s.id !== state.activeSessionId);
       state.activeSessionId = state.sessions[0].id;
       syncActiveMessages();
       saveState();
@@ -3575,7 +3602,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
   function editChar(id) {
     if (isGenerating) return;
     const safeId = sanitizeId(id, "char");
-    const c = state.characters.find(x => x.id === safeId);
+    const c = state.characters.find(x => x && x.id === safeId);
     if (!c) return;
     document.getElementById("char-modal-title").innerText = state.lang === "en" ? "Edit Character" : "Charakter bearbeiten";
     document.getElementById("char-id").value = c.id;
@@ -3623,7 +3650,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       prompt: String(document.getElementById("char-prompt").value || "").trim()
     };
 
-    const idx = state.characters.findIndex(x => x.id === id);
+    const idx = state.characters.findIndex(x => x && x.id === id);
     if (idx >= 0) state.characters[idx] = newChar;
     else state.characters.push(newChar);
 
@@ -3641,7 +3668,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     if (isGenerating) return;
     const safeId = sanitizeId(id, "char");
     showConfirmModal(state.lang === "en" ? "Really delete character?" : "Charakter wirklich löschen?", () => {
-      state.characters = state.characters.filter(x => x.id !== safeId);
+      state.characters = state.characters.filter(x => x && x.id !== safeId);
       state.settings.order = state.settings.order.filter(oId => oId !== safeId);
       if (state.settings.editorId === safeId) state.settings.editorId = "";
       saveState();
@@ -3671,12 +3698,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         const buf = await new Response(dsRaw.readable).arrayBuffer();
         return new TextDecoder("utf-8").decode(buf);
       } catch (e2) {
-        const dsRawDirect = new DecompressionStream("deflate-raw");
-        const writerRawDirect = dsRawDirect.writable.getWriter();
-        writerRawDirect.write(rawBytes.slice(0));
-        writerRawDirect.close();
-        const buf = await new Response(dsRawDirect.readable).arrayBuffer();
-        return new TextDecoder("utf-8").decode(buf);
+        return "";
       }
     }
   }
@@ -3813,7 +3835,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
   };
   document.getElementById("setting-combined").onchange = (e) => { state.settings.combined = e.target.checked; saveState(); };
   document.getElementById("setting-budget").oninput = (e) => {
-    state.settings.maxTokenBudget = parseInt(e.target.value);
+    state.settings.maxTokenBudget = parseInt(e.target.value, 10);
     document.getElementById("budget-val").innerText = state.settings.maxTokenBudget + " Tokens";
     saveState();
   };
@@ -3821,7 +3843,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
   document.getElementById("clear-chat-btn").onclick = () => {
     if (isGenerating) abortCurrentGeneration();
-    if (state.messages.length === 0) return;
+    if (!Array.isArray(state.messages) || state.messages.length === 0) return;
     showConfirmModal(state.lang === "en" ? "Clear entire history for this adventure?" : "Gesamten Verlauf dieses Abenteuers leeren?", () => {
       state.messages = []; getActiveSession().messages = []; saveState(); renderChat();
     });
@@ -3852,7 +3874,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
     if (strip) {
       if (backup.user) backup.user.apiKey = "";
-      if (Array.isArray(backup.characters)) backup.characters.forEach(c => { c.apiKey = ""; });
+      if (Array.isArray(backup.characters)) backup.characters.forEach(c => { if (c) c.apiKey = ""; });
     }
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -3865,6 +3887,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
+  // ROBUSTER JSON-IMPORT (AKZEPTIERT JEDE GÜLTIGE MULTI-RP / BACKUP DATEI)
   const importFileInput = document.getElementById("import-file");
   document.getElementById("import-btn").onclick = () => importFileInput.click();
   importFileInput.onchange = (e) => {
@@ -3879,14 +3902,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           throw new Error(state.lang === "en" ? "File is not a valid JSON object." : "Datei ist kein gültiges JSON-Objekt.");
         }
 
-        const isOfficial = imported._app === "multi-rp-studio";
-        const hasLegacyData = Array.isArray(imported.characters) || Array.isArray(imported.sessions);
-        if (!isOfficial && !hasLegacyData) {
-          throw new Error(state.lang === "en" 
-            ? "Unrecognized file. This does not appear to be a Multi-RP Studio backup." 
-            : "Nicht erkannt: Diese Datei ist kein Multi-RP Studio Backup.");
-        }
-
+        // Fehlertolerante Strukturprüfung
         const candidateState = {
           ...BLANK_STATE,
           ...imported,
@@ -3908,20 +3924,20 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
         candidateState.characters = candidateState.characters.map(c => ({
           ...c,
-          id: sanitizeId(c.id, "char"),
-          name: String(c.name || (candidateState.lang === "en" ? "Nameless" : "Ohne Namen")),
-          model: String(c.model || ""),
-          role: ["gm", "companion", "editor"].includes(c.role) ? c.role : "companion"
+          id: sanitizeId(c?.id, "char"),
+          name: String(c?.name || (candidateState.lang === "en" ? "Nameless" : "Ohne Namen")),
+          model: String(c?.model || ""),
+          role: ["gm", "companion", "editor"].includes(c?.role) ? c.role : "companion"
         }));
 
         candidateState.lorebook = candidateState.lorebook.map(l => ({
           ...l,
-          id: sanitizeId(l.id, "lore"),
-          title: String(l.title || "Untitled"),
-          priority: sanitizeInt(l.priority, 1, 100, 10),
-          scanDepth: sanitizeInt(l.scanDepth, 1, 50, 8),
-          keys: String(l.keys || ""),
-          content: String(l.content || "")
+          id: sanitizeId(l?.id, "lore"),
+          title: String(l?.title || "Untitled"),
+          priority: sanitizeInt(l?.priority, 1, 100, 10),
+          scanDepth: sanitizeInt(l?.scanDepth, 1, 50, 8),
+          keys: String(l?.keys || ""),
+          content: String(l?.content || "")
         }));
 
         if (!candidateState.sessions.length) {
@@ -3936,10 +3952,10 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           }];
         } else {
           candidateState.sessions.forEach(sess => {
+            if (!sess) return;
             sess.id = sanitizeId(sess.id, "sess");
             sess.title = String(sess.title || "Adventure");
             sess.world = { ...DEFAULT_WORLD, ...(sess.world || {}) };
-            
             sess.userProgression = sanitizeProgression(sess.userProgression);
             if (sess.companionProgression && typeof sess.companionProgression === "object") {
               for (const cId in sess.companionProgression) {
@@ -3951,15 +3967,15 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
             sess.messages = Array.isArray(sess.messages) ? sess.messages.map(m => ({
               ...m,
-              id: sanitizeId(m.id, "msg"),
-              currentVariant: sanitizeInt(m.currentVariant, 0, Math.max(0, (m.variants?.length || 1) - 1), 0),
-              variants: Array.isArray(m.variants) ? m.variants : [m.text || ""]
+              id: sanitizeId(m?.id, "msg"),
+              currentVariant: sanitizeInt(m?.currentVariant, 0, Math.max(0, (m?.variants?.length || 1) - 1), 0),
+              variants: Array.isArray(m?.variants) ? m.variants : [m?.text || ""]
             })) : [];
           });
         }
 
         candidateState.activeSessionId = sanitizeId(candidateState.activeSessionId, "sess");
-        if (!candidateState.sessions.some(s => s.id === candidateState.activeSessionId)) {
+        if (!candidateState.sessions.some(s => s && s.id === candidateState.activeSessionId)) {
           candidateState.activeSessionId = candidateState.sessions[0].id;
         }
 
@@ -3967,7 +3983,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         const sessCount = candidateState.sessions.length;
         const confirmText = state.lang === "en"
           ? `Load backup containing ${charCount} character(s) and ${sessCount} adventure(s)?\n\nWARNING: All current data will be overwritten.`
-          : `Backup mit ${charCount} Charakter(en) und ${sessCount} Abenteuer(n) laden?\n\nHINWEIS: Alle aktuellen Daten werden vollständig überschrieben.`;
+          : `Backup mit ${charCount} Charakter(en) und ${sessCount} Abenteuer(n) laden?\n\nHINWEIS: Alle aktuellen Daten werden überschrieben.`;
 
         showConfirmModal(confirmText, async () => {
           await idbSet("state", candidateState);
@@ -4001,6 +4017,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 
+  // GEHÄRTETE INITIALISIERUNG
   async function initApp() {
     let loadedState = null;
     try {
@@ -4016,7 +4033,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       );
     }
 
-    if (loadedState) {
+    if (loadedState && typeof loadedState === "object") {
       state = {
         ...BLANK_STATE,
         ...loadedState,
@@ -4030,11 +4047,13 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       };
 
       state.characters.forEach(c => {
+        if (!c) return;
         c.id = sanitizeId(c.id, "char");
         c.name = String(c.name || (state.lang === "en" ? "Nameless" : "Ohne Namen"));
       });
 
       state.lorebook.forEach(l => {
+        if (!l) return;
         l.id = sanitizeId(l.id, "lore");
         l.priority = sanitizeInt(l.priority, 1, 100, 10);
         l.scanDepth = sanitizeInt(l.scanDepth, 1, 50, 8);
@@ -4056,6 +4075,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         state.activeSessionId = state.sessions[0].id;
       } else {
         state.sessions.forEach(sess => {
+          if (!sess) return;
           sess.id = sanitizeId(sess.id, "sess");
           sess.userProgression = sanitizeProgression(sess.userProgression || loadedState.user?.progression);
           if (sess.companionProgression && typeof sess.companionProgression === "object") {
@@ -4067,13 +4087,18 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           }
           if (Array.isArray(sess.messages)) {
             sess.messages.forEach(m => { 
+              if (!m) return;
               m.id = sanitizeId(m.id, "msg"); 
               m.currentVariant = sanitizeInt(m.currentVariant, 0, Math.max(0, (m.variants?.length || 1) - 1), 0);
             });
+          } else {
+            sess.messages = [];
           }
         });
       }
     }
+
+    if (!Array.isArray(state.messages)) state.messages = [];
 
     syncActiveMessages();
     if (!dbReadFailed) {
