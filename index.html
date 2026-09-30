@@ -777,7 +777,7 @@
             cachedDbPromise = null;
             reject(new Error("IndexedDB Open Timeout"));
           }
-        }, 1200);
+        }, 10000); // FIX 1a: 1,2 s war auf langsamen Handys zu kurz (Kaltstart); die UI wird ohnehin sofort gezeichnet
 
         try {
           const req = indexedDB.open(DB_NAME, 1);
@@ -1067,8 +1067,13 @@
         userProgression: active.userProgression
       };
       localStorage.setItem(CRASH_BUFFER_KEY, JSON.stringify(payload));
-      localStorage.setItem(LOCAL_STORAGE_BACKUP, JSON.stringify(state));
     } catch (e) {}
+    // FIX 2: Passt der Gesamtstand nicht mehr (~5 MB), die ALTE Kopie entfernen statt sie still veralten zu lassen
+    try {
+      localStorage.setItem(LOCAL_STORAGE_BACKUP, JSON.stringify(state));
+    } catch (e) {
+      try { localStorage.removeItem(LOCAL_STORAGE_BACKUP); } catch (e2) {}
+    }
   }
 
   async function saveState() {
@@ -1346,7 +1351,7 @@
   function getTimeIcon(timeStr) {
     const tVal = String(timeStr || "").toLowerCase();
     if (tVal.includes("morgen") || tVal.includes("dawn") || tVal.includes("morning")) return "🌅";
-    if (tVal.includes("mittag") || tVal.includes("noon")) return "☀️️";
+    if (tVal.includes("mittag") || tVal.includes("noon")) return "☀️";
     if (tVal.includes("nachmittag") || tVal.includes("afternoon")) return "🌤️";
     if (tVal.includes("dämmerung") || tVal.includes("dusk") || tVal.includes("twilight")) return "🌇";
     if (tVal.includes("nacht") || tVal.includes("night")) return "🌙";
@@ -1568,12 +1573,13 @@
         else if (key === "STUFE" || key === "RANG" || key === "LEVEL" || key === "+LEVEL" || key === "+STUFE") key = "LEVEL";
 
         // LEVEL-ABFANGJÄGER: Level-Up nicht als Status abspeichern
-        const levelMatch = rawVal.match(/(?:level|stufe)\s*(\d+)/i);
+        // FIX 5: nur wenn der Wert MIT Level/Stufe beginnt ("Level 4", "Stufe 4") – "Vergiftet (Stufe 2)" bleibt ein Status
+        const levelMatch = rawVal.replace(/^["'\s]+/, "").match(/^(?:level|stufe|lvl)\s*(\d+)/i);
         if (levelMatch && (key === "+STATUS" || key === "LEVEL")) {
           const newLvl = levelMatch[1];
           targetProg.level = String(newLvl);
           notices.push(`⭐ ${targetName}: ${state.lang === "en" ? "Level" : "Stufe"} ${newLvl}!`);
-          if (/^(?:level|stufe)\s*\d+$/i.test(getBaseItemName(rawVal))) continue;
+          continue;
         }
 
         if (key === "+ITEM") {
@@ -2014,8 +2020,8 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
           role = "user"; content = textToUse;
         }
       } else if (m.type === "gm") {
-        role = (forCharacter.role === "gm") ? "assistant" : "user";
-        content = (role === "assistant") ? textToUse : `[World & NPCs]: ${textToUse}`;
+        role = (forCharacter.role === "gm" || forCharacter.role === "editor") ? "assistant" : "user";
+        content = (role === "assistant") ? textToUse : `[${state.lang === "en" ? "Previous Events" : "Bisheriges Geschehen"}]: ${textToUse}`;
       } else {
         const isSender = (forCharacter.id && m.senderId && forCharacter.id === m.senderId) || (String(forCharacter.name) === String(m.senderName));
         role = isSender ? "assistant" : "user";
@@ -2069,29 +2075,46 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     const parsedTemp = parseFloat(character.temp);
     const parsedTopP = parseFloat(character.topP);
 
+    const isArli = /api\.arliai\.com/i.test(targetUrl);
     const payload = {
       model: cleanModel,
       messages: [systemMessage, ...sanitizedMessages],
       temperature: isNaN(parsedTemp) ? 0.7 : parsedTemp,
       top_p: isNaN(parsedTopP) ? 0.9 : parsedTopP,
       max_tokens: customMaxTokens,
+      max_completion_tokens: customMaxTokens,
       stream: true
     };
 
     const isStrictOpenAI = /api\.openai\.com|api\.groq\.com|api\.deepseek\.com|api\.mistral\.ai/i.test(targetUrl);
     if (!isStrictOpenAI && character.repPenalty) payload.repetition_penalty = parseFloat(character.repPenalty) || 1.1;
-    payload.stop = getSafeStopTokens(targetUrl);
+    payload.stop = isArli ? ["[END_OF_TURN]"] : getSafeStopTokens(targetUrl);
+    if (isArli) payload.reasoning_effort = "low"; // DeepSeek/MiMo sind Reasoning-Modelle: weniger Denk-Tokens = schneller
 
     const headers = { "Content-Type": "application/json" };
     if (cleanKey) headers["Authorization"] = `Bearer ${cleanKey}`;
+    if (!cleanKey && isArli) throw new Error(`Kein API-Key für "${character.name || 'Spieler'}" (ArliAI braucht einen Key in JEDER Rolle).`);
+
+    // Watchdog: niemals endlos warten
+    const FIRST_BYTE_MS = 120000, IDLE_MS = 60000;
+    const reqCtrl = new AbortController();
+    const outerSignal = activeAbortController ? activeAbortController.signal : null;
+    const onOuterAbort = () => reqCtrl.abort();
+    if (outerSignal) { if (outerSignal.aborted) reqCtrl.abort(); else outerSignal.addEventListener("abort", onOuterAbort, { once: true }); }
+    let timeoutReason = "", watchdog = null, activeReader = null;
+    const arm = (ms, why) => { clearTimeout(watchdog); watchdog = setTimeout(() => { timeoutReason = why; reqCtrl.abort(); try { if (activeReader) activeReader.cancel(); } catch (e) {} }, ms); };
+    const disarm = () => { clearTimeout(watchdog); if (outerSignal) outerSignal.removeEventListener("abort", onOuterAbort); };
+    arm(FIRST_BYTE_MS, `Timeout: ${cleanModel} hat nach ${FIRST_BYTE_MS / 1000}s nicht geantwortet (${character.name || ''}). Modell-ID, Key, Parallel-Limit/Kontingent prüfen.`);
 
     let res;
     try {
       res = await fetch(targetUrl, {
         method: "POST", headers, body: JSON.stringify(payload),
-        signal: activeAbortController ? activeAbortController.signal : undefined
+        signal: reqCtrl.signal
       });
     } catch (fetchErr) {
+      disarm();
+      if (timeoutReason) throw new Error(timeoutReason);
       if (fetchErr.name === "AbortError") throw fetchErr;
       let note = "";
       if (window.location.protocol === "https:" && targetUrl.startsWith("http://")) note = "\n\n⚠️ Mixed-Content: Browser blocks HTTP from HTTPS.";
@@ -2099,9 +2122,12 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
       throw new Error(`Network Error: ${fetchErr.message}${note}`);
     }
 
-    if (!res.ok) { const err = await res.text(); throw new Error(`API Error (${res.status}): ${err}`); }
+    if (!res.ok) { disarm(); const err = await res.text(); throw new Error(`API Error (${res.status}): ${err}`); }
 
     const reader = res.body.getReader();
+    activeReader = reader;
+    arm(IDLE_MS, `Timeout: Stream von ${cleanModel} seit ${IDLE_MS / 1000}s ohne Daten (${character.name || ''}).`);
+    let streamError = "";
     const decoder = new TextDecoder("utf-8");
     let fullText = "";
     let buffer = "";
@@ -2113,8 +2139,13 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
         try { await reader.cancel(); } catch(e){}
         break;
       }
-      const { done, value } = await reader.read();
+      let chunk;
+      try { chunk = await reader.read(); }
+      catch (readErr) { disarm(); if (timeoutReason) throw new Error(timeoutReason); throw readErr; }
+      const { done, value } = chunk;
       if (done) break;
+      arm(IDLE_MS, `Timeout: Stream von ${cleanModel} seit ${IDLE_MS / 1000}s ohne Daten (${character.name || ''}).`);
+      if (!onChunk) updateStatus(`${character.name || cleanModel}: ${fullText.length} Zeichen empfangen…`);
 
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split("\n");
@@ -2127,8 +2158,9 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
             const jsonStr = trimmed.slice(5).trim();
             if (jsonStr) {
               const json = JSON.parse(jsonStr);
+              if (json.error) { streamError = json.error.message || JSON.stringify(json.error); abortStream = true; break; }
               const deltaContent = json.choices?.[0]?.delta?.content || "";
-              const deltaReasoning = json.choices?.[0]?.delta?.reasoning_content || "";
+              const deltaReasoning = json.choices?.[0]?.delta?.reasoning_content || json.choices?.[0]?.delta?.reasoning || "";
 
               if (deltaReasoning) {
                 if (!isThinking) { fullText += "<think>\n"; isThinking = true; }
@@ -2185,7 +2217,11 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
         }
       }
     }
+    disarm();
+    if (timeoutReason) throw new Error(timeoutReason);
+    if (streamError) throw new Error(`API Stream Error: ${streamError}`);
     if (isThinking) { fullText += "\n</think>\n"; isThinking = false; }
+    if (!isAborted && !stripThink(fullText)) console.warn(`[${cleanModel}] leere Antwort – evtl. alle Tokens fürs Reasoning verbraucht`);
     return fullText.trim();
   }
 
@@ -2649,7 +2685,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
    - TRIVIAL: 100% success. Never force comical stumbles!
    - IMPOSSIBLE: 100% failure against uncompromising physical resistance.
    - DARING / COMBAT: Momentum >> ${fateDirective} <<
-3. Describe environment, sensory details, and NPC resistance in 2–3 dense sentences.
+3. Start with the immediate consequence of the action. Describe surroundings only if new (max 2–3 sentences). Never repeat earlier events.
 4. STRICT PROHIBITION: NEVER control actions or words of: ${protectedListStr}!${gmProgressionGuide}`
       : `[SPIELER-AKTION VON ${safeUser}]:\n"${triggerText}"\n\n[REGIE & LOGISCHE WIRKUNG]:
 1. Die Eingabe des Spielers ist EIN VERSUCH, niemals vollendetes Faktum!
@@ -2657,7 +2693,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
    - TRIVIAL: Gelingt zu 100%. Niemals alberne Stolperer erzwingen!
    - UNMÖGLICH: Scheitert zu 100% mit kompromisslosem Widerstand.
    - GEWAGT / KAMPF: Nutze Momentum >> ${fateDirective} <<
-3. Beschreibe in 2–3 dichten Sätzen Kulisse, Sinne und NPC-Gegenwehr.
+3. Beginne mit der unmittelbaren Folge der Aktion. Kulisse nur, wenn sie neu ist (höchstens 2–3 Sätze). Wiederhole nichts aus dem bisherigen Verlauf.
 4. STRIKTES VERBOT: Steuere NIEMALS Handlungen oder Worte von: ${protectedListStr}!${gmProgressionGuide}`;
   }
 
@@ -2685,9 +2721,10 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
     if (systemTask) systemInstruction += "\n\n" + systemTask;
 
+    const turnMarker = isEn ? "=== CURRENT TURN – continue from here, do not repeat anything above ===\n" : "=== AKTUELLER ZUG – setze hier an, nichts von oben wiederholen ===\n";
     const promptTunnel = [
       ...history,
-      { role: "user", content: userPromptContent }
+      { role: "user", content: (history.length ? turnMarker : "") + userPromptContent }
     ];
 
     partialStreamingText = "";
@@ -2700,6 +2737,13 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
     return { raw: rawResponse, clean: stripThink(rawResponse) };
   }
+  // PATCH: NPC-Stimme überspringen, wenn die Spielleitung [STIMMEN: keine] (oder [STIMMEN: —]) signalisiert
+  function shouldSkipCompanion(comp, gmText) {
+    const isNpcVoice = /stimmen der welt/i.test(String(comp?.name || "")) || /^Du bist DIE STIMMEN DER WELT/.test(String(comp?.prompt || ""));
+    if (!isNpcVoice) return false;
+    return /\[\s*STIMMEN\s*:\s*(keine|niemand|—|–|-)\s*\]/i.test(String(gmText || ""));
+  }
+
   // BLOCK E: TURN-ORDER ENGINE & MODAL-TRIGGER
   async function runStreamingTurnOrder(triggerText, appendToExistingMsgId = null, historyCutoffIndex = (Array.isArray(state.messages) ? state.messages.length - 2 : -1)) {
     if (!Array.isArray(state.settings.order)) state.settings.order = [];
@@ -2746,6 +2790,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         const accumulatedCompanions = [];
         for (const comp of companions) {
           if (isAborted) return;
+          if (shouldSkipCompanion(comp, gmTurn.raw)) continue; // PATCH: kein API-Aufruf, kein Block für den Lektor
           updateStatus(comp.name + (isEn ? " reacts..." : " reagiert..."));
           const compProg = getProgressionFor(comp.id);
           const compInventoryGuide = getInventoryPromptDirective(comp.name, compProg);
@@ -2785,13 +2830,14 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         autoScroll(true);
 
         const allCompanionsFormatted = accumulatedCompanions.map(c => `[${isEn ? "ACTION & DIALOGUE OF" : "HANDLUNG & DIALOG VON"} ${String(c.name).toUpperCase()}]:\n${c.text}`).join("\n\n");
-        const editorPrompt = isEn ? `Synthesize the drafts into a dense, immersive novel chapter:\n[PLAYER ACTION BY ${String(userName).toUpperCase()}]:\n"${triggerText}"\n\n[WORLD & NPCS]:\n${gmTurn.clean || "No events."}\n\n${allCompanionsFormatted}\n\nEDITORIAL RULES:\n1. ZERO HALLUCINATION: Do not invent unrelated events!\n2. PRESERVE DIALOGUE: All spoken words from NPCs and companions must remain.\n3. FLOWING PROSE: Weave everything into seamless literary storytelling.`
-          : `Führe die folgenden Entwürfe zu einem dichten, packenden Romankapitel zusammen:\n[SPIELER-AKTION VON ${String(userName).toUpperCase()}]:\n"${triggerText}"\n\n[WELT & NPCS]:\n${gmTurn.clean || "Keine Ereignisse."}\n\n${allCompanionsFormatted}\n\nLEKTORATS-REGELN:\n1. ZERO-HALLUCINATION: Erfinde keine neuen Handlungen oder Ereignisse dazu!\n2. DIALOG-TREUE: Alle gesprochenen Worte von NPCs und Gefährten müssen erhalten bleiben.\n3. FLIESSENDE PROSA: Verwebe alles zu nahtloser Romanliteratur.`;
+        const editorPrompt = isEn ? `Merge ONLY the following drafts of THIS turn into a short prose passage (no title, do not retell earlier events):\n[PLAYER ACTION BY ${String(userName).toUpperCase()}]:\n"${triggerText}"\n\n[WORLD & NPCS]:\n${gmTurn.clean || "No events."}\n\n${allCompanionsFormatted}\n\nEDITORIAL RULES:\n1. ZERO HALLUCINATION: Do not invent unrelated events!\n2. PRESERVE DIALOGUE: All spoken words from NPCs and companions must remain.\n3. CONTINUATION: Begin directly with the consequence of the player action. No heading, no recap, not longer than the drafts.`
+          : `Setze NUR die folgenden Entwürfe DIESES Zuges zu einem kurzen Erzählabschnitt zusammen (kein Titel, nichts Früheres nacherzählen):\n[SPIELER-AKTION VON ${String(userName).toUpperCase()}]:\n"${triggerText}"\n\n[WELT & NPCS]:\n${gmTurn.clean || "Keine Ereignisse."}\n\n${allCompanionsFormatted}\n\nLEKTORATS-REGELN:\n1. ZERO-HALLUCINATION: Erfinde keine neuen Handlungen oder Ereignisse dazu!\n2. DIALOG-TREUE: Alle gesprochenen Worte von NPCs und Gefährten müssen erhalten bleiben.\n3. FORTSETZUNG: Beginne direkt mit der Folge der Spieler-Aktion. Kein Titel, keine Nacherzählung, nicht länger als die Entwürfe.`;
 
         const editorTurn = await executeActorTurn({
           actor: editorChar, effectiveHistory: effectiveHistoryForScan, userPromptContent: editorPrompt,
-          onChunk: (chunkText) => renderThrottled(contentEl, chunkText), customMaxTokens: 2400
+          onChunk: (chunkText) => renderThrottled(contentEl, chunkText), customMaxTokens: 1600
         });
+        if (editorTurn.raw) editorTurn.raw = editorTurn.raw.replace(/^(\s*(?:<think>[\s\S]*?<\/think>)?\s*)#{1,6}[^\n]*\n+/, "$1");
 
         flushThrottled(contentEl, editorTurn.raw);
         if (contentEl) contentEl.classList.remove("cursor");
@@ -2850,6 +2896,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         const finishedCompanions = [];
         for (const comp of companions) {
           if (isAborted) return;
+          if (shouldSkipCompanion(comp, gmTurn.raw)) continue; // PATCH
           activeStreamSubRole = comp.id;
 
           const compPartDiv = document.createElement("div");
@@ -4201,6 +4248,15 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
             imported = imported.state;
           }
 
+          // FIX 3: Nur echte Multi-RP-Backups annehmen (sonst löscht z. B. eine beliebige JSON-Datei alles)
+          const isOfficial = imported._app === "multi-rp-studio";
+          const hasLegacyData = Array.isArray(imported.characters) || Array.isArray(imported.sessions);
+          if (!isOfficial && !hasLegacyData) {
+            throw new Error(state.lang === "en"
+              ? "Unrecognized file. This does not appear to be a Multi-RP Studio backup."
+              : "Nicht erkannt: Diese Datei ist kein Multi-RP Studio Backup.");
+          }
+
           const candidateState = {
             ...BLANK_STATE,
             ...imported,
@@ -4284,7 +4340,14 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
             : `Backup mit ${charCount} Charakter(en) und ${sessCount} Abenteuer(n) laden?\n\nHINWEIS: Aktuelle Daten werden überschrieben.`;
 
           showConfirmModal(confirmText, async () => {
+            if (isGenerating) abortCurrentGeneration(); // FIX 4: kein laufender Zug schreibt ins neue Backup
             state = candidateState;
+            document.querySelectorAll(".lang-btn").forEach(btn => {
+              const isAct = btn.dataset.lang === (state.lang || "de");
+              btn.classList.toggle("btn-primary", isAct);
+              btn.classList.toggle("btn-secondary", !isAct);
+            });
+            applyTranslations();
             syncActiveMessages();
             renderSessionsUI();
             renderAmbientBar();
@@ -4359,10 +4422,18 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       loadedState = await idbGet("state");
     } catch (err) {
       console.warn("IndexedDB nicht lesbar, prüfe LocalStorage:", err);
+      // FIX 1b: Datenbank nicht lesbar -> Speichern sperren, sonst überschreibt ein leerer/alter Stand die echten Daten
+      dbReadFailed = true;
       try {
         const lsRaw = localStorage.getItem(LOCAL_STORAGE_BACKUP);
         if (lsRaw) loadedState = JSON.parse(lsRaw);
       } catch (e) {}
+      showConfirmModal(
+        state.lang === "en"
+          ? "Database could not be read. " + (loadedState ? "An emergency copy was loaded. " : "") + "Saving is paused to prevent data loss. Export a backup if needed and reload the page."
+          : "Die Datenbank konnte nicht gelesen werden. " + (loadedState ? "Eine Notfallkopie wurde geladen. " : "") + "Speichern ist pausiert, damit nichts verloren geht. Bei Bedarf Backup exportieren und die Seite neu laden.",
+        () => {}
+      );
     }
 
     if (!loadedState) {
@@ -4440,8 +4511,10 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     if (!Array.isArray(state.messages)) state.messages = [];
 
     syncActiveMessages();
-    await checkCrashRecovery();
-    await saveState();
+    if (!dbReadFailed) {
+      await checkCrashRecovery();
+      await saveState();
+    }
 
     const activeLang = state.lang || "de";
     document.querySelectorAll(".lang-btn").forEach(btn => {
