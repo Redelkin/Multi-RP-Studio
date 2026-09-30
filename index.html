@@ -1306,16 +1306,16 @@
   function stripThink(text) {
     if (!text) return "";
     return String(text).replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<think>[\s\S]*$/gi, '')
-      .replace(/\[(?:LIVE_)?(?:MUTATION\vert{}STATE_UPDATE\vert{}INV_UPDATE\vert{}WORLD_UPDATE\vert{}WELT_UPDATE\vert{}WORLD):[\s\S]*?(\]|$)/gi, '')
-      .replace(/\[\s*[+-](?:ITEM\vert{}GEGENSTAND\vert{}WOUND\vert{}WUNDE\vert{}VERLETZUNG\vert{}STATUS\vert{}ZUSTAND\vert{}EFFEKT\vert{}SKILL\vert{}TALENT\vert{}FÄHIGKEIT\vert{}FAEHIGKEIT\vert{}LEVEL\vert{}STUFE)[^\]]*(\]|$)/gi, '')
+      .replace(/\[(?:LIVE_)?(?:MUTATION|STATE_UPDATE|INV_UPDATE|WORLD_UPDATE|WELT_UPDATE|WORLD):[\s\S]*?(\]|$)/gi, '')
+      .replace(/\[\s*[+-](?:ITEM|GEGENSTAND|WOUND|WUNDE|VERLETZUNG|STATUS|ZUSTAND|EFFEKT|SKILL|TALENT|FÄHIGKEIT|FAEHIGKEIT|LEVEL|STUFE)[^\]]*(\]|$)/gi, '')
       .trim();
   }
 
   function formatMarkdown(raw) {
     if (!raw) return "";
     let cleaned = String(raw)
-      .replace(/\[(?:LIVE_)?(?:MUTATION\vert{}STATE_UPDATE\vert{}INV_UPDATE\vert{}WORLD_UPDATE\vert{}WELT_UPDATE\vert{}WORLD):[\s\S]*?(\]|$)/gi, '')
-      .replace(/\[\s*[+-](?:ITEM\vert{}GEGENSTAND\vert{}WOUND\vert{}WUNDE\vert{}VERLETZUNG\vert{}STATUS\vert{}ZUSTAND\vert{}EFFEKT\vert{}SKILL\vert{}TALENT\vert{}FÄHIGKEIT\vert{}FAEHIGKEIT\vert{}LEVEL\vert{}STUFE)[^\]]*(\]|$)/gi, '');
+      .replace(/\[(?:LIVE_)?(?:MUTATION|STATE_UPDATE|INV_UPDATE|WORLD_UPDATE|WELT_UPDATE|WORLD):[\s\S]*?(\]|$)/gi, '')
+      .replace(/\[\s*[+-](?:ITEM|GEGENSTAND|WOUND|WUNDE|VERLETZUNG|STATUS|ZUSTAND|EFFEKT|SKILL|TALENT|FÄHIGKEIT|FAEHIGKEIT|LEVEL|STUFE)[^\]]*(\]|$)/gi, '');
 
     const thinkBlocks = [];
     let s = cleaned.replace(/<think>([\s\S]*?)(?:<\/think>|$)/gi, (match, content) => {
@@ -1409,7 +1409,7 @@
 
   function processWorldUpdates(rawText) {
     if (!rawText) return rawText;
-    const updateRegex = /\[(?:WORLD_UPDATE\vert{}WELT_UPDATE\vert{}WORLD):\s*([^\]]+)\]/gi;
+    const updateRegex = /\[(?:WORLD_UPDATE|WELT_UPDATE|WORLD):\s*([^\]]+)\]/gi;
     let match;
     let notices = [];
     const w = state.world || { ...DEFAULT_WORLD };
@@ -1474,7 +1474,81 @@
 
   function getBaseItemName(str) {
     if (!str) return "";
-    return cleanItemName(String(str).replace(/\s*[\(\[].*?[\)\]]/g, '')).trim().toLowerCase();   }    function findBestMatchingItemIndex(list, query, contextText = "") {     if (!list \vert{}\vert{} list.length === 0 \vert{}\vert{} !query) return -1;     const qClean = cleanItemName(query).toLowerCase();     const qBase = getBaseItemName(query);      let exactIdx = list.findIndex(item => String(item).toLowerCase() === qClean);     if (exactIdx !== -1) return exactIdx;      exactIdx = list.findIndex(item => getBaseItemName(item) === qBase && qBase.length > 2);     if (exactIdx !== -1) return exactIdx;      const qWords = qBase.split(/\s+/).filter(w => w.length > 2);     let bestIdx = -1;     let highestScore = -1;      list.forEach((item, i) => {       const itemBase = getBaseItemName(item);       const itemWords = itemBase.split(/\s+/).filter(w => w.length > 2);       const hasOverlap = itemBase.includes(qBase) \vert{}\vert{} qBase.includes(itemBase) \vert{}\vert{}                          qWords.some(qw => itemWords.some(iw => iw.includes(qw) \vert{}\vert{} qw.includes(iw)));       if (!hasOverlap) return;       let score = 0;       for (const qw of qWords) {         if (itemWords.some(iw => iw === qw)) score += 12;         else if (itemWords.some(iw => iw.includes(qw) \vert{}\vert{} qw.includes(iw))) score += 6;       }       if (score > highestScore) {         highestScore = score;         bestIdx = i;       }     });      return highestScore > 0 ? bestIdx : -1;   }    function processLiveMutations(rawText, defaultTarget = "user") {     if (!rawText) return rawText;     const mutationRegex = /\[(?:LIVE_)?(?:MUTATION\vert{}STATE_UPDATE\vert{}INV_UPDATE):\s*([^\]]+)\]\vert{}\[\s*([+-]?(?:ITEM\vert{}GEGENSTAND\vert{}WOUND\vert{}WUNDE\vert{}VERLETZUNG\vert{}STATUS\vert{}ZUSTAND\vert{}EFFEKT\vert{}SKILL\vert{}TALENT\vert{}FÄHIGKEIT\vert{}FAEHIGKEIT\vert{}LEVEL\vert{}STUFE)[^\]]*)\]/gi;     let match;     let notices = [];      while ((match = mutationRegex.exec(rawText)) !== null) {       let body = (match[1] \vert{}\vert{} match[2] \vert{}\vert{} "").trim();       if (!body) continue;        let targetStr = defaultTarget;       let actionsStr = body;        if (body.includes("\vert{}")) {         const firstPipe = body.indexOf("\vert{}");         const possibleTarget = body.slice(0, firstPipe).trim();         const remaining = body.slice(firstPipe + 1).trim();         if (!/^[+-]/i.test(possibleTarget)) {           targetStr = possibleTarget;           actionsStr = remaining;         }       }        const targetProg = getProgressionFor(targetStr);       const targetChar = state.characters.find(c => c && c.id === targetStr);       const targetName = targetChar ? String(targetChar.name)         : (String(targetStr).toLowerCase() === "user" \vert{}\vert{} (state.user?.name && String(targetStr).toLowerCase() === String(state.user.name).toLowerCase()))           ? (state.user?.name \vert{}\vert{} (state.lang === "en" ? "Player" : "Spieler"))           : String(targetStr);        if (!targetProg) continue;       if (!Array.isArray(targetProg.wounds)) targetProg.wounds = [];       if (!Array.isArray(targetProg.inventory)) targetProg.inventory = [];       if (!Array.isArray(targetProg.status)) targetProg.status = [];       if (!Array.isArray(targetProg.skills)) targetProg.skills = [];        const parts = actionsStr.split(/\Vert{}(?![^(]*\))|,(?![^(]*\))/).map(s => s.trim()).filter(Boolean);
+    return cleanItemName(String(str).replace(/\s*[\(\[].*?[\)\]]/g, '')).trim().toLowerCase();
+  }
+
+  function findBestMatchingItemIndex(list, query, contextText = "") {
+    if (!list || list.length === 0 || !query) return -1;
+    const qClean = cleanItemName(query).toLowerCase();
+    const qBase = getBaseItemName(query);
+
+    let exactIdx = list.findIndex(item => String(item).toLowerCase() === qClean);
+    if (exactIdx !== -1) return exactIdx;
+
+    exactIdx = list.findIndex(item => getBaseItemName(item) === qBase && qBase.length > 2);
+    if (exactIdx !== -1) return exactIdx;
+
+    const qWords = qBase.split(/\s+/).filter(w => w.length > 2);
+    let bestIdx = -1;
+    let highestScore = -1;
+
+    list.forEach((item, i) => {
+      const itemBase = getBaseItemName(item);
+      const itemWords = itemBase.split(/\s+/).filter(w => w.length > 2);
+      const hasOverlap = itemBase.includes(qBase) || qBase.includes(itemBase) ||
+                         qWords.some(qw => itemWords.some(iw => iw.includes(qw) || qw.includes(iw)));
+      if (!hasOverlap) return;
+      let score = 0;
+      for (const qw of qWords) {
+        if (itemWords.some(iw => iw === qw)) score += 12;
+        else if (itemWords.some(iw => iw.includes(qw) || qw.includes(iw))) score += 6;
+      }
+      if (score > highestScore) {
+        highestScore = score;
+        bestIdx = i;
+      }
+    });
+
+    return highestScore > 0 ? bestIdx : -1;
+  }
+
+  function processLiveMutations(rawText, defaultTarget = "user") {
+    if (!rawText) return rawText;
+    const mutationRegex = /\[(?:LIVE_)?(?:MUTATION|STATE_UPDATE|INV_UPDATE):\s*([^\]]+)\]|\[\s*([+-]?(?:ITEM|GEGENSTAND|WOUND|WUNDE|VERLETZUNG|STATUS|ZUSTAND|EFFEKT|SKILL|TALENT|FÄHIGKEIT|FAEHIGKEIT|LEVEL|STUFE)[^\]]*)\]/gi;
+    let match;
+    let notices = [];
+
+    while ((match = mutationRegex.exec(rawText)) !== null) {
+      let body = (match[1] || match[2] || "").trim();
+      if (!body) continue;
+
+      let targetStr = defaultTarget;
+      let actionsStr = body;
+
+      if (body.includes("|")) {
+        const firstPipe = body.indexOf("|");
+        const possibleTarget = body.slice(0, firstPipe).trim();
+        const remaining = body.slice(firstPipe + 1).trim();
+        if (!/^[+-]/i.test(possibleTarget)) {
+          targetStr = possibleTarget;
+          actionsStr = remaining;
+        }
+      }
+
+      const targetProg = getProgressionFor(targetStr);
+      const targetChar = state.characters.find(c => c && c.id === targetStr);
+      const targetName = targetChar ? String(targetChar.name)
+        : (String(targetStr).toLowerCase() === "user" || (state.user?.name && String(targetStr).toLowerCase() === String(state.user.name).toLowerCase()))
+          ? (state.user?.name || (state.lang === "en" ? "Player" : "Spieler"))
+          : String(targetStr);
+
+      if (!targetProg) continue;
+      if (!Array.isArray(targetProg.wounds)) targetProg.wounds = [];
+      if (!Array.isArray(targetProg.inventory)) targetProg.inventory = [];
+      if (!Array.isArray(targetProg.status)) targetProg.status = [];
+      if (!Array.isArray(targetProg.skills)) targetProg.skills = [];
+
+      const parts = actionsStr.split(/\|(?![^(]*\))|,(?![^(]*\))/).map(s => s.trim()).filter(Boolean);
       for (const part of parts) {
         const actionMatch = part.match(/^([+-]?[a-zA-ZäöüÄÖÜ_]+)\s*[:=]?\s*(.*)$/);
         if (!actionMatch) continue;
