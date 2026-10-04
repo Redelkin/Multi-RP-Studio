@@ -311,6 +311,147 @@
     .orte-det .acts button.show { background:#3a2b17; border-color:var(--gold); color:#ffd88a; }
     .orte-empty { color:var(--muted); font-size:13px; text-align:center; padding:24px 10px; line-height:1.45; }
     #places-text { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12.5px; line-height:1.5; min-height:260px; white-space:pre; overflow-x:auto; }
+    /* ===== SETTING-THEMES: Fantasy = Original (keine Überschreibung); Modern & Sci-Fi über data-theme + Variablen ===== */
+    html[data-theme="modern"] {
+      --bg:#111318; --surface:#181b22; --surface-2:#20242d; --surface-3:#2a2f3a;
+      --fg:#eef1f7; --muted:#aab1c0; --dim:#8b93a6; --border:#323846;
+      --gold:#ff4fa3; --gold-hover:#ff78b9; --gold-glow:rgba(255,79,163,0.25);
+      --danger:#ff5468; --danger-hover:#ff7486; --success:#2ed39a; --danger-btn:#d32f4a; --on-acc:#1a0610;
+      --gm-bg:#121e28; --gm-border:#1fb5d6; --gm-text:#e4f6fb;
+      --editor-bg:#171a2c; --editor-border:#8b6cff;
+      --acc2:#3fe0ff; --acc-soft:rgba(255,79,163,0.12); --acc-line:rgba(255,79,163,0.4); --acc2-soft:rgba(63,224,255,0.12); --acc2-line:rgba(63,224,255,0.4);
+      --title-font:'Outfit',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; --title-ls:0.02em; --ui-font:'Outfit',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+      --map-bg:#0b0e14; --map-ink:#f1f5ff; --map-ink2:#cbd3e2; --map-ink3:#a7b1c4; --map-halo:#05070b; --panel1:#1b1f28; --panel2:#13161d; --me:#ff4fa3; --me-txt:#ff9fcf; --chip-inv:#a8f0ff; --sec:#3f7fa0;
+    }
+    html[data-theme="scifi"] {
+      --bg:#060d1a; --surface:#0b1628; --surface-2:#102038; --surface-3:#172a48;
+      --fg:#e3f4ff; --muted:#9dbdd2; --dim:#7d9db4; --border:#1f3d60;
+      --gold:#2de2c8; --gold-hover:#62f0dc; --gold-glow:rgba(45,226,200,0.22);
+      --danger:#ff5d6c; --danger-hover:#ff7d89; --success:#4ade80; --danger-btn:#cf2c46; --on-acc:#031413;
+      --gm-bg:#0a1e2c; --gm-border:#1aa6b7; --gm-text:#dcfbff;
+      --editor-bg:#0f1430; --editor-border:#6d7cff;
+      --acc2:#ffb547; --acc-soft:rgba(45,226,200,0.1); --acc-line:rgba(45,226,200,0.38); --acc2-soft:rgba(255,181,71,0.12); --acc2-line:rgba(255,181,71,0.4);
+      --title-font:'Orbitron','Rajdhani','Bahnschrift','DIN Alternate','Roboto Condensed','Segoe UI',sans-serif; --title-ls:0.04em;
+      --ui-font:'Rajdhani','Bahnschrift','DIN Alternate','Roboto Condensed','Segoe UI',Roboto,sans-serif;
+      --map-bg:#02060d; --map-ink:#dcf7ff; --map-ink2:#b4e3f0; --map-ink3:#8fc3d4; --map-halo:#01040a; --panel1:#0c1a2f; --panel2:#081221; --me:#ffb547; --me-txt:#ffcf8a; --chip-inv:#ffd9a0; --sec:#3a8fb0;
+    }
+    html.th-x body, html.th-x .view-panel { font-family:var(--ui-font); }
+    html[data-theme="scifi"] body { font-weight:500; }
+        html[data-theme="modern"] textarea, html[data-theme="modern"] input, html[data-theme="scifi"] .msg, html[data-theme="scifi"] textarea, html[data-theme="scifi"] input { font-family:'Outfit',-apple-system,"Segoe UI",Roboto,sans-serif; font-weight:400; }
+    html.th-x .font-serif-title { font-family:var(--title-font); letter-spacing:var(--title-ls); }
+    html[data-theme="scifi"] .card-title.font-serif-title, html[data-theme="scifi"] .modal-header .font-serif-title { font-size:13.5px; }
+    html[data-theme="scifi"] header .font-serif-title { font-family:'Rajdhani','Bahnschrift','Segoe UI',sans-serif; font-weight:700; letter-spacing:0.06em; font-size:13px; }
+    /* Oberflächen & Texturen */
+    html[data-theme="modern"] .view-panel { background:radial-gradient(120% 60% at 0% 0%, rgba(255,79,163,0.07), transparent 55%), radial-gradient(120% 60% at 100% 100%, rgba(63,224,255,0.06), transparent 55%), var(--bg); }
+    html[data-theme="scifi"] .view-panel { background:linear-gradient(rgba(45,226,200,0.045) 1px, transparent 1px) 0 0/22px 22px, linear-gradient(90deg, rgba(45,226,200,0.045) 1px, transparent 1px) 0 0/22px 22px, radial-gradient(120% 50% at 50% 0%, rgba(45,226,200,0.08), transparent 60%), var(--bg); }
+    html[data-theme="modern"] header, html[data-theme="modern"] .bottom-nav, html[data-theme="modern"] .input-bar { background:linear-gradient(180deg,#1b1e26,#16181e); }
+    html[data-theme="modern"] header { box-shadow:0 1px 0 rgba(255,79,163,0.22); }
+    html[data-theme="modern"] .bottom-nav { box-shadow:0 -1px 0 rgba(63,224,255,0.16); }
+    html[data-theme="scifi"] header, html[data-theme="scifi"] .bottom-nav, html[data-theme="scifi"] .input-bar { background:linear-gradient(180deg,#0d1a2e,#0a1424); }
+    html[data-theme="scifi"] header { box-shadow:0 1px 0 rgba(45,226,200,0.3); }
+    html[data-theme="scifi"] .bottom-nav { box-shadow:0 -1px 0 rgba(45,226,200,0.22); }
+    html[data-theme="modern"] .card { background:linear-gradient(180deg,#1b1f27,#171a21); box-shadow:0 1px 0 rgba(255,255,255,0.03) inset; }
+    html[data-theme="scifi"] .card { background:linear-gradient(180deg,#0d1b30,#0a1526); box-shadow:0 0 0 1px rgba(45,226,200,0.05) inset, 0 1px 0 rgba(45,226,200,0.12) inset; }
+    html[data-theme="scifi"] .card, html[data-theme="scifi"] .modal-content, html[data-theme="scifi"] .msg.bot, html[data-theme="scifi"] .msg.combined, html[data-theme="scifi"] .lore-folder { border-radius:6px; }
+    html[data-theme="scifi"] .btn, html[data-theme="scifi"] .header-btn, html[data-theme="scifi"] .msg-action-btn, html[data-theme="scifi"] input, html[data-theme="scifi"] select, html[data-theme="scifi"] textarea { border-radius:4px; }
+    /* hart codierte Gold-Töne ersetzen */
+    html.th-x .msg.user { background:var(--acc-soft); border-color:var(--acc-line); }
+    html.th-x .think-container { background:var(--acc-soft); }
+    html.th-x #status-indicator { background:var(--acc-soft); }
+    html.th-x .send-btn { box-shadow:0 2px 12px var(--gold-glow); }
+    html.th-x .prog-chip.inv { border-color:var(--acc2-line); background:var(--acc2-soft); color:var(--chip-inv); }
+    html.th-x .prog-chip-body strong { color:var(--fg); }
+    html.th-x .char-pill.active { background:var(--acc-soft); }
+    html.th-x .wb-note span { background:var(--acc-soft); border-color:var(--acc-line); }
+    html.th-x [style*="223, 160, 71"], html.th-x [style*="223,160,71"] { border-color:var(--acc-line) !important; }
+    html.th-x [style*="background:rgba(223,160,71"] { background:var(--acc-soft) !important; }
+    html.th-x .modal { background:rgba(2,4,8,0.8); }
+    /* Karte: Rahmen, Karte & Liste */
+    html.th-x #map-modal .map-shell, html.th-x #map-stage { background:var(--map-bg); }
+    html.th-x #map-places, html.th-x .orte-top { background:var(--bg); }
+    html[data-theme="modern"] .map-comp { display:none; }
+    html[data-theme="scifi"] .map-comp { filter:hue-rotate(140deg) saturate(1.3) drop-shadow(0 3px 8px #000); }
+    html.th-x .map-vig { background:radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(1,2,6,0.7) 100%); }
+    html.th-x .map-h, html.th-x #map-crumbs, html.th-x #map-empty strong { font-family:var(--title-font); }
+    html[data-theme="scifi"] .map-h { font-size:14px; }
+    html.th-x #map-pos { color:var(--me-txt); }
+    html.th-x #map-crumbs .crumb { color:var(--acc2); }
+    html.th-x #map-crumbs .crumb:not(.on) { text-decoration-color:var(--acc2-line); }
+    html.th-x #map-crumbs .crumb.on { color:var(--gold); }
+    html.th-x .map-zoom button { border-color:var(--acc-line); background:var(--panel2); color:var(--gold); font-family:var(--title-font); }
+    html.th-x .map-scale { font-family:var(--title-font); color:var(--map-ink2); }
+    html.th-x .map-scale .bar { border-color:var(--map-ink2); background:repeating-linear-gradient(90deg,var(--map-ink2) 0 25%,transparent 25% 50%); }
+    html.th-x #map-card, html.th-x .orte-det { background:linear-gradient(var(--panel1),var(--panel2)); border-color:var(--acc-line); }
+    html.th-x #map-card .k, html.th-x .orte-det .k { font-family:var(--title-font); color:var(--acc2); }
+    html.th-x #map-card h2 { font-family:var(--title-font); color:var(--gold); }
+    html[data-theme="scifi"] #map-card h2 { font-size:16px; }
+    html.th-x #map-card p, html.th-x .orte-det p { color:var(--fg); }
+    html.th-x #map-card ul, html.th-x .orte-det ul { color:var(--muted); }
+    html.th-x #map-card .src, html.th-x .orte-det .src, html.th-x .orte-det .path { color:var(--dim); }
+    html.th-x #map-card .x { color:var(--muted); }
+    html.th-x #map-card .orn { background:linear-gradient(90deg,var(--gold),transparent); }
+    html.th-x #map-card .acts button, html.th-x .orte-det .acts button { border-color:var(--acc-line); background:var(--surface-2); color:var(--gold); font-family:var(--title-font); }
+    html.th-x #map-card .acts button.ent, html.th-x .orte-det .acts button.show { background:var(--acc-soft); border-color:var(--gold); color:var(--fg); }
+    html.th-x #map-card .acts button.del { color:#ff9aa5; border-color:rgba(255,84,104,0.55); }
+    html.th-x #map-card-x { color:var(--acc2); }
+    html.th-x #map-measure { background:linear-gradient(var(--panel1),var(--panel2)); border-color:var(--acc-line); }
+    html.th-x #map-measure .k { font-family:var(--title-font); color:var(--gold); }
+    html.th-x #map-measure .s { color:var(--fg); }
+    html.th-x #map-gest { font-family:var(--title-font); color:var(--map-ink3); }
+    html.th-x .orte-h { border-bottom-color:var(--acc-line); font-family:var(--title-font); }
+    html.th-x .orte-item.open { border-color:var(--acc-line); }
+    html.th-x .o-mk { background:var(--map-bg); border-color:var(--acc2); }
+    html.th-x .o-mk::after { background:var(--acc2); }
+    html.th-x .o-mk.q { border-color:var(--map-ink3); }
+    html.th-x .o-mk.cur { border-color:var(--me); box-shadow:0 0 0 3px var(--acc-soft); }
+    html.th-x .o-mk.cur::after { background:var(--me); }
+    html.th-x .o-mk.ent { outline-color:var(--gold); }
+    html.th-x .o-badge { background:var(--acc-soft); border-color:var(--acc-line); color:var(--gold); }
+    html.th-x .o-badge.cur { background:var(--acc2-soft); border-color:var(--acc2-line); color:var(--me-txt); }
+    html.th-x .o-badge.unk, html.th-x .o-badge.far { background:rgba(160,175,200,0.1); color:var(--map-ink3); border-color:rgba(160,175,200,0.3); }
+    /* SVG-Karte */
+    html.th-x #map-stage .lbl { font-family:var(--title-font); fill:var(--map-ink); stroke:var(--map-halo); }
+    html[data-theme="modern"] #map-stage .lbl { font-weight:700; letter-spacing:0.01em; }
+    html[data-theme="scifi"] #map-stage .lbl { font-weight:600; letter-spacing:0.05em; }
+    html.th-x #map-stage .lbl.s { fill:var(--map-ink2); }
+    html.th-x #map-stage .lbl.u { font-family:var(--ui-font); fill:var(--map-ink3); }
+    html.th-x #map-stage .reg { font-family:var(--title-font); stroke:var(--map-halo); }
+    html.th-x #map-stage .it { font-family:var(--ui-font); fill:var(--map-ink3); stroke:var(--map-halo); }
+    html.th-x #map-stage .sec { font-family:var(--title-font); fill:var(--sec); letter-spacing:0.1em; font-weight:600; }
+    html.th-x #map-stage .mk .ring { fill:var(--map-bg); stroke:var(--acc2); }
+    html[data-theme="scifi"] #map-stage .mk .ring { stroke:var(--gold); }
+    html.th-x #map-stage .mk .dot { fill:var(--map-ink); }
+    html.th-x #map-stage .mk.q .ring, html.th-x #map-stage .mk.far .ring { stroke:var(--map-ink3); fill:var(--panel2); }
+    html.th-x #map-stage .mk.sel .ring { stroke:#ffffff; }
+    html.th-x #map-stage .halo { stroke:var(--acc2); }
+    html.th-x #map-stage .mk .door { stroke:var(--gold); }
+    html.th-x #map-stage .pin-k { font-family:var(--title-font); fill:var(--gold); stroke:var(--map-halo); }
+    html.th-x #map-stage .pin-line[stroke="#f0c26e"], html.th-x #map-stage .pin path[stroke="#f0c26e"] { stroke:var(--acc2); }
+    html.th-x #map-stage .pin circle[fill="#c94c40"] { fill:var(--me); stroke:var(--map-ink); }
+    html[data-theme="scifi"] #map-stage .metro, html[data-theme="modern"] #map-stage .metro { stroke-linecap:round; }
+    /* Anleitung & Danke */
+    .guide-mod { background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:10px 12px; display:flex; flex-direction:column; gap:7px; }
+    .guide-mod h4 { font-size:13.5px; color:var(--gold); margin:0; }
+    .guide-roles { display:flex; flex-wrap:wrap; gap:4px; }
+    .guide-role { font-size:10.5px; padding:1px 7px; border-radius:9px; background:var(--surface-3); color:var(--muted); border:1px solid var(--border); }
+    .guide-role.on { color:var(--fg); border-color:var(--gold); }
+    .guide-code { margin:0; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11.5px; line-height:1.45; white-space:pre-wrap; word-break:break-word; background:var(--bg); color:var(--fg); border:1px solid var(--border); border-radius:8px; padding:8px 9px; max-height:none; user-select:text; -webkit-user-select:text; }
+    .guide-copy { align-self:flex-end; }
+    .guide-p { font-size:12.5px; line-height:1.5; color:var(--muted); margin:0; }
+    .guide-p b { color:var(--fg); }
+    .guide-table { width:100%; border-collapse:collapse; font-size:11.5px; }
+    .guide-table th, .guide-table td { border:1px solid var(--border); padding:4px 5px; text-align:center; color:var(--fg); }
+    .guide-table th { color:var(--gold); font-weight:600; background:var(--surface-2); }
+    .guide-table td:first-child, .guide-table th:first-child { text-align:left; }
+    .guide-tips { margin:0; padding-left:18px; font-size:12.5px; line-height:1.5; color:var(--muted); display:flex; flex-direction:column; gap:4px; }
+    .guide-tips b { color:var(--fg); }
+    .thanks-text p { font-size:14px; line-height:1.6; color:var(--fg); margin:0 0 10px; }
+    .thanks-text p:first-child { font-weight:600; color:var(--gold); }
+    .thanks-btn { align-self:center; background:none; border:1px solid var(--border); color:var(--muted); font-size:12px; padding:6px 14px; border-radius:16px; cursor:pointer; min-height:32px; }
+    /* Text auf Akzentflächen (Fantasy: fest #17130f) und Gefahren-Knopf mit ausreichendem Kontrast */
+    html.th-x .send-btn, html.th-x .btn-primary, html.th-x #map-tabs button.on, html.th-x #bag-modal-level-badge, html.th-x [style*="color:#17130f"] { color:var(--on-acc) !important; }
+    html.th-x .btn-danger { background:var(--danger-btn) !important; color:#fff !important; }
+    html.th-x #map-card-k { padding-right:28px; }
   </style>
 </head>
 <body>
@@ -440,6 +581,29 @@
             <button class="btn lang-btn" style="flex:1;" data-lang="en">🇬🇧 English</button>
           </div>
         </div>
+        <div class="card" id="setting-card">
+          <div class="card-title font-serif-title" style="color:var(--gold);" data-i18n="st_title">🎭 Setting</div>
+          <p style="font-size:12.5px; color:var(--muted); line-height:1.4;" data-i18n="st_desc">Bestimmt Look, Kartenstil, Reisemittel und Einheiten sowie die Beispiele in den Spielleiter-Regeln. Wird mit dem Backup gespeichert.</p>
+          <div style="display:flex; gap:6px;">
+            <button class="btn st-btn" style="flex:1; padding:10px 6px;" data-st="fantasy" data-i18n="st_fantasy">🐉 Fantasy</button>
+            <button class="btn st-btn" style="flex:1; padding:10px 6px;" data-st="modern" data-i18n="st_modern">🌃 Modern</button>
+            <button class="btn st-btn" style="flex:1; padding:10px 6px;" data-st="scifi" data-i18n="st_scifi">🚀 Sci-Fi</button>
+          </div>
+          <p id="setting-hint" style="font-size:12px; color:var(--muted); line-height:1.4;"></p>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+            <input type="checkbox" id="setting-fog" checked>
+            <span><strong data-i18n="st_fog_chk">🌫️ Nebel des Unbekannten auf der Karte</strong></span>
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+            <input type="checkbox" id="setting-levels" checked>
+            <span><strong data-i18n="st_levels_chk">⭐ Stufen-System (Level)</strong></span>
+          </label>
+        </div>
+        <div class="card" id="guide-card">
+          <div class="card-title font-serif-title" style="color:var(--gold);" data-i18n="guide_card">📘 Anleitung</div>
+          <p style="font-size:12.5px; color:var(--muted); line-height:1.4;" data-i18n="guide_card_desc">Welche Bausteine gehören in welchen Rollen-Prompt, damit Karte, Inventar, Stufen und Lore zuverlässig funktionieren – zum Kopieren.</p>
+          <button class="btn btn-secondary" id="guide-btn" onclick="openGuide()" data-i18n="guide_btn">📘 Anleitung & Prompt-Bausteine</button>
+        </div>
         <div class="card">
           <div class="card-title font-serif-title" style="color:var(--gold);" data-i18n="editor_title">✒️ Lektor-Pipeline (Stil-Veredelung)</div>
           <p style="font-size:12.5px; color:var(--muted); line-height:1.4;" data-i18n="editor_desc">
@@ -504,6 +668,7 @@
           <input type="file" id="import-file" accept=".json" style="display:none;">
           <button class="btn btn-danger" id="reset-btn" style="margin-top:4px;" data-i18n="btn_reset">Werkseinstellungen zurücksetzen</button>
         </div>
+        <button class="thanks-btn" id="thanks-btn" onclick="openThanks()" data-i18n="thanks_btn">💛 Danke</button>
       </div>
     </section>
   </main>
@@ -835,6 +1000,26 @@
           <button class="btn btn-primary" style="flex:1;" onclick="savePlacesModal()" data-i18n="places_save">Übernehmen</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div class="modal" id="guide-modal">
+    <div class="modal-content" style="max-width:640px;">
+      <div class="modal-header">
+        <span class="font-serif-title" data-i18n="guide_title">📘 Anleitung</span>
+        <button class="header-btn" id="guide-close-btn" onclick="closeModal('guide-modal')">✕</button>
+      </div>
+      <div class="modal-body" id="guide-body"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="thanks-modal">
+    <div class="modal-content" style="max-width:480px;">
+      <div class="modal-header">
+        <span class="font-serif-title" data-i18n="thanks_title">💛 Danke</span>
+        <button class="header-btn" id="thanks-close-btn" onclick="closeModal('thanks-modal')">✕</button>
+      </div>
+      <div class="modal-body thanks-text" id="thanks-body"></div>
     </div>
   </div>
 
@@ -2018,6 +2203,7 @@
         // FIX 5: nur wenn der Wert MIT Level/Stufe beginnt ("Level 4", "Stufe 4", "Level-Up") – "Vergiftet (Stufe 2)" bleibt ein Status
         const lvlAsStatus = key === "+STATUS" && /^["'\s]*(?:(?:level|stufe|lvl)\s*\d+|(?:level|stufe)[-_ ]?(?:up|aufstieg)|stufenaufstieg)/i.test(rawVal);
         if (key === "LEVEL" || lvlAsStatus) {
+          if (!stLevels()) continue; // Stufen-System aus: Level-Tags werden ignoriert (und wie immer nicht angezeigt)
           let lp = targetProg, ln = targetName, lv = rawVal || "UP"; // leer nur bei +LEVEL, LEVELUP, STUFENAUFSTIEG
           // „[LEVEL: Elisabeth 2]“ → Stufe des Begleiters (empfohlen bleibt [MUTATION: Elisabeth | LEVEL: 2])
           const lc = state.characters.find(c => c && c.role === "companion" && c.name && new RegExp("^" + escapeRegex(String(c.name)) + "(?=$|[\\s:|,(])", "i").test(lv));
@@ -2171,6 +2357,7 @@
     if (!prog || !container) return;
 
     if (lvlBadge) lvlBadge.innerText = `${state.lang === "en" ? "Level" : "Stufe"} ${prog.level || '1'}`;
+    stLevelUi();
     if (!Array.isArray(prog.wounds)) prog.wounds = [];
     if (!Array.isArray(prog.inventory)) prog.inventory = [];
     if (!Array.isArray(prog.status)) prog.status = [];
@@ -2354,9 +2541,9 @@
     const skillStr = p.skills?.length ? p.skills.join(", ") : (isEn ? "Basic abilities" : "Grundfähigkeiten");
     
     if (isEn) {
-      info += `\n[LIVE STATUS]: Level: ${p.level || "1"} | Wounds: ${woundsStr} | Condition: ${statusStr} | Bag: ${invStr} | Skills: ${skillStr}`;
+      info += `\n[LIVE STATUS]: ${stLvl(true, p.level)}Wounds: ${woundsStr} | Condition: ${statusStr} | Bag: ${invStr} | Skills: ${skillStr}`;
     } else {
-      info += `\n[LIVE-VERFASSUNG]: Stufe: ${p.level || "1"} | Wunden: ${woundsStr} | Status: ${statusStr} | Beutel: ${invStr} | Talente: ${skillStr}`;
+      info += `\n[LIVE-VERFASSUNG]: ${stLvl(false, p.level)}Wunden: ${woundsStr} | Status: ${statusStr} | Beutel: ${invStr} | Talente: ${skillStr}`;
     }
     return info;
   }
@@ -2372,11 +2559,12 @@
     const skillStr = p.skills?.length ? p.skills.join(", ") : (isEn ? "Basic abilities" : "Grundfähigkeiten");
     
     return isEn 
-      ? `\n[YOUR LIVE STATUS]: Level: ${p.level || "1"} | Wounds: ${woundsStr} | Condition: ${statusStr} | Carrying: ${invStr} | Powers: ${skillStr}`
-      : `\n[DEINE LIVE-VERFASSUNG]: Stufe: ${p.level || "1"} | Wunden: ${woundsStr} | Zustand: ${statusStr} | Trägt: ${invStr} | Kräfte: ${skillStr}`;
+      ? `\n[YOUR LIVE STATUS]: ${stLvl(true, p.level)}Wounds: ${woundsStr} | Condition: ${statusStr} | Carrying: ${invStr} | Powers: ${skillStr}`
+      : `\n[DEINE LIVE-VERFASSUNG]: ${stLvl(false, p.level)}Wunden: ${woundsStr} | Zustand: ${statusStr} | Trägt: ${invStr} | Kräfte: ${skillStr}`;
   }
 
-  function getInventoryPromptDirective(targetName, prog) {
+  function getInventoryPromptDirective(targetName, prog) { const s = getInventoryPromptDirective0(targetName, prog); return stLevels() ? s : stStripLevel(s); }
+  function getInventoryPromptDirective0(targetName, prog) {
     const isEn = state.lang === "en";
     const safeTarget = String(targetName || (isEn ? "CHARACTER" : "FIGUR")).toUpperCase();
     const items = (prog && prog.inventory && prog.inventory.length > 0)
@@ -3263,7 +3451,359 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       [/region|provinz|königreich|\breich\b|kontinent|\bland\b|province|kingdom|realm|continent|empire/, "region"],
       [/lager|\bcamp\b/, "camp"]
     ];
-    const typeOf = s => { s = String(s || "").toLowerCase(); for (const [re, ty] of TYPE_RULES) if (re.test(s)) return ty; return "place"; };
+    // Setting (fantasy | modern | scifi): eigene Typ-Regeln zuerst, sonst die Fantasy-Regeln
+    let STY0 = "fantasy";
+    const setStyle = k => { STY0 = k === "modern" || k === "scifi" ? k : "fantasy"; };
+    // ---------- Setting-Stile: Modern (Stadtplan bei Nacht) und Sci-Fi (Sternen-/Holokarte); Fantasy bleibt der Originalpfad ----------
+    const STY_TYPES = {
+      modern: [
+        [/bahnhof|\bstation\b|\beki\b|駅|u-bahn|s-bahn|\bmetro\b|subway|haltestelle|bahnsteig/, "place"],
+        [/viertel|bezirk|stadtteil|district|neighbou?rhood|quartier|\bku\b|-ku\b|\bward\b/, "city"],
+        [/schule|school|gakkou|gakkō|gakuen|koukou|kōkō|universität|university|\buni\b|campus|akademie|academy|college|hochschule/, "castle"],
+        [/\bpark\b|garten|garden|kōen|koen|gyoen|friedhof|cemetery/, "forest"],
+        [/café|cafe|kissaten|coffee|kaffee|\bbar\b|izakaya|restaurant|ramen|imbiss|diner|kneipe|\bpub\b|club|karaoke|konbini|kombini|laden|shop|store|markt|mall|kaufhaus|supermarkt|depāto|depato|bäckerei|bakery|kiosk|arcade|spielhalle|kino|cinema|büro|office|firma|klinik|krankenhaus|hospital|polizei|police|kōban|koban|schrein|shrine|jinja|tempel|temple/, "place"],
+        [/wohnung|apartment|apāto|apato|mansion|zuhause|\bhome\b|\bwg\b|wohnheim|dorm|haus|house/, "house"],
+        [/hauptstadt|capital|metropol|megacity/, "capital"],
+        [/stadt|city|town/, "city"]
+      ],
+      scifi: [
+        [/sektor|sector|quadrant|sternsystem|star system|\bsystem\b|galaxie|galaxy|cluster|raumgebiet/, "region"],
+        [/station|außenposten|aussenposten|outpost|\bbasis\b|\bbase\b|raumhafen|spaceport|werft|shipyard|hangar|zitadelle|citadel|schiff|\bship\b|kreuzer|cruiser|frachter|freighter|fregatte|frigate/, "castle"],
+        [/hauptwelt|capital|hauptstadt|homeworld|heimatwelt/, "capital"],
+        [/planet|\bwelt\b|world|kolonie|colony|habitat|\bmond\b|\bmoon\b/, "city"],
+        [/asteroid|gürtel|guertel|\bbelt\b|trümmer|truemmer|debris/, "mountains"],
+        [/nebel|nebula|gaswolke|gas cloud/, "forest"],
+        [/deck|modul|module|labor|\blab\b|\bbar\b|cantina|kantine|markt|market|quartier|kabine|cabin|brücke|bridge|maschinenraum|engine|reaktor|reactor|lazarett|sickbay|frachtraum|cargo/, "house"],
+        [/stern|\bstar\b|sonne|\bsun\b|pulsar|schwarzes loch|black hole|wurmloch|wormhole|sprungtor|jump gate|portal/, "place"]
+      ]
+    };
+    const KIND_X = {
+      modern: [
+        [/bahnhof|\bstation\b|\beki\b|駅|u-bahn|s-bahn|\bmetro\b|subway|haltestelle|bahnsteig/, "station"],
+        [/café|cafe|kissaten|coffee|kaffee|teehaus|tea ?house|bäckerei|bakery/, "cafe"],
+        [/schule|school|gakkou|gakkō|gakuen|koukou|kōkō|universität|university|\buni\b|campus|akademie|academy|college|hochschule|kindergarten/, "school"],
+        [/izakaya|\bbar\b|kneipe|\bpub\b|club|karaoke|lounge/, "bar"],
+        [/restaurant|ramen|sushi|imbiss|diner|udon|soba|yakitori|essen|food/, "food"],
+        [/konbini|kombini|laden|shop|store|markt|market|mall|kaufhaus|supermarkt|depāto|depato|kiosk|boutique|buchhandlung|bookstore|arcade|spielhalle/, "shop"],
+        [/klinik|krankenhaus|hospital|byōin|byouin|arzt|praxis|clinic/, "hospital"],
+        [/polizei|police|kōban|koban|wache/, "police"],
+        [/schrein|shrine|jinja|tempel|temple|\btera\b|kirche|church/, "shrine"],
+        [/wohnung|apartment|apāto|apato|mansion|zuhause|\bhome\b|\bwg\b|wohnheim|dorm|zimmer|haus|house/, "home"],
+        [/\bpark\b|garten|garden|kōen|koen|gyoen|friedhof|cemetery|wald|forest/, "park"],
+        [/büro|buero|office|firma|company|agentur|agency|studio|tower|turm|hochhaus/, "office"],
+        [/kino|cinema|theater|theatre|museum|galerie|gallery|stadion|stadium|arena/, "venue"],
+        [/platz|kreuzung|crossing|square|plaza/, "plaza"]
+      ],
+      scifi: [
+        [/sprungtor|jump ?gate|wurmloch|wormhole|portal/, "gate"],
+        [/station|außenposten|aussenposten|outpost|\bbasis\b|\bbase\b|raumhafen|spaceport|werft|shipyard|hangar|zitadelle|citadel|\bdock/, "station"],
+        [/schiff|\bship\b|kreuzer|cruiser|frachter|freighter|fregatte|frigate|shuttle/, "ship"],
+        [/\bmond\b|\bmoon\b/, "moon"],
+        [/planet|\bwelt\b|world|kolonie|colony|habitat|hauptwelt|homeworld/, "planet"],
+        [/stern|\bstar\b|sonne|\bsun\b|pulsar|schwarzes loch|black hole/, "star"],
+        [/asteroid|gürtel|guertel|\bbelt\b|trümmer|truemmer|debris/, "asteroids"],
+        [/nebel|nebula|gaswolke|gas cloud/, "nebula"],
+        [/deck|modul|module|labor|\blab\b|\bbar\b|cantina|kantine|markt|market|quartier|kabine|cabin|brücke|bridge|maschinenraum|engine|reaktor|reactor|lazarett|sickbay|frachtraum|cargo/, "module"]
+      ]
+    };
+    function kindX(n, sty) {
+      const s = (String(n.name || "") + " " + String(n.typS || "")).toLowerCase(), M = sty === "modern";
+      for (const [re, k] of KIND_X[sty] || []) if (re.test(s)) return k;
+      if (n.typ === "city" || n.typ === "capital" || n.typ === "village") return M ? "district" : "planet";
+      if (n.typ === "river") return "river";
+      if (n.typ === "forest") return M ? "park" : "nebula";
+      if (n.typ === "mountains") return M ? "hills" : "asteroids";
+      if (n.typ === "castle") return M ? "office" : "station";
+      if (n.typ === "house" || n.typ === "farm" || n.typ === "mill") return M ? "home" : "module";
+      return M ? "place" : "beacon";
+    }
+    // Entfernungsangaben im Setting: Modern in km/m bzw. Minuten (zu Fuß/Rad/Bahn/Auto), Sci-Fi in Sektoren/Sprüngen/Stunden (Schiff/Shuttle)
+    const KMD = { modern: 2.5, scifi: 25 };
+    function parseDistX(s, sty) {
+      if (/weit|fern|\bfar\b|distant|remote/.test(s) && !/nicht (?:so )?weit|not (?:that |so )?far/.test(s)) return "fern";
+      let n = 1; const m = s.match(/(\d+(?:[.,]\d+)?)/), w = s.split(/[\s\-]+/);
+      if (m) n = parseFloat(m[1].replace(",", ".")); else for (const [x, v] of NUMW) if (w.includes(x)) { n = v; break; }
+      if (!isFinite(n)) n = 1; n = Math.max(0, Math.min(5000, n));
+      if (/knapp|barely|almost/.test(s)) n *= .9;
+      const K = KMD[sty];
+      if (/\d\s*km\b|kilomet/.test(s)) return n / K;
+      if (/\d\s*m\b|meter|metre/.test(s)) return n / 1000 / K;
+      if (/nebenan|next door|um die ecke|around the corner|gegenüber|across the street/.test(s)) return .12 / K;
+      if (/monat|month|jahr|year/.test(s)) return "fern";
+      if (sty === "modern") {
+        const v = /bahn|zug|train|metro|subway|linie|\bline\b|shinkansen|tram/.test(s) ? 30 : /taxi|auto|\bcar\b|\bbus\b|fahrt|drive/.test(s) ? 22 : /rad\b|bike|fahrrad|cycl/.test(s) ? 15 : 4.8;
+        if (/station|haltestelle|\bstops?\b/.test(s) && !/minute|\bmin\b|stunde|hour/.test(s)) return n * 1.3 / K;
+        if (/minute|\bmin\b/.test(s)) return n / 60 * v / K;
+        if (/stunde|\bstd|hour|\bhrs?\b/.test(s)) return n * v / K;
+        if (/woche|week|tag|day/.test(s)) return "fern";
+        return n / K; // bloße Zahl: km
+      }
+      if (/lichtjahr|light.?year|\bly\b|\blj\b|sektor|sector|sprung|sprünge|spruenge|jump|parsec|parsek/.test(s)) return n;
+      if (/\bae\b|\bau\b|astronom/.test(s)) return n * .1;
+      const ship = /schiff|ship|warp|hyper|antrieb|drive/.test(s), shut = /shuttle|fähre|faehre|gleiter|transporter|kapsel|pod/.test(s), foot = /fuß|fuss|foot|walk|lauf/.test(s);
+      const v = ship ? .5 : shut ? 1 / 12 : foot ? 4.5 / K : null; // Sektoren je Stunde
+      if (/minute|\bmin\b/.test(s)) return n / 60 * (v ?? 4.5 / K);
+      if (/stunde|\bstd|hour|\bhrs?\b/.test(s)) return n * (v ?? 1 / 12);
+      if (/woche|week/.test(s)) return n * 7 * 24 * (v ?? 1 / 12);
+      if (/tag|day/.test(s)) return n * 24 * (v ?? 1 / 12);
+      return n;
+    }
+    const PAL = {
+      modern: { mtn: "#a9bdd2", reg: "#3fe0ff", q: "#ff8cc8", qf: "Outfit,sans-serif", fogt: "#b3bccb", trail0: "#05060a", trail: "#ff4fa3", me: ["#ff4fa3", "#2a0716", "#1a0d14", "#ffd6ea"] },
+      scifi: { mtn: "#9ad7e6", reg: "#2de2c8", q: "#7ff5e3", qf: "Rajdhani,'Segoe UI',sans-serif", fogt: "#6cc6d6", trail0: "#010409", trail: "#ffb547", me: ["#ffb547", "#2a1a05", "#0d1420", "#ffe2b0"] }
+    };
+    const MCOL = { station: "#0e7fc0", cafe: "#b4532a", school: "#6d4bd8", shop: "#b8306f", home: "#2c8656", park: "#2f7d4a", shrine: "#c0392b", hospital: "#c93545", office: "#4a5a78", bar: "#8f3dc0", food: "#b86a12", police: "#2b55c7", venue: "#a8326f", plaza: "#56627a", place: "#55657f" };
+    const MGLY = {
+      station: [["p", "M-5-7h10a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z"], ["k", "M-4-5h8v4h-8Z"], ["s", "M-4 4l-2.5 3.5M4 4l2.5 3.5"]],
+      cafe: [["p", "M-6-3h9v4a4 4 0 0 1-4 4h-1a4 4 0 0 1-4-4Z"], ["s", "M3-1.5h1.5a2 2 0 0 1 0 4H3M-3-5.5q1.2-1.5 0-3M0-5.5q1.2-1.5 0-3"]],
+      school: [["p", "M0-6.5L8-2.5L0 1.5L-8-2.5Z"], ["s", "M-5-.5v3.5q5 3.2 10 0v-3.5M7-2v5"]],
+      shop: [["p", "M-6-2h12l-1.2 9h-9.6Z"], ["s", "M-3-2v-1.5a3 3 0 0 1 6 0v1.5"]],
+      home: [["s", "M-7.5 0L0-6.5L7.5 0"], ["p", "M-5-1.5h10v8h-10Z"], ["k", "M-1.5 2h3v4.5h-3Z"]],
+      park: [["p", "M0-8a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-11 0a5.5 5.5 0 0 1 5.5-5.5Z"], ["s", "M0 2v6"]],
+      shrine: [["s", "M-8-5.5q8 -2 16 0M-6-2h12M-4.5-5v12M4.5-5v12"]],
+      hospital: [["p", "M-2-7h4v5h5v4h-5v5h-4v-5h-5v-4h5Z"]],
+      office: [["p", "M-5-7.5h10v15h-10Z"], ["k", "M-3-5h2v2h-2ZM1-5h2v2h-2ZM-3-1h2v2h-2ZM1-1h2v2h-2ZM-1 3.5h2v4h-2Z"]],
+      bar: [["p", "M-6-6.5h12l-6 6.5Z"], ["s", "M0 0v5.5M-3.5 6.5h7"]],
+      food: [["p", "M-7.5-1h15a7.5 6.5 0 0 1-15 0Z"], ["s", "M-2.5-8.5l3 6M2-8.5l2.5 6"]],
+      police: [["p", "M0-7.5l6.5 2.2v4.3q0 5.5-6.5 8.5q-6.5-3-6.5-8.5v-4.3Z"]],
+      venue: [["p", "M0-7.5l2.2 5h5.3l-4.3 3.3l1.7 5.4L0 3l-4.9 3.2l1.7-5.4l-4.3-3.3h5.3Z"]],
+      plaza: [["s", "M-7-4h14M-7 0h14M-7 4h14"]],
+      place: [["p", "M0 7.5q-6-6.2-6-10.2a6 6 0 0 1 12 0q0 4-6 10.2Z"], ["k", "M0-5.5a2.2 2.2 0 1 1 0 4.4a2.2 2.2 0 1 1 0-4.4Z"]]
+    };
+    function badge(el, g, x, y, k, s = 1) {
+      const c = MCOL[k] || MCOL.place, b = el(g, "g", { transform: `translate(${f1(x)} ${f1(y)}) scale(${s})`, class: "mbadge" });
+      el(b, "path", { d: "M-4 10L0 15L4 10Z", fill: c, stroke: "#0b0e14", "stroke-width": 1.5 });
+      el(b, "rect", { x: -12, y: -12, width: 24, height: 24, rx: 6, fill: c, stroke: "#0b0e14", "stroke-width": 2 });
+      el(b, "rect", { x: -12, y: -12, width: 24, height: 24, rx: 6, fill: "none", stroke: "#ffffff", "stroke-opacity": .28, "stroke-width": 1 });
+      for (const [t, d] of MGLY[k] || MGLY.place) el(b, "path", t === "s" ? { d, fill: "none", stroke: "#fff", "stroke-width": 1.8, "stroke-linecap": "round", "stroke-linejoin": "round" } : { d, fill: t === "k" ? c : "#fff" });
+      return b;
+    }
+    const cP = (x, y, r) => `M${f1(x - r)} ${f1(y)}a${f1(r)} ${f1(r)} 0 1 0 ${f1(2 * r)} 0a${f1(r)} ${f1(r)} 0 1 0 ${f1(-2 * r)} 0Z`;
+    const hexP = (x, y, r, rot = 0) => { let d = ""; for (let i = 0; i < 6; i++) { const a = (i * 60 + rot) * Math.PI / 180; d += (i ? "L" : "M") + f1(x + Math.cos(a) * r) + " " + f1(y + Math.sin(a) * r); } return d + "Z"; };
+    // Sternenhimmel als wenige Pfade (schnell)
+    function stars(C, x0, y0, w, h, cnt, layer) {
+      const { el, rr, pick } = C, P = { "#ffffff": "", "#bfefff": "", "#9ad7ff": "", "#ffe7c2": "" }, B = { "#ffffff": "", "#bfefff": "" };
+      for (let i = 0; i < cnt; i++) { const x = rr(x0, x0 + w), y = rr(y0, y0 + h), r = rr(.5, 1.6), c = pick(Object.keys(P)); if (r > 1.35 && B[c] !== undefined) B[c] += cP(x, y, r * 2.6); P[c] += cP(x, y, r); }
+      for (const c in B) if (B[c]) el(layer, "path", { d: B[c], fill: c, opacity: .14 });
+      for (const c in P) if (P[c]) el(layer, "path", { d: P[c], fill: c, opacity: .8 });
+    }
+    // Metro-Linie im Netzplan-Stil (waagrecht/senkrecht + 45°)
+    const octi = (a, b) => { const dx = b.x - a.x, dy = b.y - a.y, ax = Math.abs(dx), ay = Math.abs(dy); const m = ax > ay ? [a.x + Math.sign(dx) * (ax - ay), a.y] : [a.x, a.y + Math.sign(dy) * (ay - ax)]; return `M${f1(a.x)} ${f1(a.y)}L${f1(m[0])} ${f1(m[1])}L${f1(b.x)} ${f1(b.y)}`; };
+    function mst(P) { const E = [], inT = new Set([0]); if (P.length < 2) return E; while (inT.size < P.length) { let best = null, bd = 1e18; for (const i of inT) for (let j = 0; j < P.length; j++) { if (inT.has(j)) continue; const d = Math.hypot(P[i].p.x - P[j].p.x, P[i].p.y - P[j].p.y); if (d < bd) { bd = d; best = [i, j]; } } inT.add(best[1]); E.push([P[best[0]], P[best[1]]]); } return E; }
+    const LINEC = ["#ff4fa3", "#3fe0ff", "#ffd23f", "#7cff8a", "#b18cff"];
+    function worldModern(C) {
+      const { L, defs, el, rr, pick, N, ACT, EDG, RIV, RAD, X0, Y0, W, H, MX, MY, MW, MH, CX, CY, WS, smooth } = C;
+      const rg = el(defs, "radialGradient", { id: "wkmg", cx: "50%", cy: "45%", r: "75%" });
+      el(rg, "stop", { offset: "0", "stop-color": "#171d29" }); el(rg, "stop", { offset: ".7", "stop-color": "#10141c" }); el(rg, "stop", { offset: "1", "stop-color": "#0b0e14" });
+      el(L.bg, "rect", { x: MX, y: MY, width: MW, height: MH, fill: "#0b0e14" });
+      el(L.bg, "rect", { x: X0, y: Y0, width: W, height: H, fill: "url(#wkmg)" });
+      C.reseed(WS ^ 911);
+      for (const n of ACT) el(L.bg, "circle", { cx: f1(n.p.x), cy: f1(n.p.y), r: f1(RAD[n.typ] + 110), fill: pick(["#ff4fa3", "#3fe0ff", "#8b6cff"]), opacity: .07, filter: "url(#wkbl)" });
+      // Straßenraster mit Blöcken (leicht gedreht)
+      const th = rr(-14, 14), cs = Math.cos(th * Math.PI / 180), sn = Math.sin(th * Math.PI / 180), S = 58;
+      const toW = (u, v) => [CX + (u - CX) * cs - (v - CY) * sn, CY + (u - CX) * sn + (v - CY) * cs];
+      const g = el(L.field, "g", { transform: `rotate(${f1(th)} ${f1(CX)} ${f1(CY)})` });
+      const gx0 = Math.floor((X0 - 400) / S) * S, gy0 = Math.floor((Y0 - 400) / S) * S, gx1 = X0 + W + 400, gy1 = Y0 + H + 400;
+      const near = (x, y) => { let m = 1e9; for (const n of ACT) m = Math.min(m, Math.hypot(n.p.x - x, n.p.y - y) - RAD[n.typ]); return m; };
+      let bl = ["", "", ""], lit = ["", "", ""], minor = "", major = "";
+      for (let u = gx0; u < gx1; u += S) for (let v = gy0; v < gy1; v += S) {
+        const [wx, wy] = toW(u + S / 2, v + S / 2), dn = near(wx, wy); if (dn > 260) continue;
+        const dens = dn < 60 ? 4 : dn < 160 ? 3 : 1.6, k = Math.max(1, Math.round(rr(dens - 1, dens + .4)));
+        for (let i = 0; i < k; i++) { const bw = rr(10, S / 2 - 6), bh = rr(10, S / 2 - 6), bx = u + 6 + (i % 2) * (S / 2 - 3) + rr(0, 3), by = v + 6 + Math.floor(i / 2) * (S / 2 - 3) + rr(0, 3), c = Math.floor(rr(0, 3)); bl[c] += `M${f1(bx)} ${f1(by)}h${f1(bw)}v${f1(bh)}h${f1(-bw)}Z`; if (rr(0, 1) < .35) lit[Math.floor(rr(0, 3))] += `M${f1(bx + rr(2, bw - 4))} ${f1(by + rr(2, bh - 4))}h2.2v2.2h-2.2Z`; }
+      }
+      for (let u = gx0; u < gx1; u += S) (Math.round(u / S) % 4 === 0 ? (major += `M${u} ${gy0}V${f1(gy1)}`) : (minor += `M${u} ${gy0}V${f1(gy1)}`));
+      for (let v = gy0; v < gy1; v += S) (Math.round(v / S) % 4 === 0 ? (major += `M${gx0} ${v}H${f1(gx1)}`) : (minor += `M${gx0} ${v}H${f1(gx1)}`));
+      el(g, "path", { d: minor, stroke: "#161b25", "stroke-width": 4, fill: "none" });
+      el(g, "path", { d: major, stroke: "#1f2633", "stroke-width": 9, fill: "none" });
+      el(g, "path", { d: major, stroke: "#2b3444", "stroke-width": 1.2, fill: "none", "stroke-dasharray": "6 8" });
+      ["#141a24", "#181f2c", "#1c2333"].forEach((c, i) => bl[i] && el(g, "path", { d: bl[i], fill: c, stroke: "#0b0e14", "stroke-width": 1 }));
+      ["#ffd27a", "#7fe8ff", "#ff9bd0"].forEach((c, i) => lit[i] && el(g, "path", { d: lit[i], fill: c, opacity: .45 }));
+      // Viertel als Zonen
+      const ZC = ["#3fe0ff", "#ff4fa3", "#b18cff", "#ffd23f", "#4dffa6"];
+      for (const n of ACT) {
+        const k = kindX(n, "modern"); n.mk = k;
+        if (k !== "district" && k !== "park") continue;
+        const r = k === "park" ? RAD[n.typ] * .85 : RAD[n.typ] + 70, c = k === "park" ? "#2f9d5c" : ZC[hsh(n.key) % ZC.length], P = [];
+        for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2 + rr(-.15, .15), rr0 = r * rr(.85, 1.12); P.push([n.p.x + Math.cos(a) * rr0, n.p.y + Math.sin(a) * rr0 * .85]); }
+        el(L.field, "path", { d: smooth(P.concat([P[0]])), fill: c, "fill-opacity": k === "park" ? .22 : .07, stroke: c, "stroke-opacity": k === "park" ? .5 : .5, "stroke-width": 2, "stroke-dasharray": k === "park" ? null : "9 6" });
+        if (k === "park") { let t = ""; for (let i = 0; i < 26; i++) { const a = rr(0, 6.283), d = r * .75 * Math.sqrt(rr(0, 1)); t += cP(n.p.x + Math.cos(a) * d, n.p.y + Math.sin(a) * d * .8, rr(4, 7)); } el(L.forest, "path", { d: t, fill: "#1f6b3e", stroke: "#0b2a17", "stroke-width": 1 }); }
+      }
+      // Wasser
+      for (const P of RIV) { const d = smooth(P), w = P.w || 4; el(L.river, "path", { d, fill: "none", stroke: "#0c1d2a", "stroke-width": w * 2.6 + 8, "stroke-linecap": "round" }); el(L.river, "path", { d, fill: "none", stroke: "#123a52", "stroke-width": w * 2.2, "stroke-linecap": "round" }); el(L.river, "path", { d, fill: "none", stroke: "#4fb6e0", "stroke-width": 1.1, opacity: .45, class: "flow" }); }
+      // Straßen zwischen Orten
+      for (const e of EDG) { if (e.kind === "in") continue; const d = smooth(e.P), main = e.kind === "main";
+        el(L.road, "path", { d, fill: "none", stroke: "#05070b", "stroke-width": main ? 11 : 8, "stroke-linecap": "round", opacity: .85 });
+        el(L.road, "path", { d, fill: "none", stroke: main ? "#5a6680" : "#414b5f", "stroke-width": main ? 5 : 3.4, "stroke-linecap": "round", "stroke-dasharray": e.far ? "10 7" : e.unk ? "3 5" : null }); }
+      // Bahn-/Metrolinien zwischen Bahnhöfen und Vierteln
+      const ST = ACT.filter(n => n.mk === "station"), HUB = ACT.filter(n => n.mk === "station" || n.mk === "district");
+      if (HUB.length >= 2 && (ST.length || HUB.length >= 3)) {
+        mst(HUB).forEach(([a, b], i) => { const d = octi(a.p, b.p), c = LINEC[(hsh(a.key) + hsh(b.key)) % LINEC.length]; el(L.road, "path", { d, fill: "none", stroke: "#05070b", "stroke-width": 11, "stroke-linejoin": "round", "stroke-linecap": "round" }); el(L.road, "path", { d, fill: "none", stroke: c, "stroke-width": 6, "stroke-linejoin": "round", "stroke-linecap": "round", opacity: .95, class: "metro" }); });
+        for (const n of HUB) { el(L.road, "circle", { cx: f1(n.p.x), cy: f1(n.p.y), r: 10, fill: "#f4f7ff", stroke: "#05070b", "stroke-width": 3 }); }
+      }
+      // Symbole
+      for (const n of [...ACT, ...N.filter(n => n.far)]) { const k = n.mk || kindX(n, "modern"); if (k === "district" || k === "park" || k === "river") continue; if (k === "hills") { for (let i = 0; i < 4; i++) el(L.hill, "ellipse", { cx: f1(n.p.x), cy: f1(n.p.y), rx: 60 + i * 34, ry: 34 + i * 20, fill: "none", stroke: "#2c3b4d", "stroke-width": 1.4, opacity: .8 - i * .15 }); continue; } badge(el, L.icon, n.p.x, n.p.y - 30, k); }
+    }
+    function worldScifi(C) {
+      const { L, defs, el, rr, pick, N, ACT, EDG, RIV, IR, X0, Y0, W, H, MX, MY, MW, MH, WS, smooth } = C;
+      const rg = el(defs, "radialGradient", { id: "wksg", cx: "50%", cy: "45%", r: "75%" });
+      el(rg, "stop", { offset: "0", "stop-color": "#0a1a33" }); el(rg, "stop", { offset: ".65", "stop-color": "#050e1e" }); el(rg, "stop", { offset: "1", "stop-color": "#02060d" });
+      el(L.bg, "rect", { x: MX, y: MY, width: MW, height: MH, fill: "#02060d" });
+      el(L.bg, "rect", { x: X0, y: Y0, width: W, height: H, fill: "url(#wksg)" });
+      C.reseed(WS ^ 1701);
+      for (let i = 0; i < 7; i++) el(L.bg, "ellipse", { cx: f1(rr(X0, X0 + W)), cy: f1(rr(Y0, Y0 + H)), rx: f1(rr(160, 380)), ry: f1(rr(90, 220)), fill: pick(["#1b3a6b", "#3a1b5c", "#0f4f55", "#123a5a"]), opacity: .32, filter: "url(#wkbl)" });
+      stars(C, MX + 500, MY + 500, MW - 1000, MH - 1000, Math.min(1400, Math.round((MW - 1000) * (MH - 1000) / 4200)), L.bg);
+      // Sektorraster
+      const S = 320, gx0 = Math.floor((X0 - 300) / S) * S, gy0 = Math.floor((Y0 - 300) / S) * S, gx1 = X0 + W + 300, gy1 = Y0 + H + 300; let fine = "", grid = "";
+      for (let u = gx0; u <= gx1; u += S / 4) (Math.round(u / (S / 4)) % 4 === 0 ? (grid += `M${u} ${gy0}V${gy1}`) : (fine += `M${u} ${gy0}V${gy1}`));
+      for (let v = gy0; v <= gy1; v += S / 4) (Math.round(v / (S / 4)) % 4 === 0 ? (grid += `M${gx0} ${v}H${gx1}`) : (fine += `M${gx0} ${v}H${gx1}`));
+      el(L.field, "path", { d: fine, stroke: "#1d5878", "stroke-width": .8, opacity: .16, fill: "none" });
+      el(L.field, "path", { d: grid, stroke: "#2a7fa0", "stroke-width": 1.3, opacity: .38, fill: "none" });
+      for (let u = gx0, i = 0; u < gx1; u += S, i++) for (let v = gy0, j = 0; v < gy1; v += S, j++) el(L.field, "text", { x: u + 10, y: v + 22, class: "sec", "font-size": 15 }, String.fromCharCode(65 + (((Math.round(u / S) % 26) + 26) % 26)) + (((Math.round(v / S) % 99) + 99) % 99 + 1));
+      // Ionenströme (Flüsse)
+      for (const P of RIV) { const d = smooth(P), w = P.w || 4; el(L.river, "path", { d, fill: "none", stroke: "#0f4f6a", "stroke-width": w * 4 + 6, "stroke-linecap": "round", opacity: .35 }); el(L.river, "path", { d, fill: "none", stroke: "#2de2c8", "stroke-width": 1.4, opacity: .6, class: "flow" }); }
+      // Routen
+      for (const e of EDG) { if (e.kind === "in") continue; const d = smooth(e.P);
+        if (e.kind === "main") { el(L.road, "path", { d, fill: "none", stroke: "#2de2c8", "stroke-width": 8, opacity: .12, "stroke-linecap": "round" }); el(L.road, "path", { d, fill: "none", stroke: "#2de2c8", "stroke-width": 1.9, opacity: .85, "stroke-dasharray": e.far ? "10 8" : null }); }
+        else el(L.road, "path", { d, fill: "none", stroke: "#6fb8d6", "stroke-width": 1.3, opacity: .75, "stroke-dasharray": e.unk ? "2 5" : "5 5" }); }
+      // Himmelskörper & Stationen
+      const PC = ["#2b7bb9", "#b9732b", "#2bb98a", "#8a4bd1", "#c94c6a", "#3fa0c0"];
+      for (const n of [...ACT, ...N.filter(n => n.far)]) {
+        const k = kindX(n, "scifi"), { x, y } = n.p, g = el(L.icon, "g"), c = PC[hsh(n.key) % PC.length];
+        if (k === "planet") { const r = n.rumor ? 14 : Math.max(18, (IR[n.typ] || 30) * .85), id = "wkpl" + n.id, gr = el(defs, "radialGradient", { id, cx: "35%", cy: "35%", r: "70%" }); el(gr, "stop", { offset: "0", "stop-color": "#ffffff", "stop-opacity": ".85" }); el(gr, "stop", { offset: ".25", "stop-color": c }); el(gr, "stop", { offset: "1", "stop-color": "#02060d" });
+          el(g, "circle", { cx: f1(x), cy: f1(y), r: f1(r + 34), fill: "none", stroke: "#2de2c8", "stroke-width": 1, opacity: .35, "stroke-dasharray": "2 6" });
+          el(g, "circle", { cx: f1(x), cy: f1(y), r: f1(r + 6), fill: c, opacity: .18, filter: "url(#wkbl)" });
+          el(g, "circle", { cx: f1(x), cy: f1(y), r: f1(r), fill: `url(#${id})` });
+          if (n.typ === "capital" || hsh(n.key) % 3 === 0) el(g, "ellipse", { cx: f1(x), cy: f1(y), rx: f1(r * 1.7), ry: f1(r * .45), fill: "none", stroke: "#cfeaff", "stroke-width": 1.6, opacity: .55, transform: `rotate(-18 ${f1(x)} ${f1(y)})` }); }
+        else if (k === "moon") { el(g, "circle", { cx: f1(x), cy: f1(y), r: 9, fill: "#8a96a6", stroke: "#cfd8e3", "stroke-width": 1 }); }
+        else if (k === "star") { const id = "wkst" + n.id, gr = el(defs, "radialGradient", { id }); el(gr, "stop", { offset: "0", "stop-color": "#fff" }); el(gr, "stop", { offset: ".3", "stop-color": "#ffd27a", "stop-opacity": ".8" }); el(gr, "stop", { offset: "1", "stop-color": "#ff9a3c", "stop-opacity": "0" }); el(g, "circle", { cx: f1(x), cy: f1(y), r: 34, fill: `url(#${id})` }); }
+        else if (k === "station") { el(g, "circle", { cx: f1(x), cy: f1(y), r: 26, fill: "#2de2c8", opacity: .12, filter: "url(#wkbl)" }); el(g, "path", { d: hexP(x, y, 15), fill: "#0b2033", stroke: "#2de2c8", "stroke-width": 1.8 }); el(g, "path", { d: hexP(x, y, 7, 30), fill: "none", stroke: "#7ff5e3", "stroke-width": 1.2 }); el(g, "path", { d: `M${f1(x - 24)} ${f1(y)}H${f1(x - 15)}M${f1(x + 15)} ${f1(y)}H${f1(x + 24)}M${f1(x)} ${f1(y - 24)}V${f1(y - 15)}M${f1(x)} ${f1(y + 15)}V${f1(y + 24)}`, stroke: "#2de2c8", "stroke-width": 1.4 }); }
+        else if (k === "ship") { el(g, "path", { d: `M${f1(x + 16)} ${f1(y)}L${f1(x - 10)} ${f1(y - 9)}L${f1(x - 5)} ${f1(y)}L${f1(x - 10)} ${f1(y + 9)}Z`, fill: "#1a2a3f", stroke: "#ffb547", "stroke-width": 1.6 }); }
+        else if (k === "gate") { el(g, "circle", { cx: f1(x), cy: f1(y), r: 17, fill: "none", stroke: "#b18cff", "stroke-width": 3 }); el(g, "circle", { cx: f1(x), cy: f1(y), r: 11, fill: "#b18cff", opacity: .2 }); }
+        else if (k === "asteroids") { const ax = n.axis || [1, 0]; let d = ""; for (let i = 0; i < 70; i++) { const t = rr(-1, 1), o = rr(-46, 46), px = x + ax[0] * t * 280 + ax[1] * o, py = y + ax[1] * t * 280 - ax[0] * o; d += cP(px, py, rr(1.5, 5)); } el(g, "path", { d, fill: "#5d6878", stroke: "#1b222c", "stroke-width": .8 }); }
+        else if (k === "nebula") { for (let i = 0; i < 4; i++) el(g, "ellipse", { cx: f1(x + rr(-40, 40)), cy: f1(y + rr(-30, 30)), rx: f1(rr(60, 110)), ry: f1(rr(40, 70)), fill: pick(["#7a3fd1", "#2de2c8", "#c94c9a"]), opacity: .28, filter: "url(#wkbl)" }); }
+        else if (k === "module") { el(g, "rect", { x: f1(x - 8), y: f1(y - 8), width: 16, height: 16, fill: "#0b2033", stroke: "#2de2c8", "stroke-width": 1.4, transform: `rotate(45 ${f1(x)} ${f1(y)})` }); }
+        else if (k !== "river") { el(g, "circle", { cx: f1(x), cy: f1(y), r: 16, fill: "#2de2c8", opacity: .1, filter: "url(#wkbl)" }); }
+      }
+    }
+    function fogX(C) {
+      const { STY, L, defs, el, MX, MY, MW, MH } = C, M = STY === "modern";
+      const pt = el(defs, "pattern", { id: "wkfx", width: M ? "12" : "6", height: M ? "12" : "6", patternUnits: "userSpaceOnUse", patternTransform: M ? "rotate(35)" : null });
+      el(pt, "path", { d: M ? "M0 0V12" : "M0 0H6", stroke: M ? "#3a404c" : "#2de2c8", "stroke-width": M ? 1.4 : .8, opacity: M ? .55 : .08 });
+      const fg = el(L.fog, "g", { mask: "url(#wkfog)", "pointer-events": "none" });
+      el(fg, "rect", { x: MX, y: MY, width: MW, height: MH, fill: M ? "#262a33" : "#01040a", opacity: M ? .94 : .9 });
+      el(fg, "rect", { x: MX, y: MY, width: MW, height: MH, fill: "url(#wkfx)" });
+      el(L.fog, "rect", { x: MX, y: MY, width: MW, height: MH, fill: M ? "#0b0d12" : "#2de2c8", opacity: M ? .55 : .2, mask: "url(#wkfogrim)", "pointer-events": "none" });
+    }
+    // Unterkarten: Modern = Häuserblöcke & Straßen, Sci-Fi = Stationsdecks & Sektoren
+    function localX(C) {
+      const { STY, SK, svg, el, rr, rnd, N, SP, TX, R, X0, Y0, W, H, G2, P, style, kmU, opts, find, D } = C, M = STY === "modern";
+      svg.setAttribute("width", W); svg.setAttribute("height", H); svg.setAttribute("viewBox", `${X0} ${Y0} ${W} ${H}`);
+      const defs = el(svg, "defs"), L = {}; ["bg", "field", "street", "house", "spec", "glow", "lbl", "mk", "me", "pin"].forEach(k => L[k] = el(svg, "g"));
+      el(el(defs, "filter", { id: "wxbl" }), "feGaussianBlur", { stdDeviation: "12" });
+      N.forEach(n => { n.mk = kindX(n, STY); });
+      const EX = N.map(n => [n.p.x, n.p.y, n.mk === "district" ? 0 : n.mk === "park" ? 70 : n.mk === "school" ? 80 : n.mk === "station" ? 56 : 34]);
+      const free = (x, y, m = 0) => !EX.some(e => Math.hypot(x - e[0], y - e[1]) < e[2] + m);
+      G2.forEach(g => { g.p = P(g.a, R * 1.05); });
+      if (M) {
+        el(L.bg, "rect", { x: X0 - 600, y: Y0 - 600, width: W + 1200, height: H + 1200, fill: "#0b0e14" });
+        const rg = el(defs, "radialGradient", { id: "wxg", gradientUnits: "userSpaceOnUse", cx: 0, cy: 0, r: R * 1.8 }); el(rg, "stop", { offset: "0", "stop-color": "#161c28" }); el(rg, "stop", { offset: "1", "stop-color": "#0b0e14" });
+        el(L.bg, "rect", { x: X0, y: Y0, width: W, height: H, fill: "url(#wxg)" });
+        const th = rr(-18, 18), cs = Math.cos(th * D), sn = Math.sin(th * D), S = style === "keep" ? 52 : 70, toW = (u, v) => [u * cs - v * sn, u * sn + v * cs];
+        const g = el(L.street, "g", { transform: `rotate(${f1(th)})` }), lim = R + 470;
+        let minor = "", major = "", bl = ["", "", "", ""], lit = ["", "", ""];
+        for (let u = -Math.ceil(lim / S) * S; u <= lim; u += S) { (Math.round(u / S) % 3 === 0 ? (major += `M${u} ${-lim}V${lim}`) : (minor += `M${u} ${-lim}V${lim}`)); (Math.round(u / S) % 3 === 0 ? (major += `M${-lim} ${u}H${lim}`) : (minor += `M${-lim} ${u}H${lim}`)); }
+        for (let u = -Math.ceil(lim / S) * S; u < lim; u += S) for (let v = -Math.ceil(lim / S) * S; v < lim; v += S) {
+          const [wx, wy] = toW(u + S / 2, v + S / 2), r = Math.hypot(wx, wy); if (!free(wx, wy, 6)) continue;
+          if (style === "keep" && r > R * .86) continue; const dens = r < R * .7 ? 1 : r < R ? .75 : r < R + 250 ? .4 : .12; if (rnd() > dens) continue;
+          const cut = rnd() < .5 ? 2 : rnd() < .5 ? 1 : 4, m = 7;
+          for (let i = 0; i < cut; i++) { const hw = cut === 1 ? S - 2 * m : (S - 2 * m) / 2 - 2, hh = cut === 4 ? (S - 2 * m) / 2 - 2 : S - 2 * m, bx = u + m + (cut === 1 ? 0 : (i % 2) * (hw + 4)), by = v + m + (cut === 4 ? Math.floor(i / 2) * (hh + 4) : 0); bl[Math.floor(rnd() * 4)] += `M${f1(bx)} ${f1(by)}h${f1(hw)}v${f1(hh)}h${f1(-hw)}Z`; for (let k = 0; k < 3; k++) if (rnd() < .3) lit[Math.floor(rnd() * 3)] += `M${f1(bx + rr(3, hw - 6))} ${f1(by + rr(3, hh - 6))}h3v3h-3Z`; }
+        }
+        el(g, "path", { d: minor, stroke: "#1a202b", "stroke-width": 9, fill: "none" });
+        el(g, "path", { d: major, stroke: "#252d3b", "stroke-width": 17, fill: "none" });
+        el(g, "path", { d: major, stroke: "#3a4458", "stroke-width": 1.4, fill: "none", "stroke-dasharray": "10 10" });
+        ["#151b26", "#19202d", "#1d2434", "#222a3b"].forEach((c, i) => bl[i] && el(L.house, "path", { d: bl[i], fill: c, stroke: "#0b0e14", "stroke-width": 1.2, transform: `rotate(${f1(th)})` }));
+        ["#ffd27a", "#7fe8ff", "#ff9bd0"].forEach((c, i) => lit[i] && el(L.house, "path", { d: lit[i], fill: c, opacity: .5, transform: `rotate(${f1(th)})` }));
+        if (style === "keep") el(L.field, "rect", { x: f1(-R * .86), y: f1(-R * .86), width: f1(R * 1.72), height: f1(R * 1.72), fill: "none", stroke: "#8b6cff", "stroke-width": 3, "stroke-dasharray": "10 8", opacity: .7, transform: `rotate(${f1(th)})` });
+        // Kanal / Fluss
+        if (SP.river != null) { const ra = SP.river * D, d = `M${f1(-Math.cos(ra) * (R + 700) + Math.sin(ra) * R * .3)} ${f1(-Math.sin(ra) * (R + 700) - Math.cos(ra) * R * .3)}L${f1(Math.cos(ra) * (R + 700) + Math.sin(ra) * R * .3)} ${f1(Math.sin(ra) * (R + 700) - Math.cos(ra) * R * .3)}`; el(L.field, "path", { d, stroke: "#0c1d2a", "stroke-width": 54 }); el(L.field, "path", { d, stroke: "#123a52", "stroke-width": 44 }); }
+        // Hauptstraßen zu den Nachbarorten
+        G2.forEach(g2 => { const e = P(g2.a, R + 600), d = `M0 0L${f1(e[0])} ${f1(e[1])}`; el(L.street, "path", { d, stroke: "#05070b", "stroke-width": 24, "stroke-linecap": "round" }); el(L.street, "path", { d, stroke: "#3a4458", "stroke-width": 18, "stroke-linecap": "round" }); el(L.street, "path", { d, stroke: "#6b7894", "stroke-width": 1.5, "stroke-dasharray": "12 10" }); });
+        // Bahnlinie durch den Bahnhof (oder das Zentrum)
+        const stn = N.find(n => n.mk === "station"), ra = (th + 35) * D, o = stn ? stn.p : { x: 0, y: 0 };
+        if (stn || style === "town") { const d = `M${f1(o.x - Math.cos(ra) * (R + 800))} ${f1(o.y - Math.sin(ra) * (R + 800))}L${f1(o.x + Math.cos(ra) * (R + 800))} ${f1(o.y + Math.sin(ra) * (R + 800))}`; el(L.street, "path", { d, stroke: "#05070b", "stroke-width": 16 }); el(L.street, "path", { d, stroke: "#5a6478", "stroke-width": 11, "stroke-dasharray": "1.5 6" }); el(L.street, "path", { d, stroke: "#9aa5bb", "stroke-width": 2.2, transform: "translate(0 -3)" }); el(L.street, "path", { d, stroke: "#9aa5bb", "stroke-width": 2.2, transform: "translate(0 3)" }); el(L.street, "path", { d, stroke: LINEC[hsh(SP.name || "") % LINEC.length], "stroke-width": 3, opacity: .55, transform: "translate(0 9)" }); }
+        // Gebäude der Unterorte
+        for (const n of N) { const { x, y } = n.p, k = n.mk, c = MCOL[k] || MCOL.place;
+          if (k === "district") { el(L.field, "circle", { cx: f1(x), cy: f1(y), r: 120, fill: c === MCOL.place ? "#3fe0ff" : c, "fill-opacity": .05, stroke: "#3fe0ff", "stroke-opacity": .45, "stroke-dasharray": "9 6", "stroke-width": 2 }); continue; }
+          if (k === "park") { el(L.spec, "rect", { x: f1(x - 64), y: f1(y - 48), width: 128, height: 96, rx: 18, fill: "#123522", stroke: "#2f9d5c", "stroke-width": 2 }); let t = ""; for (let i = 0; i < 18; i++) t += cP(x + rr(-52, 52), y + rr(-38, 38), rr(5, 8)); el(L.spec, "path", { d: t, fill: "#1f6b3e", stroke: "#0b2a17" }); continue; }
+          if (k === "station") { el(L.spec, "rect", { x: f1(x - 52), y: f1(y - 17), width: 104, height: 34, rx: 5, fill: "#16243a", stroke: "#3fe0ff", "stroke-width": 2, transform: `rotate(${f1(th + 35)} ${f1(x)} ${f1(y)})` }); }
+          else if (k === "school") { el(L.spec, "rect", { x: f1(x - 70), y: f1(y - 52), width: 140, height: 104, fill: "#121a28", stroke: "#8b6cff", "stroke-width": 2, "stroke-dasharray": "7 5" }); el(L.spec, "path", { d: `M${f1(x - 60)} ${f1(y - 42)}h70v22h-48v50h-22Z`, fill: "#232c40", stroke: "#0b0e14", "stroke-width": 1.5 }); el(L.spec, "rect", { x: f1(x + 14), y: f1(y - 6), width: 48, height: 48, rx: 4, fill: "#1b4a33", stroke: "#e6f2ea", "stroke-width": 1.2, "stroke-opacity": .6 }); }
+          else if (k === "plaza") { el(L.spec, "rect", { x: f1(x - 46), y: f1(y - 46), width: 92, height: 92, fill: "#1e2430", stroke: "#3a4458", "stroke-width": 2 }); let z = ""; for (let i = -36; i <= 36; i += 8) z += `M${x + i} ${f1(y - 44)}v12M${x + i} ${f1(y + 32)}v12`; el(L.spec, "path", { d: z, stroke: "#e8ecf4", "stroke-width": 4, opacity: .55 }); }
+          else if (k === "home") { el(L.spec, "rect", { x: f1(x - 22), y: f1(y - 15), width: 44, height: 30, fill: "#1b2333", stroke: "#2c8656", "stroke-width": 1.6 }); let w2 = ""; for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) w2 += `M${f1(x - 17 + i * 10)} ${f1(y - 10 + j * 11)}h5v5h-5Z`; el(L.spec, "path", { d: w2, fill: "#ffd27a", opacity: .55 }); }
+          else { el(L.glow, "circle", { cx: f1(x), cy: f1(y), r: 34, fill: c, opacity: .35, filter: "url(#wxbl)" }); el(L.spec, "rect", { x: f1(x - 18), y: f1(y - 13), width: 36, height: 26, rx: 3, fill: "#1d1a28", stroke: c, "stroke-width": 1.8 }); }
+          badge(el, L.spec, x, y - 34, k === "district" ? "place" : k, .9);
+        }
+      } else {
+        el(L.bg, "rect", { x: X0 - 600, y: Y0 - 600, width: W + 1200, height: H + 1200, fill: "#02060d" });
+        stars(C, X0 - 300, Y0 - 300, W + 600, H + 600, 700, L.bg);
+        el(L.bg, "circle", { cx: 0, cy: 0, r: R * 1.08, fill: "#2de2c8", opacity: .06, filter: "url(#wxbl)" });
+        const RG = [1, .75, .5, .27];
+        RG.forEach((k, i) => el(L.field, "circle", { cx: 0, cy: 0, r: f1(R * k), fill: i % 2 ? "#0c2038" : "#0a1a2e", stroke: "#1d4a6b", "stroke-width": 2 }));
+        RG.forEach(k => el(L.field, "circle", { cx: 0, cy: 0, r: f1(R * k - 10), fill: "none", stroke: "#2de2c8", "stroke-width": 2.4, opacity: .3, "stroke-dasharray": "14 6" }));
+        // Speichen / Korridore
+        const AN = G2.map(g => g.a); for (let i = 0; i < 6; i++) { const a = i * 60 + 15; if (!AN.some(b => angDiff(a, b) < 20)) AN.push(a); }
+        AN.forEach(a => { const [x, y] = P(a, R), d = `M0 0L${f1(x)} ${f1(y)}`; el(L.street, "path", { d, stroke: "#123a55", "stroke-width": 16 }); el(L.street, "path", { d, stroke: "#2de2c8", "stroke-width": 1.2, opacity: .55 }); });
+        // Module entlang der Decks
+        let lt = ["", ""];
+        for (let ring = 0; ring < 3; ring++) { const r0 = R * RG[ring + 1], r1 = R * RG[ring], cnt = Math.round((r0 + r1) * Math.PI / 46);
+          for (let i = 0; i < cnt; i++) { const a = i / cnt * 360 + rr(-2, 2), rm = (r0 + r1) / 2 + rr(-8, 8), [x, y] = P(a, rm); if (!free(x, y, 8) || AN.some(b => angDiff(a, b) < 3.5) || rnd() < .28) continue; const w = rr(18, 30), h = (r1 - r0) * rr(.45, .7); el(L.house, "rect", { x: f1(x - w / 2), y: f1(y - h / 2), width: f1(w), height: f1(h), fill: "#10243b", stroke: "#1d4a6b", "stroke-width": 1.2, transform: `rotate(${f1(a + 90)} ${f1(x)} ${f1(y)})` }); if (rnd() < .3) lt[rnd() < .7 ? 0 : 1] += cP(x, y, 2.2); } }
+        el(L.house, "path", { d: lt[0], fill: "#2de2c8", opacity: .7 }); el(L.house, "path", { d: lt[1], fill: "#ffb547", opacity: .7 });
+        el(L.spec, "circle", { cx: 0, cy: 0, r: f1(R * .12), fill: "#0e2a44", stroke: "#2de2c8", "stroke-width": 2 }); el(L.glow, "circle", { cx: 0, cy: 0, r: f1(R * .1), fill: "#2de2c8", opacity: .35, filter: "url(#wxbl)" });
+        // Andockarme zu den Nachbarorten
+        G2.forEach(g2 => { const [x0, y0] = P(g2.a, R), [x1, y1] = P(g2.a, R + 300), d = `M${f1(x0)} ${f1(y0)}L${f1(x1)} ${f1(y1)}`; el(L.street, "path", { d, stroke: "#0c2038", "stroke-width": 22 }); el(L.street, "path", { d, stroke: "#2de2c8", "stroke-width": 1.4, opacity: .7, "stroke-dasharray": "6 6" }); el(L.spec, "circle", { cx: f1(x1), cy: f1(y1), r: 18, fill: "#0b2033", stroke: "#2de2c8", "stroke-width": 2 }); });
+        // Sektor-Bezeichnungen
+        for (let ring = 0; ring < 3; ring++) { const [x, y] = P(-90 + 8, R * (RG[ring] + RG[ring + 1]) / 2); el(L.lbl, "text", { x: f1(x), y: f1(y), class: "sec", "font-size": 15, "text-anchor": "middle" }, "DECK " + String.fromCharCode(65 + ring)); }
+        for (const n of N) { const { x, y } = n.p, k = n.mk;
+          if (k === "district") continue;
+          el(L.glow, "circle", { cx: f1(x), cy: f1(y), r: 30, fill: k === "ship" ? "#ffb547" : "#2de2c8", opacity: .22, filter: "url(#wxbl)" });
+          el(L.spec, "path", { d: hexP(x, y, 22), fill: "#0b2033", stroke: k === "ship" ? "#ffb547" : k === "gate" ? "#b18cff" : "#2de2c8", "stroke-width": 2 }); }
+      }
+      // Beschriftung & Marker (wie Fantasy-Unterkarte)
+      const LB = [], hit = r => LB.some(o => r.x < o.x + o.w && r.x + r.w > o.x && r.y < o.y + o.h && r.y + r.h > o.y), MK = {};
+      N.forEach(n => LB.push({ x: n.p.x - 12, y: n.p.y - 12, w: 24, h: 24 }));
+      el(L.lbl, "text", { x: 0, y: f1(Y0 + 130), "text-anchor": "middle", class: "reg", "font-size": 46, fill: SK.reg, opacity: .55 }, String(SP.name || "").toUpperCase());
+      if (SP.sub) el(L.lbl, "text", { x: 0, y: f1(Y0 + 160), "text-anchor": "middle", class: "reg", "font-size": 13, fill: SK.mtn, opacity: .85 }, SP.sub);
+      G2.forEach(g => { if (!g.to) return; const [x, y] = P(g.a, R + 330), r = { x: x - 90, y: y - 14, w: 180, h: 22 }; LB.push(r); el(L.lbl, "text", { x: f1(x), y: f1(y + (M ? 0 : 40)), "text-anchor": "middle", class: "it", "font-size": 17 }, (Math.cos(g.a * D) < -.2 ? "← " : "") + g.to + (Math.cos(g.a * D) >= -.2 ? " →" : "")); });
+      for (const n of N) {
+        if (n.mk === "district") { const fs = 24; el(L.lbl, "text", { x: f1(n.p.x), y: f1(n.p.y - 22), "text-anchor": "middle", class: "reg", "font-size": fs, fill: SK.mtn, opacity: .9 }, n.name.toUpperCase()); LB.push({ x: n.p.x - n.name.length * fs * .45, y: n.p.y - 46, w: n.name.length * fs * .9, h: 30 }); continue; }
+        const fs = n.center || /station|school|plaza|planet/.test(n.mk) ? 21 : 18, txt = n.unk ? n.name + " ?" : n.name, w = txt.length * fs * .64, { x, y } = n.p;
+        const Cn = [[x, y + 18 + fs, "middle"], [x + 18, y + fs * .35, "start"], [x - 18, y + fs * .35, "end"], [x, y - 52, "middle"]];
+        const rect = c => ({ x: c[2] === "middle" ? c[0] - w / 2 : c[2] === "start" ? c[0] : c[0] - w, y: c[1] - fs, w, h: fs + 4 });
+        let ch = Cn[0]; for (const c of Cn) if (!hit(rect(c))) { ch = c; break; } LB.push(rect(ch));
+        el(L.lbl, "text", { x: f1(ch[0]), y: f1(ch[1]), "text-anchor": ch[2], class: n.unk ? "lbl u" : fs > 18 ? "lbl" : "lbl s", "font-size": fs }, txt);
+      }
+      for (const n of N) {
+        const g = el(L.mk, "g", { class: "mk" + (n.unk ? " q" : "") + (opts.enter && opts.enter[n.key] ? " ent" : ""), transform: `translate(${f1(n.p.x)} ${f1(n.p.y)})`, "data-id": n.id });
+        el(g, "circle", { r: 30, fill: "transparent" }); el(g, "circle", { class: "halo", r: 16 }); el(g, "circle", { class: "ring", r: 9 });
+        if (n.unk) el(g, "text", { y: 4.5, "text-anchor": "middle", "font-size": 12, fill: SK.q, "font-family": SK.qf, class: "q" }, "?"); else el(g, "circle", { class: "dot", r: 3.5 });
+        if (opts.enter && opts.enter[n.key]) el(g, "circle", { class: "door", r: 13.5 });
+        MK[n.id] = g;
+      }
+      const me = el(L.me, "g", { "pointer-events": "none" }), MEC = SK.me;
+      el(me, "circle", { r: 9, fill: "none", stroke: MEC[0], "stroke-width": 2, class: "pulse" }); el(me, "circle", { r: 9, fill: "none", stroke: MEC[0], "stroke-width": 2, class: "pulse b" });
+      el(me, "circle", { r: 7, fill: MEC[0], stroke: MEC[1], "stroke-width": 2 });
+      const hereTxt = TX.here || "", hw = Math.max(46, hereTxt.length * 4.4 + 10);
+      el(me, "path", { d: `M0-14L-6-24H-${f1(hw)}V-48H${f1(hw)}V-24H6Z`, fill: MEC[2], stroke: MEC[0], "stroke-width": 1.5, opacity: .95 });
+      el(me, "text", { y: -31, "text-anchor": "middle", class: "it", style: `font-size:14px;fill:${MEC[3]};stroke-width:0` }, hereTxt);
+      const setMe = (x, y) => me.setAttribute("transform", `translate(${f1(x)} ${f1(y)})`);
+      const cur = find(opts.cur);
+      if (cur) setMe(cur.p.x, cur.p.y); else if (opts.curSelf) setMe(0, 0); else me.style.display = "none";
+      const toKm = u => u * kmU, unitsForKm = km => km / kmU;
+      const travel = (a, b) => { if (!a || !b || a === b) return null; const km = toKm(Math.hypot(a.p.x - b.p.x, a.p.y - b.p.y)); return { km, days: km / KM_DAY }; };
+      const self = { p: { x: 0, y: 0 }, key: norm(SP.name || ""), name: SP.name || "" };
+      return { N, ACT: N, MK, X0, Y0, W, H, core: { x: -R - 150, y: -R - 150, w: 2 * R + 300, h: 2 * R + 300 }, PX: null, cur: cur || (opts.curSelf ? self : null), lastSeg: null, SEG: [], drawTrail: () => {}, setMe, find, region: "", byId: id => N.find(n => n.id === id), routePts: null, travel, toKm, unitsForKm, pinG: L.pin, meG: me, local: true, self, kmU };
+    }
+    const SKIN = { pal: s => PAL[s] || PAL.modern, kmd: s => KMD[s] || 25, kind: (n, s) => s === "fantasy" ? null : kindX(n, s), world: C => (C.STY === "modern" ? worldModern : worldScifi)(C), fog: fogX, local: localX };
+    const typeOf = s => { s = String(s || "").toLowerCase(); if (STY0 !== "fantasy") for (const [re, ty] of (STY_TYPES[STY0] || [])) if (re.test(s)) return ty; for (const [re, ty] of TYPE_RULES) if (re.test(s)) return ty; return "place"; };
     const TL = {
       de: { region: "Region", capital: "Hauptstadt", city: "Stadt", village: "Dorf", castle: "Burg", farm: "Hof", house: "Haus", mill: "Mühle", forest: "Wald", river: "Fluss", mountains: "Gebirge", camp: "Lager", place: "Ort" },
       en: { region: "Region", capital: "Capital", city: "City", village: "Village", castle: "Castle", farm: "Farm", house: "House", mill: "Mill", forest: "Forest", river: "River", mountains: "Mountains", camp: "Camp", place: "Place" }
@@ -3279,14 +3819,16 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       if ((m = l.match(/^(?:im\s+|in\s+the\s+)?(?:zentrum|mitte|herz|center|centre|middle|heart)\s+(?:von|vom|des|der|of)\s+(?:the\s+)?(.+)/))) return { k: "mid", ref: m[1] };
       if ((m = l.match(/^(?:durch|through|across)\s+(?:the\s+)?(.+)/))) return { k: "thr", ref: m[1] };
       if ((m = l.match(/^(?:in\s+der\s+nähe|in\s+der\s+umgebung|unweit|in\s+the\s+vicinity)\s+(?:von\s+|vom\s+|des\s+|der\s+|of\s+)?(?:the\s+|dem\s+|der\s+)?(.+)/))) return { k: "near", ref: m[1] };
+      if ((m = l.match(/^(?:im|in)\s+(?:orbit|umlauf)\s+(?:von|vom|um|of|around)\s+(?:the\s+|dem\s+|der\s+|den\s+)?(.+)/) || l.match(/^(?:orbiting|umkreist)\s+(?:the\s+|den\s+)?(.+)/))) return { k: "near", ref: m[1] }; // Sci-Fi: Umlaufbahn = nahe, kein Elternort
       if ((m = l.match(/^(?:in|im|inside|within|innerhalb)\s+(?:the\s+|von\s+|der\s+|dem\s+|des\s+)?(.+)/))) return { k: "in", ref: m[1] };
       if ((m = l.match(/^(?:am|an\s+der|an\s+den|an\s+dem|an|bei|beim|nahe\s+bei|nahe|neben|vor|hinter|unter|über|near|next\s+to|close\s+to|beside|by|at|on|behind|below|above|outside|außerhalb)\s+(?:the\s+|dem\s+|der\s+|den\s+|des\s+)?(.+)/))) return { k: "near", ref: m[1] };
       return { k: "free", ref: null };
     }
     const NUMW = [["halb", .5], ["halber", .5], ["halben", .5], ["half", .5], ["zwei", 2], ["two", 2], ["drei", 3], ["three", 3], ["vier", 4], ["four", 4], ["fünf", 5], ["five", 5], ["mehrere", 4], ["several", 4], ["einige", 3], ["few", 3], ["ein", 1], ["eine", 1], ["einen", 1], ["einem", 1], ["one", 1], ["a", 1], ["an", 1]];
-    function parseDist(s) {
+    function parseDist(s, sty) {
       s = String(s || "").toLowerCase().trim();
       if (!s || /^[–\-?—\s]+$/.test(s)) return null;
+      if (sty === "modern" || sty === "scifi") return parseDistX(s, sty);
       if (/weit|fern|\bfar\b|distant|remote/.test(s)) return "fern";
       let n = 1; const m = s.match(/(\d+(?:[.,]\d+)?)/), w = s.split(/[\s\-]+/);
       if (m) n = parseFloat(m[1].replace(",", ".")); else for (const [x, v] of NUMW) if (w.includes(x)) { n = v; break; }
@@ -3319,6 +3861,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
     function render(svg, list, opts) {
       const TX = opts.tx || {};
+      const STY = opts.style === "modern" || opts.style === "scifi" ? opts.style : opts.style ? "fantasy" : STY0, DRAW = STY === "fantasy", FOG_ON = opts.fog !== false, SK = DRAW ? null : SKIN.pal(STY);
       while (svg.firstChild) svg.removeChild(svg.firstChild);
       const N = [];
       for (const p of list) {
@@ -3326,7 +3869,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         if (!name || !key || N.some(n => n.key === key)) continue;
         let typ = p.typ ? typeOf(p.typ) : typeOf(name);
         if (!p.typ && typ === "region") typ = "place";
-        N.push({ id: "n" + N.length, name, key, typ, typS: String(p.typ || ""), relS: String(p.lage || ""), distS: String(p.dist || ""), rel: parseRel(p.lage), d: parseDist(p.dist), unk: !!p.unk, src: p.src || "", info: p });
+        N.push({ id: "n" + N.length, name, key, typ, typS: String(p.typ || ""), relS: String(p.lage || ""), distS: String(p.dist || ""), rel: parseRel(p.lage), d: parseDist(p.dist, STY), unk: !!p.unk, src: p.src || "", info: p });
       }
       const srcKey = N.map(n => n.key + "|" + n.relS + "|" + n.distS + "|" + n.typ).join("\n");
       let seed = hsh(srcKey);
@@ -3406,10 +3949,12 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       el(el(defs, "pattern", { id: "wkhz", width: "9", height: "9", patternUnits: "userSpaceOnUse", patternTransform: "rotate(35)" }), "path", { d: "M0 0V9", stroke: "#3a2e1e", "stroke-width": "1.2", opacity: ".55" });
       const L = {}; ["bg", "field", "hill", "river", "forest", "road", "icon", "fog", "trail", "lbl", "mk", "me", "pin"].forEach(k => L[k] = el(svg, "g"));
       const MX = X0 - 900, MY = Y0 - 900, MW = W + 1800, MH = H + 1800;
+      if (DRAW) {
       el(L.bg, "rect", { x: MX, y: MY, width: MW, height: MH, fill: "#1c1711" });
       el(L.bg, "rect", { x: X0, y: Y0, width: W, height: H, fill: "url(#wkpg)" });
       el(L.bg, "rect", { x: MX, y: MY, width: MW, height: MH, fill: "#fff", filter: "url(#wktx)", opacity: .9 });
-      seed = WS; for (let i = 0; i < 9; i++) el(L.bg, "ellipse", { cx: f1(rr(X0, X0 + W)), cy: f1(rr(Y0, Y0 + H)), rx: f1(rr(120, 300)), ry: f1(rr(80, 200)), fill: pick(["#3a2f1d", "#2b3320", "#33291a"]), opacity: .35, filter: "url(#wkbl)" });
+      }
+      seed = WS; for (let i = 0; i < 9; i++) { const at = { cx: f1(rr(X0, X0 + W)), cy: f1(rr(Y0, Y0 + H)), rx: f1(rr(120, 300)), ry: f1(rr(80, 200)), fill: pick(["#3a2f1d", "#2b3320", "#33291a"]), opacity: .35, filter: "url(#wkbl)" }; if (DRAW) el(L.bg, "ellipse", at); }
 
       const OB = []; const near = (x, y, c) => OB.some(p => Math.abs(p[0] - x) < c && Math.abs(p[1] - y) < c && Math.hypot(p[0] - x, p[1] - y) < c);
       const freeN = (x, y, extra, skip) => ACT.every(n => n === skip || Math.hypot(n.p.x - x, n.p.y - y) > RAD[n.typ] + extra);
@@ -3429,10 +3974,12 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         return P;
       }
       function drawRiver(P, w) {
+        if (DRAW) {
         const d = smooth(P);
         el(L.river, "path", { d, fill: "none", stroke: "#0c1312", "stroke-width": w + 5, "stroke-linecap": "round" });
         el(L.river, "path", { d, fill: "none", stroke: "#3f6a72", "stroke-width": w, "stroke-linecap": "round" });
         el(L.river, "path", { d, fill: "none", stroke: "#9ccbd0", "stroke-width": 1.2, opacity: .45, class: "flow" });
+        } else P.w = w;
         RIV.push(P); P.forEach(p => OB.push(p));
       }
       const rScore = (R, skip) => { let p = 0; R.forEach((q, i) => { for (const n of ACT) if (n !== skip) { const d = Math.hypot(q[0] - n.p.x, q[1] - n.p.y); if (d < RAD[n.typ] + 40) p += RAD[n.typ] + 40 - d; } for (let j = 0; j < i - 6; j += 2) if (Math.hypot(q[0] - R[j][0], q[1] - R[j][1]) < 60) p += 40; }); return p + R.length * .5; };
@@ -3464,8 +4011,9 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         if (n.typ === "region" || n.typ === "river") continue;
         let b = base(n); if (b && b.typ === "river") b = base(b); if (!b) b = n.far ? ROOT : null; if (!b || b === n) continue;
         if (n.rel.k === "in") { addE(b, n, [[b.p.x, b.p.y], [n.p.x, n.p.y]], n.days, "in"); continue; }
-        const main = BIG.has(n.typ) && BIG.has(b.typ) || n.far, P = curve(b.p, n.p, rr(-.14, .14)); addE(b, n, P, n.days || .1, main ? "main" : "path"); const d = smooth(P);
-        if (main) { el(L.road, "path", { d, fill: "none", stroke: "#1a130c", "stroke-width": 7.5, "stroke-linecap": "round", opacity: .9 }); el(L.road, "path", { d, fill: "none", stroke: "#a88a5c", "stroke-width": 2.6, "stroke-linecap": "round", "stroke-dasharray": n.far ? "10 7" : null }); }
+        const main = BIG.has(n.typ) && BIG.has(b.typ) || n.far, P = curve(b.p, n.p, rr(-.14, .14)), e0 = addE(b, n, P, n.days || .1, main ? "main" : "path"); e0.far = n.far; e0.unk = n.unk; const d = smooth(P);
+        if (!DRAW) { /* Wege zeichnet der Stil (SKIN.world) */ }
+        else if (main) { el(L.road, "path", { d, fill: "none", stroke: "#1a130c", "stroke-width": 7.5, "stroke-linecap": "round", opacity: .9 }); el(L.road, "path", { d, fill: "none", stroke: "#a88a5c", "stroke-width": 2.6, "stroke-linecap": "round", "stroke-dasharray": n.far ? "10 7" : null }); }
         else { el(L.road, "path", { d, fill: "none", stroke: "#120d09", "stroke-width": 4, opacity: .55 }); el(L.road, "path", { d, fill: "none", stroke: "#8f7650", "stroke-width": 1.7, "stroke-dasharray": n.unk ? "2 5" : "5 4" }); }
         P.forEach(p => OB.push(p));
       }
@@ -3478,6 +4026,9 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       function house(g, x, y, s, lit) { const h = el(g, "g", { transform: `translate(${f1(x)} ${f1(y)}) scale(${f1(s)})` }); el(h, "path", { d: "M-5.5-5H5.5V2H-5.5Z", fill: "#2c2117", stroke: "#0e0a07", "stroke-width": 1 }); el(h, "path", { d: "M-7.5-4.5L0-11L7.5-4.5Z", fill: lit ? "#7a5230" : "#5a4630", stroke: "#0e0a07", "stroke-width": 1 }); if (lit) el(h, "rect", { x: -1.5, y: -3, width: 3, height: 3, fill: "#f0b45d", opacity: .85 }); return h; }
       function peaks(n) { const b = base(n), bp = b ? b.p : { x: 0, y: 0 }, ax = (Math.atan2(n.p.y - bp.y, n.p.x - bp.x) / D) + 90, ux = Math.cos(ax * D), uy = Math.sin(ax * D), red = /rot|red/i.test(n.name), Pk = []; n.axis = [ux, uy]; for (let i = 0; i < 26; i++) { const t = rr(-1, 1), o = rr(-40, 40), x = n.p.x + ux * t * 300 + uy * o, y = n.p.y + uy * t * 300 - ux * o; if (!inArea(x, y)) continue; const h = (1 - Math.abs(t) * .55) * rr(36, 64); Pk.push([x, y, h]); } Pk.sort((a, b) => a[1] - b[1]).forEach(([x, y, h]) => { const w = h * 1.25, g = el(L.forest, "g"); el(g, "path", { d: `M${f1(x - w / 2)} ${f1(y)}L${f1(x)} ${f1(y - h)}L${f1(x + w / 2)} ${f1(y)}Z`, fill: red ? "#5b3b2b" : "#4b3f2e", stroke: "#120e0a", "stroke-width": 1.6, "stroke-linejoin": "round" }); el(g, "path", { d: `M${f1(x)} ${f1(y - h)}L${f1(x + w / 2)} ${f1(y)}L${f1(x + w * .08)} ${f1(y)}Z`, fill: red ? "#2d1c16" : "#2a2219" }); el(g, "path", { d: `M${f1(x - h * .16)} ${f1(y - h * .74)}L${f1(x)} ${f1(y - h)}L${f1(x + h * .16)} ${f1(y - h * .74)}`, fill: "none", stroke: "#cdb486", "stroke-width": 1.4, opacity: .6 }); }); }
       function hill(x, y, s) { const g = el(L.hill, "g", { transform: `translate(${f1(x)} ${f1(y)}) scale(${f1(s)})`, opacity: .8 }); el(g, "path", { d: "M-17 3Q-8-13 0-13Q9-13 17 3", fill: "#262016", stroke: "#6b5a3e", "stroke-width": 1.8 }); for (let k = 0; k < 3; k++) el(g, "path", { d: `M${4 + k * 4} ${-8 + k * 3}l-3 6`, stroke: "#6b5a3e", "stroke-width": 1 }); }
+      if (!DRAW) { for (const n of N) if (n.typ === "mountains") { const b = base(n), bp = b ? b.p : { x: 0, y: 0 }, ax = (Math.atan2(n.p.y - bp.y, n.p.x - bp.x) / D) + 90; n.axis = [Math.cos(ax * D), Math.sin(ax * D)]; }
+        SKIN.world({ STY, SK, L, defs, el, f1, rr, rnd, pick, reseed: v => { seed = v; }, N, ACT, EDG, RIV, RAD, IR, X0, Y0, W, H, MX, MY, MW, MH, CX, CY, WS, base, smooth, freeN, near, OB, inArea, opts, D }); }
+      else {
       for (const n of [...ACT, ...N.filter(n => n.far)]) {
         const g = el(L.icon, "g"), { x, y } = n.p;
         if (n.unk && ICON_TYPES.has(n.typ) && n.typ !== "city" && n.typ !== "capital") { if (n.typ === "camp") { for (const k of [-12, 8]) el(g, "path", { d: `M${f1(x + k - 8)} ${f1(y - 12)}l8-14l8 14Z`, fill: "#4a3a26", stroke: "#0e0a07" }); el(g, "circle", { cx: f1(x + 2), cy: f1(y - 6), r: 3, fill: "#ff9a4c" }); } else house(g, x, y - 13, 1.6, false); continue; }
@@ -3499,6 +4050,8 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           else if (roll < .4) { if (freeN(x, y, 46) && !near(x, y, 30)) { hill(x, y, rr(.7, 1.25)); OB.push([x, y]); } }
         }
         seed = hsh(srcKey) ^ 99; }
+      }
+      seed = hsh(srcKey) ^ 99;
 
       // Nebel des Unbekannten: braunes Pergament überall, aufgedeckt nur um bekannte/besuchte Orte, Wege dazwischen und die gereiste Spur
       const FOG = [], REV = new Set();
@@ -3524,6 +4077,8 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       const fogTrail = holes(el(fm, "g", { filter: "url(#wkfogf)" }), "#000");
       const rm = el(defs, "mask", { id: "wkfogrim", maskUnits: "userSpaceOnUse", x: MX, y: MY, width: MW, height: MH });
       const rimTrail = holes(el(rm, "g", { filter: "url(#wkfogr)" }), "#000");
+      if (FOG_ON && !DRAW) SKIN.fog({ STY, SK, L, defs, el, f1, rr, pick, reseed: v => { seed = v; }, MX, MY, MW, MH, CX, CY, W, H, WS });
+      if (FOG_ON && DRAW) {
       const pg = el(defs, "radialGradient", { id: "wkparch", gradientUnits: "userSpaceOnUse", cx: f1(CX), cy: f1(CY), r: f1(Math.max(W, H) * .9) });
       el(pg, "stop", { offset: "0", "stop-color": "#4b3a24" }); el(pg, "stop", { offset: ".6", "stop-color": "#3f301e" }); el(pg, "stop", { offset: "1", "stop-color": "#2c2116" });
       const fg = el(L.fog, "g", { mask: "url(#wkfog)", "pointer-events": "none" });
@@ -3532,6 +4087,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       seed = WS ^ 4242; for (let i = 0; i < 14; i++) el(fg, "ellipse", { cx: f1(rr(MX + 300, MX + MW - 300)), cy: f1(rr(MY + 300, MY + MH - 300)), rx: f1(rr(140, 380)), ry: f1(rr(90, 240)), fill: pick(["#5a4529", "#2a1f13", "#4f3c23"]), opacity: .33, filter: "url(#wkbl)" });
       for (let i = 0; i < 3; i++) { const vert = i % 2 === 0, k = rr(.3, .7); el(fg, "path", { d: vert ? `M${f1(MX + MW * k)} ${MY}V${MY + MH}` : `M${MX} ${f1(MY + MH * k)}H${MX + MW}`, stroke: "#6b5434", "stroke-width": 2, opacity: .35 }); }
       el(L.fog, "rect", { x: MX, y: MY, width: MW, height: MH, fill: "#1b130b", opacity: .7, mask: "url(#wkfogrim)", "pointer-events": "none" });
+      }
       seed = hsh(srcKey) ^ 77;
 
       // Beschriftung & Marker
@@ -3546,13 +4102,13 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         const rect = c => ({ x: c[2] === "middle" ? c[0] - w / 2 : c[2] === "start" ? c[0] : c[0] - w, y: c[1] - h, w, h: h + 4 });
         let ch = C[0]; for (const c of C) if (!hit(rect(c))) { ch = c; break; }
         LB.push(rect(ch));
-        el(L.lbl, "text", { x: f1(ch[0]), y: f1(ch[1]), "text-anchor": ch[2], class: n.typ === "mountains" ? "reg" : n.unk || n.typ === "river" || n.typ === "forest" ? "lbl u" : big || n.typ === "village" ? "lbl" : "lbl s", "font-size": fs, fill: n.typ === "mountains" ? "#d9b98a" : null }, txt);
+        el(L.lbl, "text", { x: f1(ch[0]), y: f1(ch[1]), "text-anchor": ch[2], class: n.typ === "mountains" ? "reg" : n.unk || n.typ === "river" || n.typ === "forest" ? "lbl u" : big || n.typ === "village" ? "lbl" : "lbl s", "font-size": fs, fill: n.typ === "mountains" ? (DRAW ? "#d9b98a" : SK.mtn) : null }, txt);
         if (n.rumor) el(L.lbl, "text", { x: f1(ch[0]), y: f1(ch[1] + 16), "text-anchor": ch[2], class: "it", "font-size": 13 }, TX.far || "");
       }
       function marker(n) {
         const g = el(L.mk, "g", { class: "mk" + (n.unk ? " q" : "") + (n.man ? " man" : "") + (n.rumor ? " far" : "") + (opts.enter && opts.enter[n.key] ? " ent" : ""), transform: `translate(${f1(n.p.x)} ${f1(n.p.y)})`, "data-id": n.id });
         el(g, "circle", { r: 30, fill: "transparent" }); el(g, "circle", { class: "halo", r: 16 }); el(g, "circle", { class: "ring", r: n.typ === "river" ? 6 : 9 });
-        if (n.unk) el(g, "text", { y: 4.5, "text-anchor": "middle", "font-size": 12, fill: "#ecd39c", "font-family": "Georgia,serif" }, "?"); else el(g, "circle", { class: "dot", r: n.typ === "river" ? 2.2 : 3.5 });
+        if (n.unk) el(g, "text", { y: 4.5, "text-anchor": "middle", "font-size": 12, fill: DRAW ? "#ecd39c" : SK.q, "font-family": DRAW ? "Georgia,serif" : SK.qf, class: DRAW ? null : "q" }, "?"); else el(g, "circle", { class: "dot", r: n.typ === "river" ? 2.2 : 3.5 });
         if (opts.enter && opts.enter[n.key]) el(g, "circle", { class: "door", r: 13.5 });
         MK[n.id] = g;
       }
@@ -3567,16 +4123,16 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         if (mem.length) { ox = mem.reduce((a, n) => a + n.p.x, 0) / mem.length; oy = mem.reduce((a, n) => a + n.p.y, 0) / mem.length; sx = sy = 260; }
         seed = hsh(rg.key) ^ WS; let best = null, bs = -1e9;
         for (let i = 0; i < 300; i++) { const x = rr(ox - sx, ox + sx), y = rr(oy - sy, oy + sy), fs = 44, w = rg.name.length * fs * .8, r = { x: x - w / 2, y: y - 30, w, h: 36 }; if (hit(r)) continue; let sc = pts.length ? Math.min(...pts.map(n => Math.hypot(n.p.x - x, n.p.y - y) - RAD[n.typ])) : 0; sc = Math.min(sc, 160) - Math.hypot(x - ox, y - oy) * .25; if (sc > bs) { bs = sc; best = [x, y, r]; } }
-        if (best) { LB.push(best[2]); el(L.lbl, "text", { x: f1(best[0]), y: f1(best[1]), "text-anchor": "middle", class: "reg", "font-size": 44, fill: "#cfa86a", opacity: .42 }, rg.name.toUpperCase()); }
+        if (best) { LB.push(best[2]); el(L.lbl, "text", { x: f1(best[0]), y: f1(best[1]), "text-anchor": "middle", class: "reg", "font-size": 44, fill: DRAW ? "#cfa86a" : SK.reg, opacity: .42 }, rg.name.toUpperCase()); }
       });
-      { // „Unerkundet“ dort, wo der Nebel am dichtesten ist
+      if (FOG_ON) { // „Unerkundet“ dort, wo der Nebel am dichtesten ist
         const dHole = (x, y) => { let m = 1e9; for (const o of FOG) { if (o.c) m = Math.min(m, Math.hypot(x - o.c[0], y - o.c[1]) - o.c[2]); else for (let i = 0; i < o.p.length; i += 3) m = Math.min(m, Math.hypot(x - o.p[i][0], y - o.p[i][1]) - o.w / 2); } return m; };
         seed = WS ^ 515; const C = [];
         let bx0 = 1e9, by0 = 1e9, bx1 = -1e9, by1 = -1e9; for (const n of N) { bx0 = Math.min(bx0, n.p.x); bx1 = Math.max(bx1, n.p.x); by0 = Math.min(by0, n.p.y); by1 = Math.max(by1, n.p.y); }
         bx0 = Math.max(X0 + 140, bx0 + 60); bx1 = Math.min(X0 + W - 140, bx1 - 60); by0 = Math.max(Y0 + 80, by0 - 330); by1 = Math.min(Y0 + H - 80, by1 + 330);
         for (let i = 0; i < 220; i++) { const x = rr(bx0, Math.max(bx0 + 1, bx1)), y = rr(by0, Math.max(by0 + 1, by1)), d = Math.min(dHole(x, y), 420); if (d > 150 && !hit({ x: x - 110, y: y - 18, w: 220, h: 24 })) C.push([d, x, y]); }
         C.sort((a, b) => b[0] - a[0]); const P = [];
-        for (const c of C) { if (P.length >= 2) break; if (P.some(p => Math.hypot(p[1] - c[1], p[2] - c[2]) < 500)) continue; P.push(c); el(L.lbl, "text", { x: f1(c[1]), y: f1(c[2]), "text-anchor": "middle", class: "reg fogt", "font-size": 17, fill: "#9a8260", opacity: .75 }, TX.unexplored || ""); }
+        for (const c of C) { if (P.length >= 2) break; if (P.some(p => Math.hypot(p[1] - c[1], p[2] - c[2]) < 500)) continue; P.push(c); el(L.lbl, "text", { x: f1(c[1]), y: f1(c[2]), "text-anchor": "middle", class: "reg fogt", "font-size": 17, fill: DRAW ? "#9a8260" : SK.fogt, opacity: .75 }, TX.unexplored || ""); }
       }
 
       // Wegsuche (Dijkstra) – nur intern für die gereiste Spur und Reisezeiten, kein sichtbarer Routenplaner
@@ -3593,8 +4149,8 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         else P = curve(a.p, b.p, .1);
         return { P, days };
       }
-      const trail = el(L.trail, "path", { fill: "none", stroke: "#1a120a", "stroke-width": 7, "stroke-linecap": "round", opacity: .5 });
-      const trail2 = el(L.trail, "path", { fill: "none", stroke: "#f0c26e", "stroke-width": 3.6, "stroke-linecap": "round", "stroke-dasharray": ".1 9" });
+      const trail = el(L.trail, "path", { fill: "none", stroke: DRAW ? "#1a120a" : SK.trail0, "stroke-width": 7, "stroke-linecap": "round", opacity: .5 });
+      const trail2 = el(L.trail, "path", { fill: "none", stroke: DRAW ? "#f0c26e" : SK.trail, "stroke-width": 3.6, "stroke-linecap": "round", "stroke-dasharray": ".1 9" });
       const SEG = [];
       let fogT = 0;
       const drawTrail = (extra, force) => { const d = SEG.concat(extra ? [extra] : []).filter(s => s.length > 1).map(s => "M" + s.map(p => f1(p[0]) + " " + f1(p[1])).join("L")).join(""); trail.setAttribute("d", d); trail2.setAttribute("d", d);
@@ -3608,28 +4164,31 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       }
       drawTrail(null, true);
       const me = el(L.me, "g", { "pointer-events": "none" });
-      el(me, "circle", { r: 9, fill: "none", stroke: "#ff8a5c", "stroke-width": 2, class: "pulse" }); el(me, "circle", { r: 9, fill: "none", stroke: "#ff8a5c", "stroke-width": 2, class: "pulse b" });
-      el(me, "circle", { r: 7, fill: "#ff8a5c", stroke: "#2a120a", "stroke-width": 2 });
+      const MEC = DRAW ? ["#ff8a5c", "#2a120a", "#1a120d", "#ffd0a8"] : SK.me;
+      el(me, "circle", { r: 9, fill: "none", stroke: MEC[0], "stroke-width": 2, class: "pulse" }); el(me, "circle", { r: 9, fill: "none", stroke: MEC[0], "stroke-width": 2, class: "pulse b" });
+      el(me, "circle", { r: 7, fill: MEC[0], stroke: MEC[1], "stroke-width": 2 });
       const hereTxt = TX.here || "", hw = Math.max(46, hereTxt.length * 4.4 + 10);
-      el(me, "path", { d: `M0-14L-6-24H-${f1(hw)}V-48H${f1(hw)}V-24H6Z`, fill: "#1a120d", stroke: "#ff8a5c", "stroke-width": 1.5, opacity: .95 });
-      el(me, "text", { y: -31, "text-anchor": "middle", class: "it", style: "font-size:14px;fill:#ffd0a8;stroke-width:0" }, hereTxt);
+      el(me, "path", { d: `M0-14L-6-24H-${f1(hw)}V-48H${f1(hw)}V-24H6Z`, fill: MEC[2], stroke: MEC[0], "stroke-width": 1.5, opacity: .95 });
+      el(me, "text", { y: -31, "text-anchor": "middle", class: "it", style: `font-size:14px;fill:${MEC[3]};stroke-width:0` }, hereTxt);
       const cur = cur0;
       const setMe = (x, y) => me.setAttribute("transform", `translate(${f1(x)} ${f1(y)})`);
       if (cur && cur.typ !== "region") setMe(cur.p.x, cur.p.y); else me.style.display = "none";
       const core = (() => { let a = 1e9, b = 1e9, c = -1e9, d = -1e9; for (const n of [...ACT, ...N.filter(n => n.far)]) { const r = Math.min(RAD[n.typ], 90); a = Math.min(a, n.p.x - r); c = Math.max(c, n.p.x + r); b = Math.min(b, n.p.y - r); d = Math.max(d, n.p.y + r); } if (a > c) { a = -200; b = -200; c = 200; d = 200; } return { x: a - 110, y: b - 60, w: c - a + 220, h: d - b + 120 }; })();
+      // km je Karteneinheit: Fantasy 25 (Tagesmarsch), Modern 2,5 (Stadtmaßstab), Sci-Fi 25 (= 1 Sektor)
+      const KMDs = DRAW ? KM_DAY : SKIN.kmd(STY);
       function travel(a, b) {
         if (!a || !b || a === b) return null;
         const geo = Math.hypot(a.p.x - b.p.x, a.p.y - b.p.y) * KMU / KM_DAY;
-        if (a.rumor || b.rumor || a.far || b.far) return { far: true, days: geo, km: geo * KM_DAY };
+        if (a.rumor || b.rumor || a.far || b.far) return { far: true, days: geo, km: geo * KMDs };
         const R = route(a, b); let days = 0;
-        if (R) for (const s of R) { if (s.e.a.far || s.e.b.far) return { far: true, days: geo, km: geo * KM_DAY }; days += s.e.days || 0; }
+        if (R) for (const s of R) { if (s.e.a.far || s.e.b.far) return { far: true, days: geo, km: geo * KMDs }; days += s.e.days || 0; }
         if (!R || days <= 0) days = geo;
         days = Math.max(days, geo * .8);
-        return { days, km: days * KM_DAY };
+        return { days, km: days * KMDs };
       }
       // Linearer Maßstab (Nadeln + Maßstabsleiste): 2 Tagesmärsche ≈ PXD(2) Einheiten
-      const toKm = u => u * KMU, unitsForKm = km => km / KMU;
-      return { N, ACT, MK, X0, Y0, W, H, core, PX, cur: cur && cur.typ !== "region" ? cur : null, lastSeg, SEG, drawTrail, setMe, find, region: REG ? REG.name : "", byId: id => N.find(n => n.id === id), routePts, travel, toKm, unitsForKm, pinG: L.pin, RIV, EDG, REV, world: true,
+      const toKm = DRAW ? (u => u * KMU) : (u => u * KMU * KMDs / KM_DAY), unitsForKm = DRAW ? (km => km / KMU) : (km => km / (KMU * KMDs / KM_DAY));
+      return { N, ACT, MK, X0, Y0, W, H, core, PX, cur: cur && cur.typ !== "region" ? cur : null, lastSeg, SEG, drawTrail, setMe, find, region: REG ? REG.name : "", byId: id => N.find(n => n.id === id), routePts, travel, toKm, unitsForKm, pinG: L.pin, meG: me, RIV, EDG, REV, world: true,
         riverAt: (x, y, r) => { let best = null, bd = r; for (const P of RIV) for (let i = 1; i < P.length; i++) { const d = Math.hypot(P[i][0] - x, P[i][1] - y); if (d < bd) { bd = d; best = Math.atan2(P[i][1] - P[i - 1][1], P[i][0] - P[i - 1][0]) / D; } } return best; },
         dirs: n => (G.get(n) || []).map(({ to }) => ({ a: Math.atan2(to.p.y - n.p.y, to.p.x - n.p.x) / D, to: to.name, typ: to.typ })) };
     }
@@ -3650,6 +4209,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     const circ = (x, y, r) => `M${f1(x - r)} ${f1(y)}a${f1(r)} ${f1(r)} 0 1 0 ${f1(2 * r)} 0a${f1(r)} ${f1(r)} 0 1 0 ${f1(-2 * r)} 0Z`;
     function renderLocal(svg, list, opts) {
       const SP = opts.local || {}, TX = opts.tx || {}, POS = opts.pos || {};
+      const STY = opts.style === "modern" || opts.style === "scifi" ? opts.style : opts.style ? "fantasy" : STY0;
       while (svg.firstChild) svg.removeChild(svg.firstChild);
       let seed = hsh("L:" + norm(SP.name || "ort"));
       const rnd = () => { seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
@@ -3667,7 +4227,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         const name = String(p.name || "").trim(), key = norm(name);
         if (!name || !key || N.some(n => n.key === key)) continue;
         let typ = p.typ ? typeOf(p.typ) : typeOf(name); if (typ === "region") typ = "place";
-        const n = { id: "n" + N.length, name, key, typ, typS: String(p.typ || ""), relS: String(p.lage || ""), distS: String(p.dist || ""), rel: parseRel(p.lage), d: parseDist(p.dist), unk: !!p.unk, src: p.src || "", info: p };
+        const n = { id: "n" + N.length, name, key, typ, typS: String(p.typ || ""), relS: String(p.lage || ""), distS: String(p.dist || ""), rel: parseRel(p.lage), d: parseDist(p.dist, STY), unk: !!p.unk, src: p.src || "", info: p };
         n.kind = kindOf(n); N.push(n);
       }
       const AL = [];
@@ -3707,6 +4267,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         for (const n of MOV) { const r = Math.hypot(n.p.x, n.p.y), mx = (walled ? .84 : 1.05) * R; if (r > mx) { n.p.x *= mx / r; n.p.y *= mx / r; } }
       }
       for (const n of N) { const ov = POS[n.key]; if (ov) { n.p = { x: ov[0], y: ov[1] }; n.man = true; } }
+      if (STY !== "fantasy") return SKIN.local({ STY, SK: SKIN.pal(STY), svg, el, f1, rr, rnd, pick, reseed: v => { seed = v; }, N, SP, TX, R, X0, Y0, W, H, G2, P, walled, wallR, style, T0, kmU, opts, find, manor, smooth, circ, angDiff, D });
       // Ebenen & Defs
       const defs = el(svg, "defs");
       const rg = el(defs, "radialGradient", { id: "wlg", gradientUnits: "userSpaceOnUse", cx: 0, cy: 0, r: R * 1.9 });
@@ -3926,7 +4487,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       const toKm = u => u * kmU, unitsForKm = km => km / kmU;
       const travel = (a, b) => { if (!a || !b || a === b) return null; const km = toKm(Math.hypot(a.p.x - b.p.x, a.p.y - b.p.y)); return { km, days: km / KM_DAY }; };
       const self = { p: { x: C[0], y: C[1] }, key: norm(SP.name || ""), name: SP.name || "" };
-      return { N, ACT: N, MK, X0, Y0, W, H, core: { x: -R - 150, y: -R - 150, w: 2 * R + 300, h: 2 * R + 300 }, PX: null, cur: cur || (opts.curSelf ? self : null), lastSeg: null, SEG: [], drawTrail: () => {}, setMe, find, region: "", byId: id => N.find(n => n.id === id), routePts: null, travel, toKm, unitsForKm, pinG: L.pin, local: true, self, kmU };
+      return { N, ACT: N, MK, X0, Y0, W, H, core: { x: -R - 150, y: -R - 150, w: 2 * R + 300, h: 2 * R + 300 }, PX: null, cur: cur || (opts.curSelf ? self : null), lastSeg: null, SEG: [], drawTrail: () => {}, setMe, find, region: "", byId: id => N.find(n => n.id === id), routePts: null, travel, toKm, unitsForKm, pinG: L.pin, meG: me, local: true, self, kmU };
     }
 
     // Betrachter: Wischen = Verschieben, Pinch/Mausrad = Zoom, kurz Tippen = Menü, lange drücken = Stecknadel, Nadel antippen = entfernen
@@ -4022,6 +4583,19 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     const local = e => { const r = V.stage.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
     const toMap = p => ({ x: (p.x - V.tx) / V.s + V.M.X0, y: (p.y - V.ty) / V.s + V.M.Y0 });
     const cancelLP = () => { if (V.lp) { clearTimeout(V.lp); V.lp = 0; } };
+    // „Du bist hier“-Marker (Punkt + Schild) ist nur Deko (pointer-events:none) – ein Tipp darauf gilt dem aktuellen Ort darunter
+    function meHit(e, tgt) {
+      const M = V.M, g = M && M.meG; if (!g || g.style.display === "none" || !M.cur || M.cur === M.self) return tgt;
+      const R = [...g.querySelectorAll(":scope > circle:not(.pulse), :scope > path")].map(x => x.getBoundingClientRect()).filter(r => r.width);
+      if (!R.some(r => e.clientX >= r.left - 6 && e.clientX <= r.right + 6 && e.clientY >= r.top - 6 && e.clientY <= r.bottom + 6)) return tgt;
+      const st = V.stage, ctr = k => { const r = k.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2, Math.min(r.width, r.height) / 2]; };
+      // ein anderer Ort, dessen sichtbares Symbol direkt getroffen wurde, behält Vorrang (das Schild verdeckt keine Nachbarorte)
+      if (tgt && tgt.dataset.id !== String(M.cur.id)) { const [x, y, r] = ctr(tgt); if (Math.hypot(e.clientX - x, e.clientY - y) <= Math.max(12, r * .55)) return tgt; }
+      const c = st.querySelector('.mk[data-id="' + M.cur.id + '"]'); if (c) return c;
+      const d = R[0], cx = d.left + d.width / 2, cy = d.top + d.height / 2; let best = tgt, bd = 44;
+      st.querySelectorAll(".mk").forEach(k => { const [x, y] = ctr(k), dd = Math.hypot(x - cx, y - cy); if (dd < bd) { bd = dd; best = k; } });
+      return best;
+    }
     function longPress() {
       V.lp = 0; const st = V.st;
       if (!st || !V.M || st.moved > SLOP || V.ptrs.size !== 1 || V.pinch) return;
@@ -4042,6 +4616,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         const p = local(e); V.ptrs.set(e.pointerId, p);
         if (V.ptrs.size === 1) {
           V.st = { x: p.x, y: p.y, tx: V.tx, ty: V.ty, moved: 0, long: false }; V.tapT = e.target.closest(".mk"); V.pinT = e.target.closest(".pin"); V.dragN = null;
+          if (!V.pinT) V.tapT = meHit(e, V.tapT);
           if (V.tapT && V.opts.dragMode && V.opts.dragMode()) { const n = V.M.byId(V.tapT.dataset.id); if (n) V.dragN = { n, g: V.tapT }; }
           cancelLP(); if (!V.dragN && !V.pinT) V.lp = setTimeout(longPress, LONG_MS);
         } else if (V.ptrs.size === 2) { cancelLP(); const [a, b] = [...V.ptrs.values()]; V.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2, s: V.s, tx: V.tx, ty: V.ty }; V.tapT = null; V.pinT = null; V.dragN = null; }
@@ -4115,7 +4690,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     // Ohne Anzeige rechnen (Reisezeiten für den Spielleiter)
     const layout = (list, opts) => render(document.createElementNS(NS, "svg"), list, opts || {});
     const clearPins = () => { V.pins.length = 0; drawPins(); };
-    return { mount, select, focus, frameKeys, zoomBy, reset, refit, layout, clearPins, norm, typeOf, typeLabel, parseRel, parseDist, findIn, hasWord, KM_DAY, get model() { return V.M; }, get pins() { return V.pins; }, get view() { return { s: V.s, tx: V.tx, ty: V.ty, fitS: V.fitS }; } };
+    return { mount, select, focus, frameKeys, zoomBy, reset, refit, layout, clearPins, norm, typeOf, setStyle, get style() { return STY0; }, iconKind: (n, k) => SKIN.kind(n, k || STY0), typeLabel, parseRel, parseDist, findIn, hasWord, KM_DAY, get model() { return V.M; }, get pins() { return V.pins; }, get view() { return { s: V.s, tx: V.tx, ty: V.ty, fitS: V.fitS }; } };
   })();
 
   // BLOCK W: WELTBUCH-MODUS – Spielleiter führt Karte, Chronik & Lore still im Hintergrund (keine Extra-Aufrufe)
@@ -4274,8 +4849,8 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
   function wbWorldModel() {
     const list = allMapPlaces(), tree = wbTree(list), map = getSessMap();
     const vis = tree.nodes.filter(n => !n.cont).map(n => n.p), alias = wbAlias(tree, null);
-    const key = JSON.stringify([vis.map(p => [p.name, p.typ, p.lage, p.dist]), map.pos, alias]);
-    if (wbWMCache.key !== key || !wbWMCache.M) wbWMCache = { key, M: WK.layout(vis, { pos: map.pos, alias, tx: {} }) };
+    const key = JSON.stringify([vis.map(p => [p.name, p.typ, p.lage, p.dist]), map.pos, alias, stKind()]);
+    if (wbWMCache.key !== key || !wbWMCache.M) wbWMCache = { key, M: WK.layout(vis, { pos: map.pos, alias, tx: {}, style: stKind() }) };
     return { M: wbWMCache.M, tree };
   }
   // Entfernung → lesbare Reisezeiten (zu Fuß ~25 km/Tag, Pferd ~55, Karren ~20)
@@ -4304,7 +4879,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       const { M, tree } = wbWorldModel();
       const a = wbTop(tree.find(from)), b = wbTop(tree.find(to)); if (!a || !b || a === b) return;
       const ma = M.find(a.name), mb = M.find(b.name); if (!ma || !mb || ma === mb) return;
-      const r = M.travel(ma, mb); if (!r || (!r.far && !(r.km >= 2))) return;
+      const r = M.travel(ma, mb); if (!r || (!r.far && !(r.km >= stMinKm()))) return;
       map.travel = { a: wbClip(from, 80), b: wbClip(to, 80), km: Math.round(r.km * 10) / 10, far: !!r.far, left: 2, n: (state.messages || []).length };
     } catch (e) { console.warn("Reisezeit", e); }
   }
@@ -4312,14 +4887,14 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     const out = [], map = getSessMap();
     const tr = map.travel;
     // nur solange man noch am Ziel ist und der Wechsel frisch ist (z. B. nicht nach langer Pause mit ausgeschalteter Karte)
-    if (tr && WK.norm(tr.b) === WK.norm(curPlaceName()) && !(typeof tr.n === "number" && (state.messages || []).length - tr.n > 12)) { out.push(tr.far ? tf("wb_travel_far", { a: tr.a, b: tr.b }) : tf("wb_travel_hint", { a: tr.a, b: tr.b, ...wbTravelFmt(tr.km) })); }
+    if (tr && WK.norm(tr.b) === WK.norm(curPlaceName()) && !(typeof tr.n === "number" && (state.messages || []).length - tr.n > 12)) { out.push(tr.far ? tf(stKey("wb_travel_far"), { a: tr.a, b: tr.b }) : stKind() !== "fantasy" ? stTravelHint(tr) : tf("wb_travel_hint", { a: tr.a, b: tr.b, ...wbTravelFmt(tr.km) })); }
     if (!cur) return out;
     try {
       const { M, tree } = wbWorldModel(), top = wbTop(tree.find(cur)), mc = top ? M.find(top.name) : null; if (!mc) return out;
       const R = [];
-      for (const n of M.N) { if (n === mc || n.typ === "region" || n.typ === "river" || n.rumor || n.far) continue; const r = M.travel(mc, n); if (r && !r.far && r.km >= 2) R.push([r.km, n.name]); }
+      for (const n of M.N) { if (n === mc || n.typ === "region" || n.typ === "river" || n.rumor || n.far) continue; const r = M.travel(mc, n); if (r && !r.far && r.km >= stMinKm()) R.push([r.km, n.name]); }
       R.sort((a, b) => a[0] - b[0]);
-      if (R.length) out.push(tf("wb_travel_from", { a: top.name }) + R.slice(0, 4).map(([km, nm]) => nm + " ~" + wbFmtDur(km, "foot")).join(", "));
+      if (R.length) out.push(stKind() !== "fantasy" ? stTravelFrom(top.name, R) : tf("wb_travel_from", { a: top.name }) + R.slice(0, 4).map(([km, nm]) => nm + " ~" + wbFmtDur(km, "foot")).join(", "));
     } catch (e) {}
     return out;
   }
@@ -4329,15 +4904,15 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     const en = state.lang === "en", L = [];
     if (en) {
       L.push("[WORLD BOOK – hidden app tags, one line each at the end with the other tags, only when something really changes]");
-      if (s.map) L.push("- Location change: [LOCATION: Name | type | position relative to a known place | distance]; place inside a town or building: [LOCATION: Name | type | in Town]; known place: [LOCATION: Name]");
-      if (s.memories) L.push("- Important event, promise or relationship: [MEMORY: short fact | keyword, keyword]");
-      if (s.lore) L.push("- New or changed NPC, place or thing: [LORE: Title | brief new info]");
+      if (s.map) L.push(stKind() !== "fantasy" ? stMapRule(true) : "- Location change: [LOCATION: Name | type | position relative to a known place | distance]; place inside a town or building: [LOCATION: Name | type | in Town]; known place: [LOCATION: Name]");
+      if (s.memories) L.push(stKind() !== "fantasy" ? stMemRule(true) : "- Important event, promise or relationship: [MEMORY: short fact | keyword, keyword]");
+      if (s.lore) L.push(stKind() !== "fantasy" ? stLoreRule(true) : "- New or changed NPC, place or thing: [LORE: Title | brief new info]");
       if (s.memories || s.lore) L.push(`- Secret, for you only: ${s.memories ? "[MEMORY!: …]" : "[LORE!: …]"}`);
     } else {
       L.push("[WELTBUCH – unsichtbare App-Tags, je eine Zeile am Ende bei den anderen Tags, nur bei echten Änderungen]");
-      if (s.map) L.push("- Ortswechsel: [ORT: Name | Typ | Lage zu bekanntem Ort | Entfernung]; Ort in einer Stadt oder einem Gebäude: [ORT: Name | Typ | in Stadtname]; bekannter Ort: [ORT: Name]");
-      if (s.memories) L.push("- Wichtiges Ereignis, Versprechen, Beziehung: [ERINNERUNG: kurzer Fakt | Schlüsselwort, Schlüsselwort]");
-      if (s.lore) L.push("- Neue oder geänderte Figur, Ort, Sache: [LORE: Titel | knappe neue Info]");
+      if (s.map) L.push(stKind() !== "fantasy" ? stMapRule(false) : "- Ortswechsel: [ORT: Name | Typ | Lage zu bekanntem Ort | Entfernung]; Ort in einer Stadt oder einem Gebäude: [ORT: Name | Typ | in Stadtname]; bekannter Ort: [ORT: Name]");
+      if (s.memories) L.push(stKind() !== "fantasy" ? stMemRule(false) : "- Wichtiges Ereignis, Versprechen, Beziehung: [ERINNERUNG: kurzer Fakt | Schlüsselwort, Schlüsselwort]");
+      if (s.lore) L.push(stKind() !== "fantasy" ? stLoreRule(false) : "- Neue oder geänderte Figur, Ort, Sache: [LORE: Titel | knappe neue Info]");
       if (s.memories || s.lore) L.push(`- Geheim, nur für dich: ${s.memories ? "[ERINNERUNG!: …]" : "[LORE!: …]"}`);
     }
     if (s.map) {
@@ -4544,9 +5119,10 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     requestAnimationFrame(() => renderMapView(false));
   }
   function closeMapModal() { hideMapCard(); closeModal("map-modal"); }
-  function mapTexts() { return { here: t("map_here"), unexplored: t("map_unexplored"), far: t("map_far") }; }
+  function mapTexts() { return { here: t("map_here"), unexplored: t(stKey("map_unexplored")), far: t(stKey("map_far")) }; }
   function wbMeasureText(km) {
     if (km === null) return [t("map_pin_one"), t("map_pin_tap")];
+    if (stKind() !== "fantasy") return stMeasureText(km);
     const f = wbTravelFmt(km); return [tf("map_pin_dist", { d: f.d }), tf("map_pin_travel", f)];
   }
   function wbRegionMembers(tree) {
@@ -4595,7 +5171,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     stage.classList.toggle("dragmode", mapDragMode);
     const sub = document.getElementById("map-sub"), pos = document.getElementById("map-pos"), ttl = document.getElementById("map-h");
     if (!list.length) {
-      mapLevel = ""; mapTree = null; renderCrumbs(null); if (ttl) ttl.textContent = t("map_title");
+      mapLevel = ""; mapTree = null; renderCrumbs(null); if (ttl) ttl.textContent = t(stKey("map_title"));
       empty.style.display = "flex"; world.style.display = "none"; document.getElementById("map-measure").classList.remove("on");
       sub.textContent = t("map_sub_empty"); pos.textContent = ""; return;
     }
@@ -4608,13 +5184,13 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     vis.forEach(n => { if (wbEnterable(n) && !WB_BAD_KEYS.has(n.key)) enter[n.key] = true; });
     const pins = wbPins[mapLevel || "~welt"] || (wbPins[mapLevel || "~welt"] = []);
     const opts = {
-      lang: state.lang, tx: mapTexts(), pos: map.pos, cur, alias, enter, pins,
+      lang: state.lang, tx: mapTexts(), pos: map.pos, cur, alias, enter, pins, style: stKind(), fog: stFog(),
       measureEl: document.getElementById("map-measure"), measureText: wbMeasureText,
       onPins: (P, how) => { if (how === "add" && P.length === 1) { const h = document.getElementById("map-gest"); if (h) h.classList.add("dim"); } },
       dragMode: () => mapDragMode,
       onTap: n => n ? showMapCard(n) : hideMapCard(),
       onMove: (n, x, y) => { if (WB_BAD_KEYS.has(n.key)) return; map.pos[n.key] = [x, y]; saveState(); renderMapView(true); showToast(t("map_moved").replace("{n}", n.name), "success"); },
-      onScale: (km, w) => { const s = document.getElementById("map-scale-txt"), b = document.getElementById("map-scale-bar"); if (s) s.textContent = L ? wbFmtKm(km) : wbFmtKm(km) + " · " + tf("map_scale_foot", { f: wbFmtDur(km, "foot") }); if (b) b.style.width = Math.round(w) + "px"; }
+      onScale: (km, w) => { const s = document.getElementById("map-scale-txt"), b = document.getElementById("map-scale-bar"); if (s) s.textContent = stKind() !== "fantasy" ? stScaleText(km, !!L) : L ? wbFmtKm(km) : wbFmtKm(km) + " · " + tf("map_scale_foot", { f: wbFmtDur(km, "foot") }); if (b) b.style.width = Math.round(w) + "px"; }
     };
     let M;
     if (!L) {
@@ -4624,9 +5200,9 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       const cn = tree.find(cur);
       M = WK.mount(stage, world, vis.map(n => n.p), { ...opts, local: wbLocalSpec(L, tree), curSelf: !!cn && cn === L }, keepView);
     }
-    if (ttl) ttl.textContent = L ? L.name : t("map_title");
+    if (ttl) ttl.textContent = L ? L.name : t(stKey("map_title"));
     renderCrumbs(L);
-    sub.textContent = L ? (L.p.typ || WK.typeLabel(L.ty, state.lang)) + " · " + tf("map_count", { n: vis.length }) : (M.region || t("map_unknown_land")) + " · " + tf("map_count", { n: list.length });
+    sub.textContent = L ? (L.p.typ || WK.typeLabel(L.ty, state.lang)) + " · " + tf("map_count", { n: vis.length }) : (M.region || t(stKey("map_unknown_land"))) + " · " + tf("map_count", { n: list.length });
     const cn = tree.find(cur), shownCur = M.cur && M.cur.name && WK.norm(M.cur.name) !== WK.norm(cur) && cn ? cur + " (" + M.cur.name + ")" : cur;
     pos.textContent = cur ? "📍 " + shownCur : t("map_pos_unknown");
   }
@@ -4655,14 +5231,14 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     document.getElementById("map-card-k").textContent = n.unk ? t("map_card_new") : (n.typS || WK.typeLabel(n.typ, state.lang)) + (n.relS ? " · " + n.relS : "") + dist + (n.rumor ? " · " + t("map_rumor") : "") + (kids ? " · " + tf("map_card_kids", { n: kids }) : "");
     document.getElementById("map-card-t").textContent = n.name;
     const lo = n.unk ? null : wbLoreSnippet(n);
-    document.getElementById("map-card-d").textContent = n.unk ? tf("map_card_unk_desc", { ref: n.ref ? n.ref.name : (tn && tn.cont ? tn.cont.name : "?") }) : lo ? lo.text : n.rumor ? t("map_rumor_desc") : t("map_card_nolore");
+    document.getElementById("map-card-d").textContent = n.unk ? tf("map_card_unk_desc", { ref: n.ref ? n.ref.name : (tn && tn.cont ? tn.cont.name : "?") }) : lo ? lo.text : n.rumor ? t(stKey("map_rumor_desc")) : t("map_card_nolore");
     document.getElementById("map-card-s").textContent = n.unk ? t("map_card_src_gm") : lo ? tf("map_card_src_lore", { t: lo.title }) : "";
     // Entfernung von der aktuellen Position
     const xEl = document.getElementById("map-card-x"); xEl.textContent = "";
     if (M && M.cur && M.cur !== n && M.cur.p && n.p && !isCur) {
       const r = M.local ? M.travel(M.cur, n) : M.travel(M.N.includes(M.cur) ? M.cur : null, n);
       if (r && r.far) xEl.textContent = t("map_card_far");
-      else if (r && r.km > 0) { const f = wbTravelFmt(r.km); xEl.textContent = tf("map_card_from_here", f); }
+      else if (r && r.km > 0) { if (stKind() !== "fantasy") xEl.textContent = stCardText(r.km); else { const f = wbTravelFmt(r.km); xEl.textContent = tf("map_card_from_here", f); } }
     }
     const memEl = document.getElementById("map-card-m"); memEl.innerHTML = "";
     const mems = (state.lorebook || []).filter(l => l && l.ai && l.aiKind === "memory" && !l.gmOnly && l.place && WK.norm(l.place) === n.key).slice(-3);
@@ -4729,6 +5305,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
   }
   function wbScanInstruction() {
     const en = state.lang === "en", known = allMapPlaces().map(p => p.name).slice(0, 60).join(", "), start = wbClip(state.world && state.world.location, 80);
+    if (stKind() !== "fantasy") return stScanInstruction(known, start);
     return en ? `### TASK: PLACE LIST FOR A MAP
 Read the lore excerpts and list every concrete place of the game world (regions, cities, villages, castles, buildings, forests, rivers, mountains, camps).
 Format: exactly one line per place:
@@ -4911,6 +5488,232 @@ Beginne mit der Region, in der das Abenteuer spielt${start ? ` (Start: ${start})
     if (n.ty === "region") { wbGoLevel("", n.key); return; }
     mapLevel = n.cont ? n.cont.key : ""; hideMapCard(); setMapView("map", true); renderMapView(false);
     const mn = WK.focus(key, 1.8); if (mn) showMapCard(mn);
+  }
+
+  // BLOCK S: SETTING (Fantasy / Modern / Sci-Fi) – Theme, Kartenstil, Reisemodi & Maßstab, Nebel, Stufen-System, Anleitung, Danke
+  Object.assign(I18N.de, {"st_title": "🎭 Setting", "st_desc": "Bestimmt Look, Kartenstil, Reisemittel und Einheiten sowie die Beispiele in den Spielleiter-Regeln. Wird mit dem Backup gespeichert.", "st_fantasy": "🐉 Fantasy", "st_modern": "🌃 Modern", "st_scifi": "🚀 Sci-Fi", "st_fog_chk": "🌫️ Nebel des Unbekannten auf der Karte", "st_levels_chk": "⭐ Stufen-System (Level)", "st_hint_fantasy": "Pergament-Karte, Reisen zu Fuß, zu Pferd und mit dem Karren in Tagen.", "st_hint_modern": "Stadtplan bei Nacht, Wege zu Fuß, mit Rad, Bahn und Taxi in Minuten. Nebel und Stufen sind anfangs aus.", "st_hint_scifi": "Sternenkarte mit Sektoren, Reisen mit Schiff und Shuttle in Stunden und Tagen.", "st_toast": "Setting: {s}", "u_sector": "Sektor", "u_sectors": "Sektoren", "st_m_walk": "zu Fuß", "st_m_bike": "mit dem Rad", "st_m_train": "mit der Bahn", "st_m_taxi": "mit Taxi/Auto", "st_m_ship": "mit dem Schiff", "st_m_shuttle": "mit dem Shuttle", "st_m_foot": "zu Fuß", "map_card_from_here_x": "≈ {d} von hier · {m}", "wb_travel_hint_modern": "[WEG] Von {a} nach {b}: ca. {d} – {m}. Halte Uhrzeit und Tagesablauf konsistent.", "wb_travel_hint_scifi": "[REISE] Von {a} nach {b}: ca. {d} – {m}. Halte Bordzeit, Vorräte und Energie konsistent.", "wb_travel_far_modern": "[WEG] Von {a} nach {b}: weit außerhalb, die Entfernung ist unbekannt (eher eine Tagesreise). Halte die verstrichene Zeit konsistent.", "wb_travel_far_scifi": "[REISE] Von {a} nach {b}: eine weite Reise ins Unbekannte (eher Tage bis Wochen). Halte die Bordzeit konsistent.", "wb_travel_from_modern": "Wege ab {a} (zu Fuß): ", "wb_travel_from_scifi": "Flugzeiten ab {a} (Schiff): ", "map_title_modern": "Stadtplan", "map_title_scifi": "Sternenkarte", "map_unexplored_modern": "UNBEKANNTE VIERTEL", "map_unexplored_scifi": "UNGESCANNTER SEKTOR", "map_unknown_land_modern": "Unbekannte Stadt", "map_unknown_land_scifi": "Unbekannter Raum", "map_far_modern": "weit · außerhalb des Plans", "map_far_scifi": "fern · außerhalb der Sensoren", "map_rumor_desc_modern": "Nur vom Hörensagen bekannt. Der Weg dorthin ist noch unklar.", "map_rumor_desc_scifi": "Nur aus Funksprüchen bekannt. Der Raum dazwischen ist noch nicht gescannt.", "guide_btn": "📘 Anleitung & Prompt-Bausteine", "guide_title": "📘 Anleitung", "guide_card": "📘 Anleitung", "guide_card_desc": "Welche Bausteine gehören in welchen Rollen-Prompt, damit Karte, Inventar, Stufen und Lore zuverlässig funktionieren – zum Kopieren.", "guide_intro_html": "Die KI schreibt am Ende ihrer Antwort <b>unsichtbare Tags</b> in eckigen Klammern. Die App liest sie aus und pflegt damit Karte, Inventar, Wunden, Stufen, Tageszeit und Lore. Die Tags werden nie im Chat angezeigt. Bei aktivem Weltbuch-Modus hängt die App die Grundregeln automatisch an – die Bausteine helfen, wenn du eigene Prompts schreibst oder ein Modell Tags vergisst.", "guide_setting": "Beispiele passend zum aktiven Setting: {s}.", "guide_roles_title": "Welche Rolle braucht welchen Baustein?", "guide_module": "Baustein", "guide_r_gm": "Spielleitung", "guide_r_comp": "Gefährte", "guide_r_voices": "Stimmen", "guide_r_editor": "Lektor", "guide_copy": "📋 Kopieren", "guide_copied": "In die Zwischenablage kopiert.", "guide_copy_fail": "Kopieren nicht möglich – bitte Text markieren.", "guide_off": "Stufen-System ist aus", "guide_tips_title": "💡 Tipps", "guide_tips_html": "<b>Exakte Namen:</b> In Tags immer genau die Namen aus Gruppe und Karte verwenden (z. B. „Elisabeth“, nicht „Elli“) – sonst landet ein Gegenstand beim Falschen oder ein Ort doppelt auf der Karte.\n<b>Token-Limit:</b> Tags stehen am Ende. Ist die maximale Antwortlänge zu knapp, werden sie abgeschnitten – lieber etwas mehr Tokens erlauben und die Kürze-Regel nutzen.\n<b>Reasoning-Modelle:</b> Denkende Modelle (z. B. DeepSeek R1, GLM) brauchen mehr Tokens; der Denkteil wird entfernt, die Tags müssen in der eigentlichen Antwort stehen.\n<b>Ein Tag pro Zeile</b> und nur bei echten Änderungen – das hält die Antworten sauber.\n<b>Geheimes</b> mit „!“ markieren ([ERINNERUNG!: …], [LORE!: …]): nur die Spielleitung sieht es.", "thanks_btn": "💛 Danke", "thanks_title": "💛 Danke"});
+  Object.assign(I18N.en, {"st_title": "🎭 Setting", "st_desc": "Sets the look, map style, travel modes and units, and the examples in the game master rules. Saved with the backup.", "st_fantasy": "🐉 Fantasy", "st_modern": "🌃 Modern", "st_scifi": "🚀 Sci-Fi", "st_fog_chk": "🌫️ Fog of the unknown on the map", "st_levels_chk": "⭐ Level system", "st_hint_fantasy": "Parchment map, travel on foot, on horseback and by cart in days.", "st_hint_modern": "City map at night, getting around on foot, by bike, train and taxi in minutes. Fog and levels start switched off.", "st_hint_scifi": "Star map with sectors, travel by ship and shuttle in hours and days.", "st_toast": "Setting: {s}", "u_sector": "sector", "u_sectors": "sectors", "st_m_walk": "on foot", "st_m_bike": "by bike", "st_m_train": "by train", "st_m_taxi": "by taxi/car", "st_m_ship": "by ship", "st_m_shuttle": "by shuttle", "st_m_foot": "on foot", "map_card_from_here_x": "≈ {d} from here · {m}", "wb_travel_hint_modern": "[ROUTE] From {a} to {b}: about {d} – {m}. Keep the clock and the daily routine consistent.", "wb_travel_hint_scifi": "[TRAVEL] From {a} to {b}: about {d} – {m}. Keep ship time, supplies and energy consistent.", "wb_travel_far_modern": "[ROUTE] From {a} to {b}: far outside, distance unknown (more like a day trip). Keep the passing of time consistent.", "wb_travel_far_scifi": "[TRAVEL] From {a} to {b}: a long journey into the unknown (days to weeks). Keep ship time consistent.", "wb_travel_from_modern": "Getting around from {a} (on foot): ", "wb_travel_from_scifi": "Flight times from {a} (ship): ", "map_title_modern": "City map", "map_title_scifi": "Star map", "map_unexplored_modern": "UNKNOWN DISTRICTS", "map_unexplored_scifi": "UNSCANNED SECTOR", "map_unknown_land_modern": "Unknown city", "map_unknown_land_scifi": "Unknown space", "map_far_modern": "far · off the map", "map_far_scifi": "far · beyond sensor range", "map_rumor_desc_modern": "Known only by hearsay. The way there is still unclear.", "map_rumor_desc_scifi": "Known only from radio chatter. The space in between has not been scanned yet.", "guide_btn": "📘 Guide & prompt modules", "guide_title": "📘 Guide", "guide_card": "📘 Guide", "guide_card_desc": "Which building blocks belong in which role prompt so that map, inventory, levels and lore work reliably – ready to copy.", "guide_intro_html": "At the end of its reply the AI writes <b>hidden tags</b> in square brackets. The app reads them and keeps the map, inventory, wounds, levels, time of day and lore up to date. Tags are never shown in the chat. With World Book mode on, the app adds the basic rules automatically – the modules help when you write your own prompts or a model forgets its tags.", "guide_setting": "Examples match the active setting: {s}.", "guide_roles_title": "Which role needs which module?", "guide_module": "Module", "guide_r_gm": "Game master", "guide_r_comp": "Companion", "guide_r_voices": "Voices", "guide_r_editor": "Editor", "guide_copy": "📋 Copy", "guide_copied": "Copied to the clipboard.", "guide_copy_fail": "Copying failed – please select the text.", "guide_off": "level system is off", "guide_tips_title": "💡 Tips", "guide_tips_html": "<b>Exact names:</b> always use exactly the names from the party and the map in tags (e.g. “Elisabeth”, not “Elli”) – otherwise an item goes to the wrong character or a place appears twice on the map.\n<b>Token limit:</b> tags come last. If the maximum reply length is too tight they get cut off – allow a few more tokens and use the brevity rule.\n<b>Reasoning models:</b> thinking models (e.g. DeepSeek R1, GLM) need more tokens; the thinking part is removed, so the tags must be in the actual reply.\n<b>One tag per line</b> and only for real changes – that keeps replies clean.\n<b>Secrets</b> get a “!” ([MEMORY!: …], [LORE!: …]): only the game master sees them.", "thanks_btn": "💛 Thank you", "thanks_title": "💛 Thank you"});
+  const ST_KINDS = ["fantasy", "modern", "scifi"];
+  const ST_DEFAULTS = { fantasy: { fog: true, levels: true }, modern: { fog: false, levels: false }, scifi: { fog: true, levels: true } };
+  function sanitizeSetting(s) {
+    const kind = s && typeof s === "object" && ST_KINDS.includes(s.kind) ? s.kind : "fantasy", d = ST_DEFAULTS[kind];
+    return { kind, fog: s && typeof s.fog === "boolean" ? s.fog : d.fog, levels: s && typeof s.levels === "boolean" ? s.levels : d.levels };
+  }
+  function stCfg() {
+    if (!state.settings || typeof state.settings !== "object") state.settings = { ...BLANK_STATE.settings };
+    const s = state.settings.setting;
+    if (!s || typeof s !== "object" || !ST_KINDS.includes(s.kind) || typeof s.fog !== "boolean" || typeof s.levels !== "boolean") state.settings.setting = sanitizeSetting(s);
+    return state.settings.setting;
+  }
+  const stKind = () => stCfg().kind;
+  const stFog = () => stCfg().fog !== false;
+  const stLevels = () => stCfg().levels !== false;
+  const stEn = () => state.lang === "en";
+  function stKey(k) { const kd = stKind(); if (kd === "fantasy") return k; const kk = k + "_" + kd, D = I18N[state.lang] || I18N.de; return D[kk] !== undefined ? kk : k; }
+  function applyTheme() {
+    const k = stKind(), h = document.documentElement;
+    if (h.getAttribute("data-theme") !== k) h.setAttribute("data-theme", k);
+    h.classList.toggle("th-x", k !== "fantasy");
+    try { WK.setStyle(k); } catch (e) {}
+    const meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.setAttribute("content", k === "modern" ? "#111318" : k === "scifi" ? "#060d1a" : "#0e0c0a");
+    // Sci-Fi-Schrift wie die übrigen Web-Schriften über Google Fonts – nur bei Bedarf; offline greifen die Ersatzschriften
+    if (k === "scifi" && !document.getElementById("st-font-scifi")) { const l = document.createElement("link"); l.id = "st-font-scifi"; l.rel = "stylesheet"; l.href = "https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Rajdhani:wght@500;600;700&display=swap"; document.head.appendChild(l); }
+  }
+  function stRenderSettings() {
+    const c = stCfg();
+    document.querySelectorAll(".st-btn").forEach(b => { const on = b.dataset.st === c.kind; b.classList.toggle("btn-primary", on); b.classList.toggle("btn-secondary", !on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
+    const f = document.getElementById("setting-fog"); if (f) f.checked = !!c.fog;
+    const l = document.getElementById("setting-levels"); if (l) l.checked = !!c.levels;
+    const h = document.getElementById("setting-hint"); if (h) h.textContent = t("st_hint_" + c.kind);
+    applyTheme();
+  }
+  function stAfterChange() {
+    saveState(); applyTheme(); stRenderSettings();
+    try { if (document.getElementById("bag-modal")?.classList.contains("active")) renderBagModalContent(); } catch (e) {}
+    stLevelUi();
+    if (document.getElementById("map-modal")?.classList.contains("active")) { hideMapCard(); renderMapView(true); if (mapView === "list") renderPlacesList(); }
+  }
+  function stSetKind(k) {
+    if (!ST_KINDS.includes(k) || k === stKind()) return;
+    state.settings.setting = { kind: k, ...ST_DEFAULTS[k] };
+    stAfterChange();
+    showToast(tf("st_toast", { s: t("st_" + k) }), "success");
+  }
+  function stLevelUi() { const b = document.getElementById("bag-modal-level-badge"); if (b) b.style.display = stLevels() ? "" : "none"; }
+  document.querySelectorAll(".st-btn").forEach(b => { b.onclick = () => stSetKind(b.dataset.st); });
+  { const f = document.getElementById("setting-fog"); if (f) f.onchange = e => { stCfg().fog = !!e.target.checked; stAfterChange(); }; }
+  { const l = document.getElementById("setting-levels"); if (l) l.onchange = e => { stCfg().levels = !!e.target.checked; stAfterChange(); }; }
+
+  // ---------- Reisemodi & Einheiten ----------
+  // Modern: km/m, zu Fuß 4,8 km/h, Rad 15 km/h, Bahn 30 km/h (+8 Min. Warten/Umsteigen; Fernzug 80 km/h), Taxi 22 km/h (+4 Min.; Autobahn 60 km/h)
+  // Sci-Fi: Weltkarte in Sektoren (1 Sektor = 25 Karten-km), Schiff 1 Sektor ≈ 2 Std., Shuttle 1 Sektor ≈ 12 Std., zu Fuß nur auf kurzen Strecken; Unterkarte (Station) in m/km
+  const ST_MODES = { walk: "🚶", bike: "🚲", train: "🚃", taxi: "🚕", ship: "🚀", shuttle: "🛸", foot: "🚶" };
+  function stDur(h) {
+    if (!(h >= 0)) return "?";
+    if (h >= 22) { const d = h / 24, r = d < 5 ? Math.max(1, Math.round(d * 2) / 2) : Math.round(d); return (r % 1 ? wbNum(Math.floor(r)) + "½" : wbNum(r)) + " " + (r > 1 ? t("u_days") : t("u_day")); }
+    if (h >= 1) { const r = h < 3 ? Math.round(h * 2) / 2 : Math.round(h); return (r % 1 ? wbNum(Math.floor(r)) + "½" : wbNum(r)) + " " + t("u_h"); }
+    const m = h * 60; return Math.max(1, m < 15 ? Math.round(m) : Math.round(m / 5) * 5) + " " + t("u_min");
+  }
+  function stFmtDist(km, local) {
+    if (stKind() === "scifi" && !local) {
+      const s = km / 25; if (!(s >= 0)) return "?";
+      const v = s < .1 ? "< " + wbNum(.1) : s < 10 ? wbNum(Math.round(s * 10) / 10) : String(Math.round(s));
+      return v + " " + (s >= .95 && s < 1.05 ? t("u_sector") : t("u_sectors"));
+    }
+    return wbFmtKm(km);
+  }
+  function stModes(km, local) {
+    const k = stKind(), out = [], add = (m, h) => out.push({ m, ic: ST_MODES[m], txt: stDur(h), h });
+    if (k === "modern") {
+      add("walk", km / 4.8);
+      if (km >= .5) add("bike", km / 15 + 2 / 60);
+      if (km >= 1.2) add("train", km < 25 ? km / 30 + 8 / 60 : km / 80 + .25);
+      if (km >= .8) add("taxi", km < 25 ? km / 22 + 4 / 60 : km / 60 + 4 / 60);
+    } else if (k === "scifi") {
+      if (local) { add("foot", km / 4.5); if (km >= .3) add("shuttle", km / 40 + 3 / 60); }
+      else { const s = km / 25; add("ship", s * 2); add("shuttle", s * 12); if (km / 4.5 <= 6) add("foot", km / 4.5); }
+    }
+    return out;
+  }
+  const stLocal = () => !!(WK.model && WK.model.local);
+  function stMeasureText(km) {
+    const loc = stLocal(), M = stModes(km, loc);
+    return [tf("map_pin_dist", { d: stFmtDist(km, loc) }), M.map(x => x.ic + " " + x.txt).join(" · ")];
+  }
+  function stCardText(km) {
+    const loc = stLocal(), M = stModes(km, loc), pick = stKind() === "modern" ? [M[0], M.find(x => x.m === "train") || M[1]].filter(Boolean) : M.slice(0, 2);
+    return tf("map_card_from_here_x", { d: stFmtDist(km, loc), m: pick.map(x => x.ic + " " + x.txt).join(" · ") });
+  }
+  function stScaleText(km, local) { const M = stModes(km, local); return stFmtDist(km, local) + (local || !M.length ? "" : " · " + M[0].ic + " " + M[0].txt); }
+  function stModeList(km) { return stModes(km, false).map(x => t("st_m_" + x.m) + " ~" + x.txt).join(", "); }
+  function stTravelHint(tr) { return tf(stKey("wb_travel_hint"), { a: tr.a, b: tr.b, d: stFmtDist(tr.km, false), m: stModeList(tr.km) }); }
+  function stTravelFrom(name, R) { return tf(stKey("wb_travel_from"), { a: name }) + R.slice(0, 4).map(([km, nm]) => nm + " ~" + (stModes(km, false)[0] || { txt: "?" }).txt).join(", "); }
+  const stMinKm = () => stKind() === "modern" ? .25 : 2;
+
+  // ---------- Stufen-System aus: Stufen-Anweisungen aus dem Prompt nehmen ----------
+  function stStripLevel(s) {
+    return String(s).split("\n").filter(l => !/^\s*- (?:Level|Stufe):/.test(l) && !/^3\. (?:LEVEL ONLY VIA TAG|STUFE NUR PER TAG)/.test(l)).join("\n")
+      .replace("AUTOMATIC INVENTORY, LEVEL & STATUS", "AUTOMATIC INVENTORY & STATUS").replace("AUTOMATISCHES INVENTAR, LEVEL & STATUS", "AUTOMATISCHES INVENTAR & STATUS")
+      .replace("Manage gear, level, and conditions", "Manage gear and conditions").replace("Du steuerst Stufenaufstieg, Ausrüstung und Zustände", "Du steuerst Ausrüstung und Zustände");
+  }
+  const stLvl = (en, lv) => stLevels() ? (en ? "Level: " : "Stufe: ") + (lv || "1") + " | " : "";
+
+  // ---------- Setting-passende Beispiele für Spielleiter-Regeln und Lore-Scan ----------
+  const ST_EX = {
+    fantasy: { de: { ort: "[ORT: Burg Graufels | Burg | nördlich von Roa | 2 Tage]", in: "[ORT: Goldener Kessel | Taverne | in Roa]", known: "[ORT: Roa]", item: "[+ITEM: Heiltrank (heilt leichte Wunden)]", itemOut: "[-ITEM: Fackel]", wound: "[+WOUND: Schnitt am Arm]", woundOut: "[-WOUND: Schnitt am Arm]", status: "[+STATUS: Vergiftet (−2 auf Proben)]", statusOut: "[-STATUS: Vergiftet]", comp: "Elisabeth", compItem: "Elfenbogen (+1 Reichweite)", mem: "[ERINNERUNG: Hedda hat versprochen, das Tor offen zu lassen | Hedda, Tor]", memS: "[ERINNERUNG!: Der Wirt ist ein Spitzel der Gilde]", lore: "[LORE: Goldener Kessel | Hinterzimmer mit geheimer Falltür]", world: "[WELT_UPDATE: Tag: Tag 2 | Zeit: Abend | Wetter: Regen]", voices: "[STIMMEN: Hedda, Torwache]", scanEx: "Rattenmarkt | Ort | im Norden von Roa | – | Roa" },
+      en: { ort: "[LOCATION: Greyrock Castle | Castle | north of Roa | 2 days]", in: "[LOCATION: Golden Kettle | Tavern | in Roa]", known: "[LOCATION: Roa]", item: "[+ITEM: Healing potion (heals light wounds)]", itemOut: "[-ITEM: Torch]", wound: "[+WOUND: Cut on the arm]", woundOut: "[-WOUND: Cut on the arm]", status: "[+STATUS: Poisoned (−2 on checks)]", statusOut: "[-STATUS: Poisoned]", comp: "Elisabeth", compItem: "Elven bow (+1 range)", mem: "[MEMORY: Hedda promised to leave the gate open | Hedda, gate]", memS: "[MEMORY!: The innkeeper spies for the guild]", lore: "[LORE: Golden Kettle | back room with a hidden trapdoor]", world: "[WORLD_UPDATE: Day: Day 2 | Time: Evening | Weather: Rain]", voices: "[VOICES: Hedda, gate guard]", scanEx: "Rat Market | Place | north part of Roa | – | Roa" } },
+    modern: { de: { ort: "[ORT: Shibuya Station | Bahnhof | südlich von Shinjuku | 10 Minuten mit der Bahn]", in: "[ORT: Café Mondschein | Café | in Shimokitazawa]", known: "[ORT: Shimokitazawa]", item: "[+ITEM: Suica-Karte (2.000 Yen Guthaben)]", itemOut: "[-ITEM: Regenschirm]", wound: "[+WOUND: Aufgeschürftes Knie]", woundOut: "[-WOUND: Aufgeschürftes Knie]", status: "[+STATUS: Übermüdet (Konzentration schwach)]", statusOut: "[-STATUS: Übermüdet]", comp: "Yui", compItem: "Sofortbildkamera (noch 6 Bilder)", mem: "[ERINNERUNG: Yui hat versprochen, am Freitag mitzukommen | Yui, Freitag]", memS: "[ERINNERUNG!: Der Café-Besitzer schuldet jemandem viel Geld]", lore: "[LORE: Café Mondschein | Hinterzimmer mit alter Jukebox]", world: "[WELT_UPDATE: Tag: Freitag | Zeit: 18:30 | Wetter: Nieselregen]", voices: "[STIMMEN: Barista, Herr Tanaka]", scanEx: "Café Mondschein | Café | im Süden von Shimokitazawa | 5 Minuten zu Fuß | Shimokitazawa" },
+      en: { ort: "[LOCATION: Shibuya Station | Station | south of Shinjuku | 10 minutes by train]", in: "[LOCATION: Café Mondschein | Café | in Shimokitazawa]", known: "[LOCATION: Shimokitazawa]", item: "[+ITEM: Suica card (2,000 yen credit)]", itemOut: "[-ITEM: Umbrella]", wound: "[+WOUND: Scraped knee]", woundOut: "[-WOUND: Scraped knee]", status: "[+STATUS: Exhausted (poor focus)]", statusOut: "[-STATUS: Exhausted]", comp: "Yui", compItem: "Instant camera (6 shots left)", mem: "[MEMORY: Yui promised to come along on Friday | Yui, Friday]", memS: "[MEMORY!: The café owner owes someone a lot of money]", lore: "[LORE: Café Mondschein | back room with an old jukebox]", world: "[WORLD_UPDATE: Day: Friday | Time: 6:30 pm | Weather: Drizzle]", voices: "[VOICES: Barista, Mr. Tanaka]", scanEx: "Café Mondschein | Café | south part of Shimokitazawa | 5 minutes on foot | Shimokitazawa" } },
+    scifi: { de: { ort: "[ORT: Station Kepler-9 | Raumstation | im Orbit von Vesta Prime | 6 Stunden mit dem Shuttle]", in: "[ORT: Andockring C | Deck | in Station Kepler-9]", known: "[ORT: Vesta Prime]", item: "[+ITEM: Plasmaschneider (schneidet Schotts)]", itemOut: "[-ITEM: Sauerstoffpatrone]", wound: "[+WOUND: Strahlungsverbrennung]", woundOut: "[-WOUND: Strahlungsverbrennung]", status: "[+STATUS: Sauerstoffmangel (Ausdauer halbiert)]", statusOut: "[-STATUS: Sauerstoffmangel]", comp: "Kade", compItem: "Hacking-Modul (öffnet Zugangssperren)", mem: "[ERINNERUNG: Kade schuldet der Kapitänin einen Gefallen | Kade, Kapitänin]", memS: "[ERINNERUNG!: Der Stationsrechner sendet heimlich an die Flotte]", lore: "[LORE: Andockring C | gesperrte Schleuse 7 mit Quarantäne-Siegel]", world: "[WELT_UPDATE: Tag: Zyklus 14 | Zeit: Nachtschicht | Wetter: Ionensturm]", voices: "[STIMMEN: Dockmeisterin, Bordcomputer]", scanEx: "Andockring C | Deck | im Süden von Station Kepler-9 | – | Station Kepler-9" },
+      en: { ort: "[LOCATION: Kepler-9 Station | Space station | in orbit of Vesta Prime | 6 hours by shuttle]", in: "[LOCATION: Docking Ring C | Deck | in Kepler-9 Station]", known: "[LOCATION: Vesta Prime]", item: "[+ITEM: Plasma cutter (cuts bulkheads)]", itemOut: "[-ITEM: Oxygen cartridge]", wound: "[+WOUND: Radiation burn]", woundOut: "[-WOUND: Radiation burn]", status: "[+STATUS: Oxygen deprived (stamina halved)]", statusOut: "[-STATUS: Oxygen deprived]", comp: "Kade", compItem: "Hacking module (opens access locks)", mem: "[MEMORY: Kade owes the captain a favor | Kade, captain]", memS: "[MEMORY!: The station computer secretly reports to the fleet]", lore: "[LORE: Docking Ring C | sealed airlock 7 with a quarantine seal]", world: "[WORLD_UPDATE: Day: Cycle 14 | Time: Night shift | Weather: Ion storm]", voices: "[VOICES: Dockmaster, ship computer]", scanEx: "Docking Ring C | Deck | south part of Kepler-9 Station | – | Kepler-9 Station" } }
+  };
+  const stEx = () => ST_EX[stKind()][stEn() ? "en" : "de"];
+  function stMapRule(en) {
+    const x = stEx(), k = stKind();
+    if (en) return `- Location change: [LOCATION: Name | type | position relative to a known place | distance], e.g. ${x.ort}; place inside a ${k === "modern" ? "district or building" : k === "scifi" ? "station, ship or deck" : "town or building"}: [LOCATION: Name | type | in ${k === "modern" ? "District" : k === "scifi" ? "Station" : "Town"}], e.g. ${x.in}; known place: ${x.known}` + (k === "modern" ? ". Distances in minutes (on foot/by train) or km." : ". Distances in sectors, jumps or hours (by ship/shuttle).");
+    return `- Ortswechsel: [ORT: Name | Typ | Lage zu bekanntem Ort | Entfernung], z. B. ${x.ort}; Ort in ${k === "modern" ? "einem Viertel oder Gebäude" : k === "scifi" ? "einer Station, einem Schiff oder Deck" : "einer Stadt oder einem Gebäude"}: [ORT: Name | Typ | in ${k === "modern" ? "Viertel" : k === "scifi" ? "Station" : "Stadtname"}], z. B. ${x.in}; bekannter Ort: ${x.known}` + (k === "modern" ? ". Entfernungen in Minuten (zu Fuß/mit der Bahn) oder km." : ". Entfernungen in Sektoren, Sprüngen oder Stunden (mit Schiff/Shuttle).");
+  }
+  function stMemRule(en) { const x = stEx(); return en ? `- Important event, promise or relationship: [MEMORY: short fact | keyword, keyword], e.g. ${x.mem}` : `- Wichtiges Ereignis, Versprechen, Beziehung: [ERINNERUNG: kurzer Fakt | Schlüsselwort, Schlüsselwort], z. B. ${x.mem}`; }
+  function stLoreRule(en) { const x = stEx(); return en ? `- New or changed NPC, place or thing: [LORE: Title | brief new info], e.g. ${x.lore}` : `- Neue oder geänderte Figur, Ort, Sache: [LORE: Titel | knappe neue Info], z. B. ${x.lore}`; }
+  function stScanInstruction(known, start) {
+    const en = stEn(), k = stKind(), x = stEx();
+    const what = k === "modern" ? (en ? "(regions, cities, districts, stations, schools, cafés, shops, homes/apartments, parks, shrines, offices, rivers)" : "(Regionen, Städte, Stadtviertel, Bahnhöfe, Schulen, Cafés, Läden, Wohnungen, Parks, Schreine, Büros, Flüsse)")
+      : (en ? "(sectors, star systems, planets, moons, space stations, ships, decks, colonies, asteroid fields, nebulae)" : "(Sektoren, Sternsysteme, Planeten, Monde, Raumstationen, Schiffe, Decks, Kolonien, Asteroidenfelder, Nebel)");
+    const types = k === "modern" ? (en ? "Region (= the city whose street map is shown), Capital, City (other cities), District, Station, School, Café, Shop, Apartment, Park, Shrine, Office, River or Place" : "Region (= die Stadt, deren Stadtplan gezeigt wird), Hauptstadt, Stadt (andere Städte), Viertel, Bahnhof, Schule, Café, Laden, Wohnung, Park, Schrein, Büro, Fluss oder Ort")
+      : (en ? "Sector (= region), Homeworld, Planet, Moon, Colony, Space station, Ship, Deck, Module, Asteroid field, Nebula, Star or Place" : "Sektor (= Region), Hauptwelt, Planet, Mond, Kolonie, Raumstation, Schiff, Deck, Modul, Asteroidenfeld, Nebel, Stern oder Ort");
+    const pos = k === "modern" ? (en ? `Position e.g. "east of Shibuya Station", "center of Shimokitazawa", "north part of Shibuya". Distance e.g. "5 minutes on foot", "10 minutes by train", "2 km", "far" or "–".` : `Lage z. B. „östlich von Shibuya Station“, „Zentrum von Shimokitazawa“, „im Norden von Shibuya“. Entfernung z. B. „5 Minuten zu Fuß“, „10 Minuten mit der Bahn“, „2 km“, „weit“ oder „–“.`)
+      : (en ? `Position e.g. "in orbit of Vesta Prime", "near the Kepler Belt", "north part of Kepler-9 Station". Distance e.g. "2 sectors", "6 hours by shuttle", "3 jumps", "far" or "–".` : `Lage z. B. „im Orbit von Vesta Prime“, „nahe dem Kepler-Gürtel“, „im Norden von Station Kepler-9“. Entfernung z. B. „2 Sektoren“, „6 Stunden mit dem Shuttle“, „3 Sprünge“, „weit“ oder „–“.`);
+    const part = k === "modern" ? (en ? "the city (Region) for districts, the district for stations, cafés, schools and homes, the building for its rooms" : "die Stadt (Region) bei Vierteln, das Viertel bei Bahnhöfen, Cafés, Schulen und Wohnungen, das Gebäude bei seinen Räumen") : (en ? "the sector for systems, planets and stations, the planet for colonies on its surface, the station or ship for its decks and modules" : "der Sektor bei Systemen, Planeten und Stationen, der Planet bei Kolonien auf seiner Oberfläche, die Station oder das Schiff bei Decks und Modulen");
+    return en ? `### TASK: PLACE LIST FOR A MAP
+Read the lore excerpts and list every concrete place of the game world ${what}.
+Format: exactly one line per place:
+Name | Type | Position relative to another listed place | Distance | Part of
+Type: ${types}.
+${pos}
+Part of = the parent place it lies within: ${part}; otherwise "–".
+Example: ${x.scanEx}
+Start with the ${k === "modern" ? "city (type Region)" : "sector (type Sector)"} where the adventure takes place${start ? ` (start: ${start})` : ""}. At most 60 lines. Do not invent places; estimate directions only if the lore hints at them. Output ONLY the list.${known ? `\nAlready known (keep these names): ${known}` : ""}`
+      : `### AUFGABE: ORTSLISTE FÜR EINE KARTE
+Lies die Lore-Auszüge und liste alle konkreten Orte der Spielwelt ${what}.
+Format: genau eine Zeile pro Ort:
+Name | Typ | Lage relativ zu einem anderen gelisteten Ort | Entfernung | Teil von
+Typ: ${types}.
+${pos}
+Teil von = der übergeordnete Ort, in dem der Ort liegt: ${part}; sonst „–“.
+Beispiel: ${x.scanEx}
+Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sektor)"}, in ${k === "modern" ? "der" : "dem"} das Abenteuer spielt${start ? ` (Start: ${start})` : ""}. Höchstens 60 Zeilen. Erfinde keine Orte; schätze Richtungen nur, wenn die Lore sie andeutet. Gib NUR die Liste aus.${known ? `\nBereits bekannt (Namen beibehalten): ${known}` : ""}`;
+  }
+
+  // ---------- In-App-Anleitung: modulare Prompt-Bausteine (Tags exakt wie der Parser) ----------
+  function stGuideModules() {
+    const en = stEn(), x = stEx(), k = stKind(), C = x.comp;
+    const M = [];
+    M.push({ id: "map", t: en ? "🗺️ Map & places" : "🗺️ Karte & Orte", roles: ["gm"], code: en
+      ? `[MAP] At the end of your reply, on its own line, report every change of location:\n[LOCATION: Name | type | position relative to a known place | distance]\nPlace inside a ${k === "modern" ? "district/building" : k === "scifi" ? "station/ship" : "town/building"}: [LOCATION: Name | type | in Parent]\nAlready known place: [LOCATION: Name]\nExamples:\n${x.ort}\n${x.in}\n${x.known}`
+      : `[KARTE] Melde am Ende deiner Antwort in einer eigenen Zeile jeden Ortswechsel:\n[ORT: Name | Typ | Lage zu bekanntem Ort | Entfernung]\nOrt in ${k === "modern" ? "einem Viertel/Gebäude" : k === "scifi" ? "einer Station/einem Schiff" : "einer Stadt/einem Gebäude"}: [ORT: Name | Typ | in Übergeordneter Ort]\nBereits bekannter Ort: [ORT: Name]\nBeispiele:\n${x.ort}\n${x.in}\n${x.known}`, ex: [x.ort, x.in, x.known] });
+    M.push({ id: "status", t: en ? "🎒 Status, wounds & inventory" : "🎒 Status, Wunden & Inventar", roles: ["gm", "comp"], code: en
+      ? `[STATUS] Track gear and condition only via tags at the very end:\n${x.item} / ${x.itemOut}\n${x.wound} / ${x.woundOut}\n${x.status} / ${x.statusOut}\nCompanion: [MUTATION: ${C} | +ITEM: ${x.compItem}]\nRemove with the base name, without parentheses.`
+      : `[STATUS] Ausrüstung und Zustand nur per Tag ganz am Ende:\n${x.item} / ${x.itemOut}\n${x.wound} / ${x.woundOut}\n${x.status} / ${x.statusOut}\nGefährte: [MUTATION: ${C} | +ITEM: ${x.compItem}]\nEntfernen mit dem Grundnamen, ohne Klammerzusatz.`, ex: [x.item, x.itemOut, x.wound, x.status, x.statusOut, `[MUTATION: ${C} | +ITEM: ${x.compItem}]`] });
+    M.push({ id: "level", t: en ? "⭐ Level" : "⭐ Stufen", roles: ["gm", "comp"], off: !stLevels(), code: en
+      ? `[LEVEL] A level-up only counts with the tag. The app tells you the current level X – write X+1:\n[LEVEL: 3]   (or [LEVEL: +1])\nCompanion: [MUTATION: ${C} | LEVEL: 4]\nUse the exact character names. Never put a level into +STATUS.`
+      : `[STUFE] Ein Aufstieg zählt nur mit Tag. Die App nennt dir die aktuelle Stufe X – schreibe X+1:\n[LEVEL: 3]   (oder [LEVEL: +1])\nGefährte: [MUTATION: ${C} | LEVEL: 4]\nVerwende die exakten Figurennamen. Niemals eine Stufe in +STATUS eintragen.`, ex: ["[LEVEL: 3]", "[LEVEL: +1]", `[MUTATION: ${C} | LEVEL: 4]`] });
+    M.push({ id: "lore", t: en ? "📖 Lore & memories" : "📖 Lore & Erinnerungen", roles: ["gm"], code: en
+      ? `[WORLD BOOK] Only when something really changes, one line each:\n${x.lore}\n${x.mem}\nSecret, game master only (add "!"): ${x.memS}\n[LORE!: Title | secret info]`
+      : `[WELTBUCH] Nur bei echten Änderungen, je eine Zeile:\n${x.lore}\n${x.mem}\nGeheim, nur für die Spielleitung („!“ anhängen): ${x.memS}\n[LORE!: Titel | geheime Info]`, ex: [x.lore, x.mem, x.memS] });
+    M.push({ id: "world", t: en ? "🌤️ Time of day & weather" : "🌤️ Tageszeit & Wetter", roles: ["gm"], code: en
+      ? `[TIME] When day, time or weather change:\n${x.world}\nAllowed keys: Day, Time, Weather (optional Location).`
+      : `[ZEIT] Wenn Tag, Tageszeit oder Wetter wechseln:\n${x.world}\nErlaubte Schlüssel: Tag, Zeit, Wetter (optional Ort).`, ex: [x.world] });
+    M.push({ id: "voices", t: en ? "🎭 Voices of the world" : "🎭 Stimmen der Welt", roles: ["gm", "voices"], code: en
+      ? `Game master – direction for the Voices (hidden), last line:\n${x.voices}\nNobody else speaks: [VOICES: none]\n\nVoices role prompt (must start like this):\nYou are THE VOICES OF THE WORLD. You speak only for the side characters named in [VOICES: …], in short direct speech. No tags, no narration for the player.`
+      : `Spielleitung – Regie für die Stimmen (unsichtbar), letzte Zeile:\n${x.voices}\nNiemand sonst spricht: [STIMMEN: keine]\n\nPrompt der Stimmen-Rolle (muss so beginnen):\nDu bist DIE STIMMEN DER WELT. Du sprichst nur für die in [STIMMEN: …] genannten Nebenfiguren, in kurzer wörtlicher Rede. Keine Tags, keine Erzählung für den Spieler.`, ex: [x.voices, en ? "[VOICES: none]" : "[STIMMEN: keine]"] });
+    M.push({ id: "editor", t: en ? "✒️ Editor (Lektor)" : "✒️ Lektor", roles: ["editor"], code: en
+      ? `You are the editor. Weave the game master's scene and the companions' reactions into one flowing novel chapter.\n- Keep every event, decision and line of dialogue; invent no new plot and no actions for the player.\n- No tags, no lists, no out-of-character notes.\n- Keep the tone of the setting (${k === "modern" ? "modern everyday life" : k === "scifi" ? "science fiction" : "fantasy"}); end where the player can act.`
+      : `Du bist der Lektor. Verwebe die Szene der Spielleitung und die Reaktionen der Gefährten zu einem flüssigen Romankapitel.\n- Behalte jedes Ereignis, jede Entscheidung und jede wörtliche Rede; erfinde keine neue Handlung und keine Handlungen des Spielers.\n- Keine Tags, keine Listen, keine Anmerkungen außerhalb der Geschichte.\n- Halte den Ton des Settings (${k === "modern" ? "moderner Alltag" : k === "scifi" ? "Science-Fiction" : "Fantasy"}); ende dort, wo der Spieler handeln kann.`, ex: [] });
+    M.push({ id: "brief", t: en ? "✂️ Brevity" : "✂️ Kürze", roles: ["gm", "comp", "voices"], code: en
+      ? `Reply in at most 3 short paragraphs (about 120–220 words) and stop as soon as the player can act. Never write the player's actions or thoughts.`
+      : `Antworte in höchstens 3 kurzen Absätzen (etwa 120–220 Wörter) und höre auf, sobald der Spieler handeln kann. Schreibe nie Handlungen oder Gedanken des Spielers.`, ex: [] });
+    return M;
+  }
+  function stCopy(txt) {
+    const ok = () => showToast(t("guide_copied"), "success");
+    try { if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(txt).then(ok, () => fb()); return; } } catch (e) {}
+    fb();
+    function fb() { const ta = document.createElement("textarea"); ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); ok(); } catch (e) { showToast(t("guide_copy_fail"), "error"); } ta.remove(); }
+  }
+  function renderGuide() {
+    const body = document.getElementById("guide-body"); if (!body) return;
+    body.innerHTML = "";
+    const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+    const intro = mk("p", "guide-p"); intro.innerHTML = t("guide_intro_html"); body.appendChild(intro);
+    const set = mk("p", "guide-p", tf("guide_setting", { s: t("st_" + stKind()) })); body.appendChild(set);
+    // Rollen-Tabelle
+    const R = [["gm", t("guide_r_gm")], ["comp", t("guide_r_comp")], ["voices", t("guide_r_voices")], ["editor", t("guide_r_editor")]], mods = stGuideModules();
+    body.appendChild(mk("h4", "guide-h", t("guide_roles_title")));
+    const tb = mk("table", "guide-table"), hr = document.createElement("tr"); hr.appendChild(mk("th", "", t("guide_module")));
+    R.forEach(r => hr.appendChild(mk("th", "", r[1]))); tb.appendChild(hr);
+    mods.forEach(m => { const tr = document.createElement("tr"); tr.appendChild(mk("td", "", m.t)); R.forEach(r => tr.appendChild(mk("td", "", m.roles.includes(r[0]) ? "✓" : "–"))); tb.appendChild(tr); });
+    body.appendChild(tb);
+    mods.forEach(m => {
+      const box = mk("div", "guide-mod"); box.dataset.mod = m.id;
+      box.appendChild(mk("h4", "", m.t + (m.off ? " · " + t("guide_off") : "")));
+      const rl = mk("div", "guide-roles"); R.forEach(r => { if (m.roles.includes(r[0])) rl.appendChild(mk("span", "guide-role on", r[1])); }); box.appendChild(rl);
+      const pre = mk("pre", "guide-code", m.code); box.appendChild(pre);
+      const b = mk("button", "msg-action-btn guide-copy", t("guide_copy")); b.dataset.copy = m.id; b.onclick = () => stCopy(m.code); box.appendChild(b);
+      body.appendChild(box);
+    });
+    body.appendChild(mk("h4", "guide-h", t("guide_tips_title")));
+    const ul = mk("ul", "guide-tips"); t("guide_tips_html").split("\n").forEach(li => { const e = document.createElement("li"); e.innerHTML = li; ul.appendChild(e); }); body.appendChild(ul);
+  }
+  function openGuide() { renderGuide(); document.getElementById("guide-modal").classList.add("active"); const b = document.getElementById("guide-body"); if (b) b.scrollTop = 0; }
+  // Persönliche Notiz des Entwicklers – EINE Konstante, leicht austauschbar
+  const THANKS_TEXT = {
+    de: "Danke, dass du hier bist.\n\nIch liebe es zu lesen. Aber oft sitze ich über einem Buch und frage mich: Warum tut er das? Ich wollte eine Möglichkeit schaffen, seinen eigenen Roman zu schreiben, während er passiert. Ein Buch erleben, statt es nur zu lesen. Mittendrin statt nur dabei.\n\nIch wollte ein Rollenspiel, das sich echt anfühlt. Eines, das nicht nach zehn Nachrichten den Faden verliert oder vorhersehbar wird.\n\nViele Anbieter verschmelzen KI und Oberfläche miteinander oder bremsen einen guten Anbieter durch ein holpriges Frontend aus. Multi-RP Studio trennt beides: Du wählst deine KI, die App kümmert sich um den Rest.\n\nEs sollte komplex sein, aber nicht kompliziert. Leicht zu lernen, schwer zu meistern. Es sollte so viel wie möglich mitbringen, ohne dich zu überfordern.\n\nUnd vor allem für die Hosentasche. Rollenspiele gehören nicht nur an den Schreibtisch. Sie gehören in die Bahn, in die Mittagspause und abends ins Bett, wenn du einfach noch ein bisschen durch deine Welt streifen willst.\n\nKein Installieren, keine Add-ons, kein Programmieren. Nur ein einfaches Setup, das umso besser wird, je mehr Liebe du hineinsteckst.\n\nViel Spaß in deinen Welten. – Redelkin",
+    en: "Thank you for being here.\n\nI love reading. But so often I sit over a book and wonder: why would he do that? I wanted a way to write your own novel while it happens. To live a book instead of just reading it. Right in the middle of it, not just watching from the side.\n\nI wanted a roleplay that feels real. One that doesn't lose the thread or turn predictable after ten messages.\n\nMany services fuse the AI and the interface together, or slow a great provider down with a clunky frontend. Multi-RP Studio keeps them apart: you choose your AI, the app takes care of the rest.\n\nIt should be complex, but not complicated. Easy to learn, hard to master. Bringing as much as possible without overwhelming you.\n\nAnd above all: made for your pocket. Roleplay doesn't belong only at a desk. It belongs on the train, in your lunch break, and in bed at night when you just want to wander through your world a little longer.\n\nNo installing, no add-ons, no coding. Just a simple setup that gets better the more love you put into it.\n\nEnjoy your worlds. – Redelkin"
+  };
+  function openThanks() {
+    const body = document.getElementById("thanks-body"); if (!body) return; body.innerHTML = "";
+    String(THANKS_TEXT[stEn() ? "en" : "de"] || "").split(/\n\s*\n/).forEach(par => { const p = document.createElement("p"); p.textContent = par.trim(); body.appendChild(p); });
+    document.getElementById("thanks-modal").classList.add("active");
   }
 
   // BLOCK E: TURN-ORDER ENGINE & MODAL-TRIGGER
@@ -5871,6 +6674,7 @@ Beginne mit der Region, in der das Abenteuer spielt${start ? ` (Start: ${start})
     if (stripEl) stripEl.checked = !!state.settings.stripKeysOnExport;
     const wbs = wbSettings();
     [["setting-wb-map", "map"], ["setting-wb-memories", "memories"], ["setting-wb-lore", "lore"]].forEach(([elId, k]) => { const el = document.getElementById(elId); if (el) el.checked = !!wbs[k]; });
+    stRenderSettings();
 
     const orderList = document.getElementById("turn-order-list");
     if (!orderList) return;
@@ -6511,6 +7315,7 @@ Beginne mit der Region, in der das Abenteuer spielt${start ? ` (Start: ${start})
           candidateState.lang = (imported.lang === "en" || imported.lang === "de") ? imported.lang : (state.lang === "en" ? "en" : "de");
           candidateState.mapPlaces = sanitizeMapPlaces(imported.mapPlaces, 200);
           candidateState.settings.weltbuch = sanitizeWbSettings(imported.settings && imported.settings.weltbuch);
+          candidateState.settings.setting = sanitizeSetting(imported.settings && imported.settings.setting); // alte Backups ohne Setting = Fantasy
 
           candidateState.settings.order = Array.isArray(candidateState.settings.order) 
             ? candidateState.settings.order.map(id => sanitizeId(id, "char")) 
@@ -6707,6 +7512,7 @@ Beginne mit der Region, in der das Abenteuer spielt${start ? ` (Start: ${start})
       state.lang = (loadedState.lang === "en" || loadedState.lang === "de") ? loadedState.lang : "de";
       state.mapPlaces = sanitizeMapPlaces(loadedState.mapPlaces, 200);
       state.settings.weltbuch = sanitizeWbSettings(loadedState.settings && loadedState.settings.weltbuch);
+      state.settings.setting = sanitizeSetting(loadedState.settings && loadedState.settings.setting);
 
       state.characters.forEach(c => {
         if (!c) return;
