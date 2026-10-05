@@ -2441,10 +2441,11 @@
     });
   }
   // BLOCK D: LOREBOOK-ENGINE, PROMPT-ASSEMBLY & STREAMING
-  function matchLoreKeyGroup(groupStr, text) {
+  function matchLoreKeyGroup(groupStr, text, lowerText) {
     const parts = String(groupStr).split("+").map(p => p.trim()).filter(Boolean);
     if (parts.length === 0) return false;
     return parts.every(part => {
+      if (lowerText !== undefined && !lowerText.includes(part.toLowerCase())) return false;
       const escaped = escapeRegex(part);
       try {
         const pattern = new RegExp(`(?<![\\p{L}\\p{N}_])${escaped}(?![\\p{L}\\p{N}_])`, "iu");
@@ -2492,6 +2493,7 @@
 
     let added = true;
     let depthPass = 0;
+    const scanCache = new Map();
     while (added && depthPass < 2) {
       added = false;
       depthPass++;
@@ -2502,11 +2504,12 @@
         if (!entry.keys || !String(entry.keys).trim()) return;
 
         const depth = Math.max(1, parseInt(entry.scanDepth, 10) || 8);
-        const historyScanContext = getLoreContextForDepth(messagesList, depth, currentTriggerText);
-        const fullScanText = historyScanContext + " " + activatedLoreTextPool;
+        const ck = depth + "|" + activatedLoreTextPool.length;
+        let sc = scanCache.get(ck);
+        if (!sc) { const t = getLoreContextForDepth(messagesList, depth, currentTriggerText) + " " + activatedLoreTextPool; sc = { t, l: t.toLowerCase() }; scanCache.set(ck, sc); }
 
         const groups = String(entry.keys).split(",").map(g => g.trim()).filter(Boolean);
-        if (groups.some(group => matchLoreKeyGroup(group, fullScanText))) {
+        if (groups.some(group => matchLoreKeyGroup(group, sc.t, sc.l))) {
           activeEntries.push(entry);
           activatedLoreTextPool += " " + (entry.content || "");
           added = true;
@@ -2696,7 +2699,28 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     return merged;
   }
 
+  // Letzter finish_reason des zuletzt gestreamten Aufrufs: "stop" | "length" | "degenerate" | ""
+  let lastFinishReason = "";
+  // Am letzten vollständigen Satz abschneiden (nur wenn dabei nicht zu viel verloren geht)
+  function trimToSentence(text, minKeep = 0.4) {
+    const s = String(text || "").trimEnd(); let end = -1, m;
+    const re = /[.!?…]["“”»«'’)]?(?=\s|$)/g;
+    while ((m = re.exec(s)) !== null) end = m.index + m[0].length;
+    return end > 0 && end >= s.length * minKeep ? s.slice(0, end) : s;
+  }
+  // Entgleisung: die letzten ~320 Zeichen (Fließtext, kein Denkblock) enthalten kein einziges Satz-/Tagzeichen -> Wortsalat-Schleife
+  function cutDegenerate(text) {
+    const s = String(text || "");
+    if (s.length < 600 || (/<think>/i.test(s) && !/<\/think>/i.test(s))) return null;
+    const tail = s.slice(-320);
+    if (/[.,!?;:…"„“”»«'’()\[\]\-–—*\n]/.test(tail) || tail.trim().split(/\s+/).length < 30) return null;
+    let runStart = s.length - 320;
+    while (runStart > 0 && !/[.,!?;:…"„“”»«'’()\[\]\-–—*\n]/.test(s[runStart - 1])) runStart--;
+    return trimToSentence(s.slice(0, runStart), 0).trim();
+  }
+
   async function streamInfermatic(character, messagesList, systemInstruction, onChunk, isWorldMode = false, protectedNames = [], customMaxTokens = 1800) {
+    lastFinishReason = "";
     const cleanKey = String(character.apiKey || "").trim().replace(/^Bearer\s+/i, '').replace(/^["']|["']$/g, '');
     const cleanModel = String(character.model || "").trim().replace(/^["']|["']$/g, '');
     const targetUrl = resolveEndpoint(character.baseUrl);
@@ -2727,6 +2751,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
 
     const isStrictOpenAI = /api\.openai\.com|api\.groq\.com|api\.deepseek\.com|api\.mistral\.ai/i.test(targetUrl);
     if (!isStrictOpenAI && character.repPenalty) payload.repetition_penalty = parseFloat(character.repPenalty) || 1.1;
+    if (character.role === "editor" && payload.repetition_penalty > 1.05) payload.repetition_penalty = 1.05; // Lektor muss Dialoge wörtlich übernehmen
     payload.stop = isArli ? ["[END_OF_TURN]"] : getSafeStopTokens(targetUrl);
     if (isArli) payload.reasoning_effort = /deepseek|mimo|\br1\b|qwq|glm|think|reason/i.test(cleanModel) ? "low" : "none"; // DeepSeek/MiMo: wenig denken; Gemma & Co.: Denken aus (sonst leere Antworten)
 
@@ -2735,7 +2760,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     if (!cleanKey && isArli) throw new Error(tf("err_arli_key", { n: character.name || (state.lang === "en" ? "Player" : "Spieler") }));
 
     // Watchdog: niemals endlos warten
-    const FIRST_BYTE_MS = 120000, IDLE_MS = 60000;
+    const FIRST_BYTE_MS = 180000, IDLE_MS = 90000;
     const reqCtrl = new AbortController();
     const outerSignal = activeAbortController ? activeAbortController.signal : null;
     const onOuterAbort = () => reqCtrl.abort();
@@ -2772,6 +2797,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     let buffer = "";
     let abortStream = false;
     let isThinking = false;
+    let degCheckAt = 0;
 
     while (!abortStream) {
       if (isAborted || (activeAbortController && activeAbortController.signal.aborted)) {
@@ -2800,6 +2826,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
             if (jsonStr) {
               const json = JSON.parse(jsonStr);
               if (json.error) { streamError = json.error.message || JSON.stringify(json.error); abortStream = true; break; }
+              if (json.choices?.[0]?.finish_reason) lastFinishReason = json.choices[0].finish_reason;
               const deltaContent = json.choices?.[0]?.delta?.content || "";
               const deltaReasoning = json.choices?.[0]?.delta?.reasoning_content || json.choices?.[0]?.delta?.reasoning || "";
 
@@ -2843,6 +2870,17 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
                   }
                 }
 
+                if (fullText.length - degCheckAt > 120) {
+                  degCheckAt = fullText.length;
+                  const cut = cutDegenerate(fullText);
+                  if (cut !== null) {
+                    console.warn(`[${cleanModel}] Ausgabe entgleist (Wortsalat) – Stream beendet, am letzten Satz gekürzt`);
+                    fullText = cut; partialStreamingText = fullText; lastFinishReason = "degenerate"; abortStream = true;
+                    try { reader.cancel(); } catch(e){}
+                    if (onChunk) onChunk(fullText);
+                    break;
+                  }
+                }
                 if (fullText.includes("[END_OF_TURN]")) {
                   fullText = fullText.split("[END_OF_TURN]")[0].trim();
                   abortStream = true;
@@ -3384,8 +3422,10 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     const isEn = state.lang === "en";
     const budget = state.settings.maxTokenBudget || 3200;
     const protectedNames = getProtectedNames();
-    const lore = scanLorebookRecursive(effectiveHistory, userPromptContent, isGM);
-    const history = buildCleanHistoryWithinBudget(actor, budget, lore, effectiveHistory.length - 1, skipIndex);
+    // Lektor: verwebt nur die Entwürfe dieses Zuges -> kein Lorebook, nur so viel Verlauf wie für Ton/Tempus nötig
+    const isEd = actor.role === "editor";
+    const lore = isEd ? "" : scanLorebookRecursive(effectiveHistory, userPromptContent, isGM);
+    const history = buildCleanHistoryWithinBudget(actor, isEd ? Math.min(budget, 3000) : budget, lore, effectiveHistory.length - 1, skipIndex);
 
     let systemInstruction = actor.role === "gm"
       ? (isEn ? `### ROLE: WORLD & GAME MASTER\nYou are the world, physics, atmosphere, and NPCs. Strictly enforce plausible cause and effect. NEVER puppet ${protectedNames.join(", ")}.${lore}`
@@ -5806,10 +5846,27 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
         const editorPrompt = isEn ? `Merge ONLY the following drafts of THIS turn into a short prose passage (no title, do not retell earlier events):\n[PLAYER ACTION BY ${String(userName).toUpperCase()}]:\n"${triggerText}"\n\n[WORLD & NPCS]:\n${gmTurn.clean || "No events."}\n\n${allCompanionsFormatted}\n\nEDITORIAL RULES:\n1. ZERO HALLUCINATION: Do not invent unrelated events!\n2. PRESERVE DIALOGUE: All spoken words from NPCs and companions must remain.\n3. CONTINUATION: Begin directly with the consequence of the player action. No heading, no recap, not longer than the drafts.`
           : `Setze NUR die folgenden Entwürfe DIESES Zuges zu einem kurzen Erzählabschnitt zusammen (kein Titel, nichts Früheres nacherzählen):\n[SPIELER-AKTION VON ${String(userName).toUpperCase()}]:\n"${triggerText}"\n\n[WELT & NPCS]:\n${gmTurn.clean || "Keine Ereignisse."}\n\n${allCompanionsFormatted}\n\nLEKTORATS-REGELN:\n1. ZERO-HALLUCINATION: Erfinde keine neuen Handlungen oder Ereignisse dazu!\n2. DIALOG-TREUE: Alle gesprochenen Worte von NPCs und Gefährten müssen erhalten bleiben.\n3. FORTSETZUNG: Beginne direkt mit der Folge der Spieler-Aktion. Kein Titel, keine Nacherzählung, nicht länger als die Entwürfe.`;
 
-        const editorTurn = await executeActorTurn({
-          actor: editorChar, effectiveHistory: effectiveHistoryForScan, userPromptContent: editorPrompt,
-          onChunk: (chunkText) => renderThrottled(contentEl, chunkText), customMaxTokens: 1600
-        });
+        const draftChars = String(gmTurn.clean || "") + allCompanionsFormatted;
+        const edMaxTokens = Math.min(4096, Math.max(1600, Math.round(estimateTokens(draftChars) * 1.15) + 300));
+        let editorTurn, edErr = null;
+        try {
+          editorTurn = await executeActorTurn({
+            actor: editorChar, effectiveHistory: effectiveHistoryForScan, userPromptContent: editorPrompt,
+            onChunk: (chunkText) => renderThrottled(contentEl, chunkText), customMaxTokens: edMaxTokens
+          });
+        } catch (e) {
+          if (isAborted || e.name === "AbortError") throw e;
+          edErr = e; editorTurn = { raw: stripVoiceTags(stripWeltbuchTags(partialStreamingText || "", true)) };
+        }
+        // Gekürzt (Token-Limit), entgleist oder abgebrochen: sauber am Satzende schließen; zu wenig übrig -> Entwürfe zeigen
+        const edCut = edErr || lastFinishReason === "length" || lastFinishReason === "degenerate";
+        if (edCut && editorTurn.raw) editorTurn.raw = trimToSentence(editorTurn.raw);
+        if (edCut && stripThink(editorTurn.raw || "").length < 300) {
+          editorTurn.raw = [gmTurn.clean, ...accumulatedCompanions.map(c => `**${c.name}:** ${c.text}`)].filter(x => x && String(x).trim()).join("\n\n");
+        }
+        if (edCut) showToast(edErr
+          ? (isEn ? "Editor stopped (" + String(edErr.message || edErr).slice(0, 80) + ") – kept the text so far / the drafts." : "Lektor abgebrochen (" + String(edErr.message || edErr).slice(0, 80) + ") – bisheriger Text bzw. Entwürfe übernommen.")
+          : (isEn ? "Editor text was cut at the last full sentence." : "Lektor-Text wurde am letzten vollständigen Satz beendet."), edErr ? "error" : "info");
         if (editorTurn.raw) editorTurn.raw = editorTurn.raw.replace(/^(\s*(?:<think>[\s\S]*?<\/think>)?\s*)#{1,6}[^\n]*\n+/, "$1");
 
         flushThrottled(contentEl, editorTurn.raw);
