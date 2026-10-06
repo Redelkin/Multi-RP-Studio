@@ -1180,7 +1180,7 @@
       map_scan_confirm: "Ein einzelner KI-Aufruf mit dem Modell von „{n}“ ({m}) liest dein Lorebuch (ohne Nur-GM-Einträge) und erstellt eine Ortsliste. Du kannst sie danach prüfen. Fortfahren?",
       map_scan_running: "⏳ Lorebuch wird gelesen…", map_scan_status: "{n} liest das Lorebuch für die Karte…",
       map_scan_empty: "Die KI hat keine verwertbare Ortsliste geliefert. Versuche es erneut oder trage Orte von Hand ein.",
-      places_title: "📝 Ortsliste prüfen", places_desc: "Eine Zeile pro Ort: Name | Typ | Lage | Entfernung. Die Karte wird nur aus diesen Zeilen gezeichnet. Orte aus Lore-Einträgen mit Ortsfeld und vom Spielleiter entdeckte Orte kommen automatisch dazu.",
+      places_title: "📝 Ortsliste prüfen", places_desc: "Eine Zeile pro Ort: Name | Typ | Lage | Entfernung | Teil von | Terrain (optional). Die Karte wird nur aus diesen Zeilen gezeichnet. Orte aus Lore-Einträgen mit Ortsfeld und vom Spielleiter entdeckte Orte kommen automatisch dazu.",
       places_found: "Die KI hat {n} Orte gefunden. Bitte prüfen und übernehmen.", places_save: "Übernehmen", places_saved: "Ortsliste gespeichert ({n} Orte).",
       chronicle_folder: "Chronik", wb_here_chip: "📍 Hier: {n}?", map_reset: "Ansicht zurücksetzen", map_close: "Karte schließen"
     },
@@ -1289,15 +1289,15 @@
       map_scan_confirm: "One single AI call with the model of “{n}” ({m}) reads your lorebook (without GM-only entries) and builds a place list. You can review it afterwards. Continue?",
       map_scan_running: "⏳ Reading the lorebook…", map_scan_status: "{n} is reading the lorebook for the map…",
       map_scan_empty: "The AI did not return a usable place list. Try again or add places by hand.",
-      places_title: "📝 Review place list", places_desc: "One line per place: Name | Type | Position | Distance. The map is drawn only from these lines. Places from lore entries with a place field and places discovered by the game master are added automatically.",
+      places_title: "📝 Review place list", places_desc: "One line per place: Name | Type | Position | Distance | Part of | Terrain (optional). The map is drawn only from these lines. Places from lore entries with a place field and places discovered by the game master are added automatically.",
       places_found: "The AI found {n} places. Please review and apply.", places_save: "Apply", places_saved: "Place list saved ({n} places).",
       chronicle_folder: "Chronicle", wb_here_chip: "📍 Here: {n}?", map_reset: "Reset view", map_close: "Close map"
     }
   };
 
   // Weltkarte 2: Ebenen, Orte-Reiter, Stecknadeln, Nebel, Reisezeiten
-  Object.assign(I18N.de, {"map_far": "vom Hörensagen · fern", "map_world": "Welt", "map_tab_map": "🗺️ Karte", "map_tab_places": "📍 Orte", "map_card_enter": "🚪 Betreten", "map_card_show": "🗺️ Auf Karte zeigen", "map_card_kids": "{n} Orte darin", "map_card_from_here": "≈ {d} von hier · 🚶 {f} · 🐎 {h}", "map_card_far": "Weit entfernt – der Weg dorthin ist noch unbekannt.", "map_rumor": "Gerücht", "map_rumor_desc": "Nur vom Hörensagen bekannt. Das Land dazwischen ist noch unerforscht.", "map_pin_one": "📍 Lange drücken: zweite Nadel setzen", "map_pin_tap": "Nadel antippen entfernt sie", "map_pin_dist": "≈ {d} Luftlinie", "map_pin_travel": "🚶 {f} · 🐎 {h} · 🛒 {c}", "map_gestures": "Tippen: Menü · Wischen: umsehen · Lange drücken: Nadel", "map_scale_foot": "{f} zu Fuß", "u_day": "Tag", "u_days": "Tage", "u_h": "Std.", "u_min": "Min.", "wb_travel_hint": "[REISE] Reise von {a} nach {b}: ca. {d}, zu Fuß ~{f}, zu Pferd ~{h}, mit dem Karren ~{c}. Halte die verstrichene Zeit (Tag, Tageszeit, Proviant, Erschöpfung) konsistent.", "wb_travel_far": "[REISE] Reise von {a} nach {b}: eine weite Reise, die Entfernung ist unbekannt (eher Wochen als Tage). Halte die verstrichene Zeit konsistent.", "wb_travel_from": "Reisezeiten ab {a} (zu Fuß): ", "orte_title": "📍 Orte", "orte_search_ph": "Orte durchsuchen…", "orte_no_region": "Weitere Orte", "orte_empty": "Keine Orte gefunden.", "orte_cur": "📍 hier", "orte_visited": "✓ besucht", "orte_unk": "? geschätzt", "orte_in": "in {p}", "lbl_loc_parent": "Teil von", "ph_loc_parent": "z. B. Roa (leer = keiner)", "places_desc": "Eine Zeile pro Ort: Name | Typ | Lage | Entfernung | Teil von (optional, z. B. die Stadt eines Platzes). Die Karte wird nur aus diesen Zeilen gezeichnet. Orte aus Lore-Einträgen mit Ortsfeld und vom Spielleiter entdeckte Orte kommen automatisch dazu.", "tt_map_tabs": "Karte oder Ortsliste"});
-  Object.assign(I18N.en, {"map_far": "known by rumor · far away", "map_world": "World", "map_tab_map": "🗺️ Map", "map_tab_places": "📍 Places", "map_card_enter": "🚪 Enter", "map_card_show": "🗺️ Show on map", "map_card_kids": "{n} places inside", "map_card_from_here": "≈ {d} from here · 🚶 {f} · 🐎 {h}", "map_card_far": "Far away – the way there is still unknown.", "map_rumor": "Rumor", "map_rumor_desc": "Known only by rumor. The land in between is still unexplored.", "map_pin_one": "📍 Long-press to set a second pin", "map_pin_tap": "Tap a pin to remove it", "map_pin_dist": "≈ {d} as the crow flies", "map_pin_travel": "🚶 {f} · 🐎 {h} · 🛒 {c}", "map_gestures": "Tap: menu · Swipe: look around · Long-press: pin", "map_scale_foot": "{f} on foot", "u_day": "day", "u_days": "days", "u_h": "h", "u_min": "min", "wb_travel_hint": "[TRAVEL] Journey from {a} to {b}: about {d}, on foot ~{f}, on horseback ~{h}, by cart ~{c}. Keep the passing of time (day, time of day, supplies, fatigue) consistent.", "wb_travel_far": "[TRAVEL] Journey from {a} to {b}: a long journey, distance unknown (weeks rather than days). Keep the passing of time consistent.", "wb_travel_from": "Travel times from {a} (on foot): ", "orte_title": "📍 Places", "orte_search_ph": "Search places…", "orte_no_region": "Other places", "orte_empty": "No places found.", "orte_cur": "📍 here", "orte_visited": "✓ visited", "orte_unk": "? estimated", "orte_in": "in {p}", "lbl_loc_parent": "Part of", "ph_loc_parent": "e.g. Roa (empty = none)", "places_desc": "One line per place: Name | Type | Position | Distance | Part of (optional, e.g. the city a square lies in). The map is drawn only from these lines. Places from lore entries with a place field and places discovered by the game master are added automatically.", "tt_map_tabs": "Map or place list"});
+  Object.assign(I18N.de, {"map_far": "vom Hörensagen · fern", "map_world": "Welt", "map_tab_map": "🗺️ Karte", "map_tab_places": "📍 Orte", "map_card_enter": "🚪 Betreten", "map_card_show": "🗺️ Auf Karte zeigen", "map_card_kids": "{n} Orte darin", "map_card_from_here": "≈ {d} von hier · 🚶 {f} · 🐎 {h}", "map_card_far": "Weit entfernt – der Weg dorthin ist noch unbekannt.", "map_rumor": "Gerücht", "map_rumor_desc": "Nur vom Hörensagen bekannt. Das Land dazwischen ist noch unerforscht.", "map_pin_one": "📍 Lange drücken: zweite Nadel setzen", "map_pin_tap": "Nadel antippen entfernt sie", "map_pin_dist": "≈ {d} Luftlinie", "map_pin_travel": "🚶 {f} · 🐎 {h} · 🛒 {c}", "map_gestures": "Tippen: Menü · Wischen: umsehen · Lange drücken: Nadel", "map_scale_foot": "{f} zu Fuß", "u_day": "Tag", "u_days": "Tage", "u_h": "Std.", "u_min": "Min.", "wb_travel_hint": "[REISE] Reise von {a} nach {b}: ca. {d}, zu Fuß ~{f}, zu Pferd ~{h}, mit dem Karren ~{c}. Halte die verstrichene Zeit (Tag, Tageszeit, Proviant, Erschöpfung) konsistent.", "wb_travel_far": "[REISE] Reise von {a} nach {b}: eine weite Reise, die Entfernung ist unbekannt (eher Wochen als Tage). Halte die verstrichene Zeit konsistent.", "wb_travel_from": "Reisezeiten ab {a} (zu Fuß): ", "orte_title": "📍 Orte", "orte_search_ph": "Orte durchsuchen…", "orte_no_region": "Weitere Orte", "orte_empty": "Keine Orte gefunden.", "orte_cur": "📍 hier", "orte_visited": "✓ besucht", "orte_unk": "? geschätzt", "orte_in": "in {p}", "lbl_loc_parent": "Teil von", "ph_loc_parent": "z. B. Roa (leer = keiner)", "places_desc": "Eine Zeile pro Ort: Name | Typ | Lage | Entfernung | Teil von | Terrain (optional: Insel, Ring:0/1/2, Wald, Feld…). Die Karte folgt der Weltstruktur, nicht einer festen Vorlage.", "tt_map_tabs": "Karte oder Ortsliste"});
+  Object.assign(I18N.en, {"map_far": "known by rumor · far away", "map_world": "World", "map_tab_map": "🗺️ Map", "map_tab_places": "📍 Places", "map_card_enter": "🚪 Enter", "map_card_show": "🗺️ Show on map", "map_card_kids": "{n} places inside", "map_card_from_here": "≈ {d} from here · 🚶 {f} · 🐎 {h}", "map_card_far": "Far away – the way there is still unknown.", "map_rumor": "Rumor", "map_rumor_desc": "Known only by rumor. The land in between is still unexplored.", "map_pin_one": "📍 Long-press to set a second pin", "map_pin_tap": "Tap a pin to remove it", "map_pin_dist": "≈ {d} as the crow flies", "map_pin_travel": "🚶 {f} · 🐎 {h} · 🛒 {c}", "map_gestures": "Tap: menu · Swipe: look around · Long-press: pin", "map_scale_foot": "{f} on foot", "u_day": "day", "u_days": "days", "u_h": "h", "u_min": "min", "wb_travel_hint": "[TRAVEL] Journey from {a} to {b}: about {d}, on foot ~{f}, on horseback ~{h}, by cart ~{c}. Keep the passing of time (day, time of day, supplies, fatigue) consistent.", "wb_travel_far": "[TRAVEL] Journey from {a} to {b}: a long journey, distance unknown (weeks rather than days). Keep the passing of time consistent.", "wb_travel_from": "Travel times from {a} (on foot): ", "orte_title": "📍 Places", "orte_search_ph": "Search places…", "orte_no_region": "Other places", "orte_empty": "No places found.", "orte_cur": "📍 here", "orte_visited": "✓ visited", "orte_unk": "? estimated", "orte_in": "in {p}", "lbl_loc_parent": "Part of", "ph_loc_parent": "e.g. Roa (empty = none)", "places_desc": "One line per place: Name | Type | Position | Distance | Part of | Terrain (optional: Island, Ring:0/1/2, Forest, Field…). The map follows world structure, not a fixed template.", "tt_map_tabs": "Map or place list"});
 
   function t(key) {
     const lang = (state && state.lang === "en") ? "en" : "de";
@@ -3632,19 +3632,36 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     function mst(P) { const E = [], inT = new Set([0]); if (P.length < 2) return E; while (inT.size < P.length) { let best = null, bd = 1e18; for (const i of inT) for (let j = 0; j < P.length; j++) { if (inT.has(j)) continue; const d = Math.hypot(P[i].p.x - P[j].p.x, P[i].p.y - P[j].p.y); if (d < bd) { bd = d; best = [i, j]; } } inT.add(best[1]); E.push([P[best[0]], P[best[1]]]); } return E; }
     const LINEC = ["#ff4fa3", "#3fe0ff", "#ffd23f", "#7cff8a", "#b18cff"];
     function worldModern(C) {
-      const { L, defs, el, rr, pick, N, ACT, EDG, RIV, RAD, X0, Y0, W, H, MX, MY, MW, MH, CX, CY, WS, smooth } = C;
+      const { L, defs, el, rr, pick, N, ACT, EDG, RIV, RAD, X0, Y0, W, H, MX, MY, MW, MH, CX, CY, WS, smooth, skeleton } = C;
       const rg = el(defs, "radialGradient", { id: "wkmg", cx: "50%", cy: "45%", r: "75%" });
       el(rg, "stop", { offset: "0", "stop-color": "#171d29" }); el(rg, "stop", { offset: ".7", "stop-color": "#10141c" }); el(rg, "stop", { offset: "1", "stop-color": "#0b0e14" });
       el(L.bg, "rect", { x: MX, y: MY, width: MW, height: MH, fill: "#0b0e14" });
       el(L.bg, "rect", { x: X0, y: Y0, width: W, height: H, fill: "url(#wkmg)" });
       C.reseed(WS ^ 911);
-      for (const n of ACT) el(L.bg, "circle", { cx: f1(n.p.x), cy: f1(n.p.y), r: f1(RAD[n.typ] + 110), fill: pick(["#ff4fa3", "#3fe0ff", "#8b6cff"]), opacity: .07, filter: "url(#wkbl)" });
-      // Straßenraster mit Blöcken (leicht gedreht)
+      const scale = (skeleton && skeleton.scale) || "";
+      const radN = n => (C.radOf ? C.radOf(n) : (RAD[n.typ] || 28));
+      // Dorf / Wald: kein Großstadt-Raster – nur Wege, Felder, Bäume (Präzision: Maßstab aus Skelett)
+      if (scale === "village" || scale === "forest" || scale === "local") {
+        for (const n of ACT) el(L.bg, "circle", { cx: f1(n.p.x), cy: f1(n.p.y), r: f1(radN(n) + 80), fill: scale === "forest" ? "#1a3a28" : "#2a3340", opacity: .12, filter: "url(#wkbl)" });
+        for (const e of EDG) { if (e.kind === "in") continue; const d = smooth(e.P);
+          el(L.road, "path", { d, fill: "none", stroke: "#05070b", "stroke-width": 7, "stroke-linecap": "round", opacity: .8 });
+          el(L.road, "path", { d, fill: "none", stroke: "#5a6680", "stroke-width": 3.2, "stroke-linecap": "round", "stroke-dasharray": e.far ? "10 7" : null }); }
+        for (const P of RIV) { const d = smooth(P), w = P.w || 4; el(L.river, "path", { d, fill: "none", stroke: "#123a52", "stroke-width": w * 2.2, "stroke-linecap": "round" }); el(L.river, "path", { d, fill: "none", stroke: "#4fb6e0", "stroke-width": 1.1, opacity: .45, class: "flow" }); }
+        for (const n of ACT) {
+          const dens = n.density != null ? n.density : .4;
+          if (n.typ === "forest" || scale === "forest") { let t = ""; for (let i = 0; i < 20; i++) { const a = rr(0, 6.283), d = radN(n) * .8 * Math.sqrt(rr(0, 1)); t += cP(n.p.x + Math.cos(a) * d, n.p.y + Math.sin(a) * d * .8, rr(4, 8)); } el(L.forest, "path", { d: t, fill: "#1f6b3e", stroke: "#0b2a17", "stroke-width": 1 }); }
+          else if (n.typ === "farm" || (n.details && n.details.fields)) { for (let i = 0; i < Math.round(6 + dens * 8); i++) { const a = rr(0, 360), d = rr(radN(n) * .6, radN(n) + 50); el(L.field, "rect", { x: f1(n.p.x + Math.cos(a * Math.PI / 180) * d - 12), y: f1(n.p.y + Math.sin(a * Math.PI / 180) * d - 8), width: 24, height: 16, fill: "#2a4030", opacity: .5, transform: `rotate(${f1(a)} ${f1(n.p.x)} ${f1(n.p.y)})` }); } }
+          n.mk = kindX(n, "modern"); if (n.mk !== "district" && n.mk !== "park" && n.mk !== "river") badge(el, L.icon, n.p.x, n.p.y - 24, n.mk || "house");
+        }
+        return;
+      }
+      for (const n of ACT) el(L.bg, "circle", { cx: f1(n.p.x), cy: f1(n.p.y), r: f1(radN(n) + 110), fill: pick(["#ff4fa3", "#3fe0ff", "#8b6cff"]), opacity: .07, filter: "url(#wkbl)" });
+      // Straßenraster mit Blöcken (leicht gedreht) – nur bei Stadt-/Regionsmaßstab
       const th = rr(-14, 14), cs = Math.cos(th * Math.PI / 180), sn = Math.sin(th * Math.PI / 180), S = 58;
       const toW = (u, v) => [CX + (u - CX) * cs - (v - CY) * sn, CY + (u - CX) * sn + (v - CY) * cs];
       const g = el(L.field, "g", { transform: `rotate(${f1(th)} ${f1(CX)} ${f1(CY)})` });
       const gx0 = Math.floor((X0 - 400) / S) * S, gy0 = Math.floor((Y0 - 400) / S) * S, gx1 = X0 + W + 400, gy1 = Y0 + H + 400;
-      const near = (x, y) => { let m = 1e9; for (const n of ACT) m = Math.min(m, Math.hypot(n.p.x - x, n.p.y - y) - RAD[n.typ]); return m; };
+      const near = (x, y) => { let m = 1e9; for (const n of ACT) m = Math.min(m, Math.hypot(n.p.x - x, n.p.y - y) - radN(n)); return m; };
       let bl = ["", "", ""], lit = ["", "", ""], minor = "", major = "";
       for (let u = gx0; u < gx1; u += S) for (let v = gy0; v < gy1; v += S) {
         const [wx, wy] = toW(u + S / 2, v + S / 2), dn = near(wx, wy); if (dn > 260) continue;
@@ -3663,7 +3680,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       for (const n of ACT) {
         const k = kindX(n, "modern"); n.mk = k;
         if (k !== "district" && k !== "park") continue;
-        const r = k === "park" ? RAD[n.typ] * .85 : RAD[n.typ] + 70, c = k === "park" ? "#2f9d5c" : ZC[hsh(n.key) % ZC.length], P = [];
+        const r = k === "park" ? radN(n) * .85 : radN(n) + 70, c = k === "park" ? "#2f9d5c" : ZC[hsh(n.key) % ZC.length], P = [];
         for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2 + rr(-.15, .15), rr0 = r * rr(.85, 1.12); P.push([n.p.x + Math.cos(a) * rr0, n.p.y + Math.sin(a) * rr0 * .85]); }
         el(L.field, "path", { d: smooth(P.concat([P[0]])), fill: c, "fill-opacity": k === "park" ? .22 : .07, stroke: c, "stroke-opacity": k === "park" ? .5 : .5, "stroke-width": 2, "stroke-dasharray": k === "park" ? null : "9 6" });
         if (k === "park") { let t = ""; for (let i = 0; i < 26; i++) { const a = rr(0, 6.283), d = r * .75 * Math.sqrt(rr(0, 1)); t += cP(n.p.x + Math.cos(a) * d, n.p.y + Math.sin(a) * d * .8, rr(4, 7)); } el(L.forest, "path", { d: t, fill: "#1f6b3e", stroke: "#0b2a17", "stroke-width": 1 }); }
@@ -3843,6 +3860,400 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       return { N, ACT: N, MK, X0, Y0, W, H, core: { x: -R - 150, y: -R - 150, w: 2 * R + 300, h: 2 * R + 300 }, PX: null, cur: cur || (opts.curSelf ? self : null), lastSeg: null, SEG: [], drawTrail: () => {}, setMe, find, region: "", byId: id => N.find(n => n.id === id), routePts: null, travel, toKm, unitsForKm, pinG: L.pin, meG: me, local: true, self, kmU };
     }
     const SKIN = { pal: s => PAL[s] || PAL.modern, kmd: s => KMD[s] || 25, kind: (n, s) => s === "fantasy" ? null : kindX(n, s), world: C => (C.STY === "modern" ? worldModern : worldScifi)(C), fog: fogX, local: localX };
+    // ---------- Welt-Skelett: Maßstab/Topologie aus Orten, Constraint-Layout, Größe/Dichte, Prüfungen (Präzision vor Optik) ----------
+    // Terrain-Spalte (optional, 6.): Insel|Küste|Festland|Ring|Ring:N|Wald|Feld|Straße|Sumpf|Berg|Meer|Deck|–
+    // Struktur-Zeile (Scan): # STRUKTUR: Maßstab=… | Topologie=… | Zentrum=…
+    const TERRAIN_RE = /^(insel|island|küste|kueste|coast|festland|mainland|ring(?:\s*[:=-]?\s*\d+)?|wald|forest|feld|field|farmland|straße|strasse|road|street|sumpf|swamp|marsh|berg|mountain|meer|sea|ocean|deck|station|tal|valley|wüste|wueste|desert)\b/i;
+    function parseTerrain(s) {
+      s = String(s || "").trim(); if (!s || /^[–\-—?\s]*$/.test(s)) return "";
+      const m = s.match(/ring\s*[:=-]?\s*(\d+)/i); if (/^ring/i.test(s)) return m ? "ring:" + m[1] : (/kern|core|inner|innen|zitadelle|citadel/i.test(s) ? "ring:0" : (/außen|aussen|outer|schlacke|slum/i.test(s) ? "ring:outer" : "ring"));
+      const t = s.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
+      if (/insel|island/.test(t)) return "island";
+      if (/kuste|coast|ufer|shore/.test(t)) return "coast";
+      if (/festland|mainland/.test(t)) return "mainland";
+      if (/wald|forest|wood/.test(t)) return "forest";
+      if (/feld|field|farmland|acker/.test(t)) return "field";
+      if (/stra(ss|ß)e|road|street|gasse|gasse/.test(t)) return "road";
+      if (/sumpf|swamp|marsh|moor/.test(t)) return "swamp";
+      if (/berg|mountain|gipfel/.test(t)) return "mountains";
+      if (/meer|sea|ocean|see\b/.test(t)) return "sea";
+      if (/deck|station/.test(t)) return "deck";
+      if (/tal|valley/.test(t)) return "valley";
+      if (/wuste|desert/.test(t)) return "desert";
+      return s.slice(0, 24).toLowerCase();
+    }
+    function parseStructHeader(text) {
+      const out = {};
+      for (const line of String(text || "").split(/\r?\n/)) {
+        const m = line.match(/^\s*#\s*(?:STRUKTUR|STRUCTURE)\s*:\s*(.+)$/i); if (!m) continue;
+        m[1].split("|").forEach(part => {
+          const kv = part.split("=").map(x => x.trim()); if (kv.length < 2) return;
+          const k = kv[0].toLowerCase(), v = kv.slice(1).join("=");
+          if (/massstab|maßstab|scale|size/.test(k)) out.scale = v.toLowerCase();
+          else if (/topo|layout|form/.test(k)) out.topology = v.toLowerCase();
+          else if (/zentrum|center|centre|kern|core/.test(k)) out.center = v;
+        });
+      }
+      if (out.scale) out.scale = normScale(out.scale);
+      if (out.topology) out.topology = normTopo(out.topology);
+      return out;
+    }
+    function normScale(s) {
+      s = String(s || "").toLowerCase();
+      if (/insel|island/.test(s)) return "island";
+      if (/dorf|village|hamlet/.test(s)) return "village";
+      if (/wald|forest|wood/.test(s)) return "forest";
+      if (/stadt|city|town/.test(s)) return "city";
+      if (/region|provinz|province/.test(s)) return "region";
+      if (/kontinent|continent/.test(s)) return "continent";
+      if (/raum|room|gebäude|gebaeude|building/.test(s)) return "building";
+      if (/station|deck/.test(s)) return "station";
+      if (/local|lokal/.test(s)) return "local";
+      return s;
+    }
+    function normTopo(s) {
+      return String(s || "").toLowerCase().split(/[+/,]/).map(p => {
+        p = p.trim();
+        if (/ring/.test(p)) return "rings";
+        if (/insel|island/.test(p)) return "island";
+        if (/küste|kueste|coast/.test(p)) return "coast";
+        if (/wald|forest/.test(p)) return "forest";
+        if (/stra(ss|ß)e|road|street/.test(p)) return "road";
+        if (/tal|valley/.test(p)) return "valley";
+        if (/station|deck/.test(p)) return "station";
+        if (/frei|free/.test(p)) return "free";
+        return p;
+      }).filter(Boolean).join("+");
+    }
+    // Größe (Karteneinheit / Icon-Radius-Faktor) und Bebauungsdichte 0..1 aus Typ+Terrain+Stichworten – nicht aus Setting-Defaults
+    function sizeOf(n) {
+      const blob = (String(n.typS || "") + " " + String(n.name || "") + " " + String(n.terrain || "")).toLowerCase();
+      if (n.typ === "region") return 0;
+      if (n.typ === "river") return 8;
+      if (n.typ === "mountains") return 140;
+      if (n.typ === "forest") return 70;
+      if (n.ring) return n.ring.rOuter; // Ringbreite bestimmt die Größe
+      if (/metropol|hauptstadt|capital|megacity/.test(blob)) return 72;
+      if (/zitadelle|citadel|palast|palace|festung|fortress/.test(blob)) return 58;
+      if (n.typ === "capital") return 66;
+      if (n.typ === "city" || /stadt|city|town|viertel|district/.test(blob)) return 48;
+      if (n.typ === "village" || /dorf|village|hamlet|weiler/.test(blob)) return 32;
+      if (n.typ === "castle") return 28;
+      if (n.typ === "farm" || n.typ === "mill") return 22;
+      if (n.typ === "camp") return 18;
+      if (n.typ === "house" || n.typ === "place") return 16;
+      return 24;
+    }
+    function densityOf(n) {
+      const blob = (String(n.typS || "") + " " + String(n.name || "") + " " + String(n.terrain || "")).toLowerCase();
+      if (n.typ === "forest" || n.typ === "mountains" || n.typ === "river" || n.typ === "region") return 0;
+      if (/schlacke|slum|ghetto|dicht|dense|hutten|hütten|shanty|favela/.test(blob)) return .95;
+      if (/zitadelle|citadel|palast|palace|grand|sparsam|sparse|marmor|marble|tempelbezirk/.test(blob)) return .22;
+      if (n.ring && n.ring.idx === 0) return .25;
+      if (n.ring && n.ring.idx >= 2) return .9;
+      if (n.typ === "village" || /dorf|village|scattered|locker/.test(blob)) return .38;
+      if (n.typ === "farm") return .15;
+      if (n.typ === "camp") return .2;
+      if (n.typ === "castle") return .3;
+      if (n.typ === "capital") return .55;
+      if (n.typ === "city") return .65;
+      return .45;
+    }
+    function detailFlags(n) {
+      const blob = (String(n.typS || "") + " " + String(n.name || "") + " " + String(n.terrain || "") + " " + String(n.relS || "")).toLowerCase();
+      return {
+        wall: /mauer|wall|wallgurtel|wallgürtel|festung|fortress|zitadelle|citadel|stadtmauer/.test(blob) || n.typ === "city" || n.typ === "capital" || n.typ === "castle" || !!n.ring,
+        river: n.typ === "river" || /fluss|river|bach|stream|kanal|canal/.test(blob),
+        road: /straße|strasse|road|gasse|ramp|winde|brücke|brucke|bridge|tor\b|gate/.test(blob),
+        landmark: /markt|market|tempel|temple|kathedrale|cathedral|brucke|brücke|bridge|tor\b|gate|turm|tower|monolith|lagerfeuer|campfire/.test(blob),
+        fields: n.typ === "farm" || n.typ === "village" || /feld|field|acker|farm/.test(blob),
+        coast: /insel|island|küste|coast|ufer|hafen|harbour|harbor|port/.test(blob) || n.terrain === "island" || n.terrain === "coast",
+        denseSlum: densityOf(n) >= .85,
+        grand: densityOf(n) <= .28 && (n.typ === "castle" || n.typ === "capital" || n.typ === "city" || !!n.ring)
+      };
+    }
+    // Topologie/Maßstab aus der Ortsliste ableiten (keine festen Setting-Vorlagen)
+    function inferSkeleton(N, header) {
+      header = header || {};
+      const terrains = N.map(n => n.terrain).filter(Boolean);
+      const types = N.map(n => n.typ);
+      const blob = N.map(n => (n.name + " " + n.typS + " " + n.terrain + " " + n.relS).toLowerCase()).join(" | ");
+      let scale = normScale(header.scale || "");
+      if (!scale) {
+        if (types.includes("region") && (terrains.includes("island") || /insel|island/.test(blob))) scale = "island";
+        else if (N.some(n => n.ring) || /ring|zitadelle|schlacke|concentric/.test(blob)) scale = "city";
+        else if (types.filter(t => t === "city" || t === "capital").length >= 2) scale = "region";
+        else if (types.includes("village") && !types.includes("city") && !types.includes("capital")) scale = "village";
+        else if (types.includes("forest") && types.includes("camp") && !types.includes("city")) scale = "forest";
+        else if (types.includes("city") || types.includes("capital")) scale = "city";
+        else if (types.includes("region")) scale = "region";
+        else scale = "local";
+      }
+      let topology = normTopo(header.topology || "");
+      if (!topology) {
+        const tops = [];
+        if (N.some(n => n.ring) || /ring|konzentrisch|concentric|terrassen/.test(blob)) tops.push("rings");
+        if (terrains.includes("island") || /insel|island/.test(blob)) tops.push("island");
+        if (terrains.includes("coast") || /küste|coast|hafen/.test(blob)) tops.push("coast");
+        if (scale === "forest" || (types.includes("forest") && types.includes("camp"))) tops.push("forest");
+        if (scale === "village" || (/hauptstraße|hauptstrasse|main street|dorfstraße/.test(blob))) tops.push("road");
+        if (/tal|valley/.test(blob)) tops.push("valley");
+        if (/deck|station|sektor/.test(blob)) tops.push("station");
+        topology = tops.join("+") || "free";
+      }
+      return { scale, topology, center: header.center || "", header };
+    }
+    // Ringe erkennen: Terrain ring:N, oder Name/Typ „Ring/Zitadelle/Schlacke“ + gemeinsamer Bezug
+    function detectRings(N, find) {
+      const scored = [];
+      for (const n of N) {
+        const blob = (n.name + " " + n.typS + " " + n.terrain).toLowerCase();
+        let idx = null;
+        if (/^ring:(\d+)$/.test(n.terrain)) idx = +RegExp.$1;
+        else if (n.terrain === "ring:outer") idx = 100;
+        else if (n.terrain === "ring" || n.terrain === "ring:0") idx = n.terrain === "ring:0" ? 0 : 50;
+        else if (/hoch-?zitadelle|citadel|oberstadt|ring\s*kern|inner\s*ring|kernring/.test(blob)) idx = 0;
+        else if (/mittlere\s*ringe|middle\s*ring|gildenring|eisengurtel|eisengürtel|wallgurtel|wallgürtel/.test(blob)) idx = 1;
+        else if (/schlacke|unterstadt|outer\s*ring|slum|äußere\s*ring|aussere\s*ring/.test(blob)) idx = 2;
+        else if (/\bring(e|s)?\b/.test(blob) && (n.typ === "city" || n.typ === "capital" || n.typ === "place")) idx = 50;
+        if (idx != null) scored.push({ n, idx });
+      }
+      if (scored.length < 2) return [];
+      // Eine Gruppe, wenn Ringe sich aufeinander beziehen oder dieselbe Region teilen
+      const scoredSet = new Set(scored.map(s => s.n));
+      const groups = new Map();
+      for (const s of scored) {
+        let gkey = "g0";
+        const par = s.n.info && s.n.info.parent ? find(s.n.info.parent) : null;
+        const ref = s.n.ref;
+        if (par && par.typ === "region") gkey = "r:" + par.key;
+        else if (ref && ref.typ === "region") gkey = "r:" + ref.key;
+        else if (ref && scoredSet.has(ref)) gkey = "g0"; // Querverweis auf anderen Ring → gemeinsame Gruppe
+        else if (par && scoredSet.has(par)) gkey = "g0";
+        else if (par) gkey = "p:" + par.key;
+        if (!groups.has(gkey)) groups.set(gkey, []);
+        groups.get(gkey).push(s);
+      }
+      // Singleton-Gruppen mit Querverweis in g0 mergen
+      if (groups.size > 1 && groups.has("g0")) {
+        for (const [k, mem] of [...groups.entries()]) {
+          if (k === "g0") continue;
+          if (mem.some(s => s.n.ref && scoredSet.has(s.n.ref))) { groups.get("g0").push(...mem); groups.delete(k); }
+        }
+      }
+      const out = [];
+      for (const [gkey, members] of groups) {
+        if (members.length < 2) continue;
+        members.sort((a, b) => a.idx - b.idx);
+        // Indizes normalisieren 0..n-1 falls nur Keywords ohne Nummern
+        const uniq = [...new Set(members.map(m => m.idx))].sort((a, b) => a - b);
+        const mapIdx = Object.fromEntries(uniq.map((v, i) => [v, i]));
+        const rings = members.map(m => ({ n: m.n, idx: mapIdx[m.idx] }));
+        out.push({ id: gkey, members: rings });
+      }
+      return out;
+    }
+    function applyRingLayout(groups, N, PX, rr, D) {
+      // Ringbreiten: innen klein, außen größer – präzise Staffelung
+      const WIDTHS = [36, 52, 70, 88, 100];
+      for (const g of groups) {
+        const cx = 0, cy = 0; // vorerst; wird später an Anker verschoben
+        let r = 0;
+        const sorted = g.members.slice().sort((a, b) => a.idx - b.idx);
+        for (const m of sorted) {
+          const w = WIDTHS[Math.min(m.idx, WIDTHS.length - 1)];
+          const rInner = r, rOuter = r + w;
+          r = rOuter;
+          m.n.ring = { group: g.id, idx: m.idx, rInner, rOuter, cx, cy };
+          m.n.fixed = true; // Ringe nicht auseinanderstoßen
+          m.n.far = false;
+          // Marker auf dem Ringmittelkreis, Winkel aus Name-Hash für Stabilität
+          const ang = (hsh(m.n.name) % 360);
+          const rm = (rInner + rOuter) / 2;
+          m.n.p = { x: cx + Math.cos(ang * D) * rm, y: cy + Math.sin(ang * D) * rm };
+          m.n.off = { x: m.n.p.x, y: m.n.p.y };
+          m.n.ang = ang;
+          m.n.days = 0;
+          // Icon-Radius = äußere Ringbreite für Kollision mit Nicht-Ring-Orten
+          m.n._rad = rOuter + 8;
+          m.n._ir = Math.max(12, (rOuter - rInner) / 2);
+        }
+        g.rMax = r;
+        g.cx = cx; g.cy = cy;
+      }
+    }
+    // Constraint-Layout: Ringe → Anker → Richtungen/Distanzen → Kollision (Ringe ausnehmen)
+    function layoutWorld(N, opts) {
+      const D = Math.PI / 180;
+      const header = opts.header || {};
+      const find = opts.find;
+      const POS = opts.pos || {};
+      const PX = opts.PX;
+      const rnd = opts.rnd, rr = opts.rr, hshFn = opts.hsh || hsh;
+      // Terrain an Nodes
+      N.forEach(n => { n.terrain = parseTerrain(n.info && n.info.terrain || n.terrain || ""); });
+      const rings = detectRings(N, find);
+      applyRingLayout(rings, N, PX, rr, D);
+      const ringSet = new Set();
+      rings.forEach(g => g.members.forEach(m => ringSet.add(m.n)));
+      const skel = inferSkeleton(N, header);
+      skel.rings = rings.map(g => ({ id: g.id, rMax: g.rMax, members: g.members.map(m => m.n.key) }));
+      // Klassisches Platzieren für Nicht-Ring-Orte (ähnlich bisher, aber mit parent-Containment und sizeOf)
+      let rootTaken = false;
+      const base = n => n.ref && n.ref.typ !== "region" ? n.ref : null;
+      function place(n, st) {
+        if (n.p && ringSet.has(n)) return; // Ring schon gesetzt
+        if (n.p && n.fixed && POS[n.key]) return;
+        if (n.p && !st) return;
+        st = st || new Set();
+        if (st.has(n)) return; st.add(n);
+        const b = base(n); if (b && !st.has(b)) place(b, st);
+        if (ringSet.has(n)) return;
+        opts.reseed && opts.reseed(hshFn(n.name));
+        if (n.typ === "region") { n.p = { x: 0, y: 0 }; n.fixed = true; return; }
+        const bp = b && b.p ? b.p : { x: 0, y: 0 }, k = n.rel.k, num = typeof n.d === "number" ? n.d : null;
+        let a = rr(0, 360), d;
+        if (k === "dir") { a = n.rel.a + rr(-12, 12); d = n.d === "fern" ? null : (num ?? 1); }
+        else if (k === "mid" || k === "thr") d = 0;
+        else if (k === "in") {
+          // Containment: innerhalb des Parents – bei Ring-Parent auf Ringband setzen
+          if (b && b.ring) {
+            const rm = (b.ring.rInner + b.ring.rOuter) / 2;
+            a = (hshFn(n.name) % 360);
+            n.ang = a; n.far = false; n.days = num ?? 0.02;
+            n.off = { x: Math.cos(a * D) * rm, y: Math.sin(a * D) * rm };
+            n.p = { x: b.ring.cx + n.off.x, y: b.ring.cy + n.off.y };
+            n.fixed = true; n._rad = sizeOf(n); n._ir = Math.max(8, sizeOf(n) * .35);
+            return;
+          }
+          d = num ?? .05;
+        }
+        else if (k === "near") d = num ?? .15;
+        else d = n.d === "fern" ? null : (b ? (num ?? 1) : (num ?? 0));
+        n.ang = a; n.far = d === null; n.days = d || 0;
+        const r = n.far ? 0 : PX(d);
+        n.off = { x: Math.cos(a * D) * r, y: Math.sin(a * D) * r };
+        n.fixed = !b && !n.far && r === 0 && !rootTaken; if (n.fixed) rootTaken = true;
+        n.p = { x: bp.x + n.off.x, y: bp.y + n.off.y };
+        n._rad = sizeOf(n); n._ir = Math.max(8, sizeOf(n) * (n.typ === "city" || n.typ === "capital" ? .55 : .4));
+        const ov = POS[n.key];
+        if (ov) { n.p = { x: ov[0], y: ov[1] }; n.fixed = true; n.far = false; n.man = true; }
+      }
+      N.forEach(n => { if (!n.p) place(n, new Set()); });
+      // Ring-Gruppe an Anker schieben (Zentrum-Header, Region-Mitte, oder erster Bezug)
+      for (const g of rings) {
+        let ax = 0, ay = 0;
+        if (skel.center) {
+          const c = find(skel.center);
+          if (c && c.p && !ringSet.has(c)) { ax = c.p.x; ay = c.p.y; }
+        }
+        g.cx = ax; g.cy = ay;
+        for (const m of g.members) {
+          const ang = m.n.ang * D, rm = (m.n.ring.rInner + m.n.ring.rOuter) / 2;
+          m.n.ring.cx = ax; m.n.ring.cy = ay;
+          m.n.p = { x: ax + Math.cos(ang) * rm, y: ay + Math.sin(ang) * rm };
+          m.n.off = { x: m.n.p.x - ax, y: m.n.p.y - ay };
+          const ov = POS[m.n.key];
+          if (ov) { m.n.p = { x: ov[0], y: ov[1] }; m.n.man = true; }
+        }
+        // Kinder in Ringen neu anbinden
+        N.forEach(n => {
+          if (ringSet.has(n)) return;
+          if (n.rel.k === "in" && n.ref && n.ref.ring && n.ref.ring.group === g.id) {
+            const b = n.ref, rm = (b.ring.rInner + b.ring.rOuter) / 2, a = (hshFn(n.name) % 360) * D;
+            n.p = { x: b.ring.cx + Math.cos(a) * rm, y: b.ring.cy + Math.sin(a) * rm };
+            n.fixed = true;
+          }
+        });
+      }
+      // Größe/Dichte/Details anheften
+      N.forEach(n => {
+        if (n._rad == null) n._rad = sizeOf(n);
+        if (n._ir == null) n._ir = Math.max(8, n._rad * .4);
+        n.size = n._rad; n.density = densityOf(n); n.details = detailFlags(n);
+      });
+      // Kollision: Ring-Mitglieder untereinander nicht trennen; Containment-fixed nicht verschieben
+      const ACT = N.filter(n => n.typ !== "region" && n.typ !== "river" && !n.far);
+      const radOf = n => n._rad != null ? n._rad : sizeOf(n);
+      const iters = ACT.length > 50 ? 180 : 360;
+      for (let it = 0; it < iters; it++) {
+        for (const n of ACT) {
+          if (n.fixed || ringSet.has(n)) continue;
+          const b = base(n), bp = b ? b.p : { x: 0, y: 0 };
+          n.p.x += (bp.x + n.off.x - n.p.x) * .1;
+          n.p.y += (bp.y + n.off.y - n.p.y) * .1;
+        }
+        for (let i = 0; i < ACT.length; i++) for (let j = i + 1; j < ACT.length; j++) {
+          const a = ACT[i], b = ACT[j];
+          // dieselbe Ringgruppe: Abstand = Ringstruktur, nicht auseinanderdrücken
+          if (a.ring && b.ring && a.ring.group === b.ring.group) continue;
+          // Kind in Ring-Parent: nicht aus dem Ring drücken
+          if (a.fixed && b.fixed) continue;
+          let dx = b.p.x - a.p.x, dy = b.p.y - a.p.y;
+          if (dx === 0 && dy === 0) { dx = rr(-1, 1); dy = rr(-1, 1); }
+          const d = Math.hypot(dx, dy) || .01, need = radOf(a) + radOf(b) + 28;
+          if (d < need) {
+            const p = need - d;
+            const sa = a.fixed || ringSet.has(a) ? 0 : (b.fixed || ringSet.has(b) ? 1 : .5);
+            const sb = (a.fixed || ringSet.has(a)) && (b.fixed || ringSet.has(b)) ? 0 : 1 - sa;
+            a.p.x -= dx / d * p * sa; a.p.y -= dy / d * p * sa;
+            b.p.x += dx / d * p * sb; b.p.y += dy / d * p * sb;
+          }
+        }
+      }
+      return { skeleton: skel, rings, ACT };
+    }
+    // Constraint-Verletzungen für Tests (Präzision)
+    function checkConstraints(N, opts) {
+      const D = Math.PI / 180, viol = [];
+      const find = opts && opts.find ? opts.find : (s => N.find(n => n.key === norm(s)));
+      const PX = opts && opts.PX ? opts.PX : (d => d <= 0 ? 0 : 240 * Math.pow(d, .55));
+      // 1) Richtungen
+      for (const n of N) {
+        if (!n.p || !n.ref || !n.ref.p || n.rel.k !== "dir" || n.far) continue;
+        const ang = Math.atan2(n.p.y - n.ref.p.y, n.p.x - n.ref.p.x) / D;
+        let diff = ((ang - n.rel.a + 540) % 360) - 180;
+        if (Math.abs(diff) > 35) viol.push({ k: "dir", n: n.name, ref: n.ref.name, want: n.rel.a, got: Math.round(ang), diff: Math.round(diff) });
+      }
+      // 2) Distanz (Toleranz ±35 %)
+      for (const n of N) {
+        if (!n.p || !n.ref || !n.ref.p || typeof n.d !== "number" || n.d <= 0 || n.far) continue;
+        if (n.ring && n.ref.ring && n.ring.group === n.ref.ring.group) continue;
+        const dist = Math.hypot(n.p.x - n.ref.p.x, n.p.y - n.ref.p.y), want = PX(n.d);
+        if (want > 20 && (dist < want * .65 || dist > want * 1.4)) viol.push({ k: "dist", n: n.name, ref: n.ref.name, want: Math.round(want), got: Math.round(dist) });
+      }
+      // 3) Containment: „in X“ muss nahe am Parent liegen
+      for (const n of N) {
+        if (!n.p || !n.ref || !n.ref.p || n.rel.k !== "in") continue;
+        const lim = n.ref.ring ? n.ref.ring.rOuter + 20 : (n.ref._rad || sizeOf(n.ref)) + 40;
+        const d = Math.hypot(n.p.x - (n.ref.ring ? n.ref.ring.cx : n.ref.p.x), n.p.y - (n.ref.ring ? n.ref.ring.cy : n.ref.p.y));
+        if (d > lim) viol.push({ k: "contain", n: n.name, ref: n.ref.name, d: Math.round(d), lim: Math.round(lim) });
+      }
+      // 4) Ring-Ordnung: gleicher Mittelpunkt, rOuter steigt mit idx
+      const byG = new Map();
+      for (const n of N) if (n.ring) { if (!byG.has(n.ring.group)) byG.set(n.ring.group, []); byG.get(n.ring.group).push(n); }
+      for (const [gid, mem] of byG) {
+        mem.sort((a, b) => a.ring.idx - b.ring.idx);
+        const c0 = mem[0].ring;
+        for (const n of mem) {
+          if (Math.hypot(n.ring.cx - c0.cx, n.ring.cy - c0.cy) > 1) viol.push({ k: "ring-center", n: n.name, group: gid });
+          const rm = Math.hypot(n.p.x - n.ring.cx, n.p.y - n.ring.cy);
+          if (rm < n.ring.rInner - 5 || rm > n.ring.rOuter + 5) viol.push({ k: "ring-band", n: n.name, rm: Math.round(rm), band: [n.ring.rInner, n.ring.rOuter] });
+        }
+        for (let i = 1; i < mem.length; i++) {
+          if (!(mem[i].ring.rInner >= mem[i - 1].ring.rOuter - .1)) viol.push({ k: "ring-order", a: mem[i - 1].name, b: mem[i].name });
+        }
+      }
+      // 5) Größe/Dichte-Plausibilität
+      for (const n of N) {
+        if (n.typ === "village" && n.size > 45) viol.push({ k: "size", n: n.name, typ: n.typ, size: n.size });
+        if ((n.typ === "forest" || n.typ === "mountains" || n.typ === "river") && n.density !== 0) viol.push({ k: "density", n: n.name, density: n.density });
+        if (/schlacke|slum/i.test(n.name) && n.density < .8) viol.push({ k: "density-slum", n: n.name, density: n.density });
+        if (/zitadelle|citadel/i.test(n.name) && n.density > .4) viol.push({ k: "density-citadel", n: n.name, density: n.density });
+      }
+      return viol;
+    }
+    const STRUCT = { parseTerrain, parseStructHeader, normScale, normTopo, sizeOf, densityOf, detailFlags, inferSkeleton, detectRings, layoutWorld, checkConstraints };
     const typeOf = s => { s = String(s || "").toLowerCase(); if (STY0 !== "fantasy") for (const [re, ty] of (STY_TYPES[STY0] || [])) if (re.test(s)) return ty; for (const [re, ty] of TYPE_RULES) if (re.test(s)) return ty; return "place"; };
     const TL = {
       de: { region: "Region", capital: "Hauptstadt", city: "Stadt", village: "Dorf", castle: "Burg", farm: "Hof", house: "Haus", mill: "Mühle", forest: "Wald", river: "Fluss", mountains: "Gebirge", camp: "Lager", place: "Ort" },
@@ -3858,10 +4269,17 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       for (const [d, a] of DIR) if (w.includes(d)) { m = l.match(/\b(?:von|vom|of|from)\s+(?:the\s+|dem\s+|der\s+)?(.+)$/); return { k: "dir", a, ref: m ? m[1] : null }; }
       if ((m = l.match(/^(?:im\s+|in\s+the\s+)?(?:zentrum|mitte|herz|center|centre|middle|heart)\s+(?:von|vom|des|der|of)\s+(?:the\s+)?(.+)/))) return { k: "mid", ref: m[1] };
       if ((m = l.match(/^(?:durch|through|across)\s+(?:the\s+)?(.+)/))) return { k: "thr", ref: m[1] };
+      // Ringe / Umschließung: „um X“, „umgibt X“, „around X“, „am Fuß von X“
+      if ((m = l.match(/^(?:umgibt|umschlie(?:ßt|sst)|rings?\s+um|around|surrounding|encircling)\s+(?:the\s+|den\s+|die\s+|das\s+|dem\s+|der\s+)?(.+)/))) return { k: "near", ref: m[1], ring: true };
+      if ((m = l.match(/^(?:um)\s+(?:the\s+|den\s+|die\s+|das\s+|dem\s+|der\s+)?(.+)/))) return { k: "near", ref: m[1], ring: true };
+      if ((m = l.match(/^(?:am\s+fu(?:ß|ss)|at\s+the\s+foot|am\s+rand|at\s+the\s+edge)\s+(?:von\s+|vom\s+|of\s+|des\s+|der\s+)?(?:the\s+|dem\s+|der\s+|den\s+)?(.+)/))) return { k: "near", ref: m[1], ring: true };
+      if ((m = l.match(/^(?:oberhalb|unterhalb|oberhalb\s+von|unterhalb\s+von|above|below|over|under)\s+(?:the\s+|dem\s+|der\s+|den\s+|von\s+)?(.+)/))) return { k: "near", ref: m[1], ring: true };
       if ((m = l.match(/^(?:in\s+der\s+nähe|in\s+der\s+umgebung|unweit|in\s+the\s+vicinity)\s+(?:von\s+|vom\s+|des\s+|der\s+|of\s+)?(?:the\s+|dem\s+|der\s+)?(.+)/))) return { k: "near", ref: m[1] };
-      if ((m = l.match(/^(?:im|in)\s+(?:orbit|umlauf)\s+(?:von|vom|um|of|around)\s+(?:the\s+|dem\s+|der\s+|den\s+)?(.+)/) || l.match(/^(?:orbiting|umkreist)\s+(?:the\s+|den\s+)?(.+)/))) return { k: "near", ref: m[1] }; // Sci-Fi: Umlaufbahn = nahe, kein Elternort
-      if ((m = l.match(/^(?:in|im|inside|within|innerhalb)\s+(?:the\s+|von\s+|der\s+|dem\s+|des\s+)?(.+)/))) return { k: "in", ref: m[1] };
+      if ((m = l.match(/^(?:im|in)\s+(?:orbit|umlauf)\s+(?:von|vom|um|of|around)\s+(?:the\s+|dem\s+|der\s+|den\s+)?(.+)/) || l.match(/^(?:orbiting|umkreist)\s+(?:the\s+|den\s+)?(.+)/))) return { k: "near", ref: m[1] };
+      if ((m = l.match(/^(?:in|im|inside|within|innerhalb)\s+(?:the\s+|von\s+|der\s+|dem\s+|des\s+|der\s+)?(.+)/))) return { k: "in", ref: m[1] };
       if ((m = l.match(/^(?:am|an\s+der|an\s+den|an\s+dem|an|bei|beim|nahe\s+bei|nahe|neben|vor|hinter|unter|über|near|next\s+to|close\s+to|beside|by|at|on|behind|below|above|outside|außerhalb)\s+(?:the\s+|dem\s+|der\s+|den\s+|des\s+)?(.+)/))) return { k: "near", ref: m[1] };
+      // „Lichtung in Dunkelhain“ / „clearing in X“
+      if ((m = l.match(/^(?:lichtung|clearing|camp\s+in|lager\s+in)\s+(?:in\s+|im\s+)?(?:the\s+|dem\s+|der\s+)?(.+)/))) return { k: "in", ref: m[1] };
       return { k: "free", ref: null };
     }
     const NUMW = [["halb", .5], ["halber", .5], ["halben", .5], ["half", .5], ["zwei", 2], ["two", 2], ["drei", 3], ["three", 3], ["vier", 4], ["four", 4], ["fünf", 5], ["five", 5], ["mehrere", 4], ["several", 4], ["einige", 3], ["few", 3], ["ein", 1], ["eine", 1], ["einen", 1], ["einem", 1], ["one", 1], ["a", 1], ["an", 1]];
@@ -3925,49 +4343,28 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       const base = n => n.ref && n.ref.typ !== "region" ? n.ref : null;
       const POS = opts.pos || {};
       const PX = d => d <= 0 ? 0 : 240 * Math.pow(d, .55);
-      const RAD = { city: 62, capital: 66, village: 54, castle: 34, farm: 28, house: 26, mill: 28, forest: 72, mountains: 150, camp: 28, place: 28, river: 0, region: 0 };
-      const IR = { city: 40, capital: 46, village: 30, castle: 22, farm: 16, house: 14, mill: 16, camp: 16, forest: 22, mountains: 10, river: 10, place: 12, region: 12 };
-      let rootTaken = false;
-      function place(n, st) {
-        if (n.p) return; st.add(n);
-        const b = base(n); if (b && !st.has(b)) place(b, st);
-        seed = hsh(n.name);
-        if (n.typ === "region") { n.p = { x: 0, y: 0 }; n.fixed = true; return; }
-        const bp = b && b.p ? b.p : { x: 0, y: 0 }, k = n.rel.k, num = typeof n.d === "number" ? n.d : null;
-        let a = rr(0, 360), d;
-        if (k === "dir") { a = n.rel.a + rr(-20, 20); d = n.d === "fern" ? null : (num ?? 1); }
-        else if (k === "mid" || k === "thr") d = 0;
-        else if (k === "in") d = num ?? .05;
-        else if (k === "near") d = num ?? .15;
-        else d = n.d === "fern" ? null : (b ? (num ?? 1) : (num ?? 0));
-        n.ang = a; n.far = d === null; n.days = d || 0;
-        const r = n.far ? 0 : PX(d);
-        n.off = { x: Math.cos(a * D) * r, y: Math.sin(a * D) * r };
-        n.fixed = !b && !n.far && r === 0 && !rootTaken; if (n.fixed) rootTaken = true;
-        n.p = { x: bp.x + n.off.x, y: bp.y + n.off.y };
-        const ov = POS[n.key];
-        if (ov) { n.p = { x: ov[0], y: ov[1] }; n.fixed = true; n.far = false; n.man = true; }
-      }
-      N.forEach(n => place(n, new Set())); seed = hsh(srcKey);
-      const WS = hsh("w:" + (opts.worldSeed || (REG ? REG.key : "") || "welt"));
+      // RAD/IR: Basiswerte; pro Ort überschrieben durch STRUCT.sizeOf (Präzision: Größe aus Typ/Terrain)
+      const RAD0 = { city: 62, capital: 66, village: 54, castle: 34, farm: 28, house: 26, mill: 28, forest: 72, mountains: 150, camp: 28, place: 28, river: 0, region: 0 };
+      const IR0 = { city: 40, capital: 46, village: 30, castle: 22, farm: 16, house: 14, mill: 16, camp: 16, forest: 22, mountains: 10, river: 10, place: 12, region: 12 };
+      const RAD = new Proxy(RAD0, { get: (o, k) => o[k] ?? 28 });
+      const IR = new Proxy(IR0, { get: (o, k) => o[k] ?? 12 });
+      seed = hsh(srcKey);
+      const layout = STRUCT.layoutWorld(N, { find, pos: POS, PX, rnd, rr, hsh, header: opts.header || {}, reseed: v => { seed = v; } });
+      const skeleton = layout.skeleton;
+      seed = hsh(srcKey);
+      const WS = hsh("w:" + (opts.worldSeed || (REG ? REG.key : "") || "welt") + "|" + (skeleton.scale || "") + "|" + (skeleton.topology || ""));
       const cur0 = find(opts.cur), VIS = new Set();
       (opts.visited || []).forEach(v => { const n = find(v); if (n && n.typ !== "region") VIS.add(n); });
       if (cur0 && cur0.typ !== "region") VIS.add(cur0);
       N.forEach(n => { n.vis = VIS.has(n); });
-      const ACT = N.filter(n => n.typ !== "region" && n.typ !== "river" && !n.far);
-      const iters = ACT.length > 50 ? 180 : 360;
-      for (let it = 0; it < iters; it++) {
-        for (const n of ACT) { if (n.fixed) continue; const b = base(n), bp = b ? b.p : { x: 0, y: 0 }; n.p.x += (bp.x + n.off.x - n.p.x) * .1; n.p.y += (bp.y + n.off.y - n.p.y) * .1; }
-        for (let i = 0; i < ACT.length; i++) for (let j = i + 1; j < ACT.length; j++) {
-          const a = ACT[i], b = ACT[j]; let dx = b.p.x - a.p.x, dy = b.p.y - a.p.y;
-          if (dx === 0 && dy === 0) { dx = rr(-1, 1); dy = rr(-1, 1); }
-          const d = Math.hypot(dx, dy) || .01, need = RAD[a.typ] + RAD[b.typ] + 44;
-          if (d < need) { const p = need - d, sa = a.fixed ? (b.fixed ? 0 : 0) : (b.fixed ? 1 : .5), sb = (a.fixed && b.fixed) ? 0 : 1 - sa; a.p.x -= dx / d * p * sa; a.p.y -= dy / d * p * sa; b.p.x += dx / d * p * sb; b.p.y += dy / d * p * sb; }
-        }
-      }
+      // Effektive Radien aus STRUCT (Ringbreiten / sizeOf)
+      N.forEach(n => { if (n._rad != null) { /* keep */ } else n._rad = STRUCT.sizeOf(n); if (n._ir == null) n._ir = Math.max(8, n._rad * .4); });
+      const radOf = n => n._rad != null ? n._rad : (RAD0[n.typ] || 28);
+      const irOf = n => n._ir != null ? n._ir : (IR0[n.typ] || 12);
+      const ACT = layout.ACT;
       N.filter(n => n.typ === "river").forEach(n => { const b = base(n); n.p = b ? { ...b.p } : { x: 0, y: 0 }; });
       let mnx = 1e9, mny = 1e9, mxx = -1e9, mxy = -1e9;
-      for (const n of ACT) { const r = RAD[n.typ]; mnx = Math.min(mnx, n.p.x - r); mxx = Math.max(mxx, n.p.x + r); mny = Math.min(mny, n.p.y - r); mxy = Math.max(mxy, n.p.y + r); }
+      for (const n of ACT) { const r = radOf(n); mnx = Math.min(mnx, n.p.x - r); mxx = Math.max(mxx, n.p.x + r); mny = Math.min(mny, n.p.y - r); mxy = Math.max(mxy, n.p.y + r); }
       if (!ACT.length) { mnx = -200; mny = -200; mxx = 200; mxy = 200; }
       const X0 = mnx - 300, Y0 = mny - 260, W = mxx - mnx + 600, H = mxy - mny + 560, CX = X0 + W / 2, CY = Y0 + H / 2, RX = W / 2 - 40, RY = H / 2 - 40;
       const ph = [rr(0, 6), rr(0, 6), rr(0, 6)];
@@ -3997,7 +4394,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       seed = WS; for (let i = 0; i < 9; i++) { const at = { cx: f1(rr(X0, X0 + W)), cy: f1(rr(Y0, Y0 + H)), rx: f1(rr(120, 300)), ry: f1(rr(80, 200)), fill: pick(["#3a2f1d", "#2b3320", "#33291a"]), opacity: .35, filter: "url(#wkbl)" }; if (DRAW) el(L.bg, "ellipse", at); }
 
       const OB = []; const near = (x, y, c) => OB.some(p => Math.abs(p[0] - x) < c && Math.abs(p[1] - y) < c && Math.hypot(p[0] - x, p[1] - y) < c);
-      const freeN = (x, y, extra, skip) => ACT.every(n => n === skip || Math.hypot(n.p.x - x, n.p.y - y) > RAD[n.typ] + extra);
+      const freeN = (x, y, extra, skip) => ACT.every(n => n === skip || Math.hypot(n.p.x - x, n.p.y - y) > radOf(n) + extra);
       const smooth = P => { let d = `M${f1(P[0][0])} ${f1(P[0][1])}`; for (let i = 0; i < P.length - 1; i++) { const a = P[i - 1] || P[i], b = P[i], c = P[i + 1], e = P[i + 2] || c; d += `C${f1(b[0] + (c[0] - a[0]) / 6)} ${f1(b[1] + (c[1] - a[1]) / 6)} ${f1(c[0] - (e[0] - b[0]) / 6)} ${f1(c[1] - (e[1] - b[1]) / 6)} ${f1(c[0])} ${f1(c[1])}`; } return d; };
       const out = (x, y, m = 40) => x < X0 - m || x > X0 + W + m || y < Y0 - m || y > Y0 + H + m;
 
@@ -4007,7 +4404,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         const P = [[x, y]], a0 = a;
         for (let i = 0; i < steps; i++) {
           a += rr(-12, 12) + (((a0 - a + 540) % 360) - 180) * .1;
-          for (const n of ACT) { if (n === skip) continue; const dx = x - n.p.x, dy = y - n.p.y, d = Math.hypot(dx, dy); if (d < RAD[n.typ] + 34) { const df = ((Math.atan2(dy, dx) / D - a + 540) % 360) - 180; a -= Math.sign(df) * Math.min(30, Math.abs(90 - Math.abs(df)) * .5); } }
+          for (const n of ACT) { if (n === skip) continue; const dx = x - n.p.x, dy = y - n.p.y, d = Math.hypot(dx, dy); if (d < radOf(n) + 34) { const df = ((Math.atan2(dy, dx) / D - a + 540) % 360) - 180; a -= Math.sign(df) * Math.min(30, Math.abs(90 - Math.abs(df)) * .5); } }
           x += Math.cos(a * D) * 22; y += Math.sin(a * D) * 22; P.push([x, y]);
           if (out(x, y)) break; if (stop && stop(x, y)) break;
         }
@@ -4022,13 +4419,13 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         } else P.w = w;
         RIV.push(P); P.forEach(p => OB.push(p));
       }
-      const rScore = (R, skip) => { let p = 0; R.forEach((q, i) => { for (const n of ACT) if (n !== skip) { const d = Math.hypot(q[0] - n.p.x, q[1] - n.p.y); if (d < RAD[n.typ] + 40) p += RAD[n.typ] + 40 - d; } for (let j = 0; j < i - 6; j += 2) if (Math.hypot(q[0] - R[j][0], q[1] - R[j][1]) < 60) p += 40; }); return p + R.length * .5; };
+      const rScore = (R, skip) => { let p = 0; R.forEach((q, i) => { for (const n of ACT) if (n !== skip) { const d = Math.hypot(q[0] - n.p.x, q[1] - n.p.y); if (d < radOf(n) + 40) p += radOf(n) + 40 - d; } for (let j = 0; j < i - 6; j += 2) if (Math.hypot(q[0] - R[j][0], q[1] - R[j][1]) < 60) p += 40; }); return p + R.length * .5; };
       for (const n of N.filter(n => n.typ === "river")) {
-        const b = base(n), c = b ? b.p : { x: 0, y: 0 }, o = (IR[b ? b.typ : "place"] + 20); let R = null, bs = 1e18, sx = c.x, sy = c.y; const sv = seed;
+        const b = base(n), c = b ? b.p : { x: 0, y: 0 }, o = ((b ? irOf(b) : 12) + 20); let R = null, bs = 1e18, sx = c.x, sy = c.y; const sv = seed;
         for (let k = 0; k < 10; k++) { seed = sv + k * 977; const a = k * 36 + rr(-10, 10), x0 = c.x + Math.cos((a + 90) * D) * o, y0 = c.y + Math.sin((a + 90) * D) * o, P = walk(x0, y0, a, 80, b), Q = walk(x0, y0, a + 180, 80, b), T = Q.reverse().concat(P.slice(1)), sc = rScore(T, b); if (sc < bs) { bs = sc; R = T; sx = x0; sy = y0; } }
         seed = sv + 13; drawRiver(R, 5);
         let best = null, bd = 1e9;
-        for (const p of R) { if (!freeN(p[0], p[1], 22) || !inArea(p[0], p[1])) continue; const d = Math.hypot(p[0] - c.x, p[1] - c.y); if (d < bd && d > RAD[b ? b.typ : "place"] + 30) { bd = d; best = p; } }
+        for (const p of R) { if (!freeN(p[0], p[1], 22) || !inArea(p[0], p[1])) continue; const d = Math.hypot(p[0] - c.x, p[1] - c.y); if (d < bd && d > (b ? radOf(b) : 28) + 30) { bd = d; best = p; } }
         n.p = best ? { x: best[0], y: best[1] } : { x: sx, y: sy }; n.riv = R;
       }
       for (let i = 0; i < 2; i++) {
@@ -4037,7 +4434,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       }
       for (const n of N.filter(n => n.ref && n.ref.typ === "river" && n.ref.riv && !n.man)) {
         let best = null, bd = 1e9;
-        for (const p of n.ref.riv) { if (!freeN(p[0], p[1], RAD[n.typ] + 4, n) || Math.hypot(p[0] - n.ref.p.x, p[1] - n.ref.p.y) < 55) continue; const d = Math.hypot(p[0] - n.p.x, p[1] - n.p.y); if (d < bd) { bd = d; best = p; } }
+        for (const p of n.ref.riv) { if (!freeN(p[0], p[1], radOf(n) + 4, n) || Math.hypot(p[0] - n.ref.p.x, p[1] - n.ref.p.y) < 55) continue; const d = Math.hypot(p[0] - n.p.x, p[1] - n.p.y); if (d < bd) { bd = d; best = p; } }
         if (best) n.p = { x: best[0] + 12, y: best[1] - 10 };
       }
       for (const n of N) { const ov = POS[n.key]; if (ov) n.p = { x: ov[0], y: ov[1] }; }
@@ -4067,13 +4464,45 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       function peaks(n) { const b = base(n), bp = b ? b.p : { x: 0, y: 0 }, ax = (Math.atan2(n.p.y - bp.y, n.p.x - bp.x) / D) + 90, ux = Math.cos(ax * D), uy = Math.sin(ax * D), red = /rot|red/i.test(n.name), Pk = []; n.axis = [ux, uy]; for (let i = 0; i < 26; i++) { const t = rr(-1, 1), o = rr(-40, 40), x = n.p.x + ux * t * 300 + uy * o, y = n.p.y + uy * t * 300 - ux * o; if (!inArea(x, y)) continue; const h = (1 - Math.abs(t) * .55) * rr(36, 64); Pk.push([x, y, h]); } Pk.sort((a, b) => a[1] - b[1]).forEach(([x, y, h]) => { const w = h * 1.25, g = el(L.forest, "g"); el(g, "path", { d: `M${f1(x - w / 2)} ${f1(y)}L${f1(x)} ${f1(y - h)}L${f1(x + w / 2)} ${f1(y)}Z`, fill: red ? "#5b3b2b" : "#4b3f2e", stroke: "#120e0a", "stroke-width": 1.6, "stroke-linejoin": "round" }); el(g, "path", { d: `M${f1(x)} ${f1(y - h)}L${f1(x + w / 2)} ${f1(y)}L${f1(x + w * .08)} ${f1(y)}Z`, fill: red ? "#2d1c16" : "#2a2219" }); el(g, "path", { d: `M${f1(x - h * .16)} ${f1(y - h * .74)}L${f1(x)} ${f1(y - h)}L${f1(x + h * .16)} ${f1(y - h * .74)}`, fill: "none", stroke: "#cdb486", "stroke-width": 1.4, opacity: .6 }); }); }
       function hill(x, y, s) { const g = el(L.hill, "g", { transform: `translate(${f1(x)} ${f1(y)}) scale(${f1(s)})`, opacity: .8 }); el(g, "path", { d: "M-17 3Q-8-13 0-13Q9-13 17 3", fill: "#262016", stroke: "#6b5a3e", "stroke-width": 1.8 }); for (let k = 0; k < 3; k++) el(g, "path", { d: `M${4 + k * 4} ${-8 + k * 3}l-3 6`, stroke: "#6b5a3e", "stroke-width": 1 }); }
       if (!DRAW) { for (const n of N) if (n.typ === "mountains") { const b = base(n), bp = b ? b.p : { x: 0, y: 0 }, ax = (Math.atan2(n.p.y - bp.y, n.p.x - bp.x) / D) + 90; n.axis = [Math.cos(ax * D), Math.sin(ax * D)]; }
-        SKIN.world({ STY, SK, L, defs, el, f1, rr, rnd, pick, reseed: v => { seed = v; }, N, ACT, EDG, RIV, RAD, IR, X0, Y0, W, H, MX, MY, MW, MH, CX, CY, WS, base, smooth, freeN, near, OB, inArea, opts, D }); }
+        SKIN.world({ STY, SK, L, defs, el, f1, rr, rnd, pick, reseed: v => { seed = v; }, N, ACT, EDG, RIV, RAD, IR, X0, Y0, W, H, MX, MY, MW, MH, CX, CY, WS, base, smooth, freeN, near, OB, inArea, opts, D, skeleton, radOf, irOf }); }
       else {
       for (const n of [...ACT, ...N.filter(n => n.far)]) {
         const g = el(L.icon, "g"), { x, y } = n.p;
         if (n.unk && ICON_TYPES.has(n.typ) && n.typ !== "city" && n.typ !== "capital") { if (n.typ === "camp") { for (const k of [-12, 8]) el(g, "path", { d: `M${f1(x + k - 8)} ${f1(y - 12)}l8-14l8 14Z`, fill: "#4a3a26", stroke: "#0e0a07" }); el(g, "circle", { cx: f1(x + 2), cy: f1(y - 6), r: 3, fill: "#ff9a4c" }); } else house(g, x, y - 13, 1.6, false); continue; }
-        if (n.typ === "village") { fields(n, 48, 130, 26); for (let i = 0; i < 7; i++) { const a = i / 7 * 360 + rr(-18, 18), d = rr(17, 30); house(g, x + Math.cos(a * D) * d, y + Math.sin(a * D) * d * .8, rr(1.1, 1.4), rnd() < .5); } }
-        else if (n.typ === "city" || n.typ === "capital") { const R = n.rumor ? 24 : IR[n.typ]; if (!n.rumor) fields(n, R + 20, R + 110, 30); el(g, "circle", { cx: f1(x), cy: f1(y), r: R, fill: "#241c14", stroke: "#0d0a07", "stroke-width": 8 }); for (let i = 0; i < 18; i++) { const a = rr(0, 6.28), d = rr(0, R - 9); el(g, "rect", { x: f1(x + Math.cos(a) * d - 4), y: f1(y + Math.sin(a) * d - 3), width: 8, height: 6, fill: "#5a3d24", stroke: "#0e0a07", "stroke-width": .8 }); } el(g, "circle", { cx: f1(x), cy: f1(y), r: R, fill: "none", stroke: "#8a6a3a", "stroke-width": 3.5 }); for (let i = 0; i < 8; i++) { const a = i * 45 * D; el(g, "rect", { x: f1(x + Math.cos(a) * R - 4), y: f1(y + Math.sin(a) * R - 4), width: 8, height: 8, fill: "#3a2d1f", stroke: "#c79a55", "stroke-width": 1.2 }); } }
+        if (n.ring) {
+          // Konzentrische Ringe: gemeinsames Zentrum, Bandbreite aus STRUCT; Dichte steuert Bebauung im Ringband
+          const R = n.ring, dens = n.density != null ? n.density : STRUCT.densityOf(n), det = n.details || STRUCT.detailFlags(n);
+          const cx = R.cx, cy = R.cy;
+          el(g, "circle", { cx: f1(cx), cy: f1(cy), r: R.rOuter, fill: dens > .8 ? "#1a140f" : "#241c14", stroke: "#0d0a07", "stroke-width": 2, opacity: .55 });
+          el(g, "circle", { cx: f1(cx), cy: f1(cy), r: R.rInner, fill: "#1c1711", opacity: .35 });
+          el(g, "circle", { cx: f1(cx), cy: f1(cy), r: R.rOuter, fill: "none", stroke: det.grand ? "#c79a55" : "#8a6a3a", "stroke-width": det.wall ? 3.5 : 2 });
+          if (R.rInner > 4) el(g, "circle", { cx: f1(cx), cy: f1(cy), r: R.rInner, fill: "none", stroke: "#6a5535", "stroke-width": 1.5, opacity: .7 });
+          const band = Math.max(6, R.rOuter - R.rInner - 4), cnt = Math.max(2, Math.round((R.rInner + R.rOuter) * Math.PI / 18 * dens));
+          for (let i = 0; i < cnt; i++) {
+            const a = rr(0, 6.28), rm = rr(R.rInner + 3, Math.max(R.rInner + 4, R.rOuter - 4));
+            const bx = cx + Math.cos(a) * rm, by = cy + Math.sin(a) * rm;
+            const w = dens > .8 ? rr(3, 6) : dens < .3 ? rr(7, 12) : rr(4, 8), h = dens > .8 ? rr(3, 5) : dens < .3 ? rr(6, 10) : rr(4, 7);
+            el(g, "rect", { x: f1(bx - w / 2), y: f1(by - h / 2), width: f1(w), height: f1(h), fill: dens < .3 ? "#6a4a2a" : "#5a3d24", stroke: "#0e0a07", "stroke-width": .7 });
+          }
+          if (det.wall) for (let i = 0; i < 8; i++) { const a = i * 45 * D; el(g, "rect", { x: f1(cx + Math.cos(a) * R.rOuter - 3), y: f1(cy + Math.sin(a) * R.rOuter - 3), width: 6, height: 6, fill: "#3a2d1f", stroke: "#c79a55", "stroke-width": 1 }); }
+        } else if (n.typ === "village") {
+          const R = n.rumor ? 18 : irOf(n), dens = n.density != null ? n.density : .38, det = n.details || {};
+          if (det.fields !== false) fields(n, R + 10, R + 90, Math.round(18 + dens * 20));
+          const hc = Math.max(3, Math.round(4 + dens * 10));
+          for (let i = 0; i < hc; i++) { const a = i / hc * 360 + rr(-18, 18), d = rr(R * .4, R * .95); house(g, x + Math.cos(a * D) * d, y + Math.sin(a * D) * d * .8, rr(1.0, 1.35), rnd() < .5); }
+        } else if (n.typ === "city" || n.typ === "capital") {
+          const R = n.rumor ? 24 : irOf(n), dens = n.density != null ? n.density : STRUCT.densityOf(n), det = n.details || STRUCT.detailFlags(n);
+          if (!n.rumor && det.fields) fields(n, R + 20, R + 110, 24);
+          el(g, "circle", { cx: f1(x), cy: f1(y), r: R, fill: dens > .8 ? "#1a120c" : "#241c14", stroke: "#0d0a07", "stroke-width": det.wall ? 8 : 4 });
+          const cnt = Math.max(2, Math.round(R * R * dens / 35));
+          for (let i = 0; i < cnt; i++) {
+            const a = rr(0, 6.28), d = dens > .85 ? rr(0, R - 6) : Math.sqrt(rnd()) * (R - 9);
+            const w = dens > .8 ? 5 : dens < .3 ? 10 : 8, h = dens > .8 ? 4 : dens < .3 ? 8 : 6;
+            el(g, "rect", { x: f1(x + Math.cos(a) * d - w / 2), y: f1(y + Math.sin(a) * d - h / 2), width: w, height: h, fill: dens < .3 ? "#6a4a2a" : "#5a3d24", stroke: "#0e0a07", "stroke-width": .8 });
+          }
+          el(g, "circle", { cx: f1(x), cy: f1(y), r: R, fill: "none", stroke: det.grand ? "#c79a55" : "#8a6a3a", "stroke-width": 3.5 });
+          if (det.wall) for (let i = 0; i < 8; i++) { const a = i * 45 * D; el(g, "rect", { x: f1(x + Math.cos(a) * R - 4), y: f1(y + Math.sin(a) * R - 4), width: 8, height: 8, fill: "#3a2d1f", stroke: "#c79a55", "stroke-width": 1.2 }); }
+        }
         else if (n.typ === "castle") { el(g, "path", { d: `M${f1(x - 15)} ${f1(y + 9)}V${f1(y - 7)}h4v-4h4v4h6v-4h4v4h4v-4h4v4h0V${f1(y + 9)}Z`, fill: "#2e241a", stroke: "#c79a55", "stroke-width": 1.4 }); el(g, "path", { d: `M${f1(x - 5)} ${f1(y - 7)}V${f1(y - 21)}h3v-3h4v3h3V${f1(y - 7)}`, fill: "#2e241a", stroke: "#c79a55", "stroke-width": 1.4 }); el(g, "path", { d: `M${f1(x)} ${f1(y - 24)}v-10l9 3-9 3`, fill: "#c94c40", stroke: "#c79a55", "stroke-width": 1 }); }
         else if (n.typ === "farm" || n.typ === "house" || n.typ === "camp" || n.typ === "place") { house(g, x, y - 13, 1.8, true); if (n.typ === "farm") el(g, "rect", { x: f1(x - 20), y: f1(y - 36), width: 40, height: 30, fill: "none", stroke: "#8f7650", "stroke-width": 1.2, "stroke-dasharray": "3 2" }); }
         else if (n.typ === "mill") { house(g, x, y - 13, 1.7, true); const b = el(g, "g", { class: "blades" }); for (let i = 0; i < 4; i++) el(b, "path", { d: `M${f1(x)} ${f1(y - 27)}l${f1(Math.cos(i * 90 * D) * 16)} ${f1(Math.sin(i * 90 * D) * 16)}`, stroke: "#cdb486", "stroke-width": 2.2 }); }
@@ -4094,16 +4523,30 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       seed = hsh(srcKey) ^ 99;
 
       // Nebel des Unbekannten: braunes Pergament überall, aufgedeckt nur um bekannte/besuchte Orte, Wege dazwischen und die gereiste Spur
+      // Strikter Nebel: Gelände/Skelett nur um Besuche/Spur; bekannte aber unbesuchte Orte = winzige Markerlücke
       const FOG = [], REV = new Set();
       for (const n of N) {
         if (n.typ === "region" || n.rumor) continue;
         let r;
-        if (n.typ === "mountains") { r = n.vis ? 250 : 180; if (n.axis) FOG.push({ p: [[n.p.x - n.axis[0] * 230, n.p.y - n.axis[1] * 230], [n.p.x + n.axis[0] * 230, n.p.y + n.axis[1] * 230]], w: r }); }
-        else if (n.typ === "river") r = 95;
-        else r = Math.max(n.vis ? 230 : 125, RAD[n.typ] + (n.vis ? 165 : 75));
-        FOG.push({ c: [n.p.x, n.p.y, r] }); REV.add(n);
+        if (n.vis) {
+          if (n.ring) { // Ringsegment + lokale Umgebung
+            r = n.ring.rOuter + 90;
+            FOG.push({ c: [n.ring.cx, n.ring.cy, r] });
+            // schmales Band entlang des Rings zusätzlich
+            const steps = 16, rm = (n.ring.rInner + n.ring.rOuter) / 2, P = [];
+            for (let i = 0; i <= steps; i++) { const a = i / steps * Math.PI * 2; P.push([n.ring.cx + Math.cos(a) * rm, n.ring.cy + Math.sin(a) * rm]); }
+            FOG.push({ p: P, w: Math.max(40, n.ring.rOuter - n.ring.rInner + 50) });
+          } else if (n.typ === "mountains") { r = 250; if (n.axis) FOG.push({ p: [[n.p.x - n.axis[0] * 230, n.p.y - n.axis[1] * 230], [n.p.x + n.axis[0] * 230, n.p.y + n.axis[1] * 230]], w: r }); FOG.push({ c: [n.p.x, n.p.y, r] }); }
+          else if (n.typ === "river") { r = 110; FOG.push({ c: [n.p.x, n.p.y, r] }); }
+          else { r = Math.max(200, radOf(n) + 150); FOG.push({ c: [n.p.x, n.p.y, r] }); }
+          REV.add(n);
+        } else {
+          // bekannt, aber nicht besucht: nur Marker sichtbar, kein Gelände/Skelett
+          r = Math.max(18, irOf(n) + 8);
+          FOG.push({ c: [n.p.x, n.p.y, r] });
+        }
       }
-      for (const e of EDG) { if (!REV.has(e.a) || !REV.has(e.b)) continue; const both = e.a.vis && e.b.vis; if (!both && e.len > 650) continue; FOG.push({ p: e.P, w: both ? 170 : 115 }); }
+      for (const e of EDG) { if (!e.a.vis || !e.b.vis) continue; FOG.push({ p: e.P, w: 170 }); }
       const fogF = (id, band) => { const f = el(defs, "filter", { id, filterUnits: "userSpaceOnUse", x: MX, y: MY, width: MW, height: MH });
         el(f, "feTurbulence", { type: "fractalNoise", baseFrequency: ".012", numOctaves: "2", seed: "7", result: "n" });
         el(f, "feDisplacementMap", { in: "SourceGraphic", in2: "n", scale: "80", xChannelSelector: "R", yChannelSelector: "G", result: "d" });
@@ -4134,9 +4577,9 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       const LB = []; const hit = r => LB.some(o => r.x < o.x + o.w && r.x + r.w > o.x && r.y < o.y + o.h && r.y + r.h > o.y);
       const MK = {};
       function label(n) {
-        const big = n.typ === "city" || n.typ === "capital", fs = big ? 27 : n.typ === "village" ? 23 : n.typ === "mountains" ? 22 : 17;
+        const big = n.typ === "city" || n.typ === "capital" || !!n.ring, fs = big ? 27 : n.typ === "village" ? 23 : n.typ === "mountains" ? 22 : 17;
         const txt = n.rumor ? (Math.cos(n.ang * D) < 0 ? "← " : "") + n.name + (Math.cos(n.ang * D) >= 0 ? " →" : "") : n.unk ? n.name + " ?" : n.name;
-        const w = txt.length * fs * (n.typ === "mountains" ? .95 : .66), h = fs, ir = IR[n.typ] || 12, { x, y } = n.p;
+        const w = txt.length * fs * (n.typ === "mountains" ? .95 : .66), h = fs, ir = irOf(n), { x, y } = n.p;
         const C = n.far ? (y > CY ? [[x, y - ir - 24, "middle"], [x, y + ir + fs + 4, "middle"]] : [[x, y + ir + fs + 4, "middle"], [x, y - ir - 24, "middle"]])
           : n.typ === "mountains" ? [[x, y - 78, "middle"], [x, y + 60, "middle"]] : [[x, y + ir + fs + 4, "middle"], [x, y - ir - 10, "middle"], [x + ir + 10, y + fs * .35, "start"], [x - ir - 10, y + fs * .35, "end"]];
         const rect = c => ({ x: c[2] === "middle" ? c[0] - w / 2 : c[2] === "start" ? c[0] : c[0] - w, y: c[1] - h, w, h: h + 4 });
@@ -4153,8 +4596,8 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         MK[n.id] = g;
       }
       const LBL = [...ACT, ...N.filter(n => n.far || n.typ === "river")];
-      for (const n of LBL) { const r = IR[n.typ] || 12; if (n.typ !== "mountains") LB.push({ x: n.p.x - r, y: n.p.y - r, w: 2 * r, h: 2 * r }); }
-      [...ACT].sort((a, b) => RAD[b.typ] - RAD[a.typ]).concat(N.filter(n => n.far || n.typ === "river")).forEach(n => { label(n); marker(n); });
+      for (const n of LBL) { const r = irOf(n); if (n.typ !== "mountains") LB.push({ x: n.p.x - r, y: n.p.y - r, w: 2 * r, h: 2 * r }); }
+      [...ACT].sort((a, b) => radOf(b) - radOf(a)).concat(N.filter(n => n.far || n.typ === "river")).forEach(n => { label(n); marker(n); });
       const REGS = N.filter(n => n.typ === "region");
       REGS.forEach((rg, ri) => {
         const mem = opts.regionMembers && opts.regionMembers[rg.key] ? opts.regionMembers[rg.key].map(find).filter(n => n && n.typ !== "region" && !n.rumor) : [];
@@ -4162,9 +4605,10 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         const pts = mem.length ? mem : ACT; let ox = CX, oy = CY, sx = RX * .6, sy = RY * .6;
         if (mem.length) { ox = mem.reduce((a, n) => a + n.p.x, 0) / mem.length; oy = mem.reduce((a, n) => a + n.p.y, 0) / mem.length; sx = sy = 260; }
         seed = hsh(rg.key) ^ WS; let best = null, bs = -1e9;
-        for (let i = 0; i < 300; i++) { const x = rr(ox - sx, ox + sx), y = rr(oy - sy, oy + sy), fs = 44, w = rg.name.length * fs * .8, r = { x: x - w / 2, y: y - 30, w, h: 36 }; if (hit(r)) continue; let sc = pts.length ? Math.min(...pts.map(n => Math.hypot(n.p.x - x, n.p.y - y) - RAD[n.typ])) : 0; sc = Math.min(sc, 160) - Math.hypot(x - ox, y - oy) * .25; if (sc > bs) { bs = sc; best = [x, y, r]; } }
+        for (let i = 0; i < 300; i++) { const x = rr(ox - sx, ox + sx), y = rr(oy - sy, oy + sy), fs = 44, w = rg.name.length * fs * .8, r = { x: x - w / 2, y: y - 30, w, h: 36 }; if (hit(r)) continue; let sc = pts.length ? Math.min(...pts.map(n => Math.hypot(n.p.x - x, n.p.y - y) - radOf(n))) : 0; sc = Math.min(sc, 160) - Math.hypot(x - ox, y - oy) * .25; if (sc > bs) { bs = sc; best = [x, y, r]; } }
         if (best) { LB.push(best[2]); el(L.lbl, "text", { x: f1(best[0]), y: f1(best[1]), "text-anchor": "middle", class: "reg", "font-size": 44, fill: DRAW ? "#cfa86a" : SK.reg, opacity: .42 }, rg.name.toUpperCase()); }
       });
+      // Skelett nie als Ganzes zeichnen – nur über Nebel-Löcher sichtbar (Küsten-/Ringhinweise liegen in Geländeschichten)
       if (FOG_ON) { // „Unerkundet“ dort, wo der Nebel am dichtesten ist
         const dHole = (x, y) => { let m = 1e9; for (const o of FOG) { if (o.c) m = Math.min(m, Math.hypot(x - o.c[0], y - o.c[1]) - o.c[2]); else for (let i = 0; i < o.p.length; i += 3) m = Math.min(m, Math.hypot(x - o.p[i][0], y - o.p[i][1]) - o.w / 2); } return m; };
         seed = WS ^ 515; const C = [];
@@ -4213,7 +4657,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       const cur = cur0;
       const setMe = (x, y) => me.setAttribute("transform", `translate(${f1(x)} ${f1(y)})`);
       if (cur && cur.typ !== "region") setMe(cur.p.x, cur.p.y); else me.style.display = "none";
-      const core = (() => { let a = 1e9, b = 1e9, c = -1e9, d = -1e9; for (const n of [...ACT, ...N.filter(n => n.far)]) { const r = Math.min(RAD[n.typ], 90); a = Math.min(a, n.p.x - r); c = Math.max(c, n.p.x + r); b = Math.min(b, n.p.y - r); d = Math.max(d, n.p.y + r); } if (a > c) { a = -200; b = -200; c = 200; d = 200; } return { x: a - 110, y: b - 60, w: c - a + 220, h: d - b + 120 }; })();
+      const core = (() => { let a = 1e9, b = 1e9, c = -1e9, d = -1e9; for (const n of [...ACT, ...N.filter(n => n.far)]) { const r = Math.min(radOf(n), 90); a = Math.min(a, n.p.x - r); c = Math.max(c, n.p.x + r); b = Math.min(b, n.p.y - r); d = Math.max(d, n.p.y + r); } if (a > c) { a = -200; b = -200; c = 200; d = 200; } return { x: a - 110, y: b - 60, w: c - a + 220, h: d - b + 120 }; })();
       // km je Karteneinheit: Fantasy 25 (Tagesmarsch), Modern 2,5 (Stadtmaßstab), Sci-Fi 25 (= 1 Sektor)
       const KMDs = DRAW ? KM_DAY : SKIN.kmd(STY);
       function travel(a, b) {
@@ -4228,7 +4672,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       }
       // Linearer Maßstab (Nadeln + Maßstabsleiste): 2 Tagesmärsche ≈ PXD(2) Einheiten
       const toKm = DRAW ? (u => u * KMU) : (u => u * KMU * KMDs / KM_DAY), unitsForKm = DRAW ? (km => km / KMU) : (km => km / (KMU * KMDs / KM_DAY));
-      return { N, ACT, MK, X0, Y0, W, H, core, PX, cur: cur && cur.typ !== "region" ? cur : null, lastSeg, SEG, drawTrail, setMe, find, region: REG ? REG.name : "", byId: id => N.find(n => n.id === id), routePts, travel, toKm, unitsForKm, pinG: L.pin, meG: me, RIV, EDG, REV, world: true,
+      return { N, ACT, MK, X0, Y0, W, H, core, PX, cur: cur && cur.typ !== "region" ? cur : null, lastSeg, SEG, drawTrail, setMe, find, region: REG ? REG.name : "", byId: id => N.find(n => n.id === id), routePts, travel, toKm, unitsForKm, pinG: L.pin, meG: me, RIV, EDG, REV, skeleton, violations: STRUCT.checkConstraints(N, { find, PX }), world: true,
         riverAt: (x, y, r) => { let best = null, bd = r; for (const P of RIV) for (let i = 1; i < P.length; i++) { const d = Math.hypot(P[i][0] - x, P[i][1] - y); if (d < bd) { bd = d; best = Math.atan2(P[i][1] - P[i - 1][1], P[i][0] - P[i - 1][0]) / D; } } return best; },
         dirs: n => (G.get(n) || []).map(({ to }) => ({ a: Math.atan2(to.p.y - n.p.y, to.p.x - n.p.x) / D, to: to.name, typ: to.typ })) };
     }
@@ -4730,7 +5174,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     // Ohne Anzeige rechnen (Reisezeiten für den Spielleiter)
     const layout = (list, opts) => render(document.createElementNS(NS, "svg"), list, opts || {});
     const clearPins = () => { V.pins.length = 0; drawPins(); };
-    return { mount, select, focus, frameKeys, zoomBy, reset, refit, layout, clearPins, norm, typeOf, setStyle, get style() { return STY0; }, iconKind: (n, k) => SKIN.kind(n, k || STY0), typeLabel, parseRel, parseDist, findIn, hasWord, KM_DAY, get model() { return V.M; }, get pins() { return V.pins; }, get view() { return { s: V.s, tx: V.tx, ty: V.ty, fitS: V.fitS }; } };
+    return { mount, select, focus, frameKeys, zoomBy, reset, refit, layout, clearPins, norm, typeOf, setStyle, get style() { return STY0; }, iconKind: (n, k) => SKIN.kind(n, k || STY0), typeLabel, parseRel, parseDist, findIn, hasWord, KM_DAY, STRUCT, parseTerrain: STRUCT.parseTerrain, parseStructHeader: STRUCT.parseStructHeader, checkConstraints: STRUCT.checkConstraints, get model() { return V.M; }, get pins() { return V.pins; }, get view() { return { s: V.s, tx: V.tx, ty: V.ty, fitS: V.fitS }; } };
   })();
 
   // BLOCK W: WELTBUCH-MODUS – Spielleiter führt Karte, Chronik & Lore still im Hintergrund (keine Extra-Aufrufe)
@@ -4760,6 +5204,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     const nd = v => /^[–\-—?\s]*$/.test(v) ? "" : v; // Platzhalter „–“ aus der Ortsliste = leer
     const o = { name, typ: nd(wbClip(p.typ, 40)), lage: nd(wbClip(p.lage, 120)), dist: nd(wbClip(p.dist, 40)), unk: p.unk === true };
     const par = wbClip(p.parent, 80); if (par && !/^[–\-—?]+$/.test(par) && WK.norm(par) && WK.norm(par) !== WK.norm(name)) o.parent = par;
+    const ter = nd(wbClip(p.terrain, 40)); if (ter) o.terrain = ter;
     return o;
   }
   // Reisehinweis für den nächsten Spielleiter-Zug (nur Daten; Text entsteht beim Prompt in der aktuellen Sprache)
@@ -4889,8 +5334,8 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
   function wbWorldModel() {
     const list = allMapPlaces(), tree = wbTree(list), map = getSessMap();
     const vis = tree.nodes.filter(n => !n.cont).map(n => n.p), alias = wbAlias(tree, null);
-    const key = JSON.stringify([vis.map(p => [p.name, p.typ, p.lage, p.dist]), map.pos, alias, stKind()]);
-    if (wbWMCache.key !== key || !wbWMCache.M) wbWMCache = { key, M: WK.layout(vis, { pos: map.pos, alias, tx: {}, style: stKind() }) };
+    const key = JSON.stringify([vis.map(p => [p.name, p.typ, p.lage, p.dist, p.parent || '', p.terrain || '']), map.pos, alias, state.mapStruct || null, stKind()]);
+    if (wbWMCache.key !== key || !wbWMCache.M) wbWMCache = { key, M: WK.layout(vis, { pos: map.pos, alias, tx: {}, header: state.mapStruct || {}, style: stKind() }) };
     return { M: wbWMCache.M, tree };
   }
   // Entfernung → lesbare Reisezeiten (zu Fuß ~25 km/Tag, Pferd ~55, Karren ~20)
@@ -4950,7 +5395,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       if (s.memories || s.lore) L.push(`- Secret, for you only: ${s.memories ? "[MEMORY!: …]" : "[LORE!: …]"}`);
     } else {
       L.push("[WELTBUCH – unsichtbare App-Tags, je eine Zeile am Ende bei den anderen Tags, nur bei echten Änderungen]");
-      if (s.map) L.push(stKind() !== "fantasy" ? stMapRule(false) : "- Ortswechsel: [ORT: Name | Typ | Lage zu bekanntem Ort | Entfernung]; Ort in einer Stadt oder einem Gebäude: [ORT: Name | Typ | in Stadtname]; bekannter Ort: [ORT: Name]");
+      if (s.map) L.push(stKind() !== "fantasy" ? stMapRule(false) : "- Ortswechsel: [ORT: Name | Typ | Lage zu bekanntem Ort | Entfernung]; Ort in einer Stadt/einem Ring/Gebäude: [ORT: Name | Typ | in Stadtname]; Ringe einer Stadt: Teil von = Region, Lage „um <Ring>“; bekannter Ort: [ORT: Name]");
       if (s.memories) L.push(stKind() !== "fantasy" ? stMemRule(false) : "- Wichtiges Ereignis, Versprechen, Beziehung: [ERINNERUNG: kurzer Fakt | Schlüsselwort, Schlüsselwort]");
       if (s.lore) L.push(stKind() !== "fantasy" ? stLoreRule(false) : "- Neue oder geänderte Figur, Ort, Sache: [LORE: Titel | knappe neue Info]");
       if (s.memories || s.lore) L.push(`- Geheim, nur für dich: ${s.memories ? "[ERINNERUNG!: …]" : "[LORE!: …]"}`);
@@ -5224,7 +5669,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     vis.forEach(n => { if (wbEnterable(n) && !WB_BAD_KEYS.has(n.key)) enter[n.key] = true; });
     const pins = wbPins[mapLevel || "~welt"] || (wbPins[mapLevel || "~welt"] = []);
     const opts = {
-      lang: state.lang, tx: mapTexts(), pos: map.pos, cur, alias, enter, pins, style: stKind(), fog: stFog(),
+      lang: state.lang, tx: mapTexts(), pos: map.pos, cur, alias, enter, pins, style: stKind(), fog: stFog(), header: state.mapStruct || {},
       measureEl: document.getElementById("map-measure"), measureText: wbMeasureText,
       onPins: (P, how) => { if (how === "add" && P.length === 1) { const h = document.getElementById("map-gest"); if (h) h.classList.add("dim"); } },
       dragMode: () => mapDragMode,
@@ -5305,18 +5750,35 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
   // Ortsliste (Format: Name | Typ | Lage | Entfernung) – prüfen & bearbeiten
   function parsePlaceLines(text) {
     const out = [];
+    let header = null;
     for (let line of String(text || "").split(/\r?\n/)) {
+      const raw = line;
       line = line.replace(/^\s*(?:[-*•]|\d+[.)])\s+/, "").replace(/`/g, "").trim();
-      if (!line || line.startsWith("#") || !line.includes("|") || /^\|?\s*:?-{2,}/.test(line)) continue;
+      if (!line) continue;
+      if (/^#\s*(?:STRUKTUR|STRUCTURE)\s*:/i.test(line)) { header = WK.parseStructHeader(line); continue; }
+      if (line.startsWith("#") || !line.includes("|") || /^\|?\s*:?-{2,}/.test(line)) continue;
       const f = line.replace(/^\|/, "").replace(/\|$/, "").split("|").map(x => x.trim().replace(/^\*\*|\*\*$/g, "").trim());
       if (!f[0] || /^(name|ort|place|location)$/i.test(f[0])) continue;
-      const p = sanitizeMapPlace({ name: f[0], typ: f[1] || "", lage: f[2] || "", dist: /^[–\-—?]+$/.test(f[3] || "") ? "" : (f[3] || ""), parent: f[4] || "" });
+      // Spalten: Name | Typ | Lage | Entfernung | Teil von | Terrain (5/6 optional, rückwärtskompatibel)
+      let parent = f[4] || "", terrain = f[5] || "";
+      // Toleranz: wenn Spalte 5 wie Terrain aussieht und kein Parent-Name ist, als Terrain werten
+      if (!terrain && parent && WK.parseTerrain(parent) && !/\s/.test(parent) && parent.length <= 20) {
+        const maybe = WK.parseTerrain(parent);
+        if (maybe && /^(island|coast|mainland|ring|forest|field|road|swamp|mountains|sea|deck|valley|desert)/.test(maybe)) { terrain = parent; parent = ""; }
+      }
+      const p = sanitizeMapPlace({ name: f[0], typ: f[1] || "", lage: f[2] || "", dist: /^[–\-—?]+$/.test(f[3] || "") ? "" : (f[3] || ""), parent, terrain });
       if (p && !out.some(q => WK.norm(q.name) === WK.norm(p.name))) out.push(p);
       if (out.length >= 150) break;
     }
+    if (header) out._header = header;
     return out;
   }
-  const placesToText = list => list.map(p => [p.name, p.typ || "", p.lage || "", p.dist || "–"].concat(p.parent ? [p.parent] : []).join(" | ")).join("\n");
+  const placesToText = list => list.map(p => {
+    const cols = [p.name, p.typ || "", p.lage || "", p.dist || "–", p.parent || "–"];
+    if (p.terrain) cols.push(p.terrain);
+    else if (p.parent) { /* 5 Spalten reichen */ }
+    return cols.join(" | ");
+  }).join("\n");
   function openPlacesModal(list, foundCount) {
     document.getElementById("places-text").value = placesToText(list || state.mapPlaces || []);
     const info = document.getElementById("places-info");
@@ -5325,7 +5787,9 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     document.getElementById("places-modal").classList.add("active");
   }
   function savePlacesModal() {
-    state.mapPlaces = sanitizeMapPlaces(parsePlaceLines(document.getElementById("places-text").value), 200);
+    const parsed = parsePlaceLines(document.getElementById("places-text").value);
+    state.mapPlaces = sanitizeMapPlaces(parsed, 200);
+    state.mapStruct = parsed._header || state.mapStruct || null;
     saveState(); closeModal("places-modal");
     if (document.getElementById("map-modal").classList.contains("active")) { hideMapCard(); renderMapView(false); }
     showToast(tf("places_saved", { n: state.mapPlaces.length }), "success");
@@ -5344,26 +5808,70 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     return out.trim();
   }
   function wbScanInstruction() {
+    if (typeof stScanInstruction === "function" && typeof stKind === "function" && stKind() !== "fantasy") {
+      const known = allMapPlaces().map(p => p.name).slice(0, 60).join(", "), start = wbClip(state.world && state.world.location, 80);
+      return stScanInstruction(known, start);
+    }
     const en = state.lang === "en", known = allMapPlaces().map(p => p.name).slice(0, 60).join(", "), start = wbClip(state.world && state.world.location, 80);
     if (stKind() !== "fantasy") return stScanInstruction(known, start);
-    return en ? `### TASK: PLACE LIST FOR A MAP
-Read the lore excerpts and list every concrete place of the game world (regions, cities, villages, castles, buildings, forests, rivers, mountains, camps).
-Format: exactly one line per place:
-Name | Type | Position relative to another listed place | Distance | Part of
-Type: Region, Capital, City, Village, Castle, Farm, House, Mill, Forest, River, Mountains, Camp or Place (squares, districts, taverns, temples: Place or House).
-Position e.g. "east of Roa", "at the Mill Creek", "center of Fittoa", "north part of Roa". Distance e.g. "2 days", "3 hours", "far" or "–".
-Part of = the parent place it lies within: the region for cities/villages, the city for districts, squares and buildings, the castle for its halls; otherwise "–".
-Example: Rat Market | Place | north part of Roa | – | Roa
-Start with the region where the adventure takes place${start ? ` (start: ${start})` : ""}. At most 60 lines. Do not invent places; estimate directions only if the lore hints at them. Output ONLY the list.${known ? `\nAlready known (keep these names): ${known}` : ""}`
-      : `### AUFGABE: ORTSLISTE FÜR EINE KARTE
-Lies die Lore-Auszüge und liste alle konkreten Orte der Spielwelt (Regionen, Städte, Dörfer, Burgen, Gebäude, Wälder, Flüsse, Gebirge, Lager).
-Format: genau eine Zeile pro Ort:
-Name | Typ | Lage relativ zu einem anderen gelisteten Ort | Entfernung | Teil von
-Typ: Region, Hauptstadt, Stadt, Dorf, Burg, Hof, Haus, Mühle, Wald, Fluss, Gebirge, Lager oder Ort (Plätze, Viertel, Tavernen, Tempel: Ort oder Haus).
-Lage z. B. „östlich von Roa“, „am Merenbach“, „Zentrum von Fittoa“, „im Norden von Roa“. Entfernung z. B. „2 Tage“, „3 Stunden“, „weit“ oder „–“.
-Teil von = der übergeordnete Ort, in dem der Ort liegt: die Region bei Städten und Dörfern, die Stadt bei Vierteln, Plätzen und Gebäuden, die Burg bei ihren Hallen; sonst „–“.
-Beispiel: Rattenmarkt | Ort | im Norden von Roa | – | Roa
-Beginne mit der Region, in der das Abenteuer spielt${start ? ` (Start: ${start})` : ""}. Höchstens 60 Zeilen. Erfinde keine Orte; schätze Richtungen nur, wenn die Lore sie andeutet. Gib NUR die Liste aus.${known ? `\nBereits bekannt (Namen beibehalten): ${known}` : ""}`;
+    return en ? `### TASK: PLACE LIST FOR A MAP (structure-first)
+Read the lore and build an accurate map list. First infer the WORLD STRUCTURE, then list places.
+Line 1 (required when lore states it):
+# STRUCTURE: scale=<room|building|village|city|region|island|continent> | topology=<rings|island|coast|valley|forest|road|station|free> | center=<name>
+Then exactly one place per line:
+Name | Type | Position relative to another listed place | Distance | Part of | Terrain
+Type: Region, Capital, City, Village, Castle, Farm, House, Mill, Forest, River, Mountains, Camp or Place.
+Terrain: Island, Coast, Mainland, Ring:0 (innermost), Ring:1, Ring:2, Forest, Field, Road, Swamp, Mountains, Sea, Deck or –.
+Rules for accuracy:
+- Concentric city rings (citadel / middle rings / outer slums) are ONE city: same Part-of region, Terrain Ring:0/1/2, positions "around X" / "at the foot of X". Do NOT treat rings as separate distant cities.
+- An island stays Terrain=Island on the region; poisoned/mainland around it = Mainland.
+- Villages: main street, farms, fields. Forest survival: forest, clearings, stream, camp. No big-city defaults.
+- Part of = containment parent. Distance only when lore gives it.
+Examples:
+# STRUCTURE: scale=island | topology=rings+island | center=Hoch-Zitadelle
+Aethelgard | Region | – | – | – | Island
+Hoch-Zitadelle | City | center of Aethelgard | – | Aethelgard | Ring:0
+Mittlere Ringe | City | around Hoch-Zitadelle | – | Aethelgard | Ring:1
+Die Schlacke | City | around Mittlere Ringe | – | Aethelgard | Ring:2
+Rattenmarkt | Place | in Die Schlacke | – | Die Schlacke | –
+# STRUCTURE: scale=village | topology=road | center=Dorfplatz
+Grünbach | Village | – | – | – | –
+Dorfplatz | Place | center of Grünbach | – | Grünbach | –
+Müllers Hof | Farm | east of Grünbach | 10 minutes | – | Field
+# STRUCTURE: scale=forest | topology=forest | center=Lager
+Dunkelhain | Forest | – | – | – | Forest
+Lager | Camp | clearing in Dunkelhain | – | Dunkelhain | –
+Bachlauf | River | through Dunkelhain | – | – | –
+Start${start ? ` (start: ${start})` : ""}. At most 60 places. Do not invent. Output ONLY the structure line and the list.${known ? `\nAlready known (keep names): ${known}` : ""}`
+      : `### AUFGABE: ORTSLISTE FÜR EINE KARTE (zuerst Struktur)
+Lies die Lore und baue eine akkurate Ortsliste. Zuerst die WELTSTRUKTUR, dann die Orte.
+Zeile 1 (wenn die Lore es hergibt):
+# STRUKTUR: Maßstab=<Raum|Gebäude|Dorf|Stadt|Region|Insel|Kontinent> | Topologie=<Ringe|Insel|Küste|Tal|Wald|Straße|Station|frei> | Zentrum=<Name>
+Dann genau eine Zeile pro Ort:
+Name | Typ | Lage relativ zu einem anderen gelisteten Ort | Entfernung | Teil von | Terrain
+Typ: Region, Hauptstadt, Stadt, Dorf, Burg, Hof, Haus, Mühle, Wald, Fluss, Gebirge, Lager oder Ort.
+Terrain: Insel, Küste, Festland, Ring:0 (innen), Ring:1, Ring:2, Wald, Feld, Straße, Sumpf, Berg, Meer, Deck oder –.
+Genauigkeit:
+- Konzentrische Stadtringe (Zitadelle / Mittlere Ringe / äußere Schlacke) sind EINE Stadt: gleiche Region als Teil von, Terrain Ring:0/1/2, Lage „um X“ / „am Fuß von X“. Keine getrennten Fern-Städte.
+- Eine Insel bekommt Terrain=Insel auf der Region; verpestetes Festland drumherum = Festland.
+- Dorf: Hauptstraße, Höfe, Felder. Wald-Survival: Wald, Lichtungen, Bach, Lager. Keine Großstadt-Vorlage.
+- Teil von = Containment. Entfernung nur wenn die Lore sie nennt.
+Beispiele:
+# STRUKTUR: Maßstab=Insel | Topologie=Ringe+Insel | Zentrum=Hoch-Zitadelle
+Aethelgard | Region | – | – | – | Insel
+Hoch-Zitadelle | Stadt | Zentrum von Aethelgard | – | Aethelgard | Ring:0
+Mittlere Ringe | Stadt | um Hoch-Zitadelle | – | Aethelgard | Ring:1
+Die Schlacke | Stadt | um Mittlere Ringe | – | Aethelgard | Ring:2
+Rattenmarkt | Ort | in der Schlacke | – | Die Schlacke | –
+# STRUKTUR: Maßstab=Dorf | Topologie=Straße | Zentrum=Dorfplatz
+Grünbach | Dorf | – | – | – | –
+Dorfplatz | Ort | Zentrum von Grünbach | – | Grünbach | –
+Müllers Hof | Hof | östlich von Grünbach | 10 Minuten | – | Feld
+# STRUKTUR: Maßstab=Wald | Topologie=Wald | Zentrum=Lager
+Dunkelhain | Wald | – | – | – | Wald
+Lager | Lager | Lichtung in Dunkelhain | – | Dunkelhain | –
+Bachlauf | Fluss | durch Dunkelhain | – | – | –
+Start${start ? ` (Start: ${start})` : ""}. Höchstens 60 Orte. Nichts erfinden. NUR Strukturzeile und Liste.${known ? `\nBereits bekannt (Namen beibehalten): ${known}` : ""}`;
   }
   function wbScanLore() {
     if (isGenerating) { showToast(t("map_busy"), "error"); return; }
@@ -5382,10 +5890,11 @@ Beginne mit der Region, in der das Abenteuer spielt${start ? ` (Start: ${start})
         if (isAborted) return;
         const found = parsePlaceLines(stripThink(out));
         if (!found.length) { showConfirmModal(t("map_scan_empty"), () => {}); return; }
+        if (found._header) state.mapStruct = found._header;
         const merged = sanitizeMapPlaces(state.mapPlaces || [], 200);
         for (const p of found) {
           const i = merged.findIndex(q => WK.norm(q.name) === WK.norm(p.name));
-          if (i === -1) merged.push(p); else merged[i] = { ...merged[i], typ: p.typ || merged[i].typ, lage: p.lage || merged[i].lage, dist: p.dist || merged[i].dist, ...(p.parent || merged[i].parent ? { parent: p.parent || merged[i].parent } : {}) };
+          if (i === -1) merged.push(p); else merged[i] = { ...merged[i], typ: p.typ || merged[i].typ, lage: p.lage || merged[i].lage, dist: p.dist || merged[i].dist, ...(p.parent || merged[i].parent ? { parent: p.parent || merged[i].parent } : {}), ...(p.terrain || merged[i].terrain ? { terrain: p.terrain || merged[i].terrain } : {}) };
         }
         openPlacesModal(merged, found.length);
       } catch (err) {
@@ -5640,12 +6149,12 @@ Beginne mit der Region, in der das Abenteuer spielt${start ? ` (Start: ${start})
 
   // ---------- Setting-passende Beispiele für Spielleiter-Regeln und Lore-Scan ----------
   const ST_EX = {
-    fantasy: { de: { ort: "[ORT: Burg Graufels | Burg | nördlich von Roa | 2 Tage]", in: "[ORT: Goldener Kessel | Taverne | in Roa]", known: "[ORT: Roa]", item: "[+ITEM: Heiltrank (heilt leichte Wunden)]", itemOut: "[-ITEM: Fackel]", wound: "[+WOUND: Schnitt am Arm]", woundOut: "[-WOUND: Schnitt am Arm]", status: "[+STATUS: Vergiftet (−2 auf Proben)]", statusOut: "[-STATUS: Vergiftet]", comp: "Elisabeth", compItem: "Elfenbogen (+1 Reichweite)", mem: "[ERINNERUNG: Hedda hat versprochen, das Tor offen zu lassen | Hedda, Tor]", memS: "[ERINNERUNG!: Der Wirt ist ein Spitzel der Gilde]", lore: "[LORE: Goldener Kessel | Hinterzimmer mit geheimer Falltür]", world: "[WELT_UPDATE: Tag: Tag 2 | Zeit: Abend | Wetter: Regen]", voices: "[STIMMEN: Hedda, Torwache]", scanEx: "Rattenmarkt | Ort | im Norden von Roa | – | Roa" },
-      en: { ort: "[LOCATION: Greyrock Castle | Castle | north of Roa | 2 days]", in: "[LOCATION: Golden Kettle | Tavern | in Roa]", known: "[LOCATION: Roa]", item: "[+ITEM: Healing potion (heals light wounds)]", itemOut: "[-ITEM: Torch]", wound: "[+WOUND: Cut on the arm]", woundOut: "[-WOUND: Cut on the arm]", status: "[+STATUS: Poisoned (−2 on checks)]", statusOut: "[-STATUS: Poisoned]", comp: "Elisabeth", compItem: "Elven bow (+1 range)", mem: "[MEMORY: Hedda promised to leave the gate open | Hedda, gate]", memS: "[MEMORY!: The innkeeper spies for the guild]", lore: "[LORE: Golden Kettle | back room with a hidden trapdoor]", world: "[WORLD_UPDATE: Day: Day 2 | Time: Evening | Weather: Rain]", voices: "[VOICES: Hedda, gate guard]", scanEx: "Rat Market | Place | north part of Roa | – | Roa" } },
-    modern: { de: { ort: "[ORT: Shibuya Station | Bahnhof | südlich von Shinjuku | 10 Minuten mit der Bahn]", in: "[ORT: Café Mondschein | Café | in Shimokitazawa]", known: "[ORT: Shimokitazawa]", item: "[+ITEM: Suica-Karte (2.000 Yen Guthaben)]", itemOut: "[-ITEM: Regenschirm]", wound: "[+WOUND: Aufgeschürftes Knie]", woundOut: "[-WOUND: Aufgeschürftes Knie]", status: "[+STATUS: Übermüdet (Konzentration schwach)]", statusOut: "[-STATUS: Übermüdet]", comp: "Yui", compItem: "Sofortbildkamera (noch 6 Bilder)", mem: "[ERINNERUNG: Yui hat versprochen, am Freitag mitzukommen | Yui, Freitag]", memS: "[ERINNERUNG!: Der Café-Besitzer schuldet jemandem viel Geld]", lore: "[LORE: Café Mondschein | Hinterzimmer mit alter Jukebox]", world: "[WELT_UPDATE: Tag: Freitag | Zeit: 18:30 | Wetter: Nieselregen]", voices: "[STIMMEN: Barista, Herr Tanaka]", scanEx: "Café Mondschein | Café | im Süden von Shimokitazawa | 5 Minuten zu Fuß | Shimokitazawa" },
-      en: { ort: "[LOCATION: Shibuya Station | Station | south of Shinjuku | 10 minutes by train]", in: "[LOCATION: Café Mondschein | Café | in Shimokitazawa]", known: "[LOCATION: Shimokitazawa]", item: "[+ITEM: Suica card (2,000 yen credit)]", itemOut: "[-ITEM: Umbrella]", wound: "[+WOUND: Scraped knee]", woundOut: "[-WOUND: Scraped knee]", status: "[+STATUS: Exhausted (poor focus)]", statusOut: "[-STATUS: Exhausted]", comp: "Yui", compItem: "Instant camera (6 shots left)", mem: "[MEMORY: Yui promised to come along on Friday | Yui, Friday]", memS: "[MEMORY!: The café owner owes someone a lot of money]", lore: "[LORE: Café Mondschein | back room with an old jukebox]", world: "[WORLD_UPDATE: Day: Friday | Time: 6:30 pm | Weather: Drizzle]", voices: "[VOICES: Barista, Mr. Tanaka]", scanEx: "Café Mondschein | Café | south part of Shimokitazawa | 5 minutes on foot | Shimokitazawa" } },
-    scifi: { de: { ort: "[ORT: Station Kepler-9 | Raumstation | im Orbit von Vesta Prime | 6 Stunden mit dem Shuttle]", in: "[ORT: Andockring C | Deck | in Station Kepler-9]", known: "[ORT: Vesta Prime]", item: "[+ITEM: Plasmaschneider (schneidet Schotts)]", itemOut: "[-ITEM: Sauerstoffpatrone]", wound: "[+WOUND: Strahlungsverbrennung]", woundOut: "[-WOUND: Strahlungsverbrennung]", status: "[+STATUS: Sauerstoffmangel (Ausdauer halbiert)]", statusOut: "[-STATUS: Sauerstoffmangel]", comp: "Kade", compItem: "Hacking-Modul (öffnet Zugangssperren)", mem: "[ERINNERUNG: Kade schuldet der Kapitänin einen Gefallen | Kade, Kapitänin]", memS: "[ERINNERUNG!: Der Stationsrechner sendet heimlich an die Flotte]", lore: "[LORE: Andockring C | gesperrte Schleuse 7 mit Quarantäne-Siegel]", world: "[WELT_UPDATE: Tag: Zyklus 14 | Zeit: Nachtschicht | Wetter: Ionensturm]", voices: "[STIMMEN: Dockmeisterin, Bordcomputer]", scanEx: "Andockring C | Deck | im Süden von Station Kepler-9 | – | Station Kepler-9" },
-      en: { ort: "[LOCATION: Kepler-9 Station | Space station | in orbit of Vesta Prime | 6 hours by shuttle]", in: "[LOCATION: Docking Ring C | Deck | in Kepler-9 Station]", known: "[LOCATION: Vesta Prime]", item: "[+ITEM: Plasma cutter (cuts bulkheads)]", itemOut: "[-ITEM: Oxygen cartridge]", wound: "[+WOUND: Radiation burn]", woundOut: "[-WOUND: Radiation burn]", status: "[+STATUS: Oxygen deprived (stamina halved)]", statusOut: "[-STATUS: Oxygen deprived]", comp: "Kade", compItem: "Hacking module (opens access locks)", mem: "[MEMORY: Kade owes the captain a favor | Kade, captain]", memS: "[MEMORY!: The station computer secretly reports to the fleet]", lore: "[LORE: Docking Ring C | sealed airlock 7 with a quarantine seal]", world: "[WORLD_UPDATE: Day: Cycle 14 | Time: Night shift | Weather: Ion storm]", voices: "[VOICES: Dockmaster, ship computer]", scanEx: "Docking Ring C | Deck | south part of Kepler-9 Station | – | Kepler-9 Station" } }
+    fantasy: { de: { ort: "[ORT: Burg Graufels | Burg | nördlich von Roa | 2 Tage]", in: "[ORT: Goldener Kessel | Taverne | in Roa]", known: "[ORT: Roa]", item: "[+ITEM: Heiltrank (heilt leichte Wunden)]", itemOut: "[-ITEM: Fackel]", wound: "[+WOUND: Schnitt am Arm]", woundOut: "[-WOUND: Schnitt am Arm]", status: "[+STATUS: Vergiftet (−2 auf Proben)]", statusOut: "[-STATUS: Vergiftet]", comp: "Elisabeth", compItem: "Elfenbogen (+1 Reichweite)", mem: "[ERINNERUNG: Hedda hat versprochen, das Tor offen zu lassen | Hedda, Tor]", memS: "[ERINNERUNG!: Der Wirt ist ein Spitzel der Gilde]", lore: "[LORE: Goldener Kessel | Hinterzimmer mit geheimer Falltür]", world: "[WELT_UPDATE: Tag: Tag 2 | Zeit: Abend | Wetter: Regen]", voices: "[STIMMEN: Hedda, Torwache]", scanEx: "Rattenmarkt | Ort | im Norden von Roa | – | Roa | –" },
+      en: { ort: "[LOCATION: Greyrock Castle | Castle | north of Roa | 2 days]", in: "[LOCATION: Golden Kettle | Tavern | in Roa]", known: "[LOCATION: Roa]", item: "[+ITEM: Healing potion (heals light wounds)]", itemOut: "[-ITEM: Torch]", wound: "[+WOUND: Cut on the arm]", woundOut: "[-WOUND: Cut on the arm]", status: "[+STATUS: Poisoned (−2 on checks)]", statusOut: "[-STATUS: Poisoned]", comp: "Elisabeth", compItem: "Elven bow (+1 range)", mem: "[MEMORY: Hedda promised to leave the gate open | Hedda, gate]", memS: "[MEMORY!: The innkeeper spies for the guild]", lore: "[LORE: Golden Kettle | back room with a hidden trapdoor]", world: "[WORLD_UPDATE: Day: Day 2 | Time: Evening | Weather: Rain]", voices: "[VOICES: Hedda, gate guard]", scanEx: "Rat Market | Place | north part of Roa | – | Roa | –" } },
+    modern: { de: { ort: "[ORT: Shibuya Station | Bahnhof | südlich von Shinjuku | 10 Minuten mit der Bahn]", in: "[ORT: Café Mondschein | Café | in Shimokitazawa]", known: "[ORT: Shimokitazawa]", item: "[+ITEM: Suica-Karte (2.000 Yen Guthaben)]", itemOut: "[-ITEM: Regenschirm]", wound: "[+WOUND: Aufgeschürftes Knie]", woundOut: "[-WOUND: Aufgeschürftes Knie]", status: "[+STATUS: Übermüdet (Konzentration schwach)]", statusOut: "[-STATUS: Übermüdet]", comp: "Yui", compItem: "Sofortbildkamera (noch 6 Bilder)", mem: "[ERINNERUNG: Yui hat versprochen, am Freitag mitzukommen | Yui, Freitag]", memS: "[ERINNERUNG!: Der Café-Besitzer schuldet jemandem viel Geld]", lore: "[LORE: Café Mondschein | Hinterzimmer mit alter Jukebox]", world: "[WELT_UPDATE: Tag: Freitag | Zeit: 18:30 | Wetter: Nieselregen]", voices: "[STIMMEN: Barista, Herr Tanaka]", scanEx: "Café Mondschein | Café | im Süden von Shimokitazawa | 5 Minuten zu Fuß | Shimokitazawa | –" },
+      en: { ort: "[LOCATION: Shibuya Station | Station | south of Shinjuku | 10 minutes by train]", in: "[LOCATION: Café Mondschein | Café | in Shimokitazawa]", known: "[LOCATION: Shimokitazawa]", item: "[+ITEM: Suica card (2,000 yen credit)]", itemOut: "[-ITEM: Umbrella]", wound: "[+WOUND: Scraped knee]", woundOut: "[-WOUND: Scraped knee]", status: "[+STATUS: Exhausted (poor focus)]", statusOut: "[-STATUS: Exhausted]", comp: "Yui", compItem: "Instant camera (6 shots left)", mem: "[MEMORY: Yui promised to come along on Friday | Yui, Friday]", memS: "[MEMORY!: The café owner owes someone a lot of money]", lore: "[LORE: Café Mondschein | back room with an old jukebox]", world: "[WORLD_UPDATE: Day: Friday | Time: 6:30 pm | Weather: Drizzle]", voices: "[VOICES: Barista, Mr. Tanaka]", scanEx: "Café Mondschein | Café | south part of Shimokitazawa | 5 minutes on foot | Shimokitazawa | –" } },
+    scifi: { de: { ort: "[ORT: Station Kepler-9 | Raumstation | im Orbit von Vesta Prime | 6 Stunden mit dem Shuttle]", in: "[ORT: Andockring C | Deck | in Station Kepler-9]", known: "[ORT: Vesta Prime]", item: "[+ITEM: Plasmaschneider (schneidet Schotts)]", itemOut: "[-ITEM: Sauerstoffpatrone]", wound: "[+WOUND: Strahlungsverbrennung]", woundOut: "[-WOUND: Strahlungsverbrennung]", status: "[+STATUS: Sauerstoffmangel (Ausdauer halbiert)]", statusOut: "[-STATUS: Sauerstoffmangel]", comp: "Kade", compItem: "Hacking-Modul (öffnet Zugangssperren)", mem: "[ERINNERUNG: Kade schuldet der Kapitänin einen Gefallen | Kade, Kapitänin]", memS: "[ERINNERUNG!: Der Stationsrechner sendet heimlich an die Flotte]", lore: "[LORE: Andockring C | gesperrte Schleuse 7 mit Quarantäne-Siegel]", world: "[WELT_UPDATE: Tag: Zyklus 14 | Zeit: Nachtschicht | Wetter: Ionensturm]", voices: "[STIMMEN: Dockmeisterin, Bordcomputer]", scanEx: "Andockring C | Deck | im Süden von Station Kepler-9 | – | Station Kepler-9 | Deck" },
+      en: { ort: "[LOCATION: Kepler-9 Station | Space station | in orbit of Vesta Prime | 6 hours by shuttle]", in: "[LOCATION: Docking Ring C | Deck | in Kepler-9 Station]", known: "[LOCATION: Vesta Prime]", item: "[+ITEM: Plasma cutter (cuts bulkheads)]", itemOut: "[-ITEM: Oxygen cartridge]", wound: "[+WOUND: Radiation burn]", woundOut: "[-WOUND: Radiation burn]", status: "[+STATUS: Oxygen deprived (stamina halved)]", statusOut: "[-STATUS: Oxygen deprived]", comp: "Kade", compItem: "Hacking module (opens access locks)", mem: "[MEMORY: Kade owes the captain a favor | Kade, captain]", memS: "[MEMORY!: The station computer secretly reports to the fleet]", lore: "[LORE: Docking Ring C | sealed airlock 7 with a quarantine seal]", world: "[WORLD_UPDATE: Day: Cycle 14 | Time: Night shift | Weather: Ion storm]", voices: "[VOICES: Dockmaster, ship computer]", scanEx: "Docking Ring C | Deck | south part of Kepler-9 Station | – | Kepler-9 Station | Deck" } }
   };
   const stEx = () => ST_EX[stKind()][stEn() ? "en" : "de"];
   function stMapRule(en) {
@@ -5657,31 +6166,40 @@ Beginne mit der Region, in der das Abenteuer spielt${start ? ` (Start: ${start})
   function stLoreRule(en) { const x = stEx(); return en ? `- New or changed NPC, place or thing: [LORE: Title | brief new info], e.g. ${x.lore}` : `- Neue oder geänderte Figur, Ort, Sache: [LORE: Titel | knappe neue Info], z. B. ${x.lore}`; }
   function stScanInstruction(known, start) {
     const en = stEn(), k = stKind(), x = stEx();
-    const what = k === "modern" ? (en ? "(regions, cities, districts, stations, schools, cafés, shops, homes/apartments, parks, shrines, offices, rivers)" : "(Regionen, Städte, Stadtviertel, Bahnhöfe, Schulen, Cafés, Läden, Wohnungen, Parks, Schreine, Büros, Flüsse)")
-      : (en ? "(sectors, star systems, planets, moons, space stations, ships, decks, colonies, asteroid fields, nebulae)" : "(Sektoren, Sternsysteme, Planeten, Monde, Raumstationen, Schiffe, Decks, Kolonien, Asteroidenfelder, Nebel)");
-    const types = k === "modern" ? (en ? "Region (= the city whose street map is shown), Capital, City (other cities), District, Station, School, Café, Shop, Apartment, Park, Shrine, Office, River or Place" : "Region (= die Stadt, deren Stadtplan gezeigt wird), Hauptstadt, Stadt (andere Städte), Viertel, Bahnhof, Schule, Café, Laden, Wohnung, Park, Schrein, Büro, Fluss oder Ort")
+    const what = k === "modern" ? (en ? "(regions, cities, districts, stations, schools, cafés, shops, homes/apartments, parks, farms, forests, rivers – OR a village / forest camp if that is what the lore describes; never force a metropolis)" : "(Regionen, Städte, Stadtviertel, Bahnhöfe, Schulen, Cafés, Läden, Wohnungen, Parks, Höfe, Wälder, Flüsse – ODER ein Dorf/Waldlager, wenn die Lore das beschreibt; keine erzwungene Metropole)")
+      : (en ? "(sectors, star systems, planets, moons, space stations, ships, decks, colonies, asteroid fields, nebulae – station rings are concentric, not separate stations)" : "(Sektoren, Sternsysteme, Planeten, Monde, Raumstationen, Schiffe, Decks, Kolonien, Asteroidenfelder, Nebel – Stationsringe sind konzentrisch, keine getrennten Stationen)");
+    const types = k === "modern" ? (en ? "Region (= the city whose street map is shown), Capital, City (other cities), Village, District, Station, School, Café, Shop, Apartment, Park, Farm, Forest, River or Place" : "Region (= die Stadt, deren Stadtplan gezeigt wird), Hauptstadt, Stadt (andere Städte), Dorf, Viertel, Bahnhof, Schule, Café, Laden, Wohnung, Park, Hof, Wald, Fluss oder Ort")
       : (en ? "Sector (= region), Homeworld, Planet, Moon, Colony, Space station, Ship, Deck, Module, Asteroid field, Nebula, Star or Place" : "Sektor (= Region), Hauptwelt, Planet, Mond, Kolonie, Raumstation, Schiff, Deck, Modul, Asteroidenfeld, Nebel, Stern oder Ort");
-    const pos = k === "modern" ? (en ? `Position e.g. "east of Shibuya Station", "center of Shimokitazawa", "north part of Shibuya". Distance e.g. "5 minutes on foot", "10 minutes by train", "2 km", "far" or "–".` : `Lage z. B. „östlich von Shibuya Station“, „Zentrum von Shimokitazawa“, „im Norden von Shibuya“. Entfernung z. B. „5 Minuten zu Fuß“, „10 Minuten mit der Bahn“, „2 km“, „weit“ oder „–“.`)
-      : (en ? `Position e.g. "in orbit of Vesta Prime", "near the Kepler Belt", "north part of Kepler-9 Station". Distance e.g. "2 sectors", "6 hours by shuttle", "3 jumps", "far" or "–".` : `Lage z. B. „im Orbit von Vesta Prime“, „nahe dem Kepler-Gürtel“, „im Norden von Station Kepler-9“. Entfernung z. B. „2 Sektoren“, „6 Stunden mit dem Shuttle“, „3 Sprünge“, „weit“ oder „–“.`);
-    const part = k === "modern" ? (en ? "the city (Region) for districts, the district for stations, cafés, schools and homes, the building for its rooms" : "die Stadt (Region) bei Vierteln, das Viertel bei Bahnhöfen, Cafés, Schulen und Wohnungen, das Gebäude bei seinen Räumen") : (en ? "the sector for systems, planets and stations, the planet for colonies on its surface, the station or ship for its decks and modules" : "der Sektor bei Systemen, Planeten und Stationen, der Planet bei Kolonien auf seiner Oberfläche, die Station oder das Schiff bei Decks und Modulen");
-    return en ? `### TASK: PLACE LIST FOR A MAP
+    const ter = en ? "Terrain: Island, Coast, Ring:0/1/2, Forest, Field, Road, Deck, Mainland or –." : "Terrain: Insel, Küste, Ring:0/1/2, Wald, Feld, Straße, Deck, Festland oder –.";
+    const part = k === "modern" ? (en ? "the city (type Region) for districts, the district for stations/cafés/schools/homes" : "die Stadt (Typ Region) bei Vierteln, das Viertel bei Bahnhöfen/Cafés/Schulen/Wohnungen") : (en ? "the sector for systems/planets/stations, the station or ship for decks/modules" : "der Sektor bei Systemen/Planeten/Stationen, die Station oder das Schiff bei Decks/Modulen");
+    return en ? `### TASK: PLACE LIST FOR A MAP (structure-first)
 Read the lore excerpts and list every concrete place of the game world ${what}.
-Format: exactly one line per place:
-Name | Type | Position relative to another listed place | Distance | Part of
+Line 1: # STRUCTURE: scale=<village|city|region|forest|station|…> | topology=<road|rings|forest|station|free> | center=<name>
+Then exactly one line per place:
+Name | Type | Position relative to another listed place | Distance | Part of | Terrain
 Type: ${types}.
-${pos}
+${ter}
 Part of = the parent place it lies within: ${part}; otherwise "–".
 Example: ${x.scanEx}
-Start with the ${k === "modern" ? "city (type Region)" : "sector (type Sector)"} where the adventure takes place${start ? ` (start: ${start})` : ""}. At most 60 lines. Do not invent places; estimate directions only if the lore hints at them. Output ONLY the list.${known ? `\nAlready known (keep these names): ${known}` : ""}`
-      : `### AUFGABE: ORTSLISTE FÜR EINE KARTE
+Village example (when lore is a village, not a city):
+# STRUCTURE: scale=village | topology=road | center=Village Square
+Grünbach | Village | – | – | – | –
+Müllers Hof | Farm | east of Grünbach | 10 minutes | – | Field
+Start with the ${k === "modern" ? "city (type Region)" : "sector (type Sector)"} where the adventure takes place${start ? ` (start: ${start})` : ""}. At most 60 lines. Do not invent places. Output ONLY the structure line and the list.${known ? `\nAlready known (keep these names): ${known}` : ""}`
+      : `### AUFGABE: ORTSLISTE FÜR EINE KARTE (zuerst Struktur)
 Lies die Lore-Auszüge und liste alle konkreten Orte der Spielwelt ${what}.
-Format: genau eine Zeile pro Ort:
-Name | Typ | Lage relativ zu einem anderen gelisteten Ort | Entfernung | Teil von
+Zeile 1: # STRUKTUR: Maßstab=<Dorf|Stadt|Region|Wald|Station|…> | Topologie=<Straße|Ringe|Wald|Station|frei> | Zentrum=<Name>
+Dann genau eine Zeile pro Ort:
+Name | Typ | Lage relativ zu einem anderen gelisteten Ort | Entfernung | Teil von | Terrain
 Typ: ${types}.
-${pos}
+${ter}
 Teil von = der übergeordnete Ort, in dem der Ort liegt: ${part}; sonst „–“.
 Beispiel: ${x.scanEx}
-Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sektor)"}, in ${k === "modern" ? "der" : "dem"} das Abenteuer spielt${start ? ` (Start: ${start})` : ""}. Höchstens 60 Zeilen. Erfinde keine Orte; schätze Richtungen nur, wenn die Lore sie andeutet. Gib NUR die Liste aus.${known ? `\nBereits bekannt (Namen beibehalten): ${known}` : ""}`;
+Dorf-Beispiel (wenn die Lore ein Dorf ist, keine Großstadt):
+# STRUKTUR: Maßstab=Dorf | Topologie=Straße | Zentrum=Dorfplatz
+Grünbach | Dorf | – | – | – | –
+Müllers Hof | Hof | östlich von Grünbach | 10 Minuten | – | Feld
+Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sektor)"}, in ${k === "modern" ? "der" : "dem"} das Abenteuer spielt${start ? ` (Start: ${start})` : ""}. Höchstens 60 Zeilen. Erfinde keine Orte. Gib NUR die Strukturzeile und die Liste aus.${known ? `\nBereits bekannt (Namen beibehalten): ${known}` : ""}`;
   }
 
   // ---------- In-App-Anleitung: modulare Prompt-Bausteine (Tags exakt wie der Parser) ----------
