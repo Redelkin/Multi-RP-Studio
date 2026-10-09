@@ -643,6 +643,13 @@
             <span data-i18n="lbl_budget">Budget:</span><strong id="budget-val" style="color:var(--gold);">3200 Tokens</strong>
           </div>
           <input type="range" id="setting-budget" min="1000" max="32000" step="200" value="3200">
+          <div id="lore-share-box">
+          <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:10px; gap:8px;">
+            <span data-i18n="lbl_lore_share">Davon Lore & Chronik:</span><strong id="lore-share-val" style="color:var(--gold); text-align:right;">40 %</strong>
+          </div>
+          <input type="range" id="setting-lore-share" min="10" max="80" step="5" value="40">
+          <div id="lore-share-info" style="font-size:12px; opacity:.85; margin-top:4px; line-height:1.4;"></div>
+          </div>
         </div>
         <div class="card">
           <div class="card-title font-serif-title" style="color:var(--gold);" data-i18n="turn_order">Ablauf-Reihenfolge (Turn Order)</div>
@@ -1087,7 +1094,7 @@
       editor_desc: "Verwebt Spielleiter-Kulisse und Begleiter-Reaktionen kaskadierend zu einem dichten Romankapitel.",
       lbl_active_editor: "Aktiver Lektor", title_format: "Standard-Format (ohne Lektor)",
       combined_chk: "Kombinierte Gruppen-Nachricht (GM + Gefährten in einer Blase)",
-      title_budget: "Kontext-Speicher (Dynamisches Budget)", lbl_budget: "Budget:",
+      title_budget: "Kontext-Speicher (Dynamisches Budget)", lbl_budget: "Budget:", lbl_lore_share: "Davon Lore & Chronik:", lore_share_split: "{l} Lore / {c} Chat", lore_share_hint: "Nicht genutztes Lore-Budget geht automatisch an den Chatverlauf. Immer aktive Einträge werden nie weggelassen.", lore_stats: "Letzter Zug: {n} Einträge, {u}/{b} Tokens", lore_over: "Immer aktive Einträge allein über dem Lore-Budget (trotzdem vollständig gesendet)", lore_cut: "{n} erwähnte nicht gepasst: {t}", lore_more: "{n} Folge-Einträge ausgelassen",
       turn_order: "Ablauf-Reihenfolge (Turn Order)", backup_title: "Speicher & Datensicherung",
       manual_save_lbl: "Manueller Speicherstand", manual_save_btn: "💾 Jetzt sichern",
       strip_keys_chk: "API-Keys beim Export entfernen", btn_export: "Backup exportieren",
@@ -1200,7 +1207,7 @@
       editor_desc: "Weaves the game master's scene and the companions' reactions into one flowing novel passage.",
       lbl_active_editor: "Active editor", title_format: "Default format (without editor)",
       combined_chk: "Combined group message (GM + companions in one bubble)",
-      title_budget: "Context memory (dynamic budget)", lbl_budget: "Budget:",
+      title_budget: "Context memory (dynamic budget)", lbl_budget: "Budget:", lbl_lore_share: "Of which lore & chronicle:", lore_share_split: "{l} lore / {c} chat", lore_share_hint: "Unused lore budget automatically goes to the chat history. Always-active entries are never dropped.", lore_stats: "Last turn: {n} entries, {u}/{b} tokens", lore_over: "Always-active entries alone exceed the lore budget (still sent in full)", lore_cut: "{n} mentioned did not fit: {t}", lore_more: "{n} follow-up entries skipped",
       turn_order: "Turn order", backup_title: "Storage & backup",
       manual_save_lbl: "Manual save", manual_save_btn: "💾 Save now",
       strip_keys_chk: "Remove API keys when exporting", btn_export: "Export backup",
@@ -1886,7 +1893,7 @@
     if (!c[key]) {
       const SIGN = "ITEM|GEGENSTAND|WOUND|WUNDE|VERLETZUNG|STATUS|ZUSTAND|EFFEKT|SKILL|TALENT|FÄHIGKEIT|FAEHIGKEIT|LEVEL|STUFE|LVL|RANG|STUFENAUFSTIEG";
       const MUT = "(?:LIVE_)?(?:MUTATION|STATE_UPDATE|INV_UPDATE)", WORLD = "(?:WORLD_UPDATE|WELT_UPDATE|WORLD)";
-      const WB = "ORT|LOCATION|PLACE|ERINNERUNG|MEMORY|LORE", VOICE = "STIMMEN|VOICES";
+      const WB = "ORT|LOCATION|PLACE|ERINNERUNGEN|ERINNERUNG|MEMORIES|MEMORY|CHRONIK|CHRONICLE|LORE", VOICE = "STIMMEN|VOICES";
       const C = "\\s*[:\\uFF1A]";
       // Tag-Anfang: mit Vorzeichen (+ITEM …), ohne Vorzeichen nur mit Doppelpunkt/„=“ (LEVEL: 2) oder „LEVEL 2“
       // Level-Formen: „LEVEL 2“, „LEVEL UP“, „LEVEL-UP: 3“, „LEVELUP“, „STUFENAUFSTIEG“
@@ -2448,7 +2455,8 @@
       if (lowerText !== undefined && !lowerText.includes(part.toLowerCase())) return false;
       const escaped = escapeRegex(part);
       try {
-        const pattern = new RegExp(`(?<![\\p{L}\\p{N}_])${escaped}(?![\\p{L}\\p{N}_])`, "iu");
+        const infl = part.length >= 4 && /\p{L}$/u.test(part) ? "(?:s|es|n|en|e|er|ern|em)?" : "";
+        const pattern = new RegExp(`(?<![\\p{L}\\p{N}_])${escaped}${infl}(?![\\p{L}\\p{N}_])`, "iu");
         return pattern.test(text);
       } catch (e) {
         const pattern = new RegExp(`(?:^|[^A-Za-zÀ-ÿ0-9_])${escaped}(?:$|[^A-Za-zÀ-ÿ0-9_])`, "i");
@@ -2472,63 +2480,70 @@
     return [...slice, additionalText].filter(Boolean).join(" ");
   }
 
-  function scanLorebookRecursive(messagesList, currentTriggerText, isGM, maxLoreBudget = 1200) {
-    if (!state.lorebook || !Array.isArray(state.lorebook) || state.lorebook.length === 0) return "";
-    let activeEntries = [];
-    let activatedLoreTextPool = currentTriggerText || "";
-
-    state.lorebook.forEach(entry => {
-      if (!entry) return;
-      if (!isGM && entry.gmOnly) return;
-      if (entry.constant && !activeEntries.some(e => e.id === entry.id)) {
-        activeEntries.push(entry);
-        activatedLoreTextPool += " " + (entry.content || "");
-      }
-    });
-    wbPlaceEntries(isGM).forEach(entry => {
-      if (activeEntries.some(e => e.id === entry.id)) return;
-      activeEntries.push(entry);
-      activatedLoreTextPool += " " + (entry.content || "");
-    });
-
-    let added = true;
-    let depthPass = 0;
+  // Lore-Anteil am Gesamtbudget in % (Rest = Chatverlauf; ungenutzte Lore-Tokens bekommt automatisch der Verlauf)
+  const loreSharePct = () => sanitizeInt(state.settings && state.settings.loreShare, 10, 80, 40);
+  const loreBudgetTokens = () => Math.round((state.settings.maxTokenBudget || 3200) * loreSharePct() / 100);
+  let lastLoreStats = null;
+  function scanLorebookRecursive(messagesList, currentTriggerText, isGM, maxLoreBudget) {
+    const stats = { n: 0, used: 0, budget: 0, cut: [], more: 0, over: false };
+    if (!(maxLoreBudget > 0)) maxLoreBudget = loreBudgetTokens();
+    stats.budget = maxLoreBudget;
+    if (!state.lorebook || !Array.isArray(state.lorebook) || state.lorebook.length === 0) { if (isGM) { lastLoreStats = stats; updateLoreShareUI(); } return ""; }
+    const act = new Map(); // id -> { e, tier, score }
+    let pool = currentTriggerText || "";
+    const prio = e => (parseInt(e.priority, 10) || 10);
+    state.lorebook.forEach(e => { if (!e || (!isGM && e.gmOnly) || !e.constant || act.has(e.id)) return; act.set(e.id, { e, tier: 0, score: prio(e) }); pool += " " + (e.content || ""); });
+    wbPlaceEntries(isGM).forEach(e => { if (act.has(e.id)) return; act.set(e.id, { e, tier: 1, direct: true, score: prio(e) }); pool += " " + (e.content || ""); });
+    // Relevanz: im Chat erwähnte Einträge vor Folge-Einträgen; innerhalb: Priorität, Treffer in den letzten 2 Nachrichten, Trefferzahl, Aktualität (Chronik)
+    const recent = getLoreContextForDepth(messagesList, 2, currentTriggerText), recentL = recent.toLowerCase();
+    const times = state.lorebook.filter(e => e && e.ai).map(e => e.updatedAt || e.createdAt || 0).sort((a, b) => a - b);
+    const recency = e => { if (!e.ai || !times.length) return 0; const tt = e.updatedAt || e.createdAt || 0; let k = 0; while (k < times.length && times[k] < tt) k++; return 2 * k / times.length; };
+    let added = true, pass = 0;
     const scanCache = new Map();
-    while (added && depthPass < 2) {
-      added = false;
-      depthPass++;
-      state.lorebook.forEach(entry => {
-        if (!entry) return;
-        if (!isGM && entry.gmOnly) return;
-        if (activeEntries.some(e => e.id === entry.id)) return;
-        if (!entry.keys || !String(entry.keys).trim()) return;
-
-        const depth = Math.max(1, parseInt(entry.scanDepth, 10) || 8);
-        const ck = depth + "|" + activatedLoreTextPool.length;
+    while (added && pass < 2) {
+      added = false; pass++;
+      state.lorebook.forEach(e => {
+        if (!e || (!isGM && e.gmOnly) || act.has(e.id)) return;
+        if (!e.keys || !String(e.keys).trim()) return;
+        const depth = Math.max(1, parseInt(e.scanDepth, 10) || 8);
+        const ck = depth + "|" + pool.length;
         let sc = scanCache.get(ck);
-        if (!sc) { const t = getLoreContextForDepth(messagesList, depth, currentTriggerText) + " " + activatedLoreTextPool; sc = { t, l: t.toLowerCase() }; scanCache.set(ck, sc); }
-
-        const groups = String(entry.keys).split(",").map(g => g.trim()).filter(Boolean);
-        if (groups.some(group => matchLoreKeyGroup(group, sc.t, sc.l))) {
-          activeEntries.push(entry);
-          activatedLoreTextPool += " " + (entry.content || "");
-          added = true;
-        }
+        if (!sc) { const ctx = getLoreContextForDepth(messagesList, depth, currentTriggerText), tx = ctx + " " + pool; sc = { t: tx, l: tx.toLowerCase(), c: ctx, cl: ctx.toLowerCase() }; scanCache.set(ck, sc); }
+        const groups = String(e.keys).split(",").map(g => g.trim()).filter(Boolean);
+        const hits = groups.filter(g => matchLoreKeyGroup(g, sc.t, sc.l));
+        if (!hits.length) return;
+        const inChat = hits.some(g => matchLoreKeyGroup(g, sc.c, sc.cl)), inRecent = inChat && hits.some(g => matchLoreKeyGroup(g, recent, recentL));
+        act.set(e.id, { e, tier: inChat ? 2 : 3, direct: inChat, score: prio(e) / 10 + (inRecent ? 3 : 0) + Math.min(3, hits.length) + recency(e) }); // im Chat erwähnt (2) vor Folge-Einträgen, die nur andere Lore auslöst (3)
+        pool += " " + (e.content || ""); added = true;
       });
     }
-
-    activeEntries.sort((a, b) => (parseInt(b.priority, 10) || 10) - (parseInt(a.priority, 10) || 10));
-    let budgetUsed = 0;
-    const budgeted = [];
-    for (const entry of activeEntries) {
-      const est = estimateTokens(entry.content || "");
-      if (budgetUsed + est > maxLoreBudget && budgeted.length > 0) continue;
-      budgeted.push(entry);
-      budgetUsed += est;
+    const list = [...act.values()].sort((a, b) => a.tier - b.tier || b.score - a.score);
+    const out = [];
+    for (const a of list) {
+      const est = estimateTokens(a.e.content || "") + estimateTokens(a.e.title || "") + 2;
+      if (a.tier === 0) { out.push(a.e); stats.used += est; if (stats.used > maxLoreBudget) stats.over = true; continue; } // immer aktiv: nie verwerfen
+      if (stats.used + est > maxLoreBudget) { if (a.direct) stats.cut.push(a.e.title || "?"); else stats.more++; continue; } // direkt erwähnte melden; Folge-Einträge (nur über andere Lore) nur zählen
+      out.push(a.e); stats.used += est;
     }
-    if (budgeted.length === 0) return "";
+    stats.n = out.length;
+    if (isGM || !lastLoreStats) { lastLoreStats = stats; updateLoreShareUI(); }
+    if (out.length === 0) return "";
     const header = state.lang === "en" ? "\n\n[Relevant World Lore]:\n" : "\n\n[Relevantes Weltwissen]:\n";
-    return header + budgeted.map(e => `[${e.title}]\n${e.content}`).join("\n\n");
+    return header + out.map(e => `[${e.title}]\n${e.content}`).join("\n\n");
+  }
+  function updateLoreShareUI() {
+    const v = document.getElementById("lore-share-val"), el = document.getElementById("setting-lore-share"), info = document.getElementById("lore-share-info");
+    const pct = loreSharePct(), lb = loreBudgetTokens(), tot = state.settings.maxTokenBudget || 3200;
+    if (el && document.activeElement !== el) el.value = pct;
+    if (v) v.innerText = pct + " % · " + tf("lore_share_split", { l: lb, c: tot - lb });
+    if (!info) return;
+    const s = lastLoreStats;
+    if (!s) { info.textContent = t("lore_share_hint"); info.style.color = ""; return; }
+    let txt = tf("lore_stats", { n: s.n, u: s.used, b: s.budget });
+    if (s.over) txt += " · " + t("lore_over");
+    if (s.cut.length) txt += " · " + tf("lore_cut", { n: s.cut.length, t: s.cut.slice(0, 6).join(", ") + (s.cut.length > 6 ? ", …" : "") });
+    if (s.more) txt += " · " + tf("lore_more", { n: s.more });
+    info.textContent = txt; info.style.color = s.cut.length || s.over ? "#e8a35a" : "";
   }
 
   function getUserPersonaPrompt() {
@@ -3885,7 +3900,11 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     function parseStructHeader(text) {
       const out = {};
       for (const line of String(text || "").split(/\r?\n/)) {
-        const m = line.match(/^\s*#\s*(?:STRUKTUR|STRUCTURE)\s*:\s*(.+)$/i); if (!m) continue;
+        const ln = line.replace(/[*_`]/g, "").trim();
+        let m = ln.match(/^\s*#*\s*(?:STRUKTUR|STRUCTURE|WELTSTRUKTUR|WORLD\s+STRUCTURE)\s*:?\s*(.+)$/i);
+        if (!m && /(?:maßstab|massstab|scale)\s*[=:]/i.test(ln) && /(?:topologie|topology|zentrum|center)\s*[=:]/i.test(ln)) m = [ln, ln.replace(/^\s*#+\s*/, "")];
+        if (!m) continue;
+        m[1] = m[1].replace(/(maßstab|massstab|scale|topologie|topology|zentrum|center|centre)\s*:\s*/gi, "$1=");
         m[1].split("|").forEach(part => {
           const kv = part.split("=").map(x => x.trim()); if (kv.length < 2) return;
           const k = kv[0].toLowerCase(), v = kv.slice(1).join("=");
@@ -4053,118 +4072,182 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       }
       return out;
     }
-    function applyRingLayout(groups, N, PX, rr, D) {
-      // Ringbreiten: innen klein, außen größer – präzise Staffelung
+    function applyRingLayout(groups) {
+      // Ringbreiten: innen klein, außen größer – präzise Staffelung; gemeinsamer Mittelpunkt (0,0) = Inselmitte/Weltmitte
       const WIDTHS = [36, 52, 70, 88, 100];
       for (const g of groups) {
-        const cx = 0, cy = 0; // vorerst; wird später an Anker verschoben
         let r = 0;
-        const sorted = g.members.slice().sort((a, b) => a.idx - b.idx);
+        const sorted = g.members.slice().sort((a, b) => a.idx - b.idx), band = {};
         for (const m of sorted) {
-          const w = WIDTHS[Math.min(m.idx, WIDTHS.length - 1)];
-          const rInner = r, rOuter = r + w;
-          r = rOuter;
-          m.n.ring = { group: g.id, idx: m.idx, rInner, rOuter, cx, cy };
-          m.n.fixed = true; // Ringe nicht auseinanderstoßen
-          m.n.far = false;
-          // Marker auf dem Ringmittelkreis, Winkel aus Name-Hash für Stabilität
-          const ang = (hsh(m.n.name) % 360);
-          const rm = (rInner + rOuter) / 2;
-          m.n.p = { x: cx + Math.cos(ang * D) * rm, y: cy + Math.sin(ang * D) * rm };
-          m.n.off = { x: m.n.p.x, y: m.n.p.y };
-          m.n.ang = ang;
-          m.n.days = 0;
-          // Icon-Radius = äußere Ringbreite für Kollision mit Nicht-Ring-Orten
+          // gleicher Index = gleiches Band (z. B. Bezirke eines Rings ohne „Teil von“)
+          if (!band[m.idx]) { const w = WIDTHS[Math.min(m.idx, WIDTHS.length - 1)]; band[m.idx] = [r, r + w]; r += w; }
+          const [rInner, rOuter] = band[m.idx];
+          m.n.ring = { group: g.id, idx: m.idx, rInner, rOuter, cx: 0, cy: 0 };
+          m.n.fixed = true; m.n.far = false; m.n.days = 0;
           m.n._rad = rOuter + 8;
           m.n._ir = Math.max(12, (rOuter - rInner) / 2);
         }
-        g.rMax = r;
-        g.cx = cx; g.cy = cy;
+        g.rMax = r; g.cx = 0; g.cy = 0;
       }
     }
-    // Constraint-Layout: Ringe → Anker → Richtungen/Distanzen → Kollision (Ringe ausnehmen)
+    // Constraint-Layout: Ringe → Kern (Insel) → Satelliten-Regionen → Orte in Regionen → Insel-/Küstenregel → Kollision
     function layoutWorld(N, opts) {
       const D = Math.PI / 180;
       const header = opts.header || {};
       const find = opts.find;
       const POS = opts.pos || {};
       const PX = opts.PX;
-      const rnd = opts.rnd, rr = opts.rr, hshFn = opts.hsh || hsh;
-      // Terrain an Nodes
+      const rr = opts.rr, hshFn = opts.hsh || hsh;
+      const H01 = (s, k) => (hshFn(s + "|" + k) % 10007) / 10007;
       N.forEach(n => { n.terrain = parseTerrain(n.info && n.info.terrain || n.terrain || ""); });
+      // „Teil von“ als Ersatz-Bezug, wenn die Lage keinen auflösbaren Ort nennt („Zentrum Myr“, „Ödland“ …)
+      N.forEach(n => {
+        const par = n.info && n.info.parent ? find(n.info.parent) : null;
+        n.par = par && par !== n ? par : null;
+        if (!n.ref && n.par) { n.ref = n.par; if (n.rel.k === "free" || n.rel.k === "mid") n.rel = { k: n.rel.k === "mid" ? "mid" : "in", ref: n.info.parent }; else if (n.rel.k === "dir") n.rel = { ...n.rel, ref: n.info.parent, inside: true }; }
+      });
       const rings = detectRings(N, find);
-      applyRingLayout(rings, N, PX, rr, D);
-      const ringSet = new Set();
-      rings.forEach(g => g.members.forEach(m => ringSet.add(m.n)));
+      applyRingLayout(rings);
+      const ringSet = new Set(); rings.forEach(g => g.members.forEach(m => ringSet.add(m.n)));
+      const gOf = id => rings.find(g => g.id === id);
       const skel = inferSkeleton(N, header);
-      skel.rings = rings.map(g => ({ id: g.id, rMax: g.rMax, members: g.members.map(m => m.n.key) }));
-      // Klassisches Platzieren für Nicht-Ring-Orte (ähnlich bisher, aber mit parent-Containment und sizeOf)
-      let rootTaken = false;
-      const base = n => n.ref && n.ref.typ !== "region" ? n.ref : null;
-      function place(n, st) {
-        if (n.p && ringSet.has(n)) return; // Ring schon gesetzt
-        if (n.p && n.fixed && POS[n.key]) return;
-        if (n.p && !st) return;
-        st = st || new Set();
-        if (st.has(n)) return; st.add(n);
-        const b = base(n); if (b && !st.has(b)) place(b, st);
-        if (ringSet.has(n)) return;
-        opts.reseed && opts.reseed(hshFn(n.name));
-        if (n.typ === "region") { n.p = { x: 0, y: 0 }; n.fixed = true; return; }
-        const bp = b && b.p ? b.p : { x: 0, y: 0 }, k = n.rel.k, num = typeof n.d === "number" ? n.d : null;
-        let a = rr(0, 360), d;
-        if (k === "dir") { a = n.rel.a + rr(-12, 12); d = n.d === "fern" ? null : (num ?? 1); }
-        else if (k === "mid" || k === "thr") d = 0;
-        else if (k === "in") {
-          // Containment: innerhalb des Parents – bei Ring-Parent auf Ringband setzen
-          if (b && b.ring) {
-            const rm = (b.ring.rInner + b.ring.rOuter) / 2;
-            a = (hshFn(n.name) % 360);
-            n.ang = a; n.far = false; n.days = num ?? 0.02;
-            n.off = { x: Math.cos(a * D) * rm, y: Math.sin(a * D) * rm };
-            n.p = { x: b.ring.cx + n.off.x, y: b.ring.cy + n.off.y };
-            n.fixed = true; n._rad = sizeOf(n); n._ir = Math.max(8, sizeOf(n) * .35);
-            return;
-          }
-          d = num ?? .05;
+      // Wurzel-Region (Kern der Karte): Insel-Region > Region der Ringe > Zentrum-Header > erste freie Region
+      const REGS = N.filter(n => n.typ === "region");
+      let root = REGS.find(r => r.terrain === "island") || null;
+      if (!root) for (const n of ringSet) { if (n.par && n.par.typ === "region") { root = n.par; break; } if (n.ref && n.ref.typ === "region") { root = n.ref; break; } }
+      if (!root && skel.center) { const c = find(skel.center); if (c && c.typ === "region") root = c; }
+      if (!root && !(skel.scale === "island" && rings.length)) root = REGS.find(r => !r.ref) || REGS[0] || null; // Insel-Karte ohne Inselregion: Insel um die Ringstadt, keine fremde Region als Kern
+      REGS.forEach(r => { r.isRoot = r === root; });
+      const island = skel.scale === "island" || /island/.test(skel.topology || "") || (root && root.terrain === "island");
+      // Region eines Ortes (über Teil von / „in X“ / „nahe X“)
+      const regOf = (n, d) => { d = d || 0; if (!n || d > 10) return null; if (n.typ === "region") return n; if (n.par) return regOf(n.par, d + 1); if (n.ref && n.ref !== n && (n.rel.k === "in" || n.rel.k === "mid" || n.rel.inside || n.rel.k === "near")) return regOf(n.ref, d + 1); return null; };
+      N.forEach(n => { n.reg = n.typ === "region" ? n : regOf(n); });
+      const OFF_T = new Set(["mainland", "swamp", "forest", "mountains", "desert", "field", "valley"]);
+      const offIsland = n => island && !ringSet.has(n) && n.typ !== "region" && (OFF_T.has(n.terrain) || (n.reg && !n.reg.isRoot) || /au(ß|ss)erhalb|outside|jenseits|beyond/.test(n.relS.toLowerCase()));
+      const onIsland = n => ringSet.has(n) || n.terrain === "island" || n.terrain === "coast" || (n.reg && n.reg.isRoot && !OFF_T.has(n.terrain));
+      // Kernradius (Insel bzw. Kern-Cluster) – Ringstadt bestimmt ihn exakt
+      let coreR = null;
+      const rMaxAll = rings.reduce((m, g) => Math.max(m, g.rMax), 0);
+      const coreRadius = () => {
+        if (coreR != null) return coreR;
+        let m = rMaxAll ? rMaxAll + 45 : 0;
+        for (const n of N) if (n.p && n.typ !== "region" && !n.far && (island ? onIsland(n) && !ringSet.has(n) : (!n.reg || n.reg.isRoot)) && !offIsland(n)) m = Math.max(m, Math.hypot(n.p.x, n.p.y) + (n._rad != null ? n._rad : sizeOf(n)) * .6 + (island ? 30 : 0));
+        coreR = Math.max(island ? 120 : 140, m); return coreR;
+      };
+      const SEA = island ? 60 : 40;
+      // Anker: Ringstadt → Mittelpunkt + Stadtmauer als Nullpunkt; Wurzel-Region → Kernmitte (+ Küste bei Richtung); sonst Ortsposition
+      const anchor = (b, k) => {
+        if (!b || !b.p) return { x: 0, y: 0, edge: k === "dir" && island ? coreRadius() : 0 };
+        if (b.ring) { const g = gOf(b.ring.group); return { x: g.cx, y: g.cy, edge: g.rMax }; }
+        if (b.typ === "region" && b.isRoot) return { x: 0, y: 0, edge: k === "dir" && island ? coreRadius() : 0 };
+        return { x: b.p.x, y: b.p.y, edge: 0 };
+      };
+      const usedAng = [];
+      const angFree = (seedName, prefer) => {
+        let best = 0, bs = -1;
+        for (let i = 0; i < 24; i++) {
+          const a = i * 15 + (hshFn(seedName) % 15);
+          let sc = usedAng.length ? Math.min(...usedAng.map(u => Math.abs(((a - u + 540) % 360) - 180))) : 180;
+          if (prefer != null) sc -= Math.abs(((a - prefer + 540) % 360) - 180) * .25;
+          if (sc > bs) { bs = sc; best = a; }
         }
+        return best;
+      };
+      const memCount = R => N.filter(n => n.reg === R && n !== R).length;
+      function placeRegion(R) {
+        if (R.isRoot) { R.p = { x: 0, y: 0 }; R.fixed = true; R.regR = coreRadius(); return; }
+        R.regR = 110 + 30 * Math.sqrt(memCount(R));
+        const b = R.ref && R.ref !== R && R.ref.p ? R.ref : null, A = anchor(b, R.rel.k), num = typeof R.d === "number" ? R.d : null;
+        let a, r;
+        if (R.rel.k === "dir") { a = R.rel.a; r = A.edge + (num != null ? PX(num) : 0) + R.regR * .85; }
+        else if (b && b.typ !== "region") { a = angFree(R.name, Math.atan2(b.p.y, b.p.x) / D); r = A.edge + PX(num ?? .3) + R.regR * .85; }
+        else { a = angFree(R.name); r = 0; }
+        let x = A.x + Math.cos(a * D) * r, y = A.y + Math.sin(a * D) * r;
+        const minR = coreRadius() + SEA + R.regR;
+        const d0 = Math.hypot(x, y);
+        if (d0 < minR) { const aa = d0 > 1 ? Math.atan2(y, x) : a * D; x = Math.cos(aa) * minR; y = Math.sin(aa) * minR; }
+        // andere Regionen nicht überlappen: um den Kern drehen (Richtungsangaben max. ±30°)
+        const others = REGS.filter(o => o !== R && o.p && !o.isRoot);
+        for (let t = 0; t < 24 && others.some(o => Math.hypot(o.p.x - x, o.p.y - y) < o.regR + R.regR + 30); t++) {
+          const rad = Math.hypot(x, y), cur = Math.atan2(y, x) / D, step = (t % 2 ? -1 : 1) * Math.ceil((t + 1) / 2) * 10;
+          const lim = R.rel.k === "dir" ? 30 : 180, na = (R.rel.k === "dir" ? R.rel.a : cur) + Math.max(-lim, Math.min(lim, step));
+          x = Math.cos(na * D) * (rad + (Math.abs(step) >= lim ? 60 : 0)); y = Math.sin(na * D) * (rad + (Math.abs(step) >= lim ? 60 : 0));
+        }
+        R.p = { x, y }; R.fixed = true; R.ang = Math.atan2(y, x) / D; usedAng.push(R.ang);
+        const ov = POS[R.key]; if (ov) { R.p = { x: ov[0], y: ov[1] }; R.man = true; }
+      }
+      function setAt(n, A, a, r) { n.ang = a; n.anc = { x: A.x, y: A.y }; n.off = { x: Math.cos(a * D) * r, y: Math.sin(a * D) * r }; n.p = { x: A.x + n.off.x, y: A.y + n.off.y }; }
+      function place(n, st) {
+        if (n.p) return; st = st || new Set(); if (st.has(n)) return; st.add(n);
+        const b0 = n.ref && n.ref !== n ? n.ref : null;
+        if (b0 && !b0.p) place(b0, st);
+        const b = b0 && b0.p ? b0 : null;
+        opts.reseed && opts.reseed(hshFn(n.name));
+        if (n.typ === "region") { placeRegion(n); return; }
+        if (n.d == null && /(?:^|\s)(?:weit|fern|entfernt|entfernte|far|distant)(?:\s|$)/i.test(n.relS)) n.d = "fern"; // „Weit im Norden“ = Fernziel am Rand
+        const k = n.rel.k, num = typeof n.d === "number" ? n.d : null;
+        n._rad = sizeOf(n); n._ir = Math.max(8, n._rad * (n.typ === "city" || n.typ === "capital" ? .55 : .4));
+        // in einer Satelliten-Region: innerhalb ihres Kreises (Richtung „nördlich in X“ / „Süden der X“ respektiert)
+        if (b && b.typ === "region" && !b.isRoot && (k === "in" || k === "mid" || k === "free" || k === "near" || (k === "dir" && n.rel.inside))) {
+          const R = b.regR || 160;
+          let a, r;
+          if (k === "dir") { a = n.rel.a + rr(-14, 14); r = R * .58; }
+          else if (k === "mid") { a = hshFn(n.name) % 360; r = R * .08; }
+          else { a = hshFn(n.name) % 360; r = R * (.25 + H01(n.name, "r") * .45); }
+          setAt(n, b.p, a, r); n.far = false; n.days = 0; n.fixed = false; n.inReg = b;
+          const ov = POS[n.key]; if (ov) { n.p = { x: ov[0], y: ov[1] }; n.fixed = true; n.man = true; }
+          return;
+        }
+        // in einem Ring: auf dem Ringband
+        if (k === "in" && b && b.ring) {
+          const rm = (b.ring.rInner + b.ring.rOuter) / 2, a = hshFn(n.name) % 360;
+          setAt(n, { x: b.ring.cx, y: b.ring.cy }, a, rm); n.far = false; n.days = num ?? .02; n.fixed = true; n.ringChild = true;
+          n._rad = sizeOf(n); n._ir = Math.max(8, n._rad * .35);
+          return;
+        }
+        const A = anchor(b, k);
+        let a = rr(0, 360), d;
+        if (k === "dir") { a = n.rel.a + rr(-12, 12); d = n.d === "fern" ? null : (num ?? 1); if (n.rel.inside && b && b.typ !== "region") d = 0; }
+        else if (k === "mid" || k === "thr") d = 0;
+        else if (k === "in") d = num ?? .05;
         else if (k === "near") d = num ?? .15;
         else d = n.d === "fern" ? null : (b ? (num ?? 1) : (num ?? 0));
-        n.ang = a; n.far = d === null; n.days = d || 0;
-        const r = n.far ? 0 : PX(d);
-        n.off = { x: Math.cos(a * D) * r, y: Math.sin(a * D) * r };
-        n.fixed = !b && !n.far && r === 0 && !rootTaken; if (n.fixed) rootTaken = true;
-        n.p = { x: bp.x + n.off.x, y: bp.y + n.off.y };
-        n._rad = sizeOf(n); n._ir = Math.max(8, sizeOf(n) * (n.typ === "city" || n.typ === "capital" ? .55 : .4));
+        n.far = d === null; n.days = d || 0;
+        let r = n.far ? 0 : PX(d);
+        if (k === "dir" && n.rel.inside && b && b.typ !== "region") r = Math.max(10, (b._rad != null ? b._rad : sizeOf(b)) * .5);
+        if (!n.far && (k === "dir" || k === "near" || (k === "free" && b))) r += A.edge; // Ringstadt/Insel: ab Mauer bzw. Küste messen
+        setAt(n, A, a, r);
+        n.fixed = false;
         const ov = POS[n.key];
         if (ov) { n.p = { x: ov[0], y: ov[1] }; n.fixed = true; n.far = false; n.man = true; }
       }
+      // 1) Kern (Wurzel-Region + Orte ohne/fremde Region), 2) Satelliten-Regionen, 3) Orte darin
+      if (root) placeRegion(root);
+      N.forEach(n => { if (!n.p && n.typ !== "region" && !ringSet.has(n) && (!n.reg || n.reg.isRoot) && !offIsland(n)) place(n, new Set()); });
+      ringSet.forEach(n => { if (!n.p) n.p = { x: 0, y: 0 }; });
+      coreR = null; coreRadius();
+      N.forEach(n => { if (!n.p && n.typ === "region") place(n, new Set()); });
       N.forEach(n => { if (!n.p) place(n, new Set()); });
-      // Ring-Gruppe an Anker schieben (Zentrum-Header, Region-Mitte, oder erster Bezug)
+      // Ring-Marker: innerster Ring im Zentrum, alle weiteren auf EINEM Strahl (zeigt die Konzentrik), Strahl zur freiesten Seite
       for (const g of rings) {
-        let ax = 0, ay = 0;
-        if (skel.center) {
-          const c = find(skel.center);
-          if (c && c.p && !ringSet.has(c)) { ax = c.p.x; ay = c.p.y; }
-        }
-        g.cx = ax; g.cy = ay;
+        let up = 0, down = 0;
+        for (const n of N) { if (!n.p || ringSet.has(n) || n.ringChild || n.typ === "region") continue; const dy = n.p.y - g.cy; if (Math.hypot(n.p.x - g.cx, dy) < g.rMax + 320) { if (dy < 0) up++; else down++; } }
+        const ray = up <= down ? -90 : 90;
+        g.ray = ray;
         for (const m of g.members) {
-          const ang = m.n.ang * D, rm = (m.n.ring.rInner + m.n.ring.rOuter) / 2;
-          m.n.ring.cx = ax; m.n.ring.cy = ay;
-          m.n.p = { x: ax + Math.cos(ang) * rm, y: ay + Math.sin(ang) * rm };
-          m.n.off = { x: m.n.p.x - ax, y: m.n.p.y - ay };
-          const ov = POS[m.n.key];
-          if (ov) { m.n.p = { x: ov[0], y: ov[1] }; m.n.man = true; }
+          const R = m.n.ring, rm = R.rInner <= 0 ? 0 : (R.rInner + R.rOuter) / 2;
+          m.n.ang = ray; m.n.anc = { x: g.cx, y: g.cy };
+          m.n.off = { x: Math.cos(ray * D) * rm, y: Math.sin(ray * D) * rm };
+          m.n.p = { x: g.cx + m.n.off.x, y: g.cy + m.n.off.y };
         }
-        // Kinder in Ringen neu anbinden
-        N.forEach(n => {
-          if (ringSet.has(n)) return;
-          if (n.rel.k === "in" && n.ref && n.ref.ring && n.ref.ring.group === g.id) {
-            const b = n.ref, rm = (b.ring.rInner + b.ring.rOuter) / 2, a = (hshFn(n.name) % 360) * D;
-            n.p = { x: b.ring.cx + Math.cos(a) * rm, y: b.ring.cy + Math.sin(a) * rm };
-            n.fixed = true;
-          }
-        });
+        // manuell verschobener Ring = ganze Stadt verschieben (Konzentrik bleibt)
+        const mv = g.members.find(m => POS[m.n.key]);
+        if (mv) {
+          const ov = POS[mv.n.key], dx = ov[0] - mv.n.p.x, dy = ov[1] - mv.n.p.y;
+          g.cx += dx; g.cy += dy;
+          for (const m of g.members) { m.n.ring.cx = g.cx; m.n.ring.cy = g.cy; m.n.p.x += dx; m.n.p.y += dy; m.n.anc = { x: g.cx, y: g.cy }; m.n.man = m === mv; }
+          N.forEach(n => { if (n.ringChild && n.ref && n.ref.ring && n.ref.ring.group === g.id) { n.p.x += dx; n.p.y += dy; n.anc = { x: g.cx, y: g.cy }; } });
+        }
       }
       // Größe/Dichte/Details anheften
       N.forEach(n => {
@@ -4172,64 +4255,109 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         if (n._ir == null) n._ir = Math.max(8, n._rad * .4);
         n.size = n._rad; n.density = densityOf(n); n.details = detailFlags(n);
       });
-      // Kollision: Ring-Mitglieder untereinander nicht trennen; Containment-fixed nicht verschieben
+      // Insel: Mittelpunkt = Ringstadt bzw. Kern; Festland-/Satelliten-Orte liegen jenseits von Küste + Meer
+      let isl = null;
+      if (island) {
+        const g0 = rings[0];
+        isl = { cx: g0 ? g0.cx : 0, cy: g0 ? g0.cy : 0, r: coreRadius(), sea: SEA, root: root ? root.name : "" };
+      }
+      const clampOut = n => {
+        if (!isl || !offIsland(n) || n.man) return;
+        if (Math.hypot(n.p.x - isl.cx, n.p.y - isl.cy) < 1) { const a = H01(n.name, "off") * 2 * Math.PI; n.p.x = isl.cx + Math.cos(a); n.p.y = isl.cy + Math.sin(a); } // ohne Richtung: Hash-Winkel statt Inselmitte
+        const dx = n.p.x - isl.cx, dy = n.p.y - isl.cy, d = Math.hypot(dx, dy) || .01, need = isl.r + isl.sea * .5 + Math.min(40, (n._rad || 20) * .5);
+        if (d < need) { n.p.x = isl.cx + dx / d * need; n.p.y = isl.cy + dy / d * need; }
+      };
+      // Kollision: Ringgruppe = eine Scheibe; Ring-Kinder und Satelliten-Regionen bleiben an ihrem Ort
       const ACT = N.filter(n => n.typ !== "region" && n.typ !== "river" && !n.far);
       const radOf = n => n._rad != null ? n._rad : sizeOf(n);
-      const iters = ACT.length > 50 ? 180 : 360;
+      const movable = n => !n.fixed && !ringSet.has(n) && !n.ringChild && !n.man;
+      const SATS = N.filter(r => r.typ === "region" && !r.isRoot && r.p && r.regR);
+      const FIRST = new Map(); ACT.forEach(n => { if (n.ring && !FIRST.has(n.ring.group)) FIRST.set(n.ring.group, n); });
+      const iters = ACT.length > 50 ? 180 : 320;
       for (let it = 0; it < iters; it++) {
         for (const n of ACT) {
-          if (n.fixed || ringSet.has(n)) continue;
-          const b = base(n), bp = b ? b.p : { x: 0, y: 0 };
-          n.p.x += (bp.x + n.off.x - n.p.x) * .1;
-          n.p.y += (bp.y + n.off.y - n.p.y) * .1;
+          if (!movable(n) || !n.anc) continue;
+          n.p.x += (n.anc.x + n.off.x - n.p.x) * .1;
+          n.p.y += (n.anc.y + n.off.y - n.p.y) * .1;
         }
         for (let i = 0; i < ACT.length; i++) for (let j = i + 1; j < ACT.length; j++) {
-          const a = ACT[i], b = ACT[j];
-          // dieselbe Ringgruppe: Abstand = Ringstruktur, nicht auseinanderdrücken
+          let a = ACT[i], b = ACT[j];
           if (a.ring && b.ring && a.ring.group === b.ring.group) continue;
-          // Kind in Ring-Parent: nicht aus dem Ring drücken
-          if (a.fixed && b.fixed) continue;
+          if (!movable(a) && !movable(b)) continue;
+          if (a.ring || b.ring) { // Scheibe der Ringstadt gegen anderen Ort
+            const R = a.ring ? a : b, O = a.ring ? b : a; if (!movable(O)) continue;
+            const g = gOf(R.ring.group); if (FIRST.get(g.id) !== R) continue; // Scheibe nur einmal pro Stadt
+            let dx = O.p.x - g.cx, dy = O.p.y - g.cy; const d = Math.hypot(dx, dy) || .01, need = g.rMax + radOf(O) * .6 + 22;
+            if (d < need) { O.p.x = g.cx + dx / d * need; O.p.y = g.cy + dy / d * need; }
+            continue;
+          }
           let dx = b.p.x - a.p.x, dy = b.p.y - a.p.y;
           if (dx === 0 && dy === 0) { dx = rr(-1, 1); dy = rr(-1, 1); }
           const d = Math.hypot(dx, dy) || .01, need = radOf(a) + radOf(b) + 28;
           if (d < need) {
-            const p = need - d;
-            const sa = a.fixed || ringSet.has(a) ? 0 : (b.fixed || ringSet.has(b) ? 1 : .5);
-            const sb = (a.fixed || ringSet.has(a)) && (b.fixed || ringSet.has(b)) ? 0 : 1 - sa;
+            const p = need - d, sa = movable(a) ? (movable(b) ? .5 : 1) : 0, sb = 1 - sa;
             a.p.x -= dx / d * p * sa; a.p.y -= dy / d * p * sa;
             b.p.x += dx / d * p * sb; b.p.y += dy / d * p * sb;
           }
         }
+        if (isl) ACT.forEach(clampOut);
+        // fremde Satelliten-Regionen freihalten (keine Orte in falscher Region)
+        for (const n of ACT) { if (!movable(n)) continue; for (const R of SATS) { if (n.inReg === R || n.reg === R) continue; const dx = n.p.x - R.p.x, dy = n.p.y - R.p.y, d = Math.hypot(dx, dy) || .01, need = R.regR * .8 + radOf(n) * .4; if (d < need) { n.p.x = R.p.x + dx / d * need; n.p.y = R.p.y + dy / d * need; } } }
       }
+      if (isl) ACT.forEach(clampOut);
+      N.forEach(n => { n.offIsl = offIsland(n); });
+      skel.rings = rings.map(g => ({ id: g.id, rMax: g.rMax, cx: g.cx, cy: g.cy, ray: g.ray, members: g.members.map(m => m.n.key) }));
+      skel.island = isl;
+      skel.root = root ? root.name : "";
+      skel.regions = REGS.filter(r => !r.isRoot).map(r => ({ name: r.name, x: Math.round(r.p.x), y: Math.round(r.p.y), r: Math.round(r.regR || 0) }));
       return { skeleton: skel, rings, ACT };
     }
     // Constraint-Verletzungen für Tests (Präzision)
     function checkConstraints(N, opts) {
       const D = Math.PI / 180, viol = [];
-      const find = opts && opts.find ? opts.find : (s => N.find(n => n.key === norm(s)));
       const PX = opts && opts.PX ? opts.PX : (d => d <= 0 ? 0 : 240 * Math.pow(d, .55));
+      const skel = opts && opts.skeleton || null, isl = skel && skel.island;
+      // Bezugspunkt: Ringstadt = Mittelpunkt (Distanz ab Stadtmauer), Wurzel-Region = Kernmitte (Distanz ab Küste)
+      const refPt = n => {
+        const R = n.ref;
+        if (R.ring) { const rMax = Math.max(...N.filter(m => m.ring && m.ring.group === R.ring.group).map(m => m.ring.rOuter)); return { x: R.ring.cx, y: R.ring.cy, edge: rMax }; }
+        if (R.typ === "region" && R.isRoot) return { x: R.p.x, y: R.p.y, edge: isl ? isl.r : 0 };
+        return { x: R.p.x, y: R.p.y, edge: 0 };
+      };
       // 1) Richtungen
       for (const n of N) {
-        if (!n.p || !n.ref || !n.ref.p || n.rel.k !== "dir" || n.far) continue;
-        const ang = Math.atan2(n.p.y - n.ref.p.y, n.p.x - n.ref.p.x) / D;
+        if (!n.p || !n.ref || !n.ref.p || n.rel.k !== "dir" || n.far || n.man) continue;
+        if (n.ring && n.ref.ring && n.ring.group === n.ref.ring.group) continue;
+        const c = n.rel.inside && n.ref.typ !== "region" ? { x: n.ref.p.x, y: n.ref.p.y } : refPt(n);
+        if (n.rel.inside && n.ref.typ === "region" && !n.ref.isRoot) { c.x = n.ref.p.x; c.y = n.ref.p.y; }
+        const ang = Math.atan2(n.p.y - c.y, n.p.x - c.x) / D;
         let diff = ((ang - n.rel.a + 540) % 360) - 180;
         if (Math.abs(diff) > 35) viol.push({ k: "dir", n: n.name, ref: n.ref.name, want: n.rel.a, got: Math.round(ang), diff: Math.round(diff) });
       }
-      // 2) Distanz (Toleranz ±35 %)
+      // 2) Distanz (Toleranz −35 %/+40 %; ab Stadtmauer/Küste)
       for (const n of N) {
-        if (!n.p || !n.ref || !n.ref.p || typeof n.d !== "number" || n.d <= 0 || n.far) continue;
+        if (!n.p || !n.ref || !n.ref.p || typeof n.d !== "number" || n.d <= 0 || n.far || n.man) continue;
         if (n.ring && n.ref.ring && n.ring.group === n.ref.ring.group) continue;
-        const dist = Math.hypot(n.p.x - n.ref.p.x, n.p.y - n.ref.p.y), want = PX(n.d);
+        if (n.ref.typ === "region" && !n.ref.isRoot) continue;
+        if (n.rel.k === "in" || n.rel.inside) continue;
+        const c = refPt(n), dist = Math.max(0, Math.hypot(n.p.x - c.x, n.p.y - c.y) - c.edge), want = PX(n.d);
         if (want > 20 && (dist < want * .65 || dist > want * 1.4)) viol.push({ k: "dist", n: n.name, ref: n.ref.name, want: Math.round(want), got: Math.round(dist) });
       }
-      // 3) Containment: „in X“ muss nahe am Parent liegen
+      // 3) Containment: „in X“ / Teil von Region muss innerhalb liegen
       for (const n of N) {
-        if (!n.p || !n.ref || !n.ref.p || n.rel.k !== "in") continue;
+        if (!n.p || !n.ref || !n.ref.p) continue;
+        if (n.ref.typ === "region") {
+          if (n.ref.isRoot || !(n.rel.k === "in" || n.rel.inside || n.rel.k === "mid" || n.inReg)) continue;
+          const lim = (n.ref.regR || 160) + 30, d = Math.hypot(n.p.x - n.ref.p.x, n.p.y - n.ref.p.y);
+          if (d > lim) viol.push({ k: "contain", n: n.name, ref: n.ref.name, d: Math.round(d), lim: Math.round(lim) });
+          continue;
+        }
+        if (n.rel.k !== "in") continue;
         const lim = n.ref.ring ? n.ref.ring.rOuter + 20 : (n.ref._rad || sizeOf(n.ref)) + 40;
         const d = Math.hypot(n.p.x - (n.ref.ring ? n.ref.ring.cx : n.ref.p.x), n.p.y - (n.ref.ring ? n.ref.ring.cy : n.ref.p.y));
         if (d > lim) viol.push({ k: "contain", n: n.name, ref: n.ref.name, d: Math.round(d), lim: Math.round(lim) });
       }
-      // 4) Ring-Ordnung: gleicher Mittelpunkt, rOuter steigt mit idx
+      // 4) Ring-Ordnung: gleicher Mittelpunkt, rOuter steigt mit idx, Marker im eigenen Band
       const byG = new Map();
       for (const n of N) if (n.ring) { if (!byG.has(n.ring.group)) byG.set(n.ring.group, []); byG.get(n.ring.group).push(n); }
       for (const [gid, mem] of byG) {
@@ -4241,10 +4369,24 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           if (rm < n.ring.rInner - 5 || rm > n.ring.rOuter + 5) viol.push({ k: "ring-band", n: n.name, rm: Math.round(rm), band: [n.ring.rInner, n.ring.rOuter] });
         }
         for (let i = 1; i < mem.length; i++) {
-          if (!(mem[i].ring.rInner >= mem[i - 1].ring.rOuter - .1)) viol.push({ k: "ring-order", a: mem[i - 1].name, b: mem[i].name });
+          if (mem[i].ring.idx !== mem[i - 1].ring.idx && !(mem[i].ring.rInner >= mem[i - 1].ring.rOuter - .1)) viol.push({ k: "ring-order", a: mem[i - 1].name, b: mem[i].name });
         }
+        // kein fremder Ort innerhalb der Ringstadt (außer Ring-Kindern)
+        const rMax = mem[mem.length - 1].ring.rOuter;
+        for (const n of N) { if (n.ring || n.ringChild || n.typ === "region" || n.typ === "river" || n.far || !n.p) continue; const d = Math.hypot(n.p.x - c0.cx, n.p.y - c0.cy); if (d < rMax + 5) viol.push({ k: "ring-intrude", n: n.name, d: Math.round(d), rMax }); }
       }
-      // 5) Größe/Dichte-Plausibilität
+      // 5) Insel: Inselorte innen, Festland/Satelliten außen (jenseits der Küste)
+      if (isl) for (const n of N) {
+        if (!n.p || n.typ === "region" || n.typ === "river" || n.far || n.man) continue;
+        const d = Math.hypot(n.p.x - isl.cx, n.p.y - isl.cy);
+        if (n.ring && d > isl.r) viol.push({ k: "island-in", n: n.name, d: Math.round(d), r: Math.round(isl.r) });
+        const off = /mainland|swamp|forest|mountains|desert|field|valley/.test(n.terrain || "") || (n.reg && !n.reg.isRoot);
+        if (off && d < isl.r) viol.push({ k: "island-out", n: n.name, d: Math.round(d), r: Math.round(isl.r) });
+      }
+      // 6) Regionen dürfen sich nicht überlappen (Beschriftungen/Orte nicht übereinander)
+      const RG = N.filter(n => n.typ === "region" && !n.isRoot && n.p && n.regR);
+      for (let i = 0; i < RG.length; i++) for (let j = i + 1; j < RG.length; j++) { const d = Math.hypot(RG[i].p.x - RG[j].p.x, RG[i].p.y - RG[j].p.y); if (d < (RG[i].regR + RG[j].regR) * .85) viol.push({ k: "region-overlap", a: RG[i].name, b: RG[j].name, d: Math.round(d) }); }
+      // 7) Größe/Dichte-Plausibilität
       for (const n of N) {
         if (n.typ === "village" && n.size > 45) viol.push({ k: "size", n: n.name, typ: n.typ, size: n.size });
         if ((n.typ === "forest" || n.typ === "mountains" || n.typ === "river") && n.density !== 0) viol.push({ k: "density", n: n.name, density: n.density });
@@ -4266,7 +4408,13 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       ["northern", -90], ["southern", 90], ["eastern", 0], ["western", 180], ["north", -90], ["south", 90], ["east", 0], ["west", 180]];
     function parseRel(s) {
       const l = String(s || "").toLowerCase().trim(), w = l.split(/[\s,.;]+/); let m;
-      for (const [d, a] of DIR) if (w.includes(d)) { m = l.match(/\b(?:von|vom|of|from)\s+(?:the\s+|dem\s+|der\s+)?(.+)$/); return { k: "dir", a, ref: m ? m[1] : null }; }
+      for (const [d, a] of DIR) if (w.includes(d)) {
+        if ((m = l.match(/\b(?:von|vom|of|from)\s+(?:the\s+|dem\s+|der\s+)?(.+)$/))) return { k: "dir", a, ref: m[1] };
+        // „nördlich in X“ / „im Süden der X“ / „Osten des Y“ = Teil von X, in dieser Himmelsrichtung
+        if ((m = l.match(/(?:^|\s)(?:in|im|innerhalb|inside|within)\s+(?:the\s+|der\s+|dem\s+|den\s+|des\s+)?(.+)$/)) && !DIR.some(([dd]) => m[1].trim() === dd)) return { k: "dir", a, ref: m[1], inside: true };
+        if ((m = l.match(new RegExp("(?:^|\\s)" + esc(d) + "\\s+(?:der|des|the|part\\s+of)\\s+(.+)$")))) return { k: "dir", a, ref: m[1], inside: true };
+        return { k: "dir", a, ref: null };
+      }
       if ((m = l.match(/^(?:im\s+|in\s+the\s+)?(?:zentrum|mitte|herz|center|centre|middle|heart)\s+(?:von|vom|des|der|of)\s+(?:the\s+)?(.+)/))) return { k: "mid", ref: m[1] };
       if ((m = l.match(/^(?:durch|through|across)\s+(?:the\s+)?(.+)/))) return { k: "thr", ref: m[1] };
       // Ringe / Umschließung: „um X“, „umgibt X“, „around X“, „am Fuß von X“
@@ -4277,9 +4425,13 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       if ((m = l.match(/^(?:in\s+der\s+nähe|in\s+der\s+umgebung|unweit|in\s+the\s+vicinity)\s+(?:von\s+|vom\s+|des\s+|der\s+|of\s+)?(?:the\s+|dem\s+|der\s+)?(.+)/))) return { k: "near", ref: m[1] };
       if ((m = l.match(/^(?:im|in)\s+(?:orbit|umlauf)\s+(?:von|vom|um|of|around)\s+(?:the\s+|dem\s+|der\s+|den\s+)?(.+)/) || l.match(/^(?:orbiting|umkreist)\s+(?:the\s+|den\s+)?(.+)/))) return { k: "near", ref: m[1] };
       if ((m = l.match(/^(?:in|im|inside|within|innerhalb)\s+(?:the\s+|von\s+|der\s+|dem\s+|des\s+|der\s+)?(.+)/))) return { k: "in", ref: m[1] };
+      if ((m = l.match(/^(?:via|über\s+die|über\s+den|über\s+das)\s+(?:the\s+)?(.+)/))) return { k: "near", ref: m[1] };
+      if ((m = l.match(/^(?:weit\s+|fern\s+)?(?:entfernt|weit|fern|far|distant)\s+(?:von|vom|from|of)\s+(?:the\s+|dem\s+|der\s+)?(.+)/))) return { k: "near", ref: m[1] }; // „entfernt von X“: Bezug X, Ferne über die Lage
       if ((m = l.match(/^(?:am|an\s+der|an\s+den|an\s+dem|an|bei|beim|nahe\s+bei|nahe|neben|vor|hinter|unter|über|near|next\s+to|close\s+to|beside|by|at|on|behind|below|above|outside|außerhalb)\s+(?:the\s+|dem\s+|der\s+|den\s+|des\s+)?(.+)/))) return { k: "near", ref: m[1] };
       // „Lichtung in Dunkelhain“ / „clearing in X“
       if ((m = l.match(/^(?:lichtung|clearing|camp\s+in|lager\s+in)\s+(?:in\s+|im\s+)?(?:the\s+|dem\s+|der\s+)?(.+)/))) return { k: "in", ref: m[1] };
+      // „Bezirk in den Mittleren Ringen“ / „Tor im Wallgürtel“ / „district in X“
+      if ((m = l.match(/(?:^|\s)(?:in|im|innerhalb|inside|within)\s+(?:the\s+|der\s+|dem\s+|den\s+|des\s+)?([^,;]+)$/))) return { k: "in", ref: m[1] };
       return { k: "free", ref: null };
     }
     const NUMW = [["halb", .5], ["halber", .5], ["halben", .5], ["half", .5], ["zwei", 2], ["two", 2], ["drei", 3], ["three", 3], ["vier", 4], ["four", 4], ["fünf", 5], ["five", 5], ["mehrere", 4], ["several", 4], ["einige", 3], ["few", 3], ["ein", 1], ["eine", 1], ["einen", 1], ["einem", 1], ["one", 1], ["a", 1], ["an", 1]];
@@ -4311,6 +4463,11 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         if (!n.key || n.key.length < 3) continue;
         if (hasWord(k, n.key) || hasWord(n.key, k)) { const l = Math.min(n.key.length, k.length); if (l > bl) { bl = l; best = n; } }
       }
+      if (best) return best;
+      // deutsche Beugung tolerieren: „Mittleren Ringen“ = „Mittlere Ringe“, „des Wallgürtels“ = „Wallgürtel“
+      const stem = x => x.split(" ").map(w => w.length > 4 ? w.replace(/(?:en|es|em|er|n|s|e)$/, "") : w).join(" ");
+      const ks = stem(k);
+      for (const n of N) { if (!n.key || n.key.length < 4) continue; const ns = stem(n.key); if (ns === ks || (ns.length >= 5 && hasWord(ks, ns))) { const l = ns.length; if (l > bl) { bl = l; best = n; } } }
       return best;
     }
     // Maßstab: 1 Tagesmarsch zu Fuß ≈ 25 km; die Weltkarte staucht große Entfernungen (PX ~ Tage^0.55)
@@ -4365,6 +4522,9 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       N.filter(n => n.typ === "river").forEach(n => { const b = base(n); n.p = b ? { ...b.p } : { x: 0, y: 0 }; });
       let mnx = 1e9, mny = 1e9, mxx = -1e9, mxy = -1e9;
       for (const n of ACT) { const r = radOf(n); mnx = Math.min(mnx, n.p.x - r); mxx = Math.max(mxx, n.p.x + r); mny = Math.min(mny, n.p.y - r); mxy = Math.max(mxy, n.p.y + r); }
+      if (skeleton.island) { const I = skeleton.island, rr0 = I.r * 1.15 + I.sea; mnx = Math.min(mnx, I.cx - rr0); mxx = Math.max(mxx, I.cx + rr0); mny = Math.min(mny, I.cy - rr0); mxy = Math.max(mxy, I.cy + rr0); }
+      for (const g of (skeleton.rings || [])) { mnx = Math.min(mnx, g.cx - g.rMax); mxx = Math.max(mxx, g.cx + g.rMax); mny = Math.min(mny, g.cy - g.rMax); mxy = Math.max(mxy, g.cy + g.rMax); }
+      for (const r of N) if (r.typ === "region" && !r.isRoot && r.p && r.regR) { const q = r.regR * .8; mnx = Math.min(mnx, r.p.x - q); mxx = Math.max(mxx, r.p.x + q); mny = Math.min(mny, r.p.y - q); mxy = Math.max(mxy, r.p.y + q); }
       if (!ACT.length) { mnx = -200; mny = -200; mxx = 200; mxy = 200; }
       const X0 = mnx - 300, Y0 = mny - 260, W = mxx - mnx + 600, H = mxy - mny + 560, CX = X0 + W / 2, CY = Y0 + H / 2, RX = W / 2 - 40, RY = H / 2 - 40;
       const ph = [rr(0, 6), rr(0, 6), rr(0, 6)];
@@ -4384,11 +4544,33 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       el(ft, "feComposite", { in2: "SourceGraphic", operator: "in" });
       el(el(defs, "filter", { id: "wkbl" }), "feGaussianBlur", { stdDeviation: "18" });
       el(el(defs, "pattern", { id: "wkhz", width: "9", height: "9", patternUnits: "userSpaceOnUse", patternTransform: "rotate(35)" }), "path", { d: "M0 0V9", stroke: "#3a2e1e", "stroke-width": "1.2", opacity: ".55" });
-      const L = {}; ["bg", "field", "hill", "river", "forest", "road", "icon", "fog", "trail", "lbl", "mk", "me", "pin"].forEach(k => L[k] = el(svg, "g"));
+      const L = {}; ["bg", "field", "hill", "river", "forest", "road", "icon", "fog", "sk", "trail", "lbl", "mk", "me", "pin"].forEach(k => L[k] = el(svg, "g"));
       const MX = X0 - 900, MY = Y0 - 900, MW = W + 1800, MH = H + 1800;
+      // Insel-Umriss (deterministisch aus Welt-Seed) und Festland-Kreise
+      const ISL = skeleton.island ? { ...skeleton.island } : null, MAIN = [];
+      if (ISL) {
+        seed = WS ^ 3131; const q = [rr(0, 6), rr(0, 6), rr(0, 6)], P = [];
+        for (let i = 0; i < 96; i++) { const t = i / 96 * Math.PI * 2, k = 1 + .055 * Math.sin(3 * t + q[0]) + .035 * Math.sin(5 * t + q[1]) + .02 * Math.sin(11 * t + q[2]); P.push([ISL.cx + Math.cos(t) * ISL.r * k, ISL.cy + Math.sin(t) * ISL.r * k]); }
+        ISL.poly = P; skeleton.island.poly = P.map(p => [Math.round(p[0]), Math.round(p[1])]);
+        const lim = (x, y, r) => Math.max(0, Math.min(r, Math.hypot(x - ISL.cx, y - ISL.cy) - ISL.r * 1.12 - 22));
+        for (const r of N) if (r.typ === "region" && !r.isRoot && r.p && r.regR) { const rad = lim(r.p.x, r.p.y, r.regR + 60); if (rad > 20) MAIN.push([r.p.x, r.p.y, rad]); }
+        for (const n of ACT) if (n.offIsl && !n.inReg) { const rad = lim(n.p.x, n.p.y, radOf(n) + 80); if (rad > 14) MAIN.push([n.p.x, n.p.y, rad]); }
+        seed = hsh(srcKey);
+      }
       if (DRAW) {
       el(L.bg, "rect", { x: MX, y: MY, width: MW, height: MH, fill: "#1c1711" });
       el(L.bg, "rect", { x: X0, y: Y0, width: W, height: H, fill: "url(#wkpg)" });
+      if (ISL) { // Insel: Meer/Miasma ringsum, Küste, Festland nur um Festland-Orte und Satelliten-Regionen
+        el(L.bg, "rect", { x: MX, y: MY, width: MW, height: MH, fill: "#17211f" });
+        for (let i = 0; i < 5; i++) { seed = WS ^ (900 + i); el(L.bg, "ellipse", { cx: f1(rr(X0, X0 + W)), cy: f1(rr(Y0, Y0 + H)), rx: f1(rr(160, 360)), ry: f1(rr(90, 200)), fill: "#2a3a33", opacity: .35, filter: "url(#wkbl)" }); }
+        const isD = "M" + ISL.poly.map(q => f1(q[0]) + " " + f1(q[1])).join("L") + "Z";
+        MAIN.forEach(c => el(L.bg, "circle", { cx: f1(c[0]), cy: f1(c[1]), r: f1(c[2] + 16), fill: "#2c4540", opacity: .55 }));
+        el(L.bg, "path", { d: isD, fill: "#2c4540", stroke: "#2c4540", "stroke-width": 30, opacity: .55 });
+        MAIN.forEach(c => el(L.bg, "circle", { cx: f1(c[0]), cy: f1(c[1]), r: f1(c[2]), fill: "#0e1412" }));
+        MAIN.forEach(c => el(L.bg, "circle", { cx: f1(c[0]), cy: f1(c[1]), r: f1(c[2] - 3), fill: "#221b13" }));
+        el(L.bg, "path", { d: isD, fill: "#241d14", stroke: "#0e1412", "stroke-width": 3.5 });
+        el(L.bg, "path", { d: isD, fill: "none", stroke: "#b9a47a", "stroke-width": 1.2, opacity: .45, "stroke-dasharray": "3 5" });
+      }
       el(L.bg, "rect", { x: MX, y: MY, width: MW, height: MH, fill: "#fff", filter: "url(#wktx)", opacity: .9 });
       }
       seed = WS; for (let i = 0; i < 9; i++) { const at = { cx: f1(rr(X0, X0 + W)), cy: f1(rr(Y0, Y0 + H)), rx: f1(rr(120, 300)), ry: f1(rr(80, 200)), fill: pick(["#3a2f1d", "#2b3320", "#33291a"]), opacity: .35, filter: "url(#wkbl)" }; if (DRAW) el(L.bg, "ellipse", at); }
@@ -4428,9 +4610,11 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         for (const p of R) { if (!freeN(p[0], p[1], 22) || !inArea(p[0], p[1])) continue; const d = Math.hypot(p[0] - c.x, p[1] - c.y); if (d < bd && d > (b ? radOf(b) : 28) + 30) { bd = d; best = p; } }
         n.p = best ? { x: best[0], y: best[1] } : { x: sx, y: sy }; n.riv = R;
       }
-      for (let i = 0; i < 2; i++) {
+      // Deko-Flüsse nur ohne Insel/Meer-Topologie und nie durch eine Ringstadt (nichts erfinden, was der Struktur widerspricht)
+      const inRingCity = (x, y) => (skeleton.rings || []).some(g => Math.hypot(x - g.cx, y - g.cy) < g.rMax + 14);
+      for (let i = 0; i < (skeleton.island ? 0 : 2); i++) {
         const s = rnd() * 4 | 0, x = s === 0 ? X0 : s === 1 ? X0 + W : rr(X0, X0 + W), y = s === 2 ? Y0 : s === 3 ? Y0 + H : rr(Y0, Y0 + H), a = Math.atan2(CY - y, CX - x) / D + rr(-35, 35);
-        const P = walk(x, y, a, 60, null, (x, y) => RIV.some(R => R.some(p => Math.hypot(p[0] - x, p[1] - y) < 14))); if (P.length > 6) drawRiver(P, 3);
+        const P = walk(x, y, a, 60, null, (x, y) => inRingCity(x, y) || RIV.some(R => R.some(p => Math.hypot(p[0] - x, p[1] - y) < 14))); if (P.length > 6) drawRiver(P, 3);
       }
       for (const n of N.filter(n => n.ref && n.ref.typ === "river" && n.ref.riv && !n.man)) {
         let best = null, bd = 1e9;
@@ -4448,7 +4632,8 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         if (n.typ === "region" || n.typ === "river") continue;
         let b = base(n); if (b && b.typ === "river") b = base(b); if (!b) b = n.far ? ROOT : null; if (!b || b === n) continue;
         if (n.rel.k === "in") { addE(b, n, [[b.p.x, b.p.y], [n.p.x, n.p.y]], n.days, "in"); continue; }
-        const main = BIG.has(n.typ) && BIG.has(b.typ) || n.far, P = curve(b.p, n.p, rr(-.14, .14)), e0 = addE(b, n, P, n.days || .1, main ? "main" : "path"); e0.far = n.far; e0.unk = n.unk; const d = smooth(P);
+        const bpt = b.ring ? (() => { const g = (skeleton.rings || []).find(q => q.id === b.ring.group), R = g ? g.rMax : b.ring.rOuter, a = Math.atan2(n.p.y - b.ring.cy, n.p.x - b.ring.cx); return { x: b.ring.cx + Math.cos(a) * R, y: b.ring.cy + Math.sin(a) * R }; })() : b.p; // Ringstadt: Weg beginnt am Stadttor (Außenmauer)
+        const main = BIG.has(n.typ) && BIG.has(b.typ) || n.far, P = curve(bpt, n.p, rr(-.14, .14)), e0 = addE(b, n, P, n.days || .1, main ? "main" : "path"); e0.far = n.far; e0.unk = n.unk; const d = smooth(P);
         if (!DRAW) { /* Wege zeichnet der Stil (SKIN.world) */ }
         else if (main) { el(L.road, "path", { d, fill: "none", stroke: "#1a130c", "stroke-width": 7.5, "stroke-linecap": "round", opacity: .9 }); el(L.road, "path", { d, fill: "none", stroke: "#a88a5c", "stroke-width": 2.6, "stroke-linecap": "round", "stroke-dasharray": n.far ? "10 7" : null }); }
         else { el(L.road, "path", { d, fill: "none", stroke: "#120d09", "stroke-width": 4, opacity: .55 }); el(L.road, "path", { d, fill: "none", stroke: "#8f7650", "stroke-width": 1.7, "stroke-dasharray": n.unk ? "2 5" : "5 4" }); }
@@ -4466,25 +4651,27 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       if (!DRAW) { for (const n of N) if (n.typ === "mountains") { const b = base(n), bp = b ? b.p : { x: 0, y: 0 }, ax = (Math.atan2(n.p.y - bp.y, n.p.x - bp.x) / D) + 90; n.axis = [Math.cos(ax * D), Math.sin(ax * D)]; }
         SKIN.world({ STY, SK, L, defs, el, f1, rr, rnd, pick, reseed: v => { seed = v; }, N, ACT, EDG, RIV, RAD, IR, X0, Y0, W, H, MX, MY, MW, MH, CX, CY, WS, base, smooth, freeN, near, OB, inArea, opts, D, skeleton, radOf, irOf }); }
       else {
+      // Konzentrische Ringe: außen → innen als Ringbänder (kein Überdecken), Dichte steuert Bebauung im Band
+      for (const n of ACT.filter(n => n.ring).sort((a, b) => b.ring.idx - a.ring.idx)) {
+        const g = el(L.icon, "g"), R = n.ring, cx = R.cx, cy = R.cy, dens = n.density != null ? n.density : STRUCT.densityOf(n), det = n.details || STRUCT.detailFlags(n);
+        const circ = r => `M${f1(cx - r)} ${f1(cy)}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z`;
+        el(g, "path", { d: circ(R.rOuter) + (R.rInner > 0 ? circ(R.rInner) : ""), "fill-rule": "evenodd", fill: dens > .8 ? "#1d150e" : dens < .3 ? "#2e2418" : "#261d14", stroke: "#0d0a07", "stroke-width": 2 });
+        // Bebauung ∝ Fläche × Dichte: Schlacke gedrängt (viele kleine Hütten), Zitadelle wenige große Bauten
+        const area = Math.PI * (R.rOuter * R.rOuter - R.rInner * R.rInner), cnt = Math.max(3, Math.min(700, Math.round(area * dens / (dens > .8 ? 42 : dens < .3 ? 130 : 95))));
+        for (let i = 0; i < cnt; i++) {
+          const a = rr(0, 6.28), rm = R.rInner + 3 + Math.sqrt(rnd()) * Math.max(1, R.rOuter - R.rInner - 6);
+          const bx = cx + Math.cos(a) * rm, by = cy + Math.sin(a) * rm;
+          const w = dens > .8 ? rr(3, 5.5) : dens < .3 ? rr(8, 13) : rr(4.5, 8), h = dens > .8 ? rr(2.5, 4.5) : dens < .3 ? rr(6, 10) : rr(4, 6.5);
+          el(g, "rect", { x: f1(bx - w / 2), y: f1(by - h / 2), width: f1(w), height: f1(h), fill: dens < .3 ? "#7a5a34" : dens > .8 ? "#4a3220" : "#5a3d24", stroke: "#0e0a07", "stroke-width": .7, transform: `rotate(${f1(a / D + 90)} ${f1(bx)} ${f1(by)})` });
+        }
+        el(g, "circle", { cx: f1(cx), cy: f1(cy), r: R.rOuter, fill: "none", stroke: det.grand ? "#c79a55" : "#8a6a3a", "stroke-width": det.wall ? 3.5 : 2 });
+        if (det.wall) for (let i = 0; i < 8; i++) { const a = (i * 45 + 22.5) * D; el(g, "rect", { x: f1(cx + Math.cos(a) * R.rOuter - 3), y: f1(cy + Math.sin(a) * R.rOuter - 3), width: 6, height: 6, fill: "#3a2d1f", stroke: "#c79a55", "stroke-width": 1 }); }
+        if (R.idx === 0) { el(g, "circle", { cx: f1(cx), cy: f1(cy), r: 7, fill: "#3a2d1f", stroke: "#e0b56a", "stroke-width": 1.6 }); }
+      }
       for (const n of [...ACT, ...N.filter(n => n.far)]) {
         const g = el(L.icon, "g"), { x, y } = n.p;
         if (n.unk && ICON_TYPES.has(n.typ) && n.typ !== "city" && n.typ !== "capital") { if (n.typ === "camp") { for (const k of [-12, 8]) el(g, "path", { d: `M${f1(x + k - 8)} ${f1(y - 12)}l8-14l8 14Z`, fill: "#4a3a26", stroke: "#0e0a07" }); el(g, "circle", { cx: f1(x + 2), cy: f1(y - 6), r: 3, fill: "#ff9a4c" }); } else house(g, x, y - 13, 1.6, false); continue; }
-        if (n.ring) {
-          // Konzentrische Ringe: gemeinsames Zentrum, Bandbreite aus STRUCT; Dichte steuert Bebauung im Ringband
-          const R = n.ring, dens = n.density != null ? n.density : STRUCT.densityOf(n), det = n.details || STRUCT.detailFlags(n);
-          const cx = R.cx, cy = R.cy;
-          el(g, "circle", { cx: f1(cx), cy: f1(cy), r: R.rOuter, fill: dens > .8 ? "#1a140f" : "#241c14", stroke: "#0d0a07", "stroke-width": 2, opacity: .55 });
-          el(g, "circle", { cx: f1(cx), cy: f1(cy), r: R.rInner, fill: "#1c1711", opacity: .35 });
-          el(g, "circle", { cx: f1(cx), cy: f1(cy), r: R.rOuter, fill: "none", stroke: det.grand ? "#c79a55" : "#8a6a3a", "stroke-width": det.wall ? 3.5 : 2 });
-          if (R.rInner > 4) el(g, "circle", { cx: f1(cx), cy: f1(cy), r: R.rInner, fill: "none", stroke: "#6a5535", "stroke-width": 1.5, opacity: .7 });
-          const band = Math.max(6, R.rOuter - R.rInner - 4), cnt = Math.max(2, Math.round((R.rInner + R.rOuter) * Math.PI / 18 * dens));
-          for (let i = 0; i < cnt; i++) {
-            const a = rr(0, 6.28), rm = rr(R.rInner + 3, Math.max(R.rInner + 4, R.rOuter - 4));
-            const bx = cx + Math.cos(a) * rm, by = cy + Math.sin(a) * rm;
-            const w = dens > .8 ? rr(3, 6) : dens < .3 ? rr(7, 12) : rr(4, 8), h = dens > .8 ? rr(3, 5) : dens < .3 ? rr(6, 10) : rr(4, 7);
-            el(g, "rect", { x: f1(bx - w / 2), y: f1(by - h / 2), width: f1(w), height: f1(h), fill: dens < .3 ? "#6a4a2a" : "#5a3d24", stroke: "#0e0a07", "stroke-width": .7 });
-          }
-          if (det.wall) for (let i = 0; i < 8; i++) { const a = i * 45 * D; el(g, "rect", { x: f1(cx + Math.cos(a) * R.rOuter - 3), y: f1(cy + Math.sin(a) * R.rOuter - 3), width: 6, height: 6, fill: "#3a2d1f", stroke: "#c79a55", "stroke-width": 1 }); }
+        if (n.ring) { /* oben als Ringbänder gezeichnet */
         } else if (n.typ === "village") {
           const R = n.rumor ? 18 : irOf(n), dens = n.density != null ? n.density : .38, det = n.details || {};
           if (det.fields !== false) fields(n, R + 10, R + 90, Math.round(18 + dens * 20));
@@ -4571,6 +4758,12 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       for (let i = 0; i < 3; i++) { const vert = i % 2 === 0, k = rr(.3, .7); el(fg, "path", { d: vert ? `M${f1(MX + MW * k)} ${MY}V${MY + MH}` : `M${MX} ${f1(MY + MH * k)}H${MX + MW}`, stroke: "#6b5434", "stroke-width": 2, opacity: .35 }); }
       el(L.fog, "rect", { x: MX, y: MY, width: MW, height: MH, fill: "#1b130b", opacity: .7, mask: "url(#wkfogrim)", "pointer-events": "none" });
       }
+      // Bekannte Struktur über dem Nebel: nur Umrisse (Küste, Ringmauern) – kein Gelände, keine Bebauung
+      if (FOG_ON) {
+        const SKC = DRAW ? "#e2c48e" : (SK && SK.reg) || "#cfd8e0";
+        if (ISL) el(L.sk, "path", { d: "M" + ISL.poly.map(q => f1(q[0]) + " " + f1(q[1])).join("L") + "Z", fill: "none", stroke: SKC, "stroke-width": 2.2, opacity: .5, "stroke-dasharray": "9 6", "pointer-events": "none" });
+        for (const n of ACT) if (n.ring) el(L.sk, "circle", { cx: f1(n.ring.cx), cy: f1(n.ring.cy), r: n.ring.rOuter, fill: "none", stroke: SKC, "stroke-width": n.vis ? 2.4 : 1.6, opacity: n.vis ? .7 : .5, "stroke-dasharray": n.vis ? null : "5 5", "pointer-events": "none" });
+      }
       seed = hsh(srcKey) ^ 77;
 
       // Beschriftung & Marker
@@ -4581,7 +4774,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         const txt = n.rumor ? (Math.cos(n.ang * D) < 0 ? "← " : "") + n.name + (Math.cos(n.ang * D) >= 0 ? " →" : "") : n.unk ? n.name + " ?" : n.name;
         const w = txt.length * fs * (n.typ === "mountains" ? .95 : .66), h = fs, ir = irOf(n), { x, y } = n.p;
         const C = n.far ? (y > CY ? [[x, y - ir - 24, "middle"], [x, y + ir + fs + 4, "middle"]] : [[x, y + ir + fs + 4, "middle"], [x, y - ir - 24, "middle"]])
-          : n.typ === "mountains" ? [[x, y - 78, "middle"], [x, y + 60, "middle"]] : [[x, y + ir + fs + 4, "middle"], [x, y - ir - 10, "middle"], [x + ir + 10, y + fs * .35, "start"], [x - ir - 10, y + fs * .35, "end"]];
+          : n.typ === "mountains" ? [[x, y - 78, "middle"], [x, y + 60, "middle"]] : n.ring ? [[x + 18, y + fs * .35, "start"], [x - 18, y + fs * .35, "end"], [x, y + 18 + fs, "middle"], [x, y - 22, "middle"]] : [[x, y + ir + fs + 4, "middle"], [x, y - ir - 10, "middle"], [x + ir + 10, y + fs * .35, "start"], [x - ir - 10, y + fs * .35, "end"]];
         const rect = c => ({ x: c[2] === "middle" ? c[0] - w / 2 : c[2] === "start" ? c[0] : c[0] - w, y: c[1] - h, w, h: h + 4 });
         let ch = C[0]; for (const c of C) if (!hit(rect(c))) { ch = c; break; }
         LB.push(rect(ch));
@@ -4596,17 +4789,20 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
         MK[n.id] = g;
       }
       const LBL = [...ACT, ...N.filter(n => n.far || n.typ === "river")];
-      for (const n of LBL) { const r = irOf(n); if (n.typ !== "mountains") LB.push({ x: n.p.x - r, y: n.p.y - r, w: 2 * r, h: 2 * r }); }
+      for (const n of LBL) { const r = n.ring ? 16 : irOf(n); if (n.typ !== "mountains") LB.push({ x: n.p.x - r, y: n.p.y - r, w: 2 * r, h: 2 * r }); }
       [...ACT].sort((a, b) => radOf(b) - radOf(a)).concat(N.filter(n => n.far || n.typ === "river")).forEach(n => { label(n); marker(n); });
       const REGS = N.filter(n => n.typ === "region");
       REGS.forEach((rg, ri) => {
         const mem = opts.regionMembers && opts.regionMembers[rg.key] ? opts.regionMembers[rg.key].map(find).filter(n => n && n.typ !== "region" && !n.rumor) : [];
-        if (!mem.length && REGS.length > 1) return;
-        const pts = mem.length ? mem : ACT; let ox = CX, oy = CY, sx = RX * .6, sy = RY * .6;
-        if (mem.length) { ox = mem.reduce((a, n) => a + n.p.x, 0) / mem.length; oy = mem.reduce((a, n) => a + n.p.y, 0) / mem.length; sx = sy = 260; }
+        const sat = !rg.isRoot && rg.p && rg.regR;
+        if (!mem.length && REGS.length > 1 && !sat) return;
+        const pts = mem.length ? mem : sat ? [] : ACT; let ox = CX, oy = CY, sx = RX * .6, sy = RY * .6;
+        if (sat) { ox = rg.p.x; oy = rg.p.y; sx = sy = rg.regR * .55; }
+        else if (mem.length) { ox = mem.reduce((a, n) => a + n.p.x, 0) / mem.length; oy = mem.reduce((a, n) => a + n.p.y, 0) / mem.length; sx = sy = 260; }
+        const fs = Math.round(Math.max(24, Math.min(44, sat ? rg.regR * 2.4 / (rg.name.length * .8) : 44)));
         seed = hsh(rg.key) ^ WS; let best = null, bs = -1e9;
-        for (let i = 0; i < 300; i++) { const x = rr(ox - sx, ox + sx), y = rr(oy - sy, oy + sy), fs = 44, w = rg.name.length * fs * .8, r = { x: x - w / 2, y: y - 30, w, h: 36 }; if (hit(r)) continue; let sc = pts.length ? Math.min(...pts.map(n => Math.hypot(n.p.x - x, n.p.y - y) - radOf(n))) : 0; sc = Math.min(sc, 160) - Math.hypot(x - ox, y - oy) * .25; if (sc > bs) { bs = sc; best = [x, y, r]; } }
-        if (best) { LB.push(best[2]); el(L.lbl, "text", { x: f1(best[0]), y: f1(best[1]), "text-anchor": "middle", class: "reg", "font-size": 44, fill: DRAW ? "#cfa86a" : SK.reg, opacity: .42 }, rg.name.toUpperCase()); }
+        for (let i = 0; i < 300; i++) { let x = rr(ox - sx, ox + sx); const y = rr(oy - sy, oy + sy), w = rg.name.length * fs * .8; if (w < W - 40) x = Math.max(X0 + w / 2 + 20, Math.min(X0 + W - w / 2 - 20, x)); const r = { x: x - w / 2, y: y - fs * .7, w, h: fs * .85 }; if (hit(r)) continue; let sc = pts.length ? Math.min(...pts.map(n => Math.hypot(n.p.x - x, n.p.y - y) - radOf(n))) : 0; sc = Math.min(sc, 160) - Math.hypot(x - ox, y - oy) * .25; if (sc > bs) { bs = sc; best = [x, y, r]; } }
+        if (best) { LB.push(best[2]); el(L.lbl, "text", { x: f1(best[0]), y: f1(best[1]), "text-anchor": "middle", class: "reg", "font-size": fs, fill: DRAW ? "#cfa86a" : SK.reg, opacity: .42 }, rg.name.toUpperCase()); }
       });
       // Skelett nie als Ganzes zeichnen – nur über Nebel-Löcher sichtbar (Küsten-/Ringhinweise liegen in Geländeschichten)
       if (FOG_ON) { // „Unerkundet“ dort, wo der Nebel am dichtesten ist
@@ -4672,7 +4868,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       }
       // Linearer Maßstab (Nadeln + Maßstabsleiste): 2 Tagesmärsche ≈ PXD(2) Einheiten
       const toKm = DRAW ? (u => u * KMU) : (u => u * KMU * KMDs / KM_DAY), unitsForKm = DRAW ? (km => km / KMU) : (km => km / (KMU * KMDs / KM_DAY));
-      return { N, ACT, MK, X0, Y0, W, H, core, PX, cur: cur && cur.typ !== "region" ? cur : null, lastSeg, SEG, drawTrail, setMe, find, region: REG ? REG.name : "", byId: id => N.find(n => n.id === id), routePts, travel, toKm, unitsForKm, pinG: L.pin, meG: me, RIV, EDG, REV, skeleton, violations: STRUCT.checkConstraints(N, { find, PX }), world: true,
+      return { N, ACT, MK, X0, Y0, W, H, core, PX, cur: cur && cur.typ !== "region" ? cur : null, lastSeg, SEG, drawTrail, setMe, find, region: REG ? REG.name : "", byId: id => N.find(n => n.id === id), routePts, travel, toKm, unitsForKm, pinG: L.pin, meG: me, RIV, EDG, REV, skeleton, violations: STRUCT.checkConstraints(N, { find, PX, skeleton }), world: true,
         riverAt: (x, y, r) => { let best = null, bd = r; for (const P of RIV) for (let i = 1; i < P.length; i++) { const d = Math.hypot(P[i][0] - x, P[i][1] - y); if (d < bd) { bd = d; best = Math.atan2(P[i][1] - P[i - 1][1], P[i][0] - P[i - 1][0]) / D; } } return best; },
         dirs: n => (G.get(n) || []).map(({ to }) => ({ a: Math.atan2(to.p.y - n.p.y, to.p.x - n.p.x) / D, to: to.name, typ: to.typ })) };
     }
@@ -5074,7 +5270,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       if (!R.some(r => e.clientX >= r.left - 6 && e.clientX <= r.right + 6 && e.clientY >= r.top - 6 && e.clientY <= r.bottom + 6)) return tgt;
       const st = V.stage, ctr = k => { const r = k.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2, Math.min(r.width, r.height) / 2]; };
       // ein anderer Ort, dessen sichtbares Symbol direkt getroffen wurde, behält Vorrang (das Schild verdeckt keine Nachbarorte)
-      if (tgt && tgt.dataset.id !== String(M.cur.id)) { const [x, y, r] = ctr(tgt); if (Math.hypot(e.clientX - x, e.clientY - y) <= Math.max(12, r * .55)) return tgt; }
+      if (tgt && tgt.dataset.id !== String(M.cur.id)) { const [x, y, r] = ctr(tgt); if (Math.hypot(e.clientX - x, e.clientY - y) <= Math.max(8, r * .55)) return tgt; } // sichtbares Symbol ≈ 55 % des Trefferkreises
       const c = st.querySelector('.mk[data-id="' + M.cur.id + '"]'); if (c) return c;
       const d = R[0], cx = d.left + d.width / 2, cy = d.top + d.height / 2; let best = tgt, bd = 44;
       st.querySelectorAll(".mk").forEach(k => { const [x, y] = ctr(k), dd = Math.hypot(x - cx, y - cy); if (dd < bd) { bd = dd; best = k; } });
@@ -5165,7 +5361,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     }
     function frameKeys(keys) {
       const M = V.M; if (!M) return; const S = M.N.filter(n => keys.includes(n.key) && n.p && n.typ !== "region"); if (!S.length) return;
-      let a = 1e9, b = 1e9, c = -1e9, d = -1e9; S.forEach(n => { a = Math.min(a, n.p.x); c = Math.max(c, n.p.x); b = Math.min(b, n.p.y); d = Math.max(d, n.p.y); });
+      let a = 1e9, b = 1e9, c = -1e9, d = -1e9; S.forEach(n => { const q = n.ring ? [n.ring.cx, n.ring.cy, n.ring.rOuter - 120] : [n.p.x, n.p.y, 0]; a = Math.min(a, q[0] - q[2]); c = Math.max(c, q[0] + q[2]); b = Math.min(b, q[1] - q[2]); d = Math.max(d, q[1] + q[2]); });
       frame({ x: a - 160, y: b - 160, w: c - a + 320, h: d - b + 320 }, V.fitS * 4); clamp(); apply();
     }
     const zoomBy = k => { if (!V.M) return; const A = area(); zoomAt(k, A.w / 2, A.h / 2); };
@@ -5302,7 +5498,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     for (const n of nodes) {
       n.rel = WK.parseRel(n.p.lage); n.ref = n.rel.ref ? find(n.rel.ref) : null; if (n.ref === n) n.ref = null;
       let par = n.p.parent ? find(n.p.parent) : null;
-      if (!par && n.ref && (n.rel.k === "in" || (n.rel.k === "mid" && n.ref.ty === "region"))) par = n.ref;
+      if (!par && n.ref && (n.rel.k === "in" || n.rel.inside || (n.rel.k === "mid" && n.ref.ty === "region"))) par = n.ref;
       n.par = par === n ? null : par;
     }
     for (const n of nodes) { const seen = new Set([n]); for (let q = n.par; q; q = q.par) { if (seen.has(q)) { n.par = null; break; } seen.add(q); } }
@@ -5413,14 +5609,51 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
 
   const wbNormTitle = s => String(s || "").toLowerCase().replace(/\(.*?\)/g, " ").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
   const WB_STOP = new Set(["der", "die", "das", "ein", "eine", "einen", "dem", "den", "des", "und", "aber", "nach", "sie", "ihr", "ihre", "sein", "seine", "dass", "the", "and", "his", "her", "their", "she", "they", "this", "that", "with", "from", "when", "after"]);
-  function wbAutoKeys(fact) {
-    const words = String(fact).match(/\p{Lu}[\p{L}\p{N}\-]{3,}/gu) || [], out = [];
-    for (const w of words) { if (WB_STOP.has(w.toLowerCase()) || out.some(x => x.toLowerCase() === w.toLowerCase())) continue; out.push(w); if (out.length >= 3) break; }
+  // Schlüsselwörter für Erinnerungen: zuerst bekannte Namen (Figuren, Spieler, Orte, Lore-Titel), die im Fakt vorkommen,
+  // dann markante Eigennamen/Substantive (nicht am Satzanfang, keine Allerweltswörter) – damit die Erinnerung später wirklich auslöst
+  const WB_GENERIC = new Set(["heute", "morgen", "gestern", "abend", "nacht", "tag", "tage", "zeit", "mann", "frau", "leute", "ding", "sache", "weg", "hand", "augen", "kopf", "stimme", "gruppe", "spieler", "spielerin", "versprechen", "erinnerung", "ereignis", "beziehung", "kampf", "today", "tomorrow", "night", "day", "time", "man", "woman", "people", "thing", "way", "hand", "eyes", "voice", "group", "promise", "memory", "event"]);
+  const WB_START = new Set(["dann", "doch", "noch", "auch", "hier", "dort", "dieser", "diese", "dieses", "jemand", "alle", "beim", "nach", "heute", "später", "danach", "plötzlich", "gestern", "morgen", "seit", "während", "wegen", "trotz", "unter", "über", "neben", "zwischen", "durch", "gegen", "ohne", "eine", "einer", "eines", "einem", "einen", "unsere", "unser", "deine", "seine", "ihre", "jeder", "jede", "niemand", "etwas", "nichts", "there", "then", "later", "after", "before", "some", "someone", "every", "nobody", "while", "during", "since"]);
+  function wbKnownNames() {
+    const out = [];
+    (state.characters || []).forEach(c => c && c.name && out.push(String(c.name)));
+    if (state.user && state.user.name) out.push(String(state.user.name));
+    try { allMapPlaces().forEach(p => p && p.name && out.push(String(p.name))); } catch (e) {}
+    (state.lorebook || []).forEach(l => { if (l && !l.ai && l.title) out.push(String(l.title).replace(/\s*\(.*?\)\s*/g, " ").replace(/^[^:]{0,20}:\s*/, "").trim()); });
+    return out.filter(n => n.length >= 3 && n.length <= 40);
+  }
+  function wbAutoKeys(fact, max) {
+    max = max || 5; const out = [], low = String(fact).toLowerCase();
+    const has = w => out.some(x => x.toLowerCase() === w.toLowerCase());
+    const hit = w => { try { return new RegExp("(^|[^\\p{L}\\p{N}])" + escapeRegex(w.toLowerCase()) + "(?:s|es|n|en|e|er|ern|em)?(?=$|[^\\p{L}\\p{N}])", "u").test(low); } catch (e) { return low.includes(w.toLowerCase()); } };
+    for (const n of wbKnownNames().sort((a, b) => b.length - a.length)) { if (out.length >= max) break; if (!has(n) && !out.some(x => x.toLowerCase().includes(n.toLowerCase())) && hit(n)) out.push(n); }
+    const F = String(fact);
+    for (const m of F.matchAll(/\p{Lu}[\p{L}\p{N}\-]{3,}/gu)) {
+      if (out.length >= max) break;
+      const w = m[0], before = F.slice(0, m.index);
+      if ((/^\s*["„“»«(]?\s*$/.test(before) || /[.!?:]\s*["„“»«]?\s*$/.test(before)) && WB_START.has(w.toLowerCase())) continue; // typische Satzanfänge sind keine Namen
+      if (WB_STOP.has(w.toLowerCase()) || WB_GENERIC.has(w.toLowerCase()) || has(w) || out.some(x => x.toLowerCase().includes(w.toLowerCase()))) continue;
+      out.push(w);
+    }
+    if (!out.length) { const f = (String(fact).match(/\p{Lu}[\p{L}\p{N}\-]{3,}/u) || [])[0]; if (f && !WB_GENERIC.has(f.toLowerCase())) out.push(f); }
     return out;
   }
+  // Modell-Schlüssel säubern: „Schlüssel: A, B“, Phrasen → markante Wörter, keine Allerweltswörter
+  function wbCleanKeys(keysStr) {
+    const out = [];
+    String(keysStr || "").replace(/^\s*(?:schlüssel(?:wörter|wort)?|stichw(?:ö|o)rter|keywords?|keys?|tags?)\s*[:=]\s*/i, "").split(/[,;|]/).forEach(k => {
+      k = wbClip(k.replace(/\+/g, " ").replace(/^["„“'»«\s]+|["„“'»«\s.]+$/g, ""), 40); if (k.length < 2) return;
+      const words = k.split(/\s+/);
+      const parts = words.length > 3 ? words.filter(w => /^\p{Lu}/u.test(w) && w.length >= 4 && !WB_STOP.has(w.toLowerCase())) : [k];
+      parts.forEach(w => { if (!WB_GENERIC.has(w.toLowerCase()) && !WB_STOP.has(w.toLowerCase()) && !out.some(x => x.toLowerCase() === w.toLowerCase())) out.push(w); });
+    });
+    return out;
+  }
+  // Inhaltswörter für Dubletten-Erkennung (Beugung grob entfernt)
+  const wbWords = s => new Set(wbNormTitle(s).split(" ").filter(w => w.length >= 3 && !WB_STOP.has(w)).map(w => w.length > 5 ? w.replace(/(?:en|es|er|em|n|s|e)$/, "") : w));
+  function wbSimilar(a, b) { const A = wbWords(a), B = wbWords(b); if (!A.size || !B.size) return 0; let n = 0; A.forEach(w => { if (B.has(w)) n++; }); return n / Math.min(A.size, B.size) * (n / Math.max(A.size, B.size)) ** .5; }
   function wbMergeKeys(a, b) {
     const out = []; String(a || "").split(",").concat(b || []).forEach(k => { k = wbClip(k, 40); if (k && !out.some(x => x.toLowerCase() === k.toLowerCase())) out.push(k); });
-    return out.slice(0, 10).join(", ");
+    return out.slice(0, 12).join(", ");
   }
   function wbChronicleFolder() {
     if (!Array.isArray(state.loreCategories)) state.loreCategories = [...DEFAULT_LORE_CATS];
@@ -5444,12 +5677,20 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     return e;
   }
   function wbAddMemory(fact, keysStr, secret) {
-    fact = wbClip(fact, 400); if (fact.length < 4) return false;
-    let keys = String(keysStr || "").split(/[,;|]/).map(k => wbClip(k.replace(/\+/g, " "), 40)).filter(k => k.length >= 2);
-    if (!keys.length) keys = wbAutoKeys(fact);
+    fact = String(fact || "").replace(/^\s*["„“»«']+|["„“»«']+\s*$/g, "");
+    if (wbClip(fact, 2000).length > 600) { const c = wbClip(fact, 600), k = c.search(/[.!?…][^.!?…]*$/); fact = k > 300 ? c.slice(0, k + 1) : c.replace(/\s+\S*$/, "") + " …"; } // an Satz-/Wortgrenze kürzen
+    fact = wbClip(fact, 610); if (fact.length < 4) return false;
+    // Modell-Schlüssel + immer die bekannten Namen/Eigennamen aus dem Fakt (sonst löst die Erinnerung nie aus)
+    const keys = wbCleanKeys(keysStr).concat(wbAutoKeys(fact, 5));
     const nt = wbNormTitle(fact), place = wbOn("map") ? curPlaceName() : "";
-    const ex = (state.lorebook || []).find(l => l && l.ai && l.aiKind === "memory" && wbNormTitle(l.content) === nt);
-    if (ex) { ex.keys = wbMergeKeys(ex.keys, keys); ex.gmOnly = !!secret; if (place && !ex.place) ex.place = place; ex.updatedAt = Date.now(); return "upd"; }
+    // Dublette: gleicher Fakt oder fast gleich (gleiche Geheimhaltung) → aktualisieren statt neu anlegen; ein Geheimnis wird nie öffentlich
+    const mems = (state.lorebook || []).filter(l => l && l.ai && l.aiKind === "memory" && !!l.gmOnly === !!secret);
+    let ex = mems.find(l => wbNormTitle(l.content) === nt);
+    if (!ex) { let best = 0; for (const l of mems.slice(-120)) { const sc = wbSimilar(l.content, fact); if (sc > best) { best = sc; ex = sc >= .72 ? l : ex; } } }
+    if (ex) {
+      if (wbNormTitle(ex.content) !== nt && wbWords(fact).size >= wbWords(ex.content).size) { ex.content = fact; ex.title = fact.length > 60 ? fact.slice(0, 58).trim() + "…" : fact; }
+      ex.keys = wbMergeKeys(ex.keys, keys); if (place && !ex.place) ex.place = place; ex.updatedAt = Date.now(); return "upd";
+    }
     wbNewEntry({ aiKind: "memory", title: fact.length > 60 ? fact.slice(0, 58).trim() + "…" : fact, keys: wbMergeKeys("", keys), gmOnly: !!secret, content: fact, ...(place ? { place } : {}) });
     return "new";
   }
@@ -5461,7 +5702,8 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     const ex = (state.lorebook || []).find(l => l && l.ai && l.aiKind === "lore" && wbNormTitle(l.title) === nt && !!l.gmOnly === gmOnly);
     if (ex) {
       if (String(ex.content || "").toLowerCase().includes(info.toLowerCase())) return false;
-      ex.content = wbCapLines((ex.content || "") + "\n" + info, 900); ex.updatedAt = Date.now(); return "upd";
+      if (String(ex.content || "").split("\n").some(line => wbSimilar(line, info) >= .8)) return false; // gleiche Info anders formuliert
+      ex.content = wbCapLines((ex.content || "") + "\n" + info, 1600); ex.updatedAt = Date.now(); return "upd";
     }
     const keys = user ? (String(user.keys || "").trim() || user.title) : wbMergeKeys("", [title, title.replace(/\s*\(.*?\)\s*/g, " ").trim()]);
     wbNewEntry({ aiKind: "lore", title, keys, gmOnly, content: info, about: user ? user.id : "" });
@@ -5755,7 +5997,8 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       const raw = line;
       line = line.replace(/^\s*(?:[-*•]|\d+[.)])\s+/, "").replace(/`/g, "").trim();
       if (!line) continue;
-      if (/^#\s*(?:STRUKTUR|STRUCTURE)\s*:/i.test(line)) { header = WK.parseStructHeader(line); continue; }
+      { const hl = line.replace(/[*_]/g, "").trim();
+        if (/^#*\s*(?:STRUKTUR|STRUCTURE|WELTSTRUKTUR|WORLD\s+STRUCTURE)\s*:?/i.test(hl) || (/(?:maßstab|massstab|scale)\s*[=:]/i.test(hl) && /(?:topologie|topology|zentrum|center)\s*[=:]/i.test(hl))) { const h = WK.parseStructHeader(hl); if (h && (h.scale || h.topology || h.center)) header = h; continue; } }
       if (line.startsWith("#") || !line.includes("|") || /^\|?\s*:?-{2,}/.test(line)) continue;
       const f = line.replace(/^\|/, "").replace(/\|$/, "").split("|").map(x => x.trim().replace(/^\*\*|\*\*$/g, "").trim());
       if (!f[0] || /^(name|ort|place|location)$/i.test(f[0])) continue;
@@ -5770,8 +6013,36 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       if (p && !out.some(q => WK.norm(q.name) === WK.norm(p.name))) out.push(p);
       if (out.length >= 150) break;
     }
+    // Hülle um die Ringstadt (z. B. „Monolith“ als Stadt, die Ringe „Teil von“ ihr): Ringe hängen an deren Region, die Hülle wird Ort im innersten Ring
+    const ringIdx = p => { const m = /^ring(?::(\d+))?/.exec(WK.parseTerrain(p.terrain || "") || ""); return m ? +(m[1] || 50) : -1; };
+    for (const w of out) {
+      if (WK.typeOf(w.typ) === "region") continue;
+      const kids = out.filter(p => p !== w && p.parent && WK.norm(p.parent) === WK.norm(w.name) && ringIdx(p) >= 0);
+      if (new Set(kids.map(ringIdx)).size < 2) continue; // nur echte Hülle: Kinder in verschiedenen Ringen
+      kids.forEach(k => { if (w.parent) k.parent = w.parent; else delete k.parent; });
+      const core = kids.slice().sort((a, b) => ringIdx(a) - ringIdx(b))[0];
+      delete w.terrain; w.parent = core.name; w.lage = "in " + core.name;
+      if (header && header.center && WK.norm(header.center) === WK.norm(w.name)) header.center = core.name;
+    }
+    // Unterorte eines Rings („Sonnenhof | in Hoch-Zitadelle | Hoch-Zitadelle | Ring:0“) sind keine eigenen Ringe
+    const byN = new Map(out.map(p => [WK.norm(p.name), p]));
+    for (const p of out) { const par = p.parent && byN.get(WK.norm(p.parent)); if (par && par !== p && ringIdx(par) >= 0 && ringIdx(p) >= 0) delete p.terrain; }
     if (header) out._header = header;
     return out;
+  }
+  const WB_SC_DE = { island: "Insel", village: "Dorf", forest: "Wald", city: "Stadt", region: "Region", continent: "Kontinent", building: "Gebäude", station: "Station", local: "lokal", rings: "Ringe", coast: "Küste", road: "Straße", valley: "Tal", free: "frei" };
+  const wbDe = v => state.lang === "en" ? v : String(v || "").split("+").map(x => WB_SC_DE[x] || x).join("+");
+  const structToText = h => h && (h.scale || h.topology || h.center) ? (state.lang === "en" ? `# STRUCTURE: scale=${h.scale || "–"} | topology=${h.topology || "–"} | center=${h.center || "–"}\n` : `# STRUKTUR: Maßstab=${wbDe(h.scale) || "–"} | Topologie=${wbDe(h.topology) || "–"} | Zentrum=${h.center || "–"}\n`) : "";
+  // Struktur-Fallback aus der Lore, wenn das Modell die Strukturzeile weglässt: „Insel“ / „wie ein Meer um <Region>“ nahe einem Regionsnamen
+  function wbStructFallback(found) {
+    const h = { ...(found._header || {}) };
+    const regs = found.filter(p => WK.typeOf(p.typ) === "region").map(p => WK.norm(p.name)).filter(r => r.length >= 3);
+    if (!regs.length) return found._header || null;
+    const lore = (state.lorebook || []).filter(l => l && !l.gmOnly).map(l => String(l.title || "") + " " + String(l.content || "")).join("\n").toLowerCase();
+    const e = r => r.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const isl = regs.some(r => new RegExp("(?:insel|island)[^.\\n]{0,60}" + e(r) + "|" + e(r) + "[^.\\n]{0,60}(?:insel|island)|meer\\s+(?:um|rund\\s+um)\\s+" + e(r) + "|sea\\s+(?:around|surrounding)\\s+" + e(r)).test(lore));
+    if (isl && h.scale !== "island") { h.scale = "island"; h.topology = [...new Set(String(h.topology || "").split("+").filter(x => x && x !== "free").concat(["island"]))].join("+"); h.inferred = true; }
+    return h.scale || h.topology || h.center ? h : null;
   }
   const placesToText = list => list.map(p => {
     const cols = [p.name, p.typ || "", p.lage || "", p.dist || "–", p.parent || "–"];
@@ -5779,8 +6050,10 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     else if (p.parent) { /* 5 Spalten reichen */ }
     return cols.join(" | ");
   }).join("\n");
+  let wbScanPending = false;
   function openPlacesModal(list, foundCount) {
-    document.getElementById("places-text").value = placesToText(list || state.mapPlaces || []);
+    wbScanPending = !!foundCount;
+    document.getElementById("places-text").value = structToText(state.mapStruct) + placesToText(list || state.mapPlaces || []);
     const info = document.getElementById("places-info");
     info.textContent = foundCount ? tf("places_found", { n: foundCount }) : "";
     info.style.display = foundCount ? "" : "none";
@@ -5790,6 +6063,11 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     const parsed = parsePlaceLines(document.getElementById("places-text").value);
     state.mapPlaces = sanitizeMapPlaces(parsed, 200);
     state.mapStruct = parsed._header || state.mapStruct || null;
+    // Alte, von Hand verschobene Positionen passen nach einem neuen Struktur-Scan nicht mehr (andere Koordinaten) → verwerfen;
+    // sonst nur Positionen von Orten entfernen, die es nicht mehr gibt
+    { const map = getSessMap(), keep = new Set(allMapPlaces().map(p => WK.norm(p.name)));
+      if (wbScanPending) map.pos = {}; else for (const k of Object.keys(map.pos || {})) if (!keep.has(k)) delete map.pos[k]; }
+    wbScanPending = false;
     saveState(); closeModal("places-modal");
     if (document.getElementById("map-modal").classList.contains("active")) { hideMapCard(); renderMapView(false); }
     showToast(tf("places_saved", { n: state.mapPlaces.length }), "success");
@@ -5801,7 +6079,10 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     entries.sort((a, b) => score(b) - score(a));
     let out = "";
     for (const l of entries) {
-      const chunk = `### ${String(l.title || "")}\n${String(l.content).slice(0, score(l) > 0 ? 1200 : 260)}\n\n`;
+      const c = String(l.content), cut = c.slice(0, score(l) > 0 ? 1200 : 260);
+      // fertige Ortslisten (Zeilen mit „|“, Strukturzeile) nie abschneiden – sie sind die präziseste Quelle
+      const rows = c.length > cut.length ? c.slice(cut.length).split(/\r?\n/).filter(x => (x.match(/\|/g) || []).length >= 3 || /^#\s*(STRUKTUR|STRUCTURE)/i.test(x.trim())).join("\n") : "";
+      const chunk = `### ${String(l.title || "")}\n${cut}${rows ? "\n" + rows : ""}\n\n`;
       if (out.length + chunk.length > 26000) continue;
       out += chunk;
     }
@@ -5823,10 +6104,11 @@ Name | Type | Position relative to another listed place | Distance | Part of | T
 Type: Region, Capital, City, Village, Castle, Farm, House, Mill, Forest, River, Mountains, Camp or Place.
 Terrain: Island, Coast, Mainland, Ring:0 (innermost), Ring:1, Ring:2, Forest, Field, Road, Swamp, Mountains, Sea, Deck or –.
 Rules for accuracy:
-- Concentric city rings (citadel / middle rings / outer slums) are ONE city: same Part-of region, Terrain Ring:0/1/2, positions "around X" / "at the foot of X". Do NOT treat rings as separate distant cities.
+- Concentric city rings (citadel / middle rings / outer slums) are ONE city: same Part-of region, Terrain Ring:0/1/2, positions "around X" / "at the foot of X". Do NOT treat rings as separate distant cities. No separate place for the mountain/rock/monolith beneath the city.
 - An island stays Terrain=Island on the region; poisoned/mainland around it = Mainland.
 - Villages: main street, farms, fields. Forest survival: forest, clearings, stream, camp. No big-city defaults.
 - Part of = containment parent. Distance only when lore gives it.
+- If the lore already contains a place list in this format, copy its rows verbatim (keep directions) and only add missing places.
 Examples:
 # STRUCTURE: scale=island | topology=rings+island | center=Hoch-Zitadelle
 Aethelgard | Region | – | – | – | Island
@@ -5852,10 +6134,11 @@ Name | Typ | Lage relativ zu einem anderen gelisteten Ort | Entfernung | Teil vo
 Typ: Region, Hauptstadt, Stadt, Dorf, Burg, Hof, Haus, Mühle, Wald, Fluss, Gebirge, Lager oder Ort.
 Terrain: Insel, Küste, Festland, Ring:0 (innen), Ring:1, Ring:2, Wald, Feld, Straße, Sumpf, Berg, Meer, Deck oder –.
 Genauigkeit:
-- Konzentrische Stadtringe (Zitadelle / Mittlere Ringe / äußere Schlacke) sind EINE Stadt: gleiche Region als Teil von, Terrain Ring:0/1/2, Lage „um X“ / „am Fuß von X“. Keine getrennten Fern-Städte.
+- Konzentrische Stadtringe (Zitadelle / Mittlere Ringe / äußere Schlacke) sind EINE Stadt: gleiche Region als Teil von, Terrain Ring:0/1/2, Lage „um X“ / „am Fuß von X“. Keine getrennten Fern-Städte. Kein eigener Ort für Berg/Fels/Monolith unter der Stadt.
 - Eine Insel bekommt Terrain=Insel auf der Region; verpestetes Festland drumherum = Festland.
 - Dorf: Hauptstraße, Höfe, Felder. Wald-Survival: Wald, Lichtungen, Bach, Lager. Keine Großstadt-Vorlage.
 - Teil von = Containment. Entfernung nur wenn die Lore sie nennt.
+- Enthält die Lore schon eine Ortsliste in diesem Format, übernimm deren Zeilen wörtlich (mit Himmelsrichtungen) und ergänze nur fehlende Orte.
 Beispiele:
 # STRUKTUR: Maßstab=Insel | Topologie=Ringe+Insel | Zentrum=Hoch-Zitadelle
 Aethelgard | Region | – | – | – | Insel
@@ -5890,7 +6173,7 @@ Start${start ? ` (Start: ${start})` : ""}. Höchstens 60 Orte. Nichts erfinden. 
         if (isAborted) return;
         const found = parsePlaceLines(stripThink(out));
         if (!found.length) { showConfirmModal(t("map_scan_empty"), () => {}); return; }
-        if (found._header) state.mapStruct = found._header;
+        { const h = wbStructFallback(found); if (h) state.mapStruct = h; }
         const merged = sanitizeMapPlaces(state.mapPlaces || [], 200);
         for (const p of found) {
           const i = merged.findIndex(q => WK.norm(q.name) === WK.norm(p.name));
@@ -7245,6 +7528,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     if (budgEl) budgEl.value = state.settings.maxTokenBudget || 3200;
     const budgValEl = document.getElementById("budget-val");
     if (budgValEl) budgValEl.innerText = (state.settings.maxTokenBudget || 3200) + " Tokens";
+    updateLoreShareUI();
     const stripEl = document.getElementById("setting-strip-keys");
     if (stripEl) stripEl.checked = !!state.settings.stripKeysOnExport;
     const wbs = wbSettings();
@@ -7761,6 +8045,15 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       state.settings.maxTokenBudget = parseInt(e.target.value, 10);
       const bVal = document.getElementById("budget-val");
       if (bVal) bVal.innerText = state.settings.maxTokenBudget + " Tokens";
+      updateLoreShareUI();
+      saveState();
+    };
+  }
+  const setLoreShareEl = document.getElementById("setting-lore-share");
+  if (setLoreShareEl) {
+    setLoreShareEl.oninput = (e) => {
+      state.settings.loreShare = sanitizeInt(e.target.value, 10, 80, 40);
+      updateLoreShareUI();
       saveState();
     };
   }
@@ -8104,6 +8397,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       });
 
       if (!state.settings.maxTokenBudget) state.settings.maxTokenBudget = 3200;
+      state.settings.loreShare = sanitizeInt(state.settings.loreShare, 10, 80, 40);
       state.settings.editorId = sanitizeId(state.settings.editorId, "char", true);
 
       if (!state.sessions.length) {
