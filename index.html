@@ -452,7 +452,9 @@
     html.th-x .send-btn, html.th-x .btn-primary, html.th-x #map-tabs button.on, html.th-x #bag-modal-level-badge, html.th-x [style*="color:#17130f"] { color:var(--on-acc) !important; }
     html.th-x .btn-danger { background:var(--danger-btn) !important; color:#fff !important; }
     html.th-x #map-card-k { padding-right:28px; }
-  </style>
+      .think-wait { display:inline-block; font-size:12px; color:var(--muted); font-style:italic; opacity:.8; animation: thinkPulse 1.4s ease-in-out infinite; }
+    @keyframes thinkPulse { 50% { opacity:.35; } }
+</style>
 </head>
 <body>
 
@@ -619,6 +621,10 @@
           <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
             <input type="checkbox" id="setting-combined" checked>
             <span><strong data-i18n="combined_chk">Kombinierte Gruppen-Nachricht (GM + Gefährten in einer Blase)</strong></span>
+          </label>
+          <label id="thoughts-box" style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+            <input type="checkbox" id="setting-thoughts">
+            <span><strong data-i18n="thoughts_chk">💭 Gedankengang der Modelle zeigen (einklappbar je Nachricht)</strong></span>
           </label>
         </div>
         <div class="card" id="wb-settings-card">
@@ -865,6 +871,18 @@
             <div class="form-group">
               <label>Repetition Penalty: <span id="reppenalty-val">1.1</span></label>
               <input type="range" id="char-reppenalty" min="1.0" max="1.5" step="0.02" value="1.1" oninput="document.getElementById('reppenalty-val').innerText=this.value">
+            </div>
+            <div class="form-group">
+              <label data-i18n="lbl_reasoning">🧠 Nachdenken (Reasoning)</label>
+              <select id="char-reasoning">
+                <option value="auto" data-i18n="rs_auto">Auto (Modell erkennen)</option>
+                <option value="on" data-i18n="rs_on">An</option>
+                <option value="off" data-i18n="rs_off">Aus</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label><span data-i18n="lbl_think_budget">Denk-Budget (zusätzliche Tokens)</span>: <span id="thinkbudget-val">3000</span></label>
+              <input type="range" id="char-thinkbudget" min="500" max="16000" step="250" value="3000" oninput="document.getElementById('thinkbudget-val').innerText=this.value">
             </div>
           </div>
         </details>
@@ -1127,6 +1145,10 @@
       btn_edit: "✏️", btn_delete: "🗑", btn_swipe: "🔄 Swipe",
       status_ready: "Bereit", status_stopped: "Generierung gestoppt",
       summary_thoughts: "💭 Gedankengang", trigger_label: "Trigger:",
+      lbl_reasoning: "🧠 Nachdenken (Reasoning)", rs_auto: "Auto (Modell erkennen)", rs_on: "An", rs_off: "Aus",
+      lbl_think_budget: "Denk-Budget (zusätzliche Tokens)", rs_thinking: "💭 denkt nach …",
+      rs_retry: "{n}: nur nachgedacht, keine Antwort – neuer Versuch ohne Nachdenken …",
+      thoughts_chk: "💭 Gedankengang der Modelle zeigen (einklappbar je Nachricht)",
       role_gm: "Spielleiter", role_companion: "Begleiter", role_editor: "Lektor",
       role_label_gm: "📜 Spielleiter & NPCs", role_label_companion: "🗡️ Begleiter",
       role_label_editor: "✒️ Lektor", companion_bag_btn: "🎒 Verfassung & Ausrüstung für dieses Abenteuer prüfen",
@@ -1240,6 +1262,10 @@
       btn_edit: "✏️", btn_delete: "🗑", btn_swipe: "🔄 Swipe",
       status_ready: "Ready", status_stopped: "Generation stopped",
       summary_thoughts: "💭 Reasoning", trigger_label: "Trigger:",
+      lbl_reasoning: "🧠 Reasoning (thinking)", rs_auto: "Auto (detect model)", rs_on: "On", rs_off: "Off",
+      lbl_think_budget: "Thinking budget (extra tokens)", rs_thinking: "💭 thinking …",
+      rs_retry: "{n}: only thought, no answer – retrying without thinking …",
+      thoughts_chk: "💭 Show the models' reasoning (collapsible per message)",
       role_gm: "Game master", role_companion: "Companion", role_editor: "Editor",
       role_label_gm: "📜 Game master & NPCs", role_label_companion: "🗡️ Companion",
       role_label_editor: "✒️ Editor", companion_bag_btn: "🎒 Check condition & gear for this adventure",
@@ -1518,7 +1544,7 @@
     loreCategories: [...DEFAULT_LORE_CATS],
     lorebook: [],
     mapPlaces: [],
-    settings: { combined: true, maxTokenBudget: 3200, order: [], editorId: "", stripKeysOnExport: true, weltbuch: { map: true, memories: true, lore: true } },
+    settings: { combined: true, showThoughts: false, maxTokenBudget: 3200, order: [], editorId: "", stripKeysOnExport: true, weltbuch: { map: true, memories: true, lore: true } },
     messages: []
   };
 
@@ -1927,6 +1953,42 @@
     return i !== -1 && !/<think>/i.test(s.slice(0, i)) ? "<think>" + s : s;
   }
   function noThink(text) { return fixThink(text).replace(/<think>[\s\S]*?(?:<\/think>|$)/gi, ""); }
+
+  // ---------- Nachdenken / Reasoning je Rolle: "auto" | "on" | "off" + Denk-Budget (Tokens zusätzlich zur Antwort) ----------
+  const RS_DEFAULT_BUDGET = 3000;
+  const RS_NAME_RE = /deepseek|mimo|\br1\b|qwq|qwen3|glm|think|reason|gpt-oss|magistral|\bo[134](?:-mini)?\b/i;
+  const rsSeen = {};   // Modelle, die im Stream gedacht haben (Auto-Erkennung, nur zur Laufzeit)
+  const rsFail = {};   // „nur gedacht, keine Antwort“ je Modell (Auto: ab 2 kein Denken mehr, nur zur Laufzeit)
+  function rsMode(c) { return ["auto", "on", "off"].includes(c && c.reasoning) ? c.reasoning : "auto"; }
+  function rsBudget(c) { const n = parseInt(c && c.thinkBudget, 10); return isNaN(n) ? RS_DEFAULT_BUDGET : Math.max(256, Math.min(32000, n)); }
+  function rsIsModel(model) { const m = String(model || "").trim(); return RS_NAME_RE.test(m) || !!rsSeen[m.toLowerCase()]; }
+  // Hintergrund-Aufrufe (Lektor, Vorschlag/Veredeln, Kartenscan) denken bei „Auto“ nicht – schneller, kein leeres Ergebnis
+  function rsWant(c, model, bg) {
+    const m = rsMode(c);
+    if (m !== "auto") return m === "on";
+    if (bg || (c && (c.role === "editor" || c.id === "user_internal"))) return false;
+    if ((rsFail[String(model || "").trim().toLowerCase()] || 0) >= 2) return false;
+    return rsIsModel(model);
+  }
+  // Provider-Parameter setzen; Rückgabe: Liste der gesetzten Felder (für den Fallback bei 400)
+  function rsApply(payload, url, model, think, budget, explicit) {
+    const keys = [];
+    const set = (k, v) => { payload[k] = v; keys.push(k); };
+    const effort = budget <= 4000 ? "low" : budget <= 10000 ? "medium" : "high";
+    if (/api\.arliai\.com/i.test(url)) {
+      if (think) set("reasoning_effort", effort);   // Budget wirkt über max_tokens; thinking_token_budget lehnt ArliAI ab
+      else { set("reasoning_effort", "none"); }
+      set("chat_template_kwargs", { enable_thinking: think, thinking: think });
+    } else if (/openrouter\.ai/i.test(url)) {
+      if (think) set("reasoning", { max_tokens: budget, exclude: false });
+      else if (explicit || rsIsModel(model)) set("reasoning", { enabled: false, exclude: true });
+    } else if (/api\.openai\.com/i.test(url)) {
+      if (/^(o\d|gpt-5)/i.test(model)) set("reasoning_effort", think ? effort : "low");
+    } else if (!/api\.groq\.com|api\.deepseek\.com|api\.mistral\.ai/i.test(url) && (think || explicit || rsIsModel(model))) {
+      set("chat_template_kwargs", { enable_thinking: think, thinking: think });   // vLLM/SGLang/llama.cpp-kompatibel
+    }
+    return keys;
+  }
   // Quelle für die Auswertung: ohne Denkblöcke, CRLF → LF, Vollbreiten-Doppelpunkt → „:“
   function tagSrc(text) { return noThink(text).replace(/\r\n?/g, "\n").replace(/\uFF1A/g, ":"); }
 
@@ -1959,7 +2021,7 @@
     let s = cleaned.replace(/<think>([\s\S]*?)(?:<\/think>|$)/gi, (match, content) => {
       const isStreaming = !match.includes("</think>");
       const idx = thinkBlocks.length;
-      thinkBlocks.push({ content: stripAppTags(content).trim(), open: isStreaming ? "open" : "" });
+      thinkBlocks.push({ content: stripAppTags(content).trim(), open: isStreaming ? "open" : "", streaming: isStreaming });
       return `___THINK_SLOT_${idx}___`;
     });
     s = stripAppTags(s);
@@ -1973,6 +2035,8 @@
     s = s.replace(/___THINK_SLOT_(\d+)___/g, (match, idxStr) => {
       const item = thinkBlocks[parseInt(idxStr, 10)];
       if (!item) return "";
+      if (!(state.settings && state.settings.showThoughts)) return item.streaming ? `<span class="think-wait">${t("rs_thinking")}</span>` : "";
+      if (!item.content) return "";
       return `<details class="think-container" ${item.open}><summary>${t("summary_thoughts")}</summary><div class="think-content">${escapeHTML(item.content).replace(/\n/g, '<br>')}</div></details>`;
     });
     return s;
@@ -2734,7 +2798,8 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     return trimToSentence(s.slice(0, runStart), 0).trim();
   }
 
-  async function streamInfermatic(character, messagesList, systemInstruction, onChunk, isWorldMode = false, protectedNames = [], customMaxTokens = 1800) {
+  // opts: { bg: Hintergrundaufruf (Auto = nicht denken), retry: interner Zweitversuch, drop: abgelehnte Reasoning-Felder }
+  async function streamInfermatic(character, messagesList, systemInstruction, onChunk, isWorldMode = false, protectedNames = [], customMaxTokens = 1800, opts = {}) {
     lastFinishReason = "";
     const cleanKey = String(character.apiKey || "").trim().replace(/^Bearer\s+/i, '').replace(/^["']|["']$/g, '');
     const cleanModel = String(character.model || "").trim().replace(/^["']|["']$/g, '');
@@ -2754,13 +2819,17 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     const parsedTopP = parseFloat(character.topP);
 
     const isArli = /api\.arliai\.com/i.test(targetUrl);
+    const rsBud = rsBudget(character);
+    const think = !opts.retry && rsWant(character, cleanModel, !!opts.bg);
+    // Denken braucht eigenes Budget zusätzlich zur Antwort; Zweitversuch: Denken aus, aber Luft falls das Modell trotzdem denkt
+    const maxTok = customMaxTokens + (think ? rsBud : opts.retry ? 2 * rsBud : 0);
     const payload = {
       model: cleanModel,
       messages: [systemMessage, ...sanitizedMessages],
       temperature: isNaN(parsedTemp) ? 0.7 : parsedTemp,
       top_p: isNaN(parsedTopP) ? 0.9 : parsedTopP,
-      max_tokens: customMaxTokens,
-      max_completion_tokens: customMaxTokens,
+      max_tokens: maxTok,
+      max_completion_tokens: maxTok,
       stream: true
     };
 
@@ -2768,7 +2837,18 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     if (!isStrictOpenAI && character.repPenalty) payload.repetition_penalty = parseFloat(character.repPenalty) || 1.1;
     if (character.role === "editor" && payload.repetition_penalty > 1.05) payload.repetition_penalty = 1.05; // Lektor muss Dialoge wörtlich übernehmen
     payload.stop = isArli ? ["[END_OF_TURN]"] : getSafeStopTokens(targetUrl);
-    if (isArli) payload.reasoning_effort = /deepseek|mimo|\br1\b|qwq|glm|think|reason/i.test(cleanModel) ? "low" : "none"; // DeepSeek/MiMo: wenig denken; Gemma & Co.: Denken aus (sonst leere Antworten)
+    if (think && payload.repetition_penalty > 1.05) payload.repetition_penalty = 1.05;   // hohe Strafe lässt langes Denken entgleisen
+    const rsKeys = rsApply(payload, targetUrl, cleanModel, think, rsBud, rsMode(character) !== "auto").filter(k => !(opts.drop || []).includes(k));
+    (opts.drop || []).forEach(k => { delete payload[k]; });
+    // Fehlertext nennt ein gesendetes Reasoning-Feld -> genau diese Felder einmal weglassen
+    const rsRejected = (err) => {
+      if (opts.drop || !rsKeys.length) return null;
+      const e = String(err || "");
+      let bad = rsKeys.filter(k => e.includes(k) || (k === "chat_template_kwargs" && /enable_thinking|chat_template/i.test(e)) || (k === "reasoning_effort" && /reasoning[_ ]effort/i.test(e)));
+      if (!bad.length && !isArli && /unrecognized|unknown|extra (?:field|input|param)|not permitted|additional propert/i.test(e)) bad = rsKeys.slice();
+      return bad.length ? bad : null;
+    };
+    const again = (o) => streamInfermatic(character, messagesList, systemInstruction, onChunk, isWorldMode, protectedNames, customMaxTokens, { ...opts, ...o });
 
     const headers = { "Content-Type": "application/json" };
     if (cleanKey) headers["Authorization"] = `Bearer ${cleanKey}`;
@@ -2801,7 +2881,13 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
       throw new Error(tf("err_network", { e: fetchErr.message }) + note);
     }
 
-    if (!res.ok) { disarm(); const err = await res.text(); throw new Error(tf("err_api", { s: res.status, e: err })); }
+    if (!res.ok) {
+      disarm(); const err = await res.text();
+      // Server kennt die Reasoning-Parameter nicht -> einmal ohne sie
+      const bad = (res.status === 400 || res.status === 422) ? rsRejected(err) : null;
+      if (bad) { console.warn(`[${cleanModel}] Reasoning-Parameter abgelehnt (${bad.join(", ")}) – ohne sie erneut`); return again({ drop: bad }); }
+      throw new Error(tf("err_api", { s: res.status, e: err }));
+    }
 
     const reader = res.body.getReader();
     activeReader = reader;
@@ -2845,11 +2931,22 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
               const deltaContent = json.choices?.[0]?.delta?.content || "";
               const deltaReasoning = json.choices?.[0]?.delta?.reasoning_content || json.choices?.[0]?.delta?.reasoning || "";
 
+              if (!think && (deltaReasoning || (deltaContent && /<think>|<\/think>/i.test(deltaContent)))) rsSeen[cleanModel.toLowerCase()] = true;   // denkt, obwohl nicht verlangt
               if (deltaReasoning) {
                 if (!isThinking) { fullText += "<think>\n"; isThinking = true; }
                 fullText += deltaReasoning;
                 partialStreamingText = fullText;
                 if (onChunk) onChunk(fullText);
+                if (fullText.length - degCheckAt > 400) {
+                  degCheckAt = fullText.length;
+                  const tail = fullText.slice(-320);
+                  if (!/[.,!?;:…"„“”»«'’()\[\]\-–—*\n]/.test(tail) && tail.trim().split(/\s+/).length >= 30) {
+                    console.warn(`[${cleanModel}] Denken entgleist (Wortsalat) – abgebrochen`);
+                    lastFinishReason = "degenerate"; abortStream = true;
+                    try { reader.cancel(); } catch(e){}
+                    break;
+                  }
+                }
               }
 
               if (deltaContent) {
@@ -2896,6 +2993,16 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
                     break;
                   }
                 }
+                if (think && !abortStream) {
+                  const te = fullText.lastIndexOf("</think>"), ans = te === -1 ? fullText : fullText.slice(te + 8);
+                  if (ans.length > customMaxTokens * 5) {
+                    fullText = (te === -1 ? "" : fullText.slice(0, te + 8)) + trimToSentence(ans.slice(0, customMaxTokens * 5));
+                    partialStreamingText = fullText; lastFinishReason = "length"; abortStream = true;
+                    try { reader.cancel(); } catch(e){}
+                    if (onChunk) onChunk(fullText);
+                    break;
+                  }
+                }
                 if (fullText.includes("[END_OF_TURN]")) {
                   fullText = fullText.split("[END_OF_TURN]")[0].trim();
                   abortStream = true;
@@ -2914,14 +3021,26 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     }
     disarm();
     if (timeoutReason) throw new Error(timeoutReason);
-    if (streamError) throw new Error(tf("err_stream", { e: streamError }));
+    if (streamError) {
+      const bad = !fullText.trim() ? rsRejected(streamError) : null;
+      if (bad) { console.warn(`[${cleanModel}] Reasoning-Parameter abgelehnt (${bad.join(", ")}) – ohne sie erneut`); return again({ drop: bad }); }
+      throw new Error(tf("err_stream", { e: streamError }));
+    }
     if (isThinking) { fullText += "\n</think>\n"; isThinking = false; }
     if (!isAborted && !stripThink(fullText)) {
       console.warn(`[${cleanModel}] leere Antwort – evtl. alle Tokens fürs Reasoning verbraucht`);
-      if (fullText.includes("<think>")) throw new Error(state.lang === "en"
+      if (/<think>|<\/think>/i.test(fullText) && !opts.retry) {
+        // Nur gedacht, nichts geantwortet: einmal automatisch ohne Nachdenken (und mit mehr Luft) wiederholen
+        if (think) rsFail[cleanModel.toLowerCase()] = (rsFail[cleanModel.toLowerCase()] || 0) + 1;
+        updateStatus(tf("rs_retry", { n: character.name || cleanModel }));
+        if (onChunk) onChunk("");
+        return again({ retry: true });
+      }
+      if (/<think>|<\/think>/i.test(fullText)) throw new Error(state.lang === "en"
         ? `${character.name || cleanModel}: the model (${cleanModel}) spent its whole token budget on thinking and gave no answer. Please try again or use a model without reasoning.`
         : `${character.name || cleanModel}: Das Modell (${cleanModel}) hat sein ganzes Token-Budget zum Nachdenken verbraucht und nichts geantwortet. Bitte erneut versuchen oder ein Modell ohne Reasoning wählen.`);
     }
+    if (!think) { const nt = noThink(fullText).trim(); if (nt) fullText = nt; }   // Denken aus: Denkreste entfernen
     return fullText.trim();
   }
 
@@ -3342,7 +3461,7 @@ KÖRPERLICHE VERFASSUNG: [${woundsSummary}]
 STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens vor. Beziehe bei Bedarf Gegenstände aus deinem Beutel oder deine Verfassung organisch ein. Keine NPC-Vorwegnahme. Reiner Text.`;
 
     try {
-      const suggestion = await streamInfermatic(getUserAICharObject(), [], suggestInstruction, null, false, [], 300);
+      const suggestion = await streamInfermatic(getUserAICharObject(), [], suggestInstruction, null, false, [], 300, { bg: true });
       if (suggestion && !isAborted) {
         const inputEl = document.getElementById("user-input");
         if (inputEl) {
@@ -3381,7 +3500,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       const rewriteInstruction = isEn ? `### ROLE: STYLE REFINER FOR ${String(state.user.name || "Player").toUpperCase()}\nRAW INPUT: "${text}"\nSTRICT: Transform this into 1-2 dense sentences in present tense fitting the character. Zero invention. Do not preempt NPCs. Pure text.`
         : `### ROLLE: STIL-VEREDLER FÜR ${String(state.user.name || "Spieler").toUpperCase()}\nROH-EINGABE: "${text}"\nSTRIKT: Verwandle das in 1-2 dichte Sätze im Präsens passend zur Figur. Zero-Invention. Keine NPC-Vorwegnahme. Reiner Text.`;
       try {
-        const polished = await streamInfermatic(getUserAICharObject(), [], rewriteInstruction, null, false, [], 350);
+        const polished = await streamInfermatic(getUserAICharObject(), [], rewriteInstruction, null, false, [], 350, { bg: true });
         if (polished && !isAborted) text = stripThink(polished).replace(/^["']|["']$/g, '').trim();
       } catch (e) {
       } finally {
@@ -6169,7 +6288,7 @@ Start${start ? ` (Start: ${start})` : ""}. Höchstens 60 Orte. Nichts erfinden. 
       updateStatus(tf("map_scan_status", { n: gm.name || "GM" }));
       try {
         const actor = { ...gm, prompt: "" };
-        const out = await streamInfermatic(actor, [{ role: "user", content: digest }], wbScanInstruction(), txt => { if (st) st.textContent = t("map_scan_running") + " " + txt.length; }, false, [], 1800);
+        const out = await streamInfermatic(actor, [{ role: "user", content: digest }], wbScanInstruction(), txt => { if (st) st.textContent = t("map_scan_running") + " " + txt.length; }, false, [], 1800, { bg: true });
         if (isAborted) return;
         const found = parsePlaceLines(stripThink(out));
         if (!found.length) { showConfirmModal(t("map_scan_empty"), () => {}); return; }
@@ -7524,6 +7643,8 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
 
     const combEl = document.getElementById("setting-combined");
     if (combEl) combEl.checked = !!state.settings.combined;
+    const thEl = document.getElementById("setting-thoughts");
+    if (thEl) thEl.checked = !!state.settings.showThoughts;
     const budgEl = document.getElementById("setting-budget");
     if (budgEl) budgEl.value = state.settings.maxTokenBudget || 3200;
     const budgValEl = document.getElementById("budget-val");
@@ -7774,6 +7895,9 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       document.getElementById("topp-val").innerText = "0.9";
       document.getElementById("char-reppenalty").value = "1.1";
       document.getElementById("reppenalty-val").innerText = "1.1";
+      document.getElementById("char-reasoning").value = "auto";
+      document.getElementById("char-thinkbudget").value = String(RS_DEFAULT_BUDGET);
+      document.getElementById("thinkbudget-val").innerText = String(RS_DEFAULT_BUDGET);
       document.getElementById("char-prompt").value = "";
       const modal = document.getElementById("char-modal");
       if (modal) modal.classList.add("active");
@@ -7805,6 +7929,9 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     const cRep = c.repPenalty !== undefined ? c.repPenalty : 1.1;
     document.getElementById("char-reppenalty").value = cRep;
     document.getElementById("reppenalty-val").innerText = cRep;
+    document.getElementById("char-reasoning").value = rsMode(c);
+    document.getElementById("char-thinkbudget").value = String(rsBudget(c));
+    document.getElementById("thinkbudget-val").innerText = String(rsBudget(c));
     document.getElementById("char-prompt").value = c.prompt || "";
     const modal = document.getElementById("char-modal");
     if (modal) modal.classList.add("active");
@@ -7831,6 +7958,8 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
         temp: isNaN(parsedTemp) ? 0.7 : parsedTemp,
         topP: isNaN(parsedTopP) ? 0.9 : parsedTopP,
         repPenalty: isNaN(parsedRep) ? 1.1 : parsedRep,
+        reasoning: rsMode({ reasoning: document.getElementById("char-reasoning")?.value }),
+        thinkBudget: rsBudget({ thinkBudget: document.getElementById("char-thinkbudget")?.value }),
         prompt: String(document.getElementById("char-prompt")?.value || "").trim()
       };
 
@@ -7998,6 +8127,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
           temp: 0.7, 
           topP: 0.9, 
           repPenalty: 1.1, 
+          reasoning: "auto", thinkBudget: RS_DEFAULT_BUDGET,
           prompt: importedPrompt
         };
 
@@ -8038,6 +8168,8 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
   if (setCombEl) {
     setCombEl.onchange = (e) => { state.settings.combined = e.target.checked; saveState(); };
   }
+  const setThEl = document.getElementById("setting-thoughts");
+  if (setThEl) setThEl.onchange = (e) => { state.settings.showThoughts = !!e.target.checked; saveState(); renderChat(); };
 
   const setBudgEl = document.getElementById("setting-budget");
   if (setBudgEl) {
@@ -8182,6 +8314,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
 
           candidateState.lang = (imported.lang === "en" || imported.lang === "de") ? imported.lang : (state.lang === "en" ? "en" : "de");
           candidateState.mapPlaces = sanitizeMapPlaces(imported.mapPlaces, 200);
+          candidateState.settings.showThoughts = !!candidateState.settings.showThoughts;
           candidateState.settings.weltbuch = sanitizeWbSettings(imported.settings && imported.settings.weltbuch);
           candidateState.settings.setting = sanitizeSetting(imported.settings && imported.settings.setting); // alte Backups ohne Setting = Fantasy
 
@@ -8197,7 +8330,8 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
             id: sanitizeId(c?.id, "char"),
             name: String(c?.name || (candidateState.lang === "en" ? "Nameless" : "Ohne Namen")),
             model: String(c?.model || ""),
-            role: ["gm", "companion", "editor"].includes(c?.role) ? c.role : "companion"
+            role: ["gm", "companion", "editor"].includes(c?.role) ? c.role : "companion",
+            reasoning: rsMode(c), thinkBudget: rsBudget(c)
           }));
 
           candidateState.lorebook = candidateState.lorebook.map(l => ({
