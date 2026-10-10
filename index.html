@@ -454,6 +454,38 @@
     html.th-x #map-card-k { padding-right:28px; }
       .think-wait { display:inline-block; font-size:12px; color:var(--muted); font-style:italic; opacity:.8; animation: thinkPulse 1.4s ease-in-out infinite; }
     @keyframes thinkPulse { 50% { opacity:.35; } }
+    /* Kopfzeile (Handy): Name einzeilig, runde Knöpfe, kompakter Welt-Chip */
+    header { gap:6px; padding:0 8px; }
+    #session-modal-btn { flex:1 1 auto; min-width:0; max-width:none; justify-content:flex-start; gap:6px; padding:0 10px; }
+    #session-modal-btn .hdr-sword { color:var(--gold); flex-shrink:0; }
+    #session-modal-btn .hdr-title { flex:1 1 auto; min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; display:block; text-align:left; line-height:34px; font-size:12.5px; }
+    #session-modal-btn .hdr-caret { font-size:9px; opacity:.6; flex-shrink:0; }
+    .world-chip { flex:0 0 auto; max-width:none; padding:5px 9px; gap:4px; height:34px; border-radius:17px; font-weight:600; }
+    .world-chip[aria-expanded="true"] { border-color:var(--gold); }
+    #amb-chip-day { color:var(--gold); font-size:12px; }
+    .hdr-round { flex:0 0 auto; width:36px; height:36px; padding:0; border-radius:50%; justify-content:center; position:relative; font-size:15px; }
+    .hdr-badge { position:absolute; top:-4px; right:-5px; min-width:17px; height:17px; padding:0 4px; border-radius:9px; background:var(--gold); color:#16120c; font-size:10px; font-weight:800; line-height:17px; text-align:center; box-shadow:0 0 0 2px var(--surface); }
+    .world-pop { position:fixed; top:58px; left:50%; transform:translateX(-50%) translateY(-6px); width:min(92vw, 360px); z-index:60; background:var(--surface); border:1px solid var(--gold); border-radius:14px; padding:12px; box-shadow:0 10px 30px rgba(0,0,0,.55); display:flex; flex-direction:column; gap:8px; opacity:0; pointer-events:none; transition:opacity .15s, transform .15s; }
+    .world-pop.open { opacity:1; pointer-events:auto; transform:translateX(-50%) translateY(0); }
+    .world-pop-main { display:none; }
+    .world-pop-rows { display:grid; gap:4px; }
+    .world-pop-row { display:flex; justify-content:space-between; gap:10px; font-size:13px; padding:5px 8px; background:var(--surface-2); border-radius:8px; }
+    .world-pop-row span { white-space:nowrap; flex-shrink:0; }
+    .world-pop-row b { color:var(--gold); font-weight:600; text-align:right; overflow-wrap:anywhere; }
+    @media (max-width:370px) { #session-modal-btn .hdr-title { font-size:11.5px; } .world-chip { padding:5px 7px; } header { gap:5px; padding:0 6px; } }
+    /* All-in-One */
+    html.aio #turn-order-card { display:none; }
+    .aio-banner { border-color:var(--gold) !important; background:linear-gradient(135deg, rgba(223,160,71,.14), transparent); font-size:13px; line-height:1.4; display:flex; gap:10px; align-items:center; justify-content:space-between; }
+    .card.aio-npc { opacity:.8; }
+    /* Auto-Sicherungen */
+    .ab-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 10px; font-size:12.5px; }
+    .ab-grid label { display:flex; flex-direction:column; gap:3px; color:var(--muted); }
+    .ab-grid input[type=number] { width:100%; }
+    .ab-row { display:flex; align-items:center; gap:6px; padding:7px 8px; background:var(--surface-2); border-radius:8px; }
+    .ab-info { flex:1; min-width:0; }
+    .ab-when { font-size:12.5px; font-weight:600; }
+    .ab-label { font-size:11.5px; color:var(--muted); overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+    .ab-empty { font-size:12px; color:var(--muted); padding:6px 2px; }
 </style>
 </head>
 <body>
@@ -463,20 +495,26 @@
 
   <header>
     <button class="header-btn font-serif-title" id="session-modal-btn" title="Abenteuer wechseln" data-i18n-title="tt_switch_adv">
-      <span style="color:var(--gold);">⚔</span>
-      <span id="active-session-title">Neues Abenteuer</span>
-      <span style="font-size:9px; opacity:0.6;">▼</span>
+      <span class="hdr-sword">⚔</span>
+      <span id="active-session-title" class="hdr-title">Neues Abenteuer</span>
+      <span class="hdr-caret">▼</span>
     </button>
-    <button class="header-pill" onclick="openWorldModal()" title="Welt & Zeit anpassen" data-i18n-title="tt_world">
+    <button class="header-pill world-chip" id="world-chip" onclick="toggleWorldChip()" aria-expanded="false" title="Tag, Zeit & Wetter" data-i18n-title="tt_world_chip">
       <span id="amb-pill-icon">☀️</span>
-      <span id="amb-pill-text">Tag 1 • Tag</span>
+      <span id="amb-chip-day">T1</span>
+      <span id="amb-chip-wx">🌤️</span>
     </button>
-    <button class="header-btn" id="header-bag-btn" onclick="openBagModal('user')" title="Inventar, Wunden & Status öffnen" data-i18n-title="tt_bag">
+    <button class="header-btn hdr-round" id="header-bag-btn" onclick="openBagModal('user')" title="Inventar, Wunden & Status öffnen" data-i18n-title="tt_bag">
       <span>🎒</span>
-      <span id="header-bag-count" style="color:var(--gold);">0</span>
+      <span id="header-bag-count" class="hdr-badge">0</span>
     </button>
-    <button class="header-btn" id="clear-chat-btn" title="Chat leeren" data-i18n-title="tt_clear">🗑</button>
+    <button class="header-btn hdr-round" id="clear-chat-btn" title="Chat leeren" data-i18n-title="tt_clear">🗑</button>
   </header>
+  <div id="world-pop" class="world-pop" role="dialog">
+    <div id="amb-pill-text" class="world-pop-main">Tag 1 • Tag</div>
+    <div id="amb-pop-rows" class="world-pop-rows"></div>
+    <button class="btn btn-secondary world-pop-edit" onclick="toggleWorldChip(false); openWorldModal()" title="Welt & Zeit anpassen" data-i18n-title="tt_world" data-i18n="world_edit">✏️ Welt & Zeit anpassen</button>
+  </div>
 
   <main>
     <section class="view-panel active" id="view-chat">
@@ -606,6 +644,18 @@
           <p style="font-size:12.5px; color:var(--muted); line-height:1.4;" data-i18n="guide_card_desc">Welche Bausteine gehören in welchen Rollen-Prompt, damit Karte, Inventar, Stufen und Lore zuverlässig funktionieren – zum Kopieren.</p>
           <button class="btn btn-secondary" id="guide-btn" onclick="openGuide()" data-i18n="guide_btn">📘 Anleitung & Prompt-Bausteine</button>
         </div>
+        <div class="card" id="aio-card">
+          <div class="card-title font-serif-title" style="color:var(--gold);" data-i18n="aio_title">⚡ All-in-One-Modus</div>
+          <p style="font-size:12.5px; color:var(--muted); line-height:1.4;" data-i18n="aio_desc">Ein einziger Bot erzählt alles.</p>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+            <input type="checkbox" id="setting-aio">
+            <span><strong data-i18n="aio_chk">⚡ All-in-One: ein Bot für alles</strong></span>
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+            <input type="checkbox" id="setting-aio-editor">
+            <span data-i18n="aio_editor_chk">✒️ Lektor auch im All-in-One (langsamer, Standard aus)</span>
+          </label>
+        </div>
         <div class="card">
           <div class="card-title font-serif-title" style="color:var(--gold);" data-i18n="editor_title">✒️ Lektor-Pipeline (Stil-Veredelung)</div>
           <p style="font-size:12.5px; color:var(--muted); line-height:1.4;" data-i18n="editor_desc">
@@ -661,7 +711,7 @@
           <div id="lore-share-info" style="font-size:12px; opacity:.85; margin-top:4px; line-height:1.4;"></div>
           </div>
         </div>
-        <div class="card">
+        <div class="card" id="turn-order-card">
           <div class="card-title font-serif-title" style="color:var(--gold);" data-i18n="turn_order">Ablauf-Reihenfolge (Turn Order)</div>
           <div id="turn-order-list" style="display:flex; flex-direction:column; gap:6px;"></div>
         </div>
@@ -683,6 +733,20 @@
             <button class="btn btn-secondary" style="flex:1;" id="import-btn" data-i18n="btn_import">Backup laden</button>
           </div>
           <input type="file" id="import-file" accept=".json" style="display:none;">
+          <div id="ab-box" style="display:flex; flex-direction:column; gap:8px; padding:10px; background:var(--surface-2); border-radius:8px; margin-top:4px;">
+            <div style="font-weight:700; font-size:13px; color:var(--gold);" data-i18n="ab_title">🗂️ Automatische Sicherungen</div>
+            <div style="font-size:12px; color:var(--muted); line-height:1.35;" data-i18n="ab_desc">Sicherungen im App-Speicher dieses Geräts.</div>
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;"><input type="checkbox" id="ab-on" checked><span data-i18n="ab_on">Automatisch sichern</span></label>
+            <div class="ab-grid">
+              <label><span data-i18n="ab_rounds">alle N Runden</span><input type="number" id="ab-rounds" min="0" max="200" value="5"></label>
+              <label><span data-i18n="ab_minutes">alle X Minuten</span><input type="number" id="ab-minutes" min="0" max="1440" value="15"></label>
+              <label><span data-i18n="ab_keep">behalten (letzte K)</span><input type="number" id="ab-keep" min="1" max="50" value="5"></label>
+              <label style="flex-direction:row; align-items:center; gap:6px;"><input type="checkbox" id="ab-session" checked><span data-i18n="ab_session">beim Abenteuer-Wechsel</span></label>
+            </div>
+            <button class="btn btn-secondary" id="ab-now-btn" data-i18n="ab_now">💾 Jetzt sichern</button>
+            <div id="ab-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+            <div id="ab-usage" style="font-size:11px; color:var(--muted);"></div>
+          </div>
           <button class="btn btn-danger" id="reset-btn" style="margin-top:4px;" data-i18n="btn_reset">Werkseinstellungen zurücksetzen</button>
         </div>
         <button class="thanks-btn" id="thanks-btn" onclick="openThanks()" data-i18n="thanks_btn">💛 Danke</button>
@@ -1550,7 +1614,7 @@
     loreCategories: [...DEFAULT_LORE_CATS],
     lorebook: [],
     mapPlaces: [],
-    settings: { combined: true, showThoughts: false, editorContinuity: false, maxTokenBudget: 3200, order: [], editorId: "", stripKeysOnExport: true, weltbuch: { map: true, memories: true, lore: true } },
+    settings: { combined: true, showThoughts: false, editorContinuity: false, allInOne: false, aioEditor: false, autoBackup: { on: true, rounds: 5, minutes: 15, session: true, keep: 5 }, maxTokenBudget: 3200, order: [], editorId: "", stripKeysOnExport: true, weltbuch: { map: true, memories: true, lore: true } },
     messages: []
   };
 
@@ -2081,6 +2145,19 @@
 
   function renderAmbientBar() {
     const w = state.world || DEFAULT_WORLD;
+    {
+      const rd = (w.day !== undefined && w.day !== null && String(w.day).trim()) ? String(w.day).trim() : "Tag 1";
+      const n = (rd.match(/\d+/) || [])[0], en = state.lang === "en";
+      const short = n ? (en ? "D" : "T") + n : rd.slice(0, 6);
+      const dEl = document.getElementById("amb-chip-day"); if (dEl) dEl.textContent = short;
+      const wEl = document.getElementById("amb-chip-wx"); if (wEl) wEl.textContent = getWeatherIcon(w.weather);
+      const rows = document.getElementById("amb-pop-rows");
+      if (rows) {
+        const L = en ? ["📅 Day", "🕯️ Time", "📍 Place", "☁️ Weather"] : ["📅 Tag", "🕯️ Zeit", "📍 Ort", "☁️ Wetter"];
+        const V = [en ? rd.replace(/^Tag/i, "Day") : rd, worldVal(w.time || "Tag"), w.location || "Start", worldVal(w.weather || "Klar")];
+        rows.innerHTML = L.map((l, i) => `<div class="world-pop-row"><span>${escapeHTML(l)}</span><b>${escapeHTML(String(V[i]))}</b></div>`).join("");
+      }
+    }
     const pillTextEl = document.getElementById("amb-pill-text");
     const pillIconEl = document.getElementById("amb-pill-icon");
     const rawDay = (w.day !== undefined && w.day !== null && String(w.day).trim()) ? String(w.day).trim() : "Tag 1";
@@ -2135,8 +2212,9 @@
         const splitIdx = part.search(/[:=]/);
         if (splitIdx === -1) continue;
         const key = part.slice(0, splitIdx).trim().toLowerCase();
-        const val = part.slice(splitIdx + 1).trim();
+        let val = part.slice(splitIdx + 1).replace(/<\/?[a-zäöüß_]+>/gi, "").trim();
         if (!val) continue;
+        if ((key === "day" || key === "tag") && /^\d+$/.test(val)) val = (state.lang === "en" ? "Day " : "Tag ") + val;
         if (key === "day" || key === "tag") { w.day = val; notices.push(`📅 ${val}`); }
         else if (key === "time" || key === "zeit") { w.time = val; notices.push(`${getTimeIcon(val)} ${val}`); }
         else if (key === "weather" || key === "wetter") { w.weather = val; notices.push(`${getWeatherIcon(val)} ${val}`); }
@@ -3565,10 +3643,10 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
       : `[AKTUELLE SZENE DER WELT]:\n${cleanGmScene || "Die Umgebung bleibt unverändert."}\n\n[AKTION VON ${safeUser}]:\n"${triggerText}"\n\n${companionsContext ? `[BISHERIGE REAKTIONEN DEINER GEFÄHRTEN]:\n${companionsContext}\n\n` : ""}[REGIE FÜR ${safeComp}]: Reagiere unmittelbar auf die Kulisse, auf ${safeUser} und beziehe anwesende Gefährten ein. Bleibe in deiner Figur.${compInventoryGuide}`;
   }
 
-  async function executeActorTurn({ actor, effectiveHistory, userPromptContent, systemTask = "", onChunk = null, customMaxTokens = 1400, isGM = false, skipIndex = -1 }) {
+  async function executeActorTurn({ actor, effectiveHistory, userPromptContent, systemTask = "", onChunk = null, customMaxTokens = 1400, isGM = false, skipIndex = -1, aio = false }) {
     const isEn = state.lang === "en";
     const budget = state.settings.maxTokenBudget || 3200;
-    const protectedNames = getProtectedNames();
+    const protectedNames = aio ? [String(state.user?.name || "").trim()].filter(Boolean) : getProtectedNames();
     // Lektor: verwebt nur die Entwürfe dieses Zuges -> kein Lorebook, nur so viel Verlauf wie für Ton/Tempus nötig
     const isEd = actor.role === "editor";
     const lore = isEd ? "" : scanLorebookRecursive(effectiveHistory, userPromptContent, isGM);
@@ -6771,8 +6849,13 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       const fateDirective = generateFateDirective(state.lang, userProg);
       const gmProgressionGuide = getInventoryPromptDirective(userName, userProg);
 
+      // MODUS AIO: EIN BOT FÜR ALLES (eine Anfrage je Zug)
+      const aioNarr = aioOn() ? aioNarrator() : null;
+      if (aioNarr) {
+        await runAioTurn({ narr: aioNarr, userName, triggerText, fateDirective, gmProgressionGuide, effectiveHistoryForScan, appendToExistingMsgId, isEn });
+
       // MODUS A: LEKTOR-PIPELINE
-      if (editorChar && gmChar && companions.length > 0) {
+      } else if (editorChar && gmChar && companions.length > 0) {
         updateStatus(gmChar.name + (isEn ? " designs setting..." : " entwirft Welt & Kulisse..."));
         const gmPrompt = buildGMPromptContent(userName, triggerText, fateDirective, gmProgressionGuide, protectedListStr, isEn);
         const gmTurn = await executeActorTurn({
@@ -7015,6 +7098,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       setGenerating(false); 
       renderChat(); 
       saveState();
+      if (!isAborted && state.messages.some(m => m && !turnPreIds.has(m.id))) abAfterRound();
     }
   }
 
@@ -7344,8 +7428,10 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     if (!Array.isArray(state.characters) || state.characters.length === 0) { bar.classList.remove("visible"); return; }
     bar.classList.add("visible");
     bar.innerHTML = `<span style="font-size:11px; color:var(--dim); display:flex; align-items:center;">${t("trigger_label")}</span>`;
+    const aioN = aioOn() ? aioNarrator() : null;
     state.characters.forEach(c => {
       if (!c) return;
+      if (aioOn() && (!aioN || c.id !== aioN.id)) return;   // All-in-One: nur der Erzähler
       const btn = document.createElement("button");
       btn.className = "quick-btn";
       btn.innerHTML = `${formatAvatar(c.avatar, 15)} <span>${escapeHTML(c.name)}</span>`;
@@ -7396,13 +7482,25 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       list.innerHTML = `<div class="empty-state"><span>🎭</span><p>${t("empty_party")}</p></div>`;
       return;
     }
+    const aioNarrC = aioOn() ? aioNarrator() : null;
+    if (aioOn()) {
+      const bn = document.createElement("div"); bn.className = "card aio-banner"; bn.id = "aio-banner";
+      bn.innerHTML = `<span>${escapeHTML(aioNarrC ? tf("aio_banner", { n: aioNarrC.name }) : t("aio_banner_none"))}</span>`;
+      const ob = document.createElement("button"); ob.className = "btn btn-secondary"; ob.id = "aio-off-btn"; ob.style.cssText = "flex-shrink:0; font-size:12px; padding:6px 10px;"; ob.textContent = t("aio_off_btn"); ob.onclick = () => aioSet(false);
+      bn.appendChild(ob); list.appendChild(bn);
+    }
     state.characters.forEach(c => {
       if (!c) return;
       c.id = sanitizeId(c.id, "char");
       const safeCharId = c.id;
       const card = document.createElement("div");
       card.className = "card";
-      const roleLabel = c.role === 'gm' ? t("role_label_gm") : (c.role === 'editor' ? t("role_label_editor") : t("role_label_companion"));
+      let roleLabel = c.role === 'gm' ? t("role_label_gm") : (c.role === 'editor' ? t("role_label_editor") : t("role_label_companion"));
+      if (aioOn()) {
+        if (aioNarrC && c.id === aioNarrC.id) { roleLabel = t("aio_role_narr"); card.classList.add("aio-narr"); card.style.borderColor = "var(--gold)"; }
+        else if (c.role === "editor") roleLabel = t("aio_role_ed");
+        else { roleLabel = t("aio_role_npc"); card.classList.add("aio-npc"); }
+      }
       let bagBtnHtml = "";
       if (c.role === 'companion') {
         bagBtnHtml = `
@@ -7721,6 +7819,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
 
     const combEl = document.getElementById("setting-combined");
     if (combEl) combEl.checked = !!state.settings.combined;
+    if (typeof aioRenderSettings === "function") { aioApplyClass(); aioRenderSettings(); abRenderSettings(); }
     const ecEl = document.getElementById("setting-editor-cont");
     if (ecEl) ecEl.checked = !!state.settings.editorContinuity;
     const thEl = document.getElementById("setting-thoughts");
@@ -7780,6 +7879,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
   if (sessionSelect) {
     sessionSelect.onchange = (e) => {
       if (isGenerating) return;
+      abBeforeSessionChange();
       state.activeSessionId = sanitizeId(e.target.value, "sess");
       syncActiveMessages();
       saveState();
@@ -7814,6 +7914,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
           companionProgression: {},
           map: blankSessMap()
         };
+        abBeforeSessionChange();
         state.sessions.unshift(newSess);
         state.activeSessionId = newSess.id;
         syncActiveMessages();
@@ -8398,6 +8499,10 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
           candidateState.mapPlaces = sanitizeMapPlaces(imported.mapPlaces, 200);
           candidateState.settings.showThoughts = !!candidateState.settings.showThoughts;
           candidateState.settings.editorContinuity = !!candidateState.settings.editorContinuity;
+          candidateState.settings.allInOne = !!candidateState.settings.allInOne;
+          candidateState.settings.aioEditor = !!candidateState.settings.aioEditor;
+          { const ab = candidateState.settings.autoBackup && typeof candidateState.settings.autoBackup === "object" ? candidateState.settings.autoBackup : {};
+            candidateState.settings.autoBackup = { on: ab.on !== false, rounds: sanitizeInt(ab.rounds, 0, 200, 5), minutes: sanitizeInt(ab.minutes, 0, 1440, 15), session: ab.session !== false, keep: sanitizeInt(ab.keep, 1, 50, 5) }; }
           candidateState.settings.weltbuch = sanitizeWbSettings(imported.settings && imported.settings.weltbuch);
           candidateState.settings.setting = sanitizeSetting(imported.settings && imported.settings.setting); // alte Backups ohne Setting = Fantasy
 
@@ -8689,6 +8794,207 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     const hbBtn = document.getElementById("clear-chat-btn");
     if (hbBtn) new ResizeObserver(() => updateMapFab()).observe(hbBtn);
   }
+
+  // ===================== ALL-IN-ONE · AUTO-SICHERUNGEN · KOPFZEILE (10.10.2026) =====================
+  Object.assign(I18N.de, {
+    aio_title: "⚡ All-in-One-Modus", aio_desc: "Ein einziger Bot erzählt alles – Welt, NPCs und Begleiter – in EINER Antwort pro Runde (schnell, wie klassische KI-Chat-Apps). Begleiter-Karten werden zu NPC-Infos. Ausschalten stellt die Mehr-Rollen-Gruppe unverändert wieder her.",
+    aio_chk: "⚡ All-in-One: ein Bot für alles", aio_editor_chk: "✒️ Lektor auch im All-in-One (langsamer, Standard aus)",
+    aio_banner: "⚡ All-in-One aktiv: {n} erzählt alles in einer Antwort. Begleiter sind NPC-Infos.", aio_banner_none: "⚡ All-in-One aktiv – lege einen Spielleiter an, der alles erzählt.",
+    aio_role_narr: "⚡ Erzähler für alles", aio_role_npc: "📇 NPC-Info (spielt der Erzähler)", aio_role_ed: "✒️ Lektor (im All-in-One optional)",
+    aio_off_btn: "Mehr-Rollen-Modus", aio_status: "{n} erzählt …", aio_toast_on: "⚡ All-in-One an – eine Antwort pro Runde.", aio_toast_off: "👥 Mehr-Rollen-Gruppe wiederhergestellt.",
+    ab_title: "🗂️ Automatische Sicherungen", ab_desc: "Sicherungen im App-Speicher dieses Geräts (nicht im Download-Ordner). Datei-Export bleibt unten möglich.",
+    ab_on: "Automatisch sichern", ab_rounds: "alle N Runden", ab_minutes: "alle X Minuten", ab_session: "beim Abenteuer-Wechsel", ab_keep: "behalten (letzte K)",
+    ab_now: "💾 Jetzt sichern", ab_empty: "Noch keine automatische Sicherung.", ab_restore: "↺ Laden", ab_delete: "🗑", ab_saved: "Sicherung angelegt.",
+    ab_confirm_del: "Diese Sicherung löschen?", ab_quota: "Speicher fast voll – älteste Sicherungen entfernt.", ab_fail: "Automatische Sicherung nicht möglich (Speicher voll?).",
+    ab_usage: "Belegt: {u} von ca. {q}", ab_r_rounds: "Runden", ab_r_timer: "Zeit", ab_r_session: "Wechsel", ab_r_manual: "manuell",
+    world_edit: "✏️ Welt & Zeit anpassen", tt_world_chip: "Tag, Zeit & Wetter"
+  });
+  Object.assign(I18N.en, {
+    aio_title: "⚡ All-in-One mode", aio_desc: "One single bot narrates everything – world, NPCs and companions – in ONE reply per round (fast, like classic AI chat apps). Companion cards become NPC info. Switching off restores the multi-role party unchanged.",
+    aio_chk: "⚡ All-in-One: one bot for everything", aio_editor_chk: "✒️ Editor in All-in-One too (slower, default off)",
+    aio_banner: "⚡ All-in-One active: {n} narrates everything in one reply. Companions are NPC info.", aio_banner_none: "⚡ All-in-One active – add a game master who narrates everything.",
+    aio_role_narr: "⚡ Narrator for everything", aio_role_npc: "📇 NPC info (played by the narrator)", aio_role_ed: "✒️ Editor (optional in All-in-One)",
+    aio_off_btn: "Multi-role mode", aio_status: "{n} narrates …", aio_toast_on: "⚡ All-in-One on – one reply per round.", aio_toast_off: "👥 Multi-role party restored.",
+    ab_title: "🗂️ Automatic backups", ab_desc: "Backups in this device's app storage (not the downloads folder). File export is still available below.",
+    ab_on: "Back up automatically", ab_rounds: "every N rounds", ab_minutes: "every X minutes", ab_session: "on adventure switch", ab_keep: "keep (last K)",
+    ab_now: "💾 Back up now", ab_empty: "No automatic backup yet.", ab_restore: "↺ Load", ab_delete: "🗑", ab_saved: "Backup created.",
+    ab_confirm_del: "Delete this backup?", ab_quota: "Storage almost full – oldest backups removed.", ab_fail: "Automatic backup not possible (storage full?).",
+    ab_usage: "Used: {u} of about {q}", ab_r_rounds: "rounds", ab_r_timer: "timer", ab_r_session: "switch", ab_r_manual: "manual",
+    world_edit: "✏️ Edit world & time", tt_world_chip: "Day, time & weather"
+  });
+
+  // ---------- ALL-IN-ONE ----------
+  function aioOn() { return !!(state.settings && state.settings.allInOne); }
+  function aioNarrator() {
+    const cs = state.characters || [];
+    return cs.find(c => c && c.role === "gm") || cs.find(c => c && c.role === "companion" && !isNpcVoiceChar(c)) || null;
+  }
+  function aioNpcInfo(narr, isEn) {
+    const comps = (state.characters || []).filter(c => c && c.id !== narr.id && c.role === "companion" && !isNpcVoiceChar(c));
+    if (!comps.length) return "";
+    const lines = comps.map(c => {
+      const p = getProgressionFor(c.id) || {};
+      const card = String(c.prompt || "").replace(/\s+/g, " ").trim();
+      const short = card.length > 900 ? card.slice(0, 900).replace(/\s\S*$/, "") + " …" : card;
+      const lv = stLevels() && p.level ? (isEn ? ` · Level ${p.level}` : ` · Stufe ${p.level}`) : "";
+      const inv = (p.inventory || []).length ? (isEn ? " · Gear: " : " · Ausrüstung: ") + p.inventory.slice(0, 12).join(", ") : "";
+      const wd = (p.wounds || []).length ? (isEn ? " · Wounds: " : " · Wunden: ") + p.wounds.join(", ") : "";
+      return `- ${c.name}${lv}${inv}${wd}${short ? "\n  " + short : ""}`;
+    });
+    return (isEn ? "\n\n[COMPANIONS – YOU PLAY THEM TOO (NPC info)]:\n" : "\n\n[BEGLEITER – DU SPIELST SIE MIT (NPC-Infos)]:\n") + lines.join("\n");
+  }
+  function aioDirective(userName, isEn) {
+    const U = String(userName || (isEn ? "Player" : "Spieler"));
+    return isEn
+      ? `\n\n[ALL-IN-ONE MODE]: You are the only narrator: world, NPCs AND the companions listed above (their actions and dialogue, in character, written by you). This overrides any earlier rule not to play the companions. The ONLY character you never control is ${U}. One flowing passage, no speaker headings like "Name:" at line starts. Keep all system tags (location, items, wounds, level, memories, world time) as usual at the very end; companion items/levels via [MUTATION: Name | …].`
+      : `\n\n[ALL-IN-ONE-MODUS]: Du bist der einzige Erzähler: Welt, NPCs UND die oben genannten Begleiter (ihre Handlungen und wörtliche Rede, in ihrer Art, von dir geschrieben). Das hat Vorrang vor früheren Regeln, die Begleiter nicht zu steuern. Die EINZIGE Figur, die du nie steuerst, ist ${U}. Ein durchgehender Erzähltext, keine Sprecher-Überschriften wie „Name:“ am Zeilenanfang. System-Tags (Ort, Gegenstände, Wunden, Stufe, Erinnerungen, Weltzeit) wie gewohnt ganz am Ende; Begleiter-Gegenstände/-Stufen über [MUTATION: Name | …].`;
+  }
+  // Ein Zug im All-in-One: EINE Anfrage; Tracking aus genau dieser Antwort; Lektor nur wenn eingeschaltet
+  async function runAioTurn({ narr, userName, triggerText, fateDirective, gmProgressionGuide, effectiveHistoryForScan, appendToExistingMsgId, isEn }) {
+    let msg;
+    if (appendToExistingMsgId) {
+      msg = state.messages.find(m => m && m.id === sanitizeId(appendToExistingMsgId, "msg"));
+      ensureMsgVariants(msg); msg.variants.push(""); msg.currentVariant = msg.variants.length - 1; msg.text = "";
+    } else {
+      msg = { id: generateId("msg"), type: "gm", senderId: narr.id, senderName: narr.name, text: "", variants: [""], currentVariant: 0, aio: true };
+      state.messages.push(msg);
+    }
+    activeStreamMsgRef = msg; renderChat();
+    const contentEl = document.getElementById("body-" + msg.id);
+    if (contentEl) { contentEl.innerHTML = ""; contentEl.classList.add("cursor"); }
+    autoScroll(true);
+    updateStatus(tf("aio_status", { n: narr.name }));
+    const prompt = buildGMPromptContent(userName, triggerText, fateDirective, gmProgressionGuide, userName, isEn) + aioNpcInfo(narr, isEn) + aioDirective(userName, isEn);
+    const actor = narr.role === "gm" ? narr : { ...narr, role: "gm" };
+    const tr = await executeActorTurn({ actor, effectiveHistory: effectiveHistoryForScan, userPromptContent: prompt,
+      onChunk: (ch) => renderThrottled(contentEl, ch), isGM: true, customMaxTokens: 1800, aio: true });
+    if (isAborted) return;
+    let text = tr.raw;
+    const edc = state.settings.aioEditor ? (state.characters || []).find(c => c && c.id === state.settings.editorId && c.role === "editor") : null;
+    if (edc && tr.clean) {
+      updateStatus(edc.name + (isEn ? " crafting novel chapter..." : " verfasst Kapitel..."));
+      try {
+        const et = await runEditorSynthesis({ editorChar: edc, userName, triggerText, drafts: [{ name: narr.name, text: tr.clean, gm: true }],
+          onChunk: (ch) => renderThrottled(contentEl, ch), maxTokens: Math.min(4096, Math.max(1600, Math.round(estimateTokens(tr.clean) * 1.15) + 300)),
+          prevTail: editorPrevTail(state.messages.indexOf(msg)) });
+        if (et.raw && stripThink(et.raw).length > 200 && lastFinishReason !== "degenerate") text = et.raw;
+      } catch (e) { if (isAborted || e.name === "AbortError") throw e; showToast((isEn ? "Editor failed – kept the narrator text. " : "Lektor fehlgeschlagen – Erzähltext übernommen. ") + String(e.message || e).slice(0, 80), "error"); }
+    }
+    flushThrottled(contentEl, text);
+    if (contentEl) contentEl.classList.remove("cursor");
+    if (text && !isAborted) {
+      msg.text = text; ensureMsgVariants(msg); msg.variants[msg.currentVariant || 0] = text;
+      wbAttach(msg, tr.wb); stampSnapshot(msg);
+    }
+  }
+  function aioApplyClass() { document.documentElement.classList.toggle("aio", aioOn()); }
+  function aioSet(on) {
+    state.settings.allInOne = !!on; aioApplyClass(); saveState();
+    renderCharacters(); renderQuickTriggers(); aioRenderSettings();
+    showToast(t(on ? "aio_toast_on" : "aio_toast_off"), "success");
+  }
+  function aioRenderSettings() {
+    const a = document.getElementById("setting-aio"); if (a) a.checked = aioOn();
+    const e = document.getElementById("setting-aio-editor"); if (e) e.checked = !!state.settings.aioEditor;
+  }
+  { const a = document.getElementById("setting-aio"); if (a) a.onchange = e => aioSet(e.target.checked); }
+  { const e = document.getElementById("setting-aio-editor"); if (e) e.onchange = ev => { state.settings.aioEditor = !!ev.target.checked; saveState(); }; }
+
+  // ---------- AUTOMATISCHE SICHERUNGEN (IndexedDB, eigene Datenbank) ----------
+  const AB_DB = "multi_rp_autobackups", AB_STORE = "backups";
+  let abDbP = null, abRounds = 0, abLastTs = Date.now(), abDirty = false, abBusy = false;
+  function abCfg() {
+    const d = { on: true, rounds: 5, minutes: 15, session: true, keep: 5 }, c = state.settings && state.settings.autoBackup;
+    const o = Object.assign({}, d, c && typeof c === "object" ? c : {});
+    return { on: o.on !== false, rounds: sanitizeInt(o.rounds, 0, 200, 5), minutes: sanitizeInt(o.minutes, 0, 1440, 15), session: o.session !== false, keep: sanitizeInt(o.keep, 1, 50, 5) };
+  }
+  function abDb() {
+    if (abDbP) return abDbP;
+    abDbP = new Promise((res, rej) => {
+      try {
+        const rq = indexedDB.open(AB_DB, 1);
+        rq.onupgradeneeded = e => { const db = e.target.result; if (!db.objectStoreNames.contains(AB_STORE)) db.createObjectStore(AB_STORE, { keyPath: "id" }); };
+        rq.onsuccess = () => res(rq.result); rq.onerror = () => { abDbP = null; rej(rq.error); }; rq.onblocked = () => { abDbP = null; rej(new Error("blocked")); };
+      } catch (e) { abDbP = null; rej(e); }
+    });
+    return abDbP;
+  }
+  function abTx(mode, fn) { return abDb().then(db => new Promise((res, rej) => { const tx = db.transaction(AB_STORE, mode), st = tx.objectStore(AB_STORE); let out; const r = fn(st); if (r) r.onsuccess = () => { out = r.result; }; tx.oncomplete = () => res(out); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error || new Error("abort")); })); }
+  async function abList() { try { const all = await abTx("readonly", st => st.getAll()); return (all || []).map(b => ({ id: b.id, ts: b.ts, size: b.size, label: b.label, reason: b.reason })).sort((a, b) => b.ts - a.ts); } catch (e) { return []; } }
+  async function abPrune(keep) { const l = await abList(); for (const b of l.slice(keep)) await abTx("readwrite", st => st.delete(b.id)); }
+  async function autoBackupNow(reason = "manual", snapshotText = null) {
+    if (abBusy || dbReadFailed || isResetting) return false;
+    abBusy = true;
+    try {
+      const cfg = abCfg();
+      const data = snapshotText || (() => { const b = JSON.parse(JSON.stringify(state)); b._app = "multi-rp-studio"; b._version = 1; return JSON.stringify(b); })();
+      const sess = (state.sessions || []).find(s => s && s.id === state.activeSessionId);
+      const rec = { id: "ab_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6), ts: Date.now(), size: new Blob([data]).size, label: String((sess && sess.title) || "").slice(0, 80), reason, data };
+      let ok = false;
+      for (let i = 0; i < 3 && !ok; i++) {
+        try { await abTx("readwrite", st => st.put(rec)); ok = true; }
+        catch (e) {
+          const quota = e && (e.name === "QuotaExceededError" || /quota/i.test(String(e.message || "")));
+          const l = await abList(); if (!quota || !l.length) throw e;
+          await abTx("readwrite", st => st.delete(l[l.length - 1].id)); if (i === 0) showToast(t("ab_quota"), "info");
+        }
+      }
+      await abPrune(cfg.keep);
+      abRounds = 0; abLastTs = Date.now(); abDirty = false;
+      abRenderList();
+      return true;
+    } catch (e) { console.warn("Auto-Sicherung fehlgeschlagen:", e); showToast(t("ab_fail"), "error"); return false; }
+    finally { abBusy = false; }
+  }
+  function abAfterRound() { abDirty = true; abRounds++; const c = abCfg(); if (c.on && c.rounds > 0 && abRounds >= c.rounds) autoBackupNow("rounds"); }
+  function abBeforeSessionChange() { const c = abCfg(); if (c.on && c.session && (state.messages || []).length) { const b = JSON.parse(JSON.stringify(state)); b._app = "multi-rp-studio"; b._version = 1; autoBackupNow("session", JSON.stringify(b)); } }
+  setInterval(() => { const c = abCfg(); if (c.on && c.minutes > 0 && abDirty && !isGenerating && Date.now() - abLastTs >= c.minutes * 60000) autoBackupNow("timer"); }, 30000);
+  function abFmtSize(n) { return n >= 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; }
+  async function abRenderList() {
+    const box = document.getElementById("ab-list"); if (!box) return;
+    const l = await abList(); box.innerHTML = "";
+    if (!l.length) { box.innerHTML = `<div class="ab-empty">${escapeHTML(t("ab_empty"))}</div>`; }
+    l.forEach(b => {
+      const row = document.createElement("div"); row.className = "ab-row"; row.dataset.id = b.id;
+      const d = new Date(b.ts), when = d.toLocaleString(state.lang === "en" ? "en-GB" : "de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+      row.innerHTML = `<div class="ab-info"><div class="ab-when">${escapeHTML(when)} · ${escapeHTML(abFmtSize(b.size || 0))}</div><div class="ab-label">${escapeHTML(b.label || "–")} · ${escapeHTML(t("ab_r_" + (b.reason || "manual")))}</div></div>`;
+      const rb = document.createElement("button"); rb.className = "msg-action-btn ab-restore"; rb.textContent = t("ab_restore"); rb.onclick = () => abRestore(b.id);
+      const db = document.createElement("button"); db.className = "msg-action-btn ab-delete"; db.textContent = t("ab_delete"); db.onclick = () => showConfirmModal(t("ab_confirm_del"), async () => { await abTx("readwrite", st => st.delete(b.id)); abRenderList(); });
+      row.appendChild(rb); row.appendChild(db); box.appendChild(row);
+    });
+    const u = document.getElementById("ab-usage");
+    if (u && navigator.storage && navigator.storage.estimate) { try { const e = await navigator.storage.estimate(); u.textContent = tf("ab_usage", { u: abFmtSize(e.usage || 0), q: abFmtSize(e.quota || 0) }); } catch (e) {} }
+  }
+  // Laden über den normalen Import (gleiche Prüfungen + Bestätigung)
+  async function abRestore(id) {
+    const rec = await abTx("readonly", st => st.get(id)); if (!rec) return;
+    const inp = document.getElementById("import-file"); if (!inp || !inp.onchange) return;
+    const dt = new DataTransfer(); dt.items.add(new File([rec.data], "autobackup.json", { type: "application/json" }));
+    inp.files = dt.files; inp.onchange({ target: inp });
+  }
+  function abRenderSettings() {
+    const c = abCfg();
+    const set = (id, v, chk) => { const e = document.getElementById(id); if (e) { if (chk) e.checked = v; else e.value = v; } };
+    set("ab-on", c.on, true); set("ab-rounds", c.rounds); set("ab-minutes", c.minutes); set("ab-session", c.session, true); set("ab-keep", c.keep);
+    abRenderList();
+  }
+  function abSaveCfg() {
+    const g = id => document.getElementById(id);
+    state.settings.autoBackup = { on: !!g("ab-on")?.checked, rounds: sanitizeInt(g("ab-rounds")?.value, 0, 200, 5), minutes: sanitizeInt(g("ab-minutes")?.value, 0, 1440, 15), session: !!g("ab-session")?.checked, keep: sanitizeInt(g("ab-keep")?.value, 1, 50, 5) };
+    saveState(); abPrune(abCfg().keep).then(abRenderList);
+  }
+  ["ab-on", "ab-rounds", "ab-minutes", "ab-session", "ab-keep"].forEach(id => { const e = document.getElementById(id); if (e) e.onchange = abSaveCfg; });
+  { const b = document.getElementById("ab-now-btn"); if (b) b.onclick = async () => { if (await autoBackupNow("manual")) showToast(t("ab_saved"), "success"); }; }
+
+  // ---------- KOPFZEILE: Welt-Chip ----------
+  function toggleWorldChip(force) {
+    const pop = document.getElementById("world-pop"); if (!pop) return;
+    const on = force !== undefined ? !!force : !pop.classList.contains("open");
+    pop.classList.toggle("open", on);
+    const chip = document.getElementById("world-chip"); if (chip) chip.setAttribute("aria-expanded", on ? "true" : "false");
+  }
+  document.addEventListener("click", e => { const pop = document.getElementById("world-pop"); if (pop && pop.classList.contains("open") && !e.target.closest("#world-pop") && !e.target.closest("#world-chip")) toggleWorldChip(false); }, true);
+  aioApplyClass();
 
   // App starten
   initApp();
