@@ -615,6 +615,10 @@
             <label data-i18n="lbl_active_editor">Aktiver Lektor</label>
             <select id="setting-editor"><option value="">Deaktiviert (Direkte Ausgabe)</option></select>
           </div>
+          <label id="editor-cont-box" style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+            <input type="checkbox" id="setting-editor-cont">
+            <span><strong data-i18n="editor_cont_chk">Anschluss: letzte 1–2 Sätze des vorigen Kapitels mitgeben</strong></span>
+          </label>
         </div>
         <div class="card">
           <div class="card-title font-serif-title" style="color:var(--gold);" data-i18n="title_format">Standard-Format (ohne Lektor)</div>
@@ -1110,6 +1114,7 @@
       btn_add_lore: "+ Neuer Eintrag", btn_add_folder: "📁 + Ordner", btn_toggle_folders: "Alle auf/zu",
       card_lang: "🌐 Sprache / Language", editor_title: "✒️ Lektor-Pipeline (Stil-Veredelung)",
       editor_desc: "Verwebt Spielleiter-Kulisse und Begleiter-Reaktionen kaskadierend zu einem dichten Romankapitel.",
+      editor_cont_chk: "Anschluss: letzte 1–2 Sätze des vorigen Kapitels mitgeben",
       lbl_active_editor: "Aktiver Lektor", title_format: "Standard-Format (ohne Lektor)",
       combined_chk: "Kombinierte Gruppen-Nachricht (GM + Gefährten in einer Blase)",
       title_budget: "Kontext-Speicher (Dynamisches Budget)", lbl_budget: "Budget:", lbl_lore_share: "Davon Lore & Chronik:", lore_share_split: "{l} Lore / {c} Chat", lore_share_hint: "Nicht genutztes Lore-Budget geht automatisch an den Chatverlauf. Immer aktive Einträge werden nie weggelassen.", lore_stats: "Letzter Zug: {n} Einträge, {u}/{b} Tokens", lore_over: "Immer aktive Einträge allein über dem Lore-Budget (trotzdem vollständig gesendet)", lore_cut: "{n} erwähnte nicht gepasst: {t}", lore_more: "{n} Folge-Einträge ausgelassen",
@@ -1227,6 +1232,7 @@
       btn_add_lore: "+ New entry", btn_add_folder: "📁 + Folder", btn_toggle_folders: "Expand/collapse all",
       card_lang: "🌐 Language / Sprache", editor_title: "✒️ Editor pipeline (style polish)",
       editor_desc: "Weaves the game master's scene and the companions' reactions into one flowing novel passage.",
+      editor_cont_chk: "Continuity: pass the last 1–2 sentences of the previous chapter",
       lbl_active_editor: "Active editor", title_format: "Default format (without editor)",
       combined_chk: "Combined group message (GM + companions in one bubble)",
       title_budget: "Context memory (dynamic budget)", lbl_budget: "Budget:", lbl_lore_share: "Of which lore & chronicle:", lore_share_split: "{l} lore / {c} chat", lore_share_hint: "Unused lore budget automatically goes to the chat history. Always-active entries are never dropped.", lore_stats: "Last turn: {n} entries, {u}/{b} tokens", lore_over: "Always-active entries alone exceed the lore budget (still sent in full)", lore_cut: "{n} mentioned did not fit: {t}", lore_more: "{n} follow-up entries skipped",
@@ -1544,7 +1550,7 @@
     loreCategories: [...DEFAULT_LORE_CATS],
     lorebook: [],
     mapPlaces: [],
-    settings: { combined: true, showThoughts: false, maxTokenBudget: 3200, order: [], editorId: "", stripKeysOnExport: true, weltbuch: { map: true, memories: true, lore: true } },
+    settings: { combined: true, showThoughts: false, editorContinuity: false, maxTokenBudget: 3200, order: [], editorId: "", stripKeysOnExport: true, weltbuch: { map: true, memories: true, lore: true } },
     messages: []
   };
 
@@ -1950,7 +1956,13 @@
   // „</think>“ ohne öffnendes „<think>“ (manche Reasoning-Modelle): alles davor ist Denken
   function fixThink(text) {
     const s = String(text || ""), i = s.search(/<\/think>/i);
-    return i !== -1 && !/<think>/i.test(s.slice(0, i)) ? "<think>" + s : s;
+    if (i === -1) return s;
+    const opens = (s.match(/<think>/gi) || []).length, closes = (s.match(/<\/think>/gi) || []).length;
+    if (closes > opens) {   // verwaistes „</think>“: alles davor ist Denken
+      const j = s.toLowerCase().lastIndexOf("</think>");
+      return "<think>" + s.slice(0, j).replace(/<\/?think>/gi, "\n") + "</think>" + s.slice(j + 8);
+    }
+    return !/<think>/i.test(s.slice(0, i)) ? "<think>" + s : s;
   }
   function noThink(text) { return fixThink(text).replace(/<think>[\s\S]*?(?:<\/think>|$)/gi, ""); }
 
@@ -2811,7 +2823,8 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     const worldAmbient = getWorldAmbientPrompt();
     const systemMessage = {
       role: "system",
-      content: (character.prompt || "") + getUserPersonaPrompt() + companionProg + worldAmbient + (systemInstruction ? "\n\n" + systemInstruction : "")
+      content: opts.bare ? (character.prompt || "") + (systemInstruction ? "\n\n" + systemInstruction : "")   // Lektor: nur eigener Prompt + Regeln
+        : (character.prompt || "") + getUserPersonaPrompt() + companionProg + worldAmbient + (systemInstruction ? "\n\n" + systemInstruction : "")
     };
 
     const sanitizedMessages = sanitizeRoleAlternation(messagesList);
@@ -3582,7 +3595,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     const rawResponse = await streamInfermatic(actor, promptTunnel, systemInstruction, onChunk, isGM, isGM ? protectedNames : [], customMaxTokens);
 
     let wb = null;
-    if (!isAborted && rawResponse) {
+    if (!isAborted && rawResponse && actor.role !== "editor") {   // Lektor: Tracking nur aus den Original-Antworten
       processWorldUpdates(rawResponse);
       if (!isNpcVoiceChar(actor)) processLiveMutations(rawResponse, actor.role === "companion" ? actor.id : "user");
       if (actor.role === "gm") wb = processWeltbuchTags(rawResponse);
@@ -3592,6 +3605,53 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     const noWb = rawResponse ? stripWeltbuchTags(rawResponse) : rawResponse;
     const shown = noWb ? stripVoiceTags(noWb) : noWb;
     return { raw: shown, clean: stripThink(shown), scene: stripThink(noWb, true), full: rawResponse || "", voices: extractVoiceTags(rawResponse), wb };
+  }
+  // ---------- Stil-Synthese (Lektor): Anfrage nur aus diesem Zug ----------
+  // Namen/Begriffe für die Schreibweise: Spieler, Sprecher dieses Zuges, bekannte Figuren/Orte/Lore-Titel, die in den Entwürfen vorkommen
+  function editorGlossary(drafts, userName) {
+    const out = [], seen = new Set();
+    const add = n => { const s = String(n || "").trim(); if (s.length >= 2 && s.length <= 40 && !seen.has(s.toLowerCase())) { seen.add(s.toLowerCase()); out.push(s); } };
+    add(userName);
+    drafts.forEach(d => { if (!d.voice && !d.gm) add(d.name); });
+    const text = drafts.map(d => d.text).join("\n").toLowerCase();
+    const cands = [...(state.characters || []).filter(c => c && c.role !== "editor" && c.role !== "gm" && !isNpcVoiceChar(c)).map(c => c.name),
+      state.world && state.world.location, ...(state.mapPlaces || []).map(p => p && p.name), ...(state.lorebook || []).filter(l => l && !l.gmOnly).map(l => l.title)];
+    for (const c of cands) { if (out.length >= 20) break; const s = String(c || "").trim(); if (s.length >= 3 && text.includes(s.toLowerCase())) add(s); }
+    return out.slice(0, 20);
+  }
+  // letzte 1–2 Sätze des vorigen Kapitels (nur wenn eingeschaltet)
+  function editorPrevTail(beforeIdx) {
+    if (!(state.settings && state.settings.editorContinuity)) return "";
+    for (let i = Math.min(beforeIdx, state.messages.length) - 1; i >= 0; i--) {
+      const m = state.messages[i];
+      if (!m || m.type === "user") continue;
+      const t = stripThink(m.type === "editor" ? (m.text || "") : (m.text || m.gmText || "")).replace(/\s+/g, " ").trim();
+      if (!t) continue;
+      const sents = t.match(/[^.!?…]+[.!?…]+["“”»«'’)]*/g) || [t];
+      return sents.slice(-2).join(" ").trim().slice(-320);
+    }
+    return "";
+  }
+  // drafts: [{name, text, gm?, voice?}] in Reihenfolge dieses Zuges
+  async function runEditorSynthesis({ editorChar, userName, triggerText, drafts, onChunk, maxTokens, prevTail }) {
+    const isEn = state.lang === "en", U = String(userName || (isEn ? "Player" : "Spieler"));
+    const use = drafts.filter(d => d && String(d.text || "").trim());
+    const gloss = editorGlossary(use, U);
+    const label = d => d.gm ? (isEn ? "NARRATION & NPCS" : "ERZÄHLUNG & NPCS") : d.voice ? (isEn ? "NPC VOICES" : "NPC-STIMMEN") : String(d.name || "").toUpperCase();
+    const sys = isEn
+      ? `### ROLE: STYLE SYNTHESIS (EDITOR)\nYou are not a participant in the story. Rework ONLY the drafts of this turn below into ONE chapter in your style.\nRULES:\n1. Content only from the drafts: invent nothing (no new actions, places, items, thoughts, NPCs) and drop no event; keep the order (narration first, then the reactions as listed).\n2. Spoken words stay verbatim and with the right speaker.\n3. ${U}'s message is narrated as an action (in second person \"you\"), not quoted as speech unless it is direct speech; do not extend it or put new words into ${U}'s mouth.\n4. A draft under [NAME] describes NAME: its \"I/my\" means NAME (narrate in third person); \"you\" is always ${U}.\n5. No tags or square brackets, no heading, no recap of earlier events, no meta comments.\n6. About as long as the drafts together.`
+      : `### ROLLE: STIL-SYNTHESE (LEKTOR)\nDu bist kein Mitspieler. Schreibe NUR die Entwürfe dieses Zuges unten in deinem Stil zu EINEM Kapitel um.\nREGELN:\n1. Inhalt nur aus den Entwürfen: nichts erfinden (keine neuen Handlungen, Orte, Gegenstände, Gedanken, NPCs), kein Ereignis und keinen Absatz weglassen; Reihenfolge bleibt (erst die Erzählung, dann die Reaktionen wie aufgeführt).\n2. Wörtliche Rede bleibt wörtlich und beim richtigen Sprecher.\n3. Die Nachricht von ${U} wird als Handlung erzählt (in der 2. Person „du“), nicht als Rede zitiert, außer sie ist wörtliche Rede; nicht erweitern, ${U} keine neuen Worte in den Mund legen.\n4. Ein Entwurf unter [NAME] beschreibt NAME: „ich/mein“ darin meint NAME (in der 3. Person erzählen); „du“ ist immer ${U}.\n5. Keine Tags oder eckigen Klammern, keine Überschrift, keine Nacherzählung früherer Ereignisse, keine Meta-Kommentare.\n6. Etwa so lang wie die Entwürfe zusammen.`;
+    const parts = [];
+    if (gloss.length) parts.push(`[${isEn ? "NAMES & TERMS (spelling only)" : "NAMEN & BEGRIFFE (nur Schreibweise)"}]: ${gloss.join(", ")}`);
+    if (prevTail) parts.push(`[${isEn ? "END OF PREVIOUS CHAPTER (connection only, do not repeat)" : "ENDE DES VORIGEN KAPITELS (nur Anschluss, nicht wiederholen)"}]: ${prevTail}`);
+    parts.push(`[${isEn ? "PLAYER MESSAGE" : "SPIELER-NACHRICHT"} – ${U}]:\n"${String(triggerText || "").trim()}"`);
+    use.forEach(d => parts.push(`[${label(d)}]:\n${String(d.text).trim()}`));
+    parts.push(isEn ? "Write the chapter now." : "Schreibe jetzt das Kapitel.");
+    partialStreamingText = "";
+    const raw = await streamInfermatic(editorChar, [{ role: "user", content: parts.join("\n\n") }], sys, onChunk, false, [], maxTokens, { bare: true });
+    // Tags gehören nie in den Kapiteltext (Auswertung lief schon auf den Original-Antworten)
+    const shown = raw ? stripAppTags(raw).replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim() : raw;
+    return { raw: shown, clean: stripThink(shown), full: raw || "" };
   }
   // PATCH: NPC-Stimme überspringen, wenn die Spielleitung [STIMMEN: keine] (oder [STIMMEN: —]) signalisiert
   function isNpcVoiceChar(c) { return /stimmen der welt|voices of the world/i.test(String(c?.name || "")) || /^(Du bist DIE STIMMEN DER WELT|You are THE VOICES OF THE WORLD)/i.test(String(c?.prompt || "")); }
@@ -6735,7 +6795,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
           });
           if (isAborted) return;
 
-          accumulatedCompanions.push({ name: comp.name, text: compTurn.clean });
+          accumulatedCompanions.push({ name: comp.name, text: compTurn.clean, voice: isNpcVoiceChar(comp) });
         }
 
         updateStatus(editorChar.name + (isEn ? " crafting novel chapter..." : " verfasst Kapitel..."));
@@ -6762,18 +6822,15 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
         activeStreamMsgRef = editorMsgObj;
         autoScroll(true);
 
-        const allCompanionsFormatted = accumulatedCompanions.map(c => `[${isEn ? "ACTION & DIALOGUE OF" : "HANDLUNG & DIALOG VON"} ${String(c.name).toUpperCase()}]:\n${c.text}`).join("\n\n");
-        const editorPrompt = isEn ? `Merge ONLY the following drafts of THIS turn into a short prose passage (no title, do not retell earlier events):\n[PLAYER ACTION BY ${String(userName).toUpperCase()}]:\n"${triggerText}"\n\n[WORLD & NPCS]:\n${gmTurn.clean || "No events."}\n\n${allCompanionsFormatted}\n\nEDITORIAL RULES:\n1. ZERO HALLUCINATION: Do not invent unrelated events!\n2. PRESERVE DIALOGUE: All spoken words from NPCs and companions must remain.\n3. CONTINUATION: Begin directly with the consequence of the player action. No heading, no recap, not longer than the drafts.`
-          : `Setze NUR die folgenden Entwürfe DIESES Zuges zu einem kurzen Erzählabschnitt zusammen (kein Titel, nichts Früheres nacherzählen):\n[SPIELER-AKTION VON ${String(userName).toUpperCase()}]:\n"${triggerText}"\n\n[WELT & NPCS]:\n${gmTurn.clean || "Keine Ereignisse."}\n\n${allCompanionsFormatted}\n\nLEKTORATS-REGELN:\n1. ZERO-HALLUCINATION: Erfinde keine neuen Handlungen oder Ereignisse dazu!\n2. DIALOG-TREUE: Alle gesprochenen Worte von NPCs und Gefährten müssen erhalten bleiben.\n3. FORTSETZUNG: Beginne direkt mit der Folge der Spieler-Aktion. Kein Titel, keine Nacherzählung, nicht länger als die Entwürfe.`;
-
+        const allCompanionsFormatted = accumulatedCompanions.map(c => `[${String(c.name).toUpperCase()}]:\n${c.text}`).join("\n\n");
         const draftChars = String(gmTurn.clean || "") + allCompanionsFormatted;
         const edMaxTokens = Math.min(4096, Math.max(1600, Math.round(estimateTokens(draftChars) * 1.15) + 300));
+        const edDrafts = [{ name: gmChar.name, text: gmTurn.clean, gm: true }, ...accumulatedCompanions.map(c => ({ name: c.name, text: c.text, voice: !!c.voice }))];
+        const edPrevTail = editorPrevTail(state.messages.findIndex(m => m && m.id === editorMsgObj.id));
         let editorTurn, edErr = null;
         try {
-          editorTurn = await executeActorTurn({
-            actor: editorChar, effectiveHistory: effectiveHistoryForScan, userPromptContent: editorPrompt,
-            onChunk: (chunkText) => renderThrottled(contentEl, chunkText), customMaxTokens: edMaxTokens
-          });
+          editorTurn = await runEditorSynthesis({ editorChar, userName, triggerText, drafts: edDrafts,
+            onChunk: (chunkText) => renderThrottled(contentEl, chunkText), maxTokens: edMaxTokens, prevTail: edPrevTail });
         } catch (e) {
           if (isAborted || e.name === "AbortError") throw e;
           edErr = e; editorTurn = { raw: stripVoiceTags(stripWeltbuchTags(partialStreamingText || "", true)) };
@@ -7033,7 +7090,28 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
         userPrompt = buildCompanionPromptContent(char, state.user?.name || "Player", lastUserAction || (isEn ? "Stay alert." : "Bleib wachsam."), lastGmScene, "", compGuide, isEn);
       }
 
-      const turnResult = await executeActorTurn({
+      let turnResult;
+      if (isEditor) {
+        // letzter Zug = letzte Spieler-Nachricht + alle Antworten danach (vor dieser Blase)
+        let ui = -1; for (let i = cutoff; i >= 0; i--) if (state.messages[i]?.type === "user") { ui = i; break; }
+        const drafts = [];
+        for (let i = ui + 1; i <= cutoff && i < targetIdx; i++) {
+          const m = state.messages[i]; if (!m || m.type === "editor") continue;
+          if (m.type === "combined") {
+            if (m.gmText) drafts.push({ name: m.gmName || "", text: stripThink(m.gmText), gm: true });
+            (m.companionParts || []).forEach(p => drafts.push({ name: p.charName, text: stripThink(p.text), voice: /stimmen der welt|voices of the world/i.test(String(p.charName || "")) }));
+          } else {
+            const c = state.characters.find(x => x && x.id === m.senderId);
+            drafts.push({ name: m.senderName || (c && c.name) || "", text: stripThink(m.text || ""), gm: m.type === "gm" || (c && c.role === "gm"), voice: c ? isNpcVoiceChar(c) : false });
+          }
+        }
+        // Lektor-Modus speichert die Roh-Antworten nicht: dann das vorhandene Kapitel dieses Zuges neu fassen
+        if (!drafts.some(d => String(d.text || "").trim())) for (let i = ui + 1; i <= cutoff && i < targetIdx; i++) { const m = state.messages[i]; if (m && m.type === "editor" && m.text) drafts.push({ name: "", text: stripThink(m.text), gm: true }); }
+        if (!drafts.some(d => String(d.text || "").trim())) drafts.push({ name: "", text: isEn ? "(no replies yet)" : "(noch keine Antworten)", gm: true });
+        const est = estimateTokens(drafts.map(d => d.text).join("\n"));
+        turnResult = await runEditorSynthesis({ editorChar: char, userName: state.user?.name, triggerText: ui >= 0 ? stripThink(state.messages[ui].text || "") : "",
+          drafts, onChunk: (chunkText) => renderThrottled(contentEl, chunkText), maxTokens: Math.min(4096, Math.max(1600, Math.round(est * 1.15) + 300)), prevTail: editorPrevTail(ui) });
+      } else turnResult = await executeActorTurn({
         actor: char, effectiveHistory: historySlice, userPromptContent: userPrompt,
         onChunk: (chunkText) => renderThrottled(contentEl, chunkText), isGM, customMaxTokens: 1400
       });
@@ -7643,6 +7721,8 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
 
     const combEl = document.getElementById("setting-combined");
     if (combEl) combEl.checked = !!state.settings.combined;
+    const ecEl = document.getElementById("setting-editor-cont");
+    if (ecEl) ecEl.checked = !!state.settings.editorContinuity;
     const thEl = document.getElementById("setting-thoughts");
     if (thEl) thEl.checked = !!state.settings.showThoughts;
     const budgEl = document.getElementById("setting-budget");
@@ -8168,6 +8248,8 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
   if (setCombEl) {
     setCombEl.onchange = (e) => { state.settings.combined = e.target.checked; saveState(); };
   }
+  const setEcEl = document.getElementById("setting-editor-cont");
+  if (setEcEl) setEcEl.onchange = (e) => { state.settings.editorContinuity = !!e.target.checked; saveState(); };
   const setThEl = document.getElementById("setting-thoughts");
   if (setThEl) setThEl.onchange = (e) => { state.settings.showThoughts = !!e.target.checked; saveState(); renderChat(); };
 
@@ -8315,6 +8397,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
           candidateState.lang = (imported.lang === "en" || imported.lang === "de") ? imported.lang : (state.lang === "en" ? "en" : "de");
           candidateState.mapPlaces = sanitizeMapPlaces(imported.mapPlaces, 200);
           candidateState.settings.showThoughts = !!candidateState.settings.showThoughts;
+          candidateState.settings.editorContinuity = !!candidateState.settings.editorContinuity;
           candidateState.settings.weltbuch = sanitizeWbSettings(imported.settings && imported.settings.weltbuch);
           candidateState.settings.setting = sanitizeSetting(imported.settings && imported.settings.setting); // alte Backups ohne Setting = Fantasy
 
