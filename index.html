@@ -83,6 +83,7 @@
     .bottom-nav { height:54px; background:var(--surface); border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-around; flex-shrink:0; z-index:50; padding-bottom:env(safe-area-inset-bottom); }
     .nav-tab { background:none; border:none; color:var(--dim); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; cursor:pointer; flex:1; height:100%; transition:color 0.15s ease; }
     .nav-tab.active { color:var(--gold); font-weight:600; }
+    .nav-tab { min-width:0; min-height:44px; padding:0 2px; } .nav-tab .nav-label { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .nav-icon { font-size:17px; }
     .nav-label { font-size:11px; }
 
@@ -188,6 +189,17 @@
     .map-fab { position:absolute; top:6px; right:8px; z-index:25; width:42px; height:42px; padding:0; border-radius:50%; justify-content:center; font-size:20px; line-height:1; box-shadow:0 3px 10px rgba(0,0,0,0.45); }
     .map-fab.hidden { display:none !important; }
     #view-chat.has-map-fab #chat-messages { padding-top:58px; }
+    .img-fab { right:58px; }
+    #img-modal .img-steps { font-size:13px; }
+    #img-status { padding:8px 10px; border-radius:8px; background:var(--surface-2); border:1px solid var(--border); font-size:13.5px; }
+    #img-status[data-step="err"] { color:#f08a7a; border-color:rgba(240,138,122,.4); }
+    #img-status[data-step="ok"] { color:#9fd49a; }
+    #img-modal.img-busy #img-status::before { content:""; display:inline-block; width:12px; height:12px; margin-right:8px; border:2px solid var(--gold); border-right-color:transparent; border-radius:50%; animation:imgspin .8s linear infinite; vertical-align:-2px; }
+    @keyframes imgspin { to { transform:rotate(360deg); } }
+    #img-prev img, .img-test-img { display:block; width:100%; max-width:420px; border-radius:10px; border:1px solid var(--border); margin-top:6px; }
+    .img-test-img { max-width:160px; }
+    .img-pr { margin-top:6px; font-size:12.5px; } .img-pr > summary { cursor:pointer; color:var(--gold); } .img-pr p { margin:6px 0; white-space:pre-wrap; word-break:break-word; }
+    #p2-img-box [hidden], #img-char-row[hidden], #img-status[hidden], #img-hint[hidden], #img-reuse-row[hidden], #p2-img-key-row[hidden] { display:none !important; }
     .wb-note { margin-top:8px; display:flex; flex-wrap:wrap; gap:6px; align-items:center; font-size:11px; color:var(--muted); }
     .wb-note span { background:rgba(223,160,71,0.1); border:1px solid rgba(223,160,71,0.25); border-radius:10px; padding:1px 8px; }
     .wb-here-chip { background:var(--surface-3); border:1px dashed var(--gold); color:var(--gold); border-radius:12px; padding:2px 10px; font-size:11.5px; cursor:pointer; min-height:26px; }
@@ -463,7 +475,22 @@
     .mm-im-list li.bad { border:1px solid var(--danger); }
     .mm-im-list small { color:var(--muted); font-size:11.5px; word-break:break-word; } .mm-im-list small.w { color:#f2c46d; }
     body.mm-on { overflow:hidden; }
-    .im-mode[hidden] { display:none; }
+    .p2-branch-bar { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); padding:6px 10px; margin:0 0 8px; background:var(--surface-2); border:1px solid var(--border); border-radius:10px; }
+    .p2-branch-bar select { flex:1; min-width:0; }
+    .p2-img { position:relative; margin-top:8px; }
+    .p2-img img { display:block; width:100%; max-width:420px; border-radius:10px; border:1px solid var(--border); aspect-ratio:1; object-fit:cover; background:var(--surface-2); }
+    .p2-img.missing img { display:none; }
+    .p2-img .order-btn { position:absolute; top:6px; right:6px; width:28px; height:28px; }
+    .p2-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 10px; margin-top:6px; }
+    .p2-grid label { display:flex; flex-direction:column; font-size:11px; color:var(--muted); gap:2px; }
+    .p2-chk { display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer; margin-top:6px; }
+    .p2-det { border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; flex-direction:column; gap:8px; }
+    .p2-det > summary { cursor:pointer; font-weight:700; font-size:13.5px; color:var(--gold); }
+    .p2-det[open] > *:not(summary) { margin-top:8px; }
+    .p2-mono, .p2-chap-ta { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:16px; width:100%; }
+    .p2-chap-ta { font-family:inherit; }
+    .p1-warn { color:#f2c46d; }
+    .im-mode[hidden], #p2-img-openai[hidden], #p2-img-ext[hidden] { display:none; }
     .xio-row { display:flex; gap:8px; } .xio-row .btn { flex:1; font-size:12.5px; padding:9px 6px; }
     .xio-file { position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; pointer-events:none; }
     .xio-list { margin:0; padding-left:18px; font-size:12.5px; line-height:1.45; max-height:180px; overflow:auto; }
@@ -562,15 +589,15 @@
 
   <div id="main-menu" class="main-menu" hidden>
     <div class="mm-wrap">
-      <div class="mm-top"><div class="font-serif-title mm-logo">⚔ Multi-RP Studio</div><button class="header-btn hdr-round" id="mm-close" title="Zurück zur Kampagne" data-i18n-title="mm_back">✕</button></div>
-      <p class="mm-hint" data-i18n="mm_desc">Deine Kampagnen auf diesem Gerät. Spieler-Profil und Anbieter gelten für alle.</p>
+      <div class="mm-top"><div class="font-serif-title mm-logo">⚔ Multi-RP Studio</div><button class="header-btn hdr-round" id="mm-close" title="Zurück zum Abenteuer" data-i18n-title="mm_back">✕</button></div>
+      <p class="mm-hint" data-i18n="mm_desc">Deine Abenteuer auf diesem Gerät. Spieler-Profil und Anbieter gelten für alle.</p>
       <div class="xio-row">
-        <button class="btn btn-primary" id="mm-new-btn" data-i18n="mm_new">+ Neue Kampagne</button>
+        <button class="btn btn-primary" id="mm-new-btn" data-i18n="mm_new">+ Neues Abenteuer</button>
         <button class="btn btn-secondary" id="mm-import-btn" data-i18n="mm_import">📥 Backups laden</button>
       </div>
       <input type="file" id="mm-file" accept=".json,application/json" multiple class="xio-file">
       <div id="mm-list" class="mm-list"></div>
-      <button class="btn btn-secondary" id="mm-export-all" data-i18n="mm_export_all">⬇️ Alle Kampagnen herunterladen</button>
+      <button class="btn btn-secondary" id="mm-export-all" data-i18n="mm_export_all">⬇️ Alle Abenteuer herunterladen</button>
       <p class="mm-hint mm-drop" data-i18n="mm_drop">Tipp (Desktop): Backup-Dateien einfach hierher ziehen.</p>
     </div>
   </div>
@@ -603,6 +630,7 @@
     <section class="view-panel active" id="view-chat">
       <div id="chat-messages"></div>
       <button id="map-fab" class="header-btn map-fab" onclick="openMapModal()" title="Karte öffnen" data-i18n-title="tt_map">🗺️</button>
+      <button id="img-fab" class="header-btn map-fab img-fab hidden" title="Szenenbild erzeugen" aria-label="Szenenbild erzeugen" data-i18n-title="img_fab">🎨</button>
       <button id="scroll-bottom-btn" class="scroll-bottom-btn" title="Nach unten scrollen" data-i18n-title="tt_scroll">↓</button>
       <div id="status-indicator"><span>⚡</span><span id="status-text" data-i18n="status_ready">Bereit</span></div>
       <div id="bk-remind" class="bk-remind" role="status" hidden><span id="bk-remind-txt"></span><button class="btn btn-primary" id="bk-remind-go" data-i18n="rm_go">📦 Sichern</button><button class="msg-action-btn" id="bk-remind-later" data-i18n="rm_later">Später</button></div>
@@ -698,6 +726,16 @@
       </div>
     </section>
 
+    <section class="view-panel" id="view-chronik">
+      <div style="padding:14px; display:flex; flex-direction:column; gap:12px; max-width:700px; margin:0 auto; width:100%;"><div class="card">
+        <div class="card-title font-serif-title" style="color:var(--gold);" data-i18n="p2_chap_title">📚 Chronik</div>
+        <p class="p1-note" id="p2-chap-branch"></p>
+        <p class="p1-note" id="p2-chap-info"></p>
+        <div class="xio-row" style="align-items:center;"><label class="p2-chk"><input type="checkbox" id="p2-chap-on"><span data-i18n="p2_chap_auto">Automatisch alle</span></label><input type="number" id="p2-chap-every" min="6" max="400" inputmode="numeric" style="max-width:80px;" aria-label="N"><span class="p1-note" data-i18n="p2_chap_msgs">Nachrichten</span></div>
+        <button class="btn btn-secondary" id="p2-chap-now" data-i18n="p2_chap_now">✍️ Jetzt zusammenfassen</button>
+        <p class="p1-note" id="p2-chap-status" aria-live="polite"></p>
+        <div id="p2-chap-list" style="display:flex; flex-direction:column; gap:8px;"></div></div>
+    </section>
     <section class="view-panel" id="view-settings">
       <div style="padding:14px; display:flex; flex-direction:column; gap:12px; max-width:650px; margin:0 auto; width:100%;">
         <div class="card">
@@ -706,6 +744,40 @@
             <button class="btn lang-btn" style="flex:1;" data-lang="de">🇩🇪 Deutsch</button>
             <button class="btn lang-btn" style="flex:1;" data-lang="en">🇬🇧 English</button>
           </div>
+        </div>
+        <div class="card" id="p2-card">
+          <div class="card-title font-serif-title" style="color:var(--gold);" data-i18n="p2_card">🧪 Profi-Werkzeuge</div>
+          <button class="btn btn-secondary" id="p2-insp-btn" data-i18n="p2_insp_btn">🔍 Letzte Anfrage ansehen</button>
+          <details class="p2-det"><summary data-i18n="p2_tpl_title">📝 Prompt-Vorlagen</summary>
+            <select id="p2-tpl-kind" aria-label="Vorlage"><option value="gm" data-i18n="p2_tpl_gm">Spielleitung (Zug)</option><option value="comp" data-i18n="p2_tpl_comp">Begleiter (Zug)</option><option value="style" data-i18n="p2_tpl_style">Stil-Synthese (Lektor)</option></select>
+            <p class="p1-note"><span id="p2-tpl-state"></span> · <span id="p2-tpl-help"></span></p>
+            <textarea id="p2-tpl-text" rows="9" spellcheck="false" class="p2-mono"></textarea>
+            <div class="xio-row"><button class="btn btn-secondary" id="p2-tpl-reset" data-i18n="p2_tpl_reset">↺ Standard</button><button class="btn btn-primary" id="p2-tpl-save" data-i18n="p2_tpl_save">Speichern</button></div>
+          </details>
+          <details class="p2-det" id="p2-img-box"><summary data-i18n="p2_img_title">🖼️ Bilder (optional)</summary>
+            <label class="p2-chk"><input type="checkbox" id="p2-img-on"><span data-i18n="p2_img_on">Bilder erzeugen erlauben</span></label>
+            <div class="form-group"><label for="p2-img-prov" data-i18n="p2_img_prov">Bild-Anbieter</label><select id="p2-img-prov"></select></div>
+            <p class="p1-note" id="img-hint"></p>
+            <p class="p1-note p1-warn" id="p2-img-ext" data-i18n="p2_img_ext">⚠️ Externer Dienst: Der Bild-Prompt (Szene, Namen) wird an image.pollinations.ai gesendet.</p>
+            <div class="form-group"><label for="p2-img-url">Base URL</label><input type="url" id="p2-img-url" inputmode="url" autocapitalize="off" spellcheck="false"></div>
+            <div class="form-group" id="p2-img-key-row"><label for="p2-img-key">API Key</label><input type="password" id="p2-img-key" autocomplete="off" spellcheck="false">
+              <label class="p2-chk" id="img-reuse-row"><input type="checkbox" id="img-reuse"><span data-i18n="img_reuse">ArliAI-Chat-Key wiederverwenden, wenn leer</span></label></div>
+            <div class="form-group" data-f="model"><label for="p2-img-model" data-i18n="lbl_model">Modell</label><div class="xio-row"><input type="text" id="p2-img-model" list="img-models-dl" autocapitalize="off" spellcheck="false" style="flex:1;min-width:0"><button class="btn btn-secondary" id="img-models-btn" style="flex:0 0 auto;width:auto" title="Modell-Liste laden" aria-label="Modell-Liste laden" data-i18n-title="img_models_btn">📋</button></div><datalist id="img-models-dl"></datalist></div>
+            <div class="form-group" data-f="size"><label for="img-size" data-i18n="img_size">Größe / Format</label><select id="img-size"></select></div>
+            <div class="p2-grid">
+              <label data-f="steps"><span data-i18n="img_steps">Schritte</span><input type="number" id="img-steps" min="1" max="150" inputmode="numeric"></label>
+              <label data-f="cfg"><span>CFG / Guidance</span><input type="number" id="img-cfg" min="0" max="30" step="0.5" inputmode="decimal"></label>
+              <label data-f="sampler"><span>Sampler</span><input type="text" id="img-sampler" autocapitalize="off" spellcheck="false"></label>
+              <label data-f="seed"><span data-i18n="img_seed">Seed (−1 = zufällig)</span><input type="number" id="img-seed" min="-1" inputmode="numeric"></label>
+            </div>
+            <div class="form-group" data-f="neg"><label for="img-neg" data-i18n="img_neg">Negativ-Prompt (Standard)</label><input type="text" id="img-neg" autocapitalize="off" spellcheck="false"></div>
+            <div class="form-group"><label for="img-style" data-i18n="img_style">Stil-Präfix (vor jedem Prompt)</label><input type="text" id="img-style" autocapitalize="off" spellcheck="false"></div>
+            <div class="form-group"><label for="p2-img-max" data-i18n="p2_img_max">Speichergrenze pro Abenteuer (MB)</label><input type="number" id="p2-img-max" min="1" max="500" inputmode="numeric"></div>
+            <label class="p2-chk"><input type="checkbox" id="p2-img-exp"><span data-i18n="p2_img_exp">Bilder beim Export mitnehmen (größere Datei)</span></label>
+            <button class="btn btn-secondary" id="img-test-btn" data-i18n="img_test">🧪 Verbindung testen (Testbild)</button>
+            <div class="p1-note" id="img-test-out" aria-live="polite"></div>
+          </details>
+          <button class="btn btn-secondary" id="p2-basic-reset" data-i18n="p2_basic_reset">↺ Erweiterte Parameter wieder für alle Anbieter erlauben</button>
         </div>
         <div class="card" id="setting-card">
           <div class="card-title font-serif-title" style="color:var(--gold);" data-i18n="st_title">🎭 Setting</div>
@@ -820,11 +892,11 @@
             <button class="btn btn-secondary" id="ps-ask-btn" data-i18n="ps_ask" hidden>🛡️ Dauerhaft speichern anfragen</button>
           </div>
           <div class="p1-box" id="cx-box">
-            <div class="p1-h" data-i18n="cx_title">📦 Kampagne als Datei</div>
+            <div class="p1-h" data-i18n="cx_title">📦 Abenteuer als Datei</div>
             <p class="p1-note" id="cx-last"></p>
             <div style="display:flex; gap:8px;">
-              <button class="btn btn-primary" style="flex:1;" id="export-btn" data-i18n="btn_export">📦 Kampagne exportieren</button>
-              <button class="btn btn-secondary" style="flex:1;" id="import-btn" data-i18n="btn_import">📥 Kampagne importieren</button>
+              <button class="btn btn-primary" style="flex:1;" id="export-btn" data-i18n="btn_export">📦 Abenteuer exportieren</button>
+              <button class="btn btn-secondary" style="flex:1;" id="import-btn" data-i18n="btn_import">📥 Abenteuer importieren</button>
             </div>
             <input type="file" id="import-file" accept=".json,application/json" style="display:none;">
             <label class="p1-chk"><input type="checkbox" id="setting-include-keys"><span data-i18n="cx_keys_chk">🔑 API-Keys mitexportieren (nicht empfohlen)</span></label>
@@ -858,6 +930,7 @@
     <button class="nav-tab active" data-view="view-chat"><span class="nav-icon">💬</span><span class="nav-label" data-i18n="tab_chat">Chat</span></button>
     <button class="nav-tab" data-view="view-party"><span class="nav-icon">👥</span><span class="nav-label" data-i18n="tab_party">Gruppe</span></button>
     <button class="nav-tab" data-view="view-lorebook"><span class="nav-icon">📖</span><span class="nav-label" data-i18n="tab_lore">Lore</span></button>
+    <button class="nav-tab" data-view="view-chronik"><span class="nav-icon">📜</span><span class="nav-label" data-i18n="tab_chronik">Chronik</span></button>
     <button class="nav-tab" data-view="view-settings"><span class="nav-icon">⚙️</span><span class="nav-label" data-i18n="tab_system">System</span></button>
   </nav>
 
@@ -929,6 +1002,7 @@
             <button class="order-btn" style="color:var(--danger);" id="delete-session-btn" title="Löschen" data-i18n-title="tooltip_delete">🗑</button>
           </div>
         </div>
+        <button class="btn btn-secondary" id="p2-chap-btn" style="margin-top:4px;" data-i18n="p2_chap_btn">📜 Chronik öffnen</button>
         <button class="btn btn-secondary" id="session-first-msg-btn" style="margin-top:4px;" data-i18n="btn_set_scene">
           🎬 Szenen-Auftakt festlegen
         </button>
@@ -1031,6 +1105,18 @@
             <div class="form-group">
               <label>Repetition Penalty: <span id="reppenalty-val">1.1</span></label>
               <input type="range" id="char-reppenalty" min="1.0" max="1.5" step="0.02" value="1.1" oninput="document.getElementById('reppenalty-val').innerText=this.value">
+            </div>
+            <div class="form-group p2-sampler">
+              <label data-i18n="p2_sampler">🎛️ Sampler (leer = nicht senden)</label>
+              <select id="char-preset"><option value="" data-i18n="p2_preset">Voreinstellung wählen …</option><option value="creative" data-i18n="p2_pre_creative">Kreativ</option><option value="balanced" data-i18n="p2_pre_balanced">Ausgewogen</option><option value="precise" data-i18n="p2_pre_precise">Präzise</option></select>
+              <div class="p2-grid">
+                <label>min_p<input type="number" id="char-minp" step="0.01" min="0" max="1" inputmode="decimal"></label>
+                <label>top_k<input type="number" id="char-topk" step="1" min="0" max="500" inputmode="numeric"></label>
+                <label>frequency_penalty<input type="number" id="char-freqp" step="0.05" min="-2" max="2" inputmode="decimal"></label>
+                <label>presence_penalty<input type="number" id="char-presp" step="0.05" min="-2" max="2" inputmode="decimal"></label>
+                <label>max_tokens<input type="number" id="char-maxtok" step="50" min="16" max="32000" inputmode="numeric"></label>
+              </div>
+              <label class="p2-chk"><input type="checkbox" id="char-basic"><span data-i18n="p2_basic">Nur Basis-Parameter (für strikte Anbieter)</span></label>
             </div>
             <div class="form-group">
               <label data-i18n="lbl_reasoning">🧠 Nachdenken (Reasoning)</label>
@@ -1211,7 +1297,7 @@
   <div class="modal" id="import-modal">
     <div class="modal-content" style="max-width:420px;">
       <div class="modal-header">
-        <span class="font-serif-title" data-i18n="im_title">📥 Kampagne importieren</span>
+        <span class="font-serif-title" data-i18n="im_title">📥 Abenteuer importieren</span>
         <button class="header-btn" onclick="closeModal('import-modal')">✕</button>
       </div>
       <div class="modal-body">
@@ -1232,9 +1318,35 @@
     </div>
   </div>
 
+  <div class="modal" id="p2-insp-modal">
+    <div class="modal-content" style="max-width:560px;">
+      <div class="modal-header"><span class="font-serif-title" data-i18n="p2_insp_title">🔍 Letzte Anfrage</span><button class="header-btn" onclick="closeModal('p2-insp-modal')">✕</button></div>
+      <div class="modal-body" id="p2-insp-body"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="img-modal">
+    <div class="modal-content" style="max-width:520px;">
+      <div class="modal-header"><span class="font-serif-title" data-i18n="img_title">🎨 Szenenbild</span><button class="header-btn" onclick="imgCancel()" title="Schließen" aria-label="Schließen">✕</button></div>
+      <div class="modal-body" style="display:flex; flex-direction:column; gap:10px;">
+        <div class="form-group"><label for="img-mode" data-i18n="img_mode">Was soll ins Bild?</label><select id="img-mode"><option value="scene" data-i18n="img_m_scene">Aktuelle Szene</option><option value="last" data-i18n="img_m_last">Letzte Nachricht</option><option value="portrait" data-i18n="img_m_portrait">Porträt einer Figur</option><option value="custom" data-i18n="img_m_custom">Eigener Prompt</option></select></div>
+        <div class="form-group" id="img-char-row"><label for="img-char" data-i18n="img_char">Figur</label><select id="img-char"></select></div>
+        <p class="p1-note" id="img-prov-note"></p>
+        <div id="img-status" aria-live="polite" hidden></div>
+        <details class="p2-det" id="img-prompt-det"><summary data-i18n="img_prompt">Prompt</summary>
+          <label class="p1-note" for="img-pos" data-i18n="img_pos">Positiv (Englisch)</label><textarea id="img-pos" rows="5" class="p2-mono" spellcheck="false"></textarea>
+          <label class="p1-note" for="img-neg2" data-i18n="img_negp">Negativ</label><textarea id="img-neg2" rows="2" class="p2-mono" spellcheck="false"></textarea>
+          <button class="btn btn-secondary" id="img-redo" data-i18n="img_redo">🎨 Mit diesem Prompt neu erzeugen</button>
+        </details>
+        <div id="img-prev"></div>
+        <div class="xio-row"><button class="btn btn-secondary" id="img-cancel" data-i18n="btn_close">Schließen</button><button class="btn btn-primary" id="img-go" data-i18n="img_go">✨ Prompt schreiben & Bild erzeugen</button></div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal" id="mm-new-modal">
     <div class="modal-content" style="max-width:420px;">
-      <div class="modal-header"><span class="font-serif-title" data-i18n="mm_new_title">+ Neue Kampagne</span><button class="header-btn" onclick="closeModal('mm-new-modal')">✕</button></div>
+      <div class="modal-header"><span class="font-serif-title" data-i18n="mm_new_title">+ Neues Abenteuer</span><button class="header-btn" onclick="closeModal('mm-new-modal')">✕</button></div>
       <div class="modal-body">
         <div class="form-group"><label data-i18n="lbl_name">Name</label><input type="text" id="mm-new-name" maxlength="80" autocomplete="off" data-i18n-ph="mm_new_ph" placeholder="z. B. Die Nebelküste"></div>
         <fieldset class="im-mode st-pick"><legend data-i18n="st_title">🎭 Setting</legend>
@@ -1242,7 +1354,7 @@
           <label><input type="radio" name="mm-st" value="modern"><span><b data-i18n="st_modern">🌃 Modern</b></span></label>
           <label><input type="radio" name="mm-st" value="scifi"><span><b data-i18n="st_scifi">🚀 Sci-Fi</b></span></label>
         </fieldset>
-        <p class="p1-note" data-i18n="mm_new_note">Die aktuelle Kampagne bleibt unverändert gespeichert. Figuren und Lore legst du in der neuen Kampagne an.</p>
+        <p class="p1-note" data-i18n="mm_new_note">Das aktuelle Abenteuer bleibt unverändert gespeichert. Figuren und Lore legst du im neuen Abenteuer an.</p>
         <div style="display:flex; gap:8px;"><button class="btn btn-secondary" style="flex:1;" onclick="closeModal('mm-new-modal')" data-i18n="btn_cancel">Abbrechen</button><button class="btn btn-primary" style="flex:1;" id="mm-new-ok" data-i18n="mm_create">Anlegen & starten</button></div>
       </div>
     </div>
@@ -1255,10 +1367,10 @@
         <p class="p1-note" id="mm-im-sum"></p>
         <ul class="mm-im-list" id="mm-im-list"></ul>
         <fieldset class="im-mode" id="mm-im-mode"><legend data-i18n="mm_im_mode">Name schon vorhanden:</legend>
-          <label><input type="radio" name="mm-im" id="mm-im-rename" checked><span><b data-i18n="mm_im_rename">Als neue Kampagne „(2)“</b></span></label>
+          <label><input type="radio" name="mm-im" id="mm-im-rename" checked><span><b data-i18n="mm_im_rename">Als neues Abenteuer „(2)“</b></span></label>
           <label><input type="radio" name="mm-im" id="mm-im-skip"><span><b data-i18n="mm_im_skip">Überspringen</b></span></label>
         </fieldset>
-        <p class="p1-note" data-i18n="mm_im_note">Jedes Backup wird eine eigene Kampagne. Nichts Vorhandenes wird überschrieben.</p>
+        <p class="p1-note" data-i18n="mm_im_note">Jedes Backup wird ein eigenes Abenteuer. Nichts Vorhandenes wird überschrieben.</p>
         <div style="display:flex; gap:8px;"><button class="btn btn-secondary" style="flex:1;" onclick="closeModal('mm-import-modal')" data-i18n="btn_cancel">Abbrechen</button><button class="btn btn-primary" style="flex:1;" id="mm-im-ok" data-i18n="im_ok">Importieren</button></div>
       </div>
     </div>
@@ -1578,12 +1690,17 @@
   Object.assign(I18N.de, {"ui_quota": "Speicherlimit erreicht!", "ui_save_disabled": "Speichern gesperrt.", "ui_saving": "💾 Speichere...", "ui_saved_ok": "Erfolgreich gesichert! ✓", "ui_saved_prefix": "Zuletzt:", "ui_crash_restored": "Notfall-Wiederherstellung: Daten gerettet!", "ui_lang_switched": "Sprache umgestellt!", "ui_level": "Stufe", "ui_wound": "Wunde", "ui_wound_treated": "Wunde versorgt", "ui_skill": "Talent", "ui_level_prompt": "Neue Stufe / Rang eingeben:", "ui_level_set": "Stufe auf", "ui_removed": "Entfernt:", "ui_no_reply": "Keine Antwort erhalten – bitte erneut versuchen.", "ui_branch": "Strang", "ui_msg_updated": "Nachricht aktualisiert.", "ui_need_user_model": "Bitte zuerst ein KI-Modell für deine Spielfigur eintragen.", "ui_need_chars": "Erstelle zuerst Charaktere.", "ui_folder_prompt": "Name des neuen Lorebook-Ordners:", "ui_folder_default": "Neuer Ordner", "ui_folder_exists": "Ein Ordner mit diesem Namen existiert bereits.", "ui_lore_edit_title": "Lore-Eintrag bearbeiten", "ui_lore_del": "Lore-Eintrag löschen?", "ui_editor_off": "Deaktiviert (Direkte Ausgabe)", "ui_adv_title_prompt": "Titel des neuen Abenteuers:", "ui_adv_rename_prompt": "Neuer Titel für dieses Abenteuer:", "ui_clear_hist": "Möchtest du den Verlauf leeren?", "ui_adv_del": "Abenteuer wirklich löschen?", "ui_profile_saved": "Spieler-Profil gespeichert!", "ui_char_edit_title": "Charakter bearbeiten", "ui_char_del": "Charakter wirklich löschen?", "ui_card_imported": "Charakterkarte importiert!", "ui_clear_all_hist": "Gesamten Verlauf dieses Abenteuers leeren?", "ui_reset_confirm": "Dieses Abenteuer löschen?", "ui_import_failed": "Import fehlgeschlagen: "});
   Object.assign(I18N.en, {"ui_quota": "Storage quota exceeded!", "ui_save_disabled": "Saving is disabled.", "ui_saving": "💾 Saving...", "ui_saved_ok": "Successfully saved! ✓", "ui_saved_prefix": "Saved:", "ui_crash_restored": "Crash Recovery: Data restored!", "ui_lang_switched": "Language switched!", "ui_level": "Level", "ui_wound": "Wound", "ui_wound_treated": "Wound treated", "ui_skill": "Skill", "ui_level_prompt": "Enter new Level / Rank:", "ui_level_set": "Level set to", "ui_removed": "Removed:", "ui_no_reply": "No reply received – please try again.", "ui_branch": "Branch", "ui_msg_updated": "Message updated.", "ui_need_user_model": "Please enter an AI model for your character first.", "ui_need_chars": "Please create characters first.", "ui_folder_prompt": "Name of the new Lorebook folder:", "ui_folder_default": "New Folder", "ui_folder_exists": "A folder with this name already exists.", "ui_lore_edit_title": "Edit Lorebook Entry", "ui_lore_del": "Delete Lorebook entry?", "ui_editor_off": "Disabled (Direct Output)", "ui_adv_title_prompt": "Title of the new adventure:", "ui_adv_rename_prompt": "New title for this adventure:", "ui_clear_hist": "Clear chat history for this adventure?", "ui_adv_del": "Delete adventure?", "ui_profile_saved": "Player profile saved!", "ui_char_edit_title": "Edit Character", "ui_char_del": "Really delete character?", "ui_card_imported": "Character card imported!", "ui_clear_all_hist": "Clear entire history for this adventure?", "ui_reset_confirm": "Delete this adventure?", "ui_import_failed": "Import failed: "});
 
-  Object.assign(I18N.de, {"xio_lore_export": "⬇️ Lorebook exportieren", "xio_lore_import": "📂 Einträge importieren", "xio_char_export": "⬇️ Alle exportieren", "xio_char_import": "📂 Importieren (JSON/PNG)", "xio_export_one": "Als Datei exportieren", "xio_title_lore": "📂 Lore-Einträge importieren", "xio_title_char": "📂 Charaktere importieren", "xio_s_found": "Gefunden", "xio_s_new": "Neu", "xio_s_conf": "Gleicher Name schon vorhanden", "xio_dup": "(doppelt)", "xio_mode": "Doppelte (gleicher Name):", "xio_skip": "Überspringen", "xio_skip_d": "Vorhandene bleiben unverändert.", "xio_over": "Überschreiben", "xio_over_d": "Inhalt wird ersetzt, Verknüpfungen (Karte, Reihenfolge) bleiben.", "xio_both": "Beide behalten", "xio_both_d": "Import wird als Kopie „(2)“ mit neuer ID angelegt.", "xio_done": "Import fertig: {a} neu, {o} überschrieben, {s} übersprungen.", "xio_exported": "{n} exportiert.", "xio_nokeys": "Ohne API-Keys.", "xio_nothing": "Nichts zum Exportieren.", "xio_fail_lore": "Lore-Import nicht möglich:", "xio_fail_char": "Charakter-Import nicht möglich:", "xio_e_json": "Die Datei ist kein gültiges JSON. Prüfe Kommas, Klammern und Anführungszeichen („\"“). Details: {m}", "xio_e_lore_fmt": "Unbekanntes Format. Erwartet wird ein Eintrag wie {\"name\": \"…\", \"content\": \"…\"}, eine Liste davon oder ein Lorebook mit \"entries\". Siehe Anleitung → Dateiformat.", "xio_e_char_fmt": "Unbekanntes Format. Erwartet wird ein Charakter wie {\"name\": \"…\", \"prompt\": \"…\"}, eine Liste davon, {\"characters\": […]} oder eine Character Card (V2/V3).", "xio_e_is_char": "Diese Datei enthält Charaktere. Bitte im Tab „Gruppe“ importieren.", "xio_e_is_lore": "Diese Datei enthält Lore-Einträge. Bitte im Tab „Lore“ importieren.", "xio_e_none": "Keine brauchbaren Einträge gefunden. {w}", "xio_w_notobj": "Eintrag {i}: kein Objekt in { } – übersprungen.", "xio_w_lore_empty": "Eintrag {i}: weder \"name\" noch \"content\" – übersprungen.", "xio_w_char_noname": "Charakter {i}: \"name\" fehlt – übersprungen.", "xio_w_loc": "Eintrag {i} („{n}“): \"location\" braucht mindestens \"type\" – Ort ignoriert.", "xio_w_book": "„{n}“ enthält ein eingebettetes Lorebook – im Tab „Lore“ mit derselben Datei importierbar.", "xio_g_title": "📄 Dateiformat: Lorebook & Charaktere", "xio_g_intro_html": "Einfache JSON-Dateien zum Teilen. Pflicht ist nur <b>name</b> (Lore: <b>name</b> oder <b>content</b>), alles andere hat Standardwerte. <b>keys</b> darf Text mit Kommas oder eine Liste sein. IDs vergibt die App selbst; API-Keys werden nie exportiert. Importiert werden auch SillyTavern World Info, Character Cards V2/V3 (JSON und PNG) und Kampagnen-Backups.", "xio_g_lore_min": "Lore-Eintrag (minimal)", "xio_g_lore_full": "Ganzes Lorebook (vollständig)", "xio_g_char_min": "Charakter (minimal)", "xio_g_char_full": "Charakter-Liste (vollständig)", "xio_g_dl": "⬇️ Vorlage"});
-  Object.assign(I18N.en, {"xio_lore_export": "⬇️ Export lorebook", "xio_lore_import": "📂 Import entries", "xio_char_export": "⬇️ Export all", "xio_char_import": "📂 Import (JSON/PNG)", "xio_export_one": "Export as file", "xio_title_lore": "📂 Import lore entries", "xio_title_char": "📂 Import characters", "xio_s_found": "Found", "xio_s_new": "New", "xio_s_conf": "Same name already exists", "xio_dup": "(duplicate)", "xio_mode": "Duplicates (same name):", "xio_skip": "Skip", "xio_skip_d": "Existing ones stay unchanged.", "xio_over": "Overwrite", "xio_over_d": "Content is replaced, links (map, turn order) are kept.", "xio_both": "Keep both", "xio_both_d": "The import is added as a copy “(2)” with a new id.", "xio_done": "Import done: {a} new, {o} overwritten, {s} skipped.", "xio_exported": "{n} exported.", "xio_nokeys": "Without API keys.", "xio_nothing": "Nothing to export.", "xio_fail_lore": "Lore import not possible:", "xio_fail_char": "Character import not possible:", "xio_e_json": "The file is not valid JSON. Check commas, brackets and quotes (\"). Details: {m}", "xio_e_lore_fmt": "Unknown format. Expected an entry like {\"name\": \"…\", \"content\": \"…\"}, a list of them, or a lorebook with \"entries\". See Guide → File format.", "xio_e_char_fmt": "Unknown format. Expected a character like {\"name\": \"…\", \"prompt\": \"…\"}, a list of them, {\"characters\": […]} or a Character Card (V2/V3).", "xio_e_is_char": "This file contains characters. Please import it in the “Party” tab.", "xio_e_is_lore": "This file contains lore entries. Please import it in the “Lore” tab.", "xio_e_none": "No usable entries found. {w}", "xio_w_notobj": "Entry {i}: not an object in { } – skipped.", "xio_w_lore_empty": "Entry {i}: neither \"name\" nor \"content\" – skipped.", "xio_w_char_noname": "Character {i}: \"name\" is missing – skipped.", "xio_w_loc": "Entry {i} (“{n}”): \"location\" needs at least \"type\" – place ignored.", "xio_w_book": "“{n}” contains an embedded lorebook – import the same file in the “Lore” tab.", "xio_g_title": "📄 File format: lorebook & characters", "xio_g_intro_html": "Simple JSON files for sharing. Only <b>name</b> is required (lore: <b>name</b> or <b>content</b>); everything else has defaults. <b>keys</b> may be comma-separated text or a list. The app assigns ids itself; API keys are never exported. SillyTavern World Info, Character Cards V2/V3 (JSON and PNG) and campaign backups can be imported too.", "xio_g_lore_min": "Lore entry (minimal)", "xio_g_lore_full": "Whole lorebook (full)", "xio_g_char_min": "Character (minimal)", "xio_g_char_full": "Character list (full)", "xio_g_dl": "⬇️ Template"});
+  Object.assign(I18N.de, {"xio_lore_export": "⬇️ Lorebook exportieren", "xio_lore_import": "📂 Einträge importieren", "xio_char_export": "⬇️ Alle exportieren", "xio_char_import": "📂 Importieren (JSON/PNG)", "xio_export_one": "Als Datei exportieren", "xio_title_lore": "📂 Lore-Einträge importieren", "xio_title_char": "📂 Charaktere importieren", "xio_s_found": "Gefunden", "xio_s_new": "Neu", "xio_s_conf": "Gleicher Name schon vorhanden", "xio_dup": "(doppelt)", "xio_mode": "Doppelte (gleicher Name):", "xio_skip": "Überspringen", "xio_skip_d": "Vorhandene bleiben unverändert.", "xio_over": "Überschreiben", "xio_over_d": "Inhalt wird ersetzt, Verknüpfungen (Karte, Reihenfolge) bleiben.", "xio_both": "Beide behalten", "xio_both_d": "Import wird als Kopie „(2)“ mit neuer ID angelegt.", "xio_done": "Import fertig: {a} neu, {o} überschrieben, {s} übersprungen.", "xio_exported": "{n} exportiert.", "xio_nokeys": "Ohne API-Keys.", "xio_nothing": "Nichts zum Exportieren.", "xio_fail_lore": "Lore-Import nicht möglich:", "xio_fail_char": "Charakter-Import nicht möglich:", "xio_e_json": "Die Datei ist kein gültiges JSON. Prüfe Kommas, Klammern und Anführungszeichen („\"“). Details: {m}", "xio_e_lore_fmt": "Unbekanntes Format. Erwartet wird ein Eintrag wie {\"name\": \"…\", \"content\": \"…\"}, eine Liste davon oder ein Lorebook mit \"entries\". Siehe Anleitung → Dateiformat.", "xio_e_char_fmt": "Unbekanntes Format. Erwartet wird ein Charakter wie {\"name\": \"…\", \"prompt\": \"…\"}, eine Liste davon, {\"characters\": […]} oder eine Character Card (V2/V3).", "xio_e_is_char": "Diese Datei enthält Charaktere. Bitte im Tab „Gruppe“ importieren.", "xio_e_is_lore": "Diese Datei enthält Lore-Einträge. Bitte im Tab „Lore“ importieren.", "xio_e_none": "Keine brauchbaren Einträge gefunden. {w}", "xio_w_notobj": "Eintrag {i}: kein Objekt in { } – übersprungen.", "xio_w_lore_empty": "Eintrag {i}: weder \"name\" noch \"content\" – übersprungen.", "xio_w_char_noname": "Charakter {i}: \"name\" fehlt – übersprungen.", "xio_w_loc": "Eintrag {i} („{n}“): \"location\" braucht mindestens \"type\" – Ort ignoriert.", "xio_w_book": "„{n}“ enthält ein eingebettetes Lorebook – im Tab „Lore“ mit derselben Datei importierbar.", "xio_g_title": "📄 Dateiformat: Lorebook & Charaktere", "xio_g_intro_html": "Einfache JSON-Dateien zum Teilen. Pflicht ist nur <b>name</b> (Lore: <b>name</b> oder <b>content</b>), alles andere hat Standardwerte. <b>keys</b> darf Text mit Kommas oder eine Liste sein. IDs vergibt die App selbst; API-Keys werden nie exportiert. Importiert werden auch SillyTavern World Info, Character Cards V2/V3 (JSON und PNG) und Abenteuer-Backups.", "xio_g_lore_min": "Lore-Eintrag (minimal)", "xio_g_lore_full": "Ganzes Lorebook (vollständig)", "xio_g_char_min": "Charakter (minimal)", "xio_g_char_full": "Charakter-Liste (vollständig)", "xio_g_dl": "⬇️ Vorlage"});
+  Object.assign(I18N.en, {"xio_lore_export": "⬇️ Export lorebook", "xio_lore_import": "📂 Import entries", "xio_char_export": "⬇️ Export all", "xio_char_import": "📂 Import (JSON/PNG)", "xio_export_one": "Export as file", "xio_title_lore": "📂 Import lore entries", "xio_title_char": "📂 Import characters", "xio_s_found": "Found", "xio_s_new": "New", "xio_s_conf": "Same name already exists", "xio_dup": "(duplicate)", "xio_mode": "Duplicates (same name):", "xio_skip": "Skip", "xio_skip_d": "Existing ones stay unchanged.", "xio_over": "Overwrite", "xio_over_d": "Content is replaced, links (map, turn order) are kept.", "xio_both": "Keep both", "xio_both_d": "The import is added as a copy “(2)” with a new id.", "xio_done": "Import done: {a} new, {o} overwritten, {s} skipped.", "xio_exported": "{n} exported.", "xio_nokeys": "Without API keys.", "xio_nothing": "Nothing to export.", "xio_fail_lore": "Lore import not possible:", "xio_fail_char": "Character import not possible:", "xio_e_json": "The file is not valid JSON. Check commas, brackets and quotes (\"). Details: {m}", "xio_e_lore_fmt": "Unknown format. Expected an entry like {\"name\": \"…\", \"content\": \"…\"}, a list of them, or a lorebook with \"entries\". See Guide → File format.", "xio_e_char_fmt": "Unknown format. Expected a character like {\"name\": \"…\", \"prompt\": \"…\"}, a list of them, {\"characters\": […]} or a Character Card (V2/V3).", "xio_e_is_char": "This file contains characters. Please import it in the “Party” tab.", "xio_e_is_lore": "This file contains lore entries. Please import it in the “Lore” tab.", "xio_e_none": "No usable entries found. {w}", "xio_w_notobj": "Entry {i}: not an object in { } – skipped.", "xio_w_lore_empty": "Entry {i}: neither \"name\" nor \"content\" – skipped.", "xio_w_char_noname": "Character {i}: \"name\" is missing – skipped.", "xio_w_loc": "Entry {i} (“{n}”): \"location\" needs at least \"type\" – place ignored.", "xio_w_book": "“{n}” contains an embedded lorebook – import the same file in the “Lore” tab.", "xio_g_title": "📄 File format: lorebook & characters", "xio_g_intro_html": "Simple JSON files for sharing. Only <b>name</b> is required (lore: <b>name</b> or <b>content</b>); everything else has defaults. <b>keys</b> may be comma-separated text or a list. The app assigns ids itself; API keys are never exported. SillyTavern World Info, Character Cards V2/V3 (JSON and PNG) and adventure backups can be imported too.", "xio_g_lore_min": "Lore entry (minimal)", "xio_g_lore_full": "Whole lorebook (full)", "xio_g_char_min": "Character (minimal)", "xio_g_char_full": "Character list (full)", "xio_g_dl": "⬇️ Template"});
 
-  Object.assign(I18N.de, {"mm_home": "Hauptmenü", "mm_back": "Zurück zur Kampagne", "mm_desc": "Deine Kampagnen auf diesem Gerät. Spieler-Profil, Anbieter und Sprache gelten für alle.", "mm_new": "+ Neue Kampagne", "mm_import": "📥 Backups laden", "mm_export_all": "⬇️ Alle Kampagnen herunterladen", "mm_drop": "Tipp (Desktop): Backup-Dateien einfach hierher ziehen. Mehrere auf einmal gehen auch.", "mm_unnamed": "Kampagne", "mm_new_default": "Neue Kampagne", "mm_new_title": "+ Neue Kampagne", "mm_new_ph": "z. B. Die Nebelküste", "mm_new_note": "Die aktuelle Kampagne bleibt unverändert gespeichert. Figuren und Lore legst du in der neuen Kampagne an.", "mm_create": "Anlegen & starten", "mm_open": "▶ Weiterspielen", "mm_rename": "Umbenennen", "mm_duplicate": "Duplizieren", "mm_export": "Als Backup herunterladen", "mm_delete": "Löschen", "mm_current": "aktuell", "mm_last": "zuletzt {d}", "mm_meta": "{c} · {m} · {l}", "mm_c1": "1 Charakter", "mm_cn": "{n} Charaktere", "mm_m1": "1 Nachricht", "mm_mn": "{n} Nachrichten", "mm_l1": "1 Lore-Eintrag", "mm_ln": "{n} Lore-Einträge", "mm_no_chars": "Noch keine Figuren", "mm_copy_sfx": "(Kopie)", "mm_dup_ok": "Kampagne dupliziert.", "mm_exported": "Kampagne heruntergeladen.", "mm_exported_all": "{n} Kampagnen in einer Datei heruntergeladen.", "mm_deleted": "Kampagne gelöscht.", "mm_del_confirm": "Kampagne „{n}“ mit allen Abenteuern, Chats, Lore und Karte endgültig löschen? Das lässt sich nicht rückgängig machen (vorher ggf. ⬇️ herunterladen).", "mm_switch_fail": "Wechsel nicht möglich – die aktuelle Kampagne bleibt geöffnet.", "mm_quota": "Speicher voll – Kampagne konnte nicht angelegt werden.", "mm_im_title": "📥 Backups laden", "mm_im_sum": "{ok} Kampagne(n) lesbar, {bad} Datei(en) fehlerhaft.", "mm_im_mode": "Name schon vorhanden:", "mm_im_rename": "Als neue Kampagne „(2)“ anlegen", "mm_im_skip": "Überspringen", "mm_im_note": "Jedes Backup wird eine eigene Kampagne. Nichts Vorhandenes wird überschrieben.", "mm_im_done": "{n} Kampagne(n) importiert, {s} übersprungen.", "mm_dup": "Name existiert schon", "mm_bundle_empty": "Die Sammeldatei enthält keine Kampagnen.", "mm_err_bundle": "Das ist eine Sammeldatei mit mehreren Kampagnen – bitte im Hauptmenü (🏠) über „Backups laden“ importieren."});
-  Object.assign(I18N.en, {"mm_home": "Main menu", "mm_back": "Back to campaign", "mm_desc": "Your campaigns on this device. Player profile, provider and language apply to all of them.", "mm_new": "+ New campaign", "mm_import": "📥 Load backups", "mm_export_all": "⬇️ Download all campaigns", "mm_drop": "Tip (desktop): just drop backup files here. Several at once work too.", "mm_unnamed": "Campaign", "mm_new_default": "New campaign", "mm_new_title": "+ New campaign", "mm_new_ph": "e.g. The Misty Coast", "mm_new_note": "The current campaign stays saved unchanged. Create characters and lore inside the new campaign.", "mm_create": "Create & start", "mm_open": "▶ Continue", "mm_rename": "Rename", "mm_duplicate": "Duplicate", "mm_export": "Download as backup", "mm_delete": "Delete", "mm_current": "current", "mm_last": "last {d}", "mm_meta": "{c} · {m} · {l}", "mm_c1": "1 character", "mm_cn": "{n} characters", "mm_m1": "1 message", "mm_mn": "{n} messages", "mm_l1": "1 lore entry", "mm_ln": "{n} lore entries", "mm_no_chars": "No characters yet", "mm_copy_sfx": "(copy)", "mm_dup_ok": "Campaign duplicated.", "mm_exported": "Campaign downloaded.", "mm_exported_all": "{n} campaigns downloaded in one file.", "mm_deleted": "Campaign deleted.", "mm_del_confirm": "Permanently delete campaign “{n}” with all adventures, chats, lore and map? This cannot be undone (download it with ⬇️ first if needed).", "mm_switch_fail": "Switching failed – the current campaign stays open.", "mm_quota": "Storage full – the campaign could not be created.", "mm_im_title": "📥 Load backups", "mm_im_sum": "{ok} campaign(s) readable, {bad} file(s) broken.", "mm_im_mode": "Name already exists:", "mm_im_rename": "Add as new campaign “(2)”", "mm_im_skip": "Skip", "mm_im_note": "Every backup becomes its own campaign. Nothing existing is overwritten.", "mm_im_done": "{n} campaign(s) imported, {s} skipped.", "mm_dup": "name already exists", "mm_bundle_empty": "The bundle file contains no campaigns.", "mm_err_bundle": "This is a bundle file with several campaigns – please import it from the main menu (🏠) via “Load backups”."});
+  Object.assign(I18N.de, {"mm_home": "Hauptmenü", "mm_back": "Zurück zum Abenteuer", "mm_desc": "Deine Abenteuer auf diesem Gerät. Spieler-Profil, Anbieter und Sprache gelten für alle.", "mm_new": "+ Neues Abenteuer", "mm_import": "📥 Backups laden", "mm_export_all": "⬇️ Alle Abenteuer herunterladen", "mm_drop": "Tipp (Desktop): Backup-Dateien einfach hierher ziehen. Mehrere auf einmal gehen auch.", "mm_unnamed": "Abenteuer", "mm_new_default": "Neues Abenteuer", "mm_new_title": "+ Neues Abenteuer", "mm_new_ph": "z. B. Die Nebelküste", "mm_new_note": "Das aktuelle Abenteuer bleibt unverändert gespeichert. Figuren und Lore legst du im neuen Abenteuer an.", "mm_create": "Anlegen & starten", "mm_open": "▶ Weiterspielen", "mm_rename": "Umbenennen", "mm_duplicate": "Duplizieren", "mm_export": "Als Backup herunterladen", "mm_delete": "Löschen", "mm_current": "aktuell", "mm_last": "zuletzt {d}", "mm_meta": "{c} · {m} · {l}", "mm_c1": "1 Charakter", "mm_cn": "{n} Charaktere", "mm_m1": "1 Nachricht", "mm_mn": "{n} Nachrichten", "mm_l1": "1 Lore-Eintrag", "mm_ln": "{n} Lore-Einträge", "mm_no_chars": "Noch keine Figuren", "mm_copy_sfx": "(Kopie)", "mm_dup_ok": "Abenteuer dupliziert.", "mm_exported": "Abenteuer heruntergeladen.", "mm_exported_all": "{n} Abenteuer in einer Datei heruntergeladen.", "mm_deleted": "Abenteuer gelöscht.", "mm_del_confirm": "Abenteuer „{n}“ mit allen Chats, Lore und Karte endgültig löschen? Das lässt sich nicht rückgängig machen (vorher ggf. ⬇️ herunterladen).", "mm_switch_fail": "Wechsel nicht möglich – das aktuelle Abenteuer bleibt geöffnet.", "mm_quota": "Speicher voll – Abenteuer konnte nicht angelegt werden.", "mm_im_title": "📥 Backups laden", "mm_im_sum": "{ok} Abenteuer lesbar, {bad} Datei(en) fehlerhaft.", "mm_im_mode": "Name schon vorhanden:", "mm_im_rename": "Als neues Abenteuer „(2)“ anlegen", "mm_im_skip": "Überspringen", "mm_im_note": "Jedes Backup wird ein eigenes Abenteuer. Nichts Vorhandenes wird überschrieben.", "mm_im_done": "{n} Abenteuer importiert, {s} übersprungen.", "mm_dup": "Name existiert schon", "mm_bundle_empty": "Die Sammeldatei enthält keine Abenteuer.", "mm_err_bundle": "Das ist eine Sammeldatei mit mehreren Abenteuern – bitte im Hauptmenü (🏠) über „Backups laden“ importieren."});
+  Object.assign(I18N.en, {"mm_home": "Main menu", "mm_back": "Back to adventure", "mm_desc": "Your adventures on this device. Player profile, provider and language apply to all of them.", "mm_new": "+ New adventure", "mm_import": "📥 Load backups", "mm_export_all": "⬇️ Download all adventures", "mm_drop": "Tip (desktop): just drop backup files here. Several at once work too.", "mm_unnamed": "Adventure", "mm_new_default": "New adventure", "mm_new_title": "+ New adventure", "mm_new_ph": "e.g. The Misty Coast", "mm_new_note": "The current adventure stays saved unchanged. Create characters and lore inside the new adventure.", "mm_create": "Create & start", "mm_open": "▶ Continue", "mm_rename": "Rename", "mm_duplicate": "Duplicate", "mm_export": "Download as backup", "mm_delete": "Delete", "mm_current": "current", "mm_last": "last {d}", "mm_meta": "{c} · {m} · {l}", "mm_c1": "1 character", "mm_cn": "{n} characters", "mm_m1": "1 message", "mm_mn": "{n} messages", "mm_l1": "1 lore entry", "mm_ln": "{n} lore entries", "mm_no_chars": "No characters yet", "mm_copy_sfx": "(copy)", "mm_dup_ok": "Adventure duplicated.", "mm_exported": "Adventure downloaded.", "mm_exported_all": "{n} adventures downloaded in one file.", "mm_deleted": "Adventure deleted.", "mm_del_confirm": "Permanently delete adventure “{n}” with all chats, lore and map? This cannot be undone (download it with ⬇️ first if needed).", "mm_switch_fail": "Switching failed – the current adventure stays open.", "mm_quota": "Storage full – the adventure could not be created.", "mm_im_title": "📥 Load backups", "mm_im_sum": "{ok} adventure(s) readable, {bad} file(s) broken.", "mm_im_mode": "Name already exists:", "mm_im_rename": "Add as new adventure “(2)”", "mm_im_skip": "Skip", "mm_im_note": "Every backup becomes its own adventure. Nothing existing is overwritten.", "mm_im_done": "{n} adventure(s) imported, {s} skipped.", "mm_dup": "name already exists", "mm_bundle_empty": "The bundle file contains no adventures.", "mm_err_bundle": "This is a bundle file with several adventures – please import it from the main menu (🏠) via “Load backups”."});
 
+  Object.assign(I18N.de, {"p2_del_alt": "Alternative {n} löschen?", "p2_del_alt_tt": "Diese Alternative löschen", "p2_branch_here": "Ab hier abzweigen", "p2_branch_sw": "🌿 Strang", "p2_img_msg": "Bild zur Szene erzeugen", "p2_img_char": "Porträt erzeugen", "p2_img_alt": "Erzeugtes Szenenbild", "p2_img_del": "Bild entfernen", "p2_insp_none": "Noch keine Anfrage in dieser Sitzung.", "p2_insp_note": "Token sind geschätzt (≈ Zeichen ÷ 2,8). API-Keys sind maskiert.", "p2_part_sys": "System (Rolle, Regeln, Profil)", "p2_part_lore": "Lore", "p2_part_mem": "Erinnerungen & Kapitel", "p2_part_hist": "Verlauf + aktueller Zug", "p2_part_total": "Gesamt", "p2_tpl_custom": "✏️ Eigene Vorlage aktiv", "p2_tpl_default": "Standard-Vorlage", "p2_tpl_vars_gm": "Platzhalter: {user} {trigger} {fate} {protected} {guide}", "p2_tpl_vars_comp": "Platzhalter: {name} {user} {scene} {trigger} {companions} {guide}", "p2_tpl_vars_style": "Systemanweisung des Lektors · Platzhalter: {user}", "p2_tpl_saved": "Vorlage gespeichert.", "p2_tpl_reset_ok": "Standard-Vorlage wiederhergestellt.", "p2_basic_on": "Der Anbieter lehnt Zusatz-Parameter ab – für ihn werden ab jetzt nur Basis-Parameter gesendet.", "p2_basic_cleared": "Erweiterte Parameter sind wieder für alle Anbieter erlaubt.", "p2_chap_nogm": "Keine Spielleitung mit Modell vorhanden.", "p2_chap_running": "⏳ Kapitel wird im Hintergrund zusammengefasst …", "p2_chap_fail": "Zusammenfassung fehlgeschlagen ({e}) – das Spiel läuft normal weiter.", "p2_chap_info": "{n} Kapitel · {u} Nachrichten noch nicht zusammengefasst (gilt für diesen Strang)", "p2_chap_empty": "Noch keine Kapitel. Sie entstehen automatisch oder über „Jetzt zusammenfassen“.", "p2_chap_n": "Kapitel {i} · {n} Nachrichten", "p2_pin": "📌 Anheften", "p2_unpin": "📌 Lösen", "p2_regen": "↻ Neu", "p2_chap_del": "Dieses Kapitel löschen? Die Nachrichten bleiben erhalten.", "p2_chap_nothing": "Noch nicht genug neue Nachrichten zum Zusammenfassen.", "p2_img_empty": "Der Bild-Anbieter hat kein Bild geliefert.", "p2_img_bad": "Bild konnte nicht gelesen werden.", "p2_img_nokey": "Für den Bild-Anbieter fehlt der API-Key (System → Profi-Werkzeuge → Bilder).", "p2_img_running": "🖼️ Bild wird erzeugt …", "p2_img_full": "Speichergrenze für Bilder erreicht ({n} MB).", "p2_img_ok": "Bild gespeichert.", "p2_img_fail": "Bild fehlgeschlagen: {e}", "p2_sampler": "🎛️ Sampler (leer = nicht senden)", "p2_preset": "Voreinstellung wählen …", "p2_pre_creative": "Kreativ", "p2_pre_balanced": "Ausgewogen", "p2_pre_precise": "Präzise", "p2_basic": "Nur Basis-Parameter (für strikte Anbieter)", "p2_chap_btn": "📜 Chronik öffnen", "tab_chronik": "Chronik", "p2_chap_of": "Kapitel des Strangs „{s}“", "p2_card": "🧪 Profi-Werkzeuge", "p2_insp_btn": "🔍 Letzte Anfrage ansehen", "p2_tpl_title": "📝 Prompt-Vorlagen", "p2_tpl_gm": "Spielleitung (Zug)", "p2_tpl_comp": "Begleiter (Zug)", "p2_tpl_style": "Stil-Synthese (Lektor)", "p2_tpl_reset": "↺ Standard", "p2_tpl_save": "Speichern", "p2_img_title": "🖼️ Bilder (optional)", "p2_img_on": "Bilder erzeugen erlauben", "p2_img_prov": "Bild-Anbieter", "p2_img_p_openai": "OpenAI-kompatibel (/images/generations)", "p2_img_p_poll": "Pollinations (extern, ohne Key)", "p2_img_ext": "⚠️ Externer Dienst: Der Bild-Prompt (Szene, Namen) wird an image.pollinations.ai gesendet.", "p2_img_max": "Speichergrenze pro Abenteuer (MB)", "p2_img_exp": "Bilder beim Export mitnehmen (größere Datei)", "p2_basic_reset": "↺ Erweiterte Parameter wieder für alle Anbieter erlauben", "p2_insp_title": "🔍 Letzte Anfrage", "p2_chap_title": "📜 Chronik – Kapitel-Gedächtnis", "p2_chap_auto": "Automatisch alle", "p2_chap_msgs": "Nachrichten", "p2_chap_now": "✍️ Jetzt zusammenfassen", "p2_g_title": "🧪 Profi-Funktionen kurz erklärt", "p2_g_html": "<b>Alternativen:</b> 🔄 Swipe erzeugt eine neue Antwort, ◀ 2/3 ▶ blättert, ✂️ löscht die gezeigte, ✏️ bearbeitet sie. Die gezeigte Fassung geht in den Verlauf, ins Gedächtnis und an den Lektor.\n<b>Stränge:</b> 🌿 zweigt ab dieser Nachricht ab. Karte, Inventar, Erinnerungen und Kapitel laufen pro Strang getrennt; oben im Chat wechselst du zwischen Strängen.\n<b>Letzte Anfrage:</b> System → 🧪 zeigt die genaue Anfrage mit geschätzten Token je Teil, Keys maskiert.\n<b>Vorlagen & Sampler:</b> Zug-Vorlagen für Spielleitung, Begleiter und Lektor mit „↺ Standard“. Im Charakter-Dialog: min_p, top_k, Strafen, max_tokens – leere Felder werden nicht gesendet. Lehnt ein Anbieter sie ab (400), sendet die App für ihn nur noch Basis-Parameter.\n<b>Szenenbilder:</b> standardmäßig aus. 🎨 neben der Karte: die Spielleitung schreibt einen englischen Bild-Prompt (Tags für SD/Anime-Modelle, Sätze für Flux/DALL-E), dann erzeugt der Anbieter das Bild. Modi: Szene, letzte Nachricht, Porträt, eigener Prompt. Prompt ansehen/bearbeiten, Abbrechen jederzeit. 17 Anbieter (u. a. ArliAI, A1111/Forge, OpenAI, Together, OpenRouter, Gemini, Stability, Hugging Face, fal, NovelAI, Horde, Pollinations). Bilder liegen verkleinert im Gerät, beim Export optional.\n<b>Kapitel-Gedächtnis:</b> alle N Nachrichten (oder wenn der Verlauf das Budget sprengt) fasst die Spielleitung ältere Nachrichten zusammen. Kapitel teilen sich das Lore-/Erinnerungs-Budget; ansehen, bearbeiten, 📌 anheften und neu erzeugen im Tab 📜 Chronik (pro Strang).\n<b>Bild-Anbieter:</b> ✅ live getestet: ArliAI · 🧪 Request-Form gemockt getestet: A1111/Forge/SD.Next/Draw Things, OpenAI, OpenAI-kompatibel, Together, NanoGPT, AI/ML API, Electron Hub, xAI, OpenRouter, Google Imagen, Stability, Hugging Face, fal.ai, NovelAI (V3), AI Horde, Pollinations · ⛔ nicht direkt im Browser: ComfyUI (Workflow), Black Forest Labs, Workers AI (kein CORS), Chutes, Z.AI (Proxy), SillyTavern Extras."});
+  Object.assign(I18N.en, {"p2_del_alt": "Delete alternative {n}?", "p2_del_alt_tt": "Delete this alternative", "p2_branch_here": "Branch from here", "p2_branch_sw": "🌿 Branch", "p2_img_msg": "Generate scene image", "p2_img_char": "Generate portrait", "p2_img_alt": "Generated scene image", "p2_img_del": "Remove image", "p2_insp_none": "No request in this session yet.", "p2_insp_note": "Tokens are estimated (≈ characters ÷ 2.8). API keys are masked.", "p2_part_sys": "System (role, rules, profile)", "p2_part_lore": "Lore", "p2_part_mem": "Memories & chapters", "p2_part_hist": "History + current turn", "p2_part_total": "Total", "p2_tpl_custom": "✏️ Custom template active", "p2_tpl_default": "Default template", "p2_tpl_vars_gm": "Placeholders: {user} {trigger} {fate} {protected} {guide}", "p2_tpl_vars_comp": "Placeholders: {name} {user} {scene} {trigger} {companions} {guide}", "p2_tpl_vars_style": "System instruction of the editor · placeholder: {user}", "p2_tpl_saved": "Template saved.", "p2_tpl_reset_ok": "Default template restored.", "p2_basic_on": "The provider rejects extra parameters – from now on only basic parameters are sent to it.", "p2_basic_cleared": "Advanced parameters are allowed for all providers again.", "p2_chap_nogm": "No game master with a model.", "p2_chap_running": "⏳ Summarizing a chapter in the background …", "p2_chap_fail": "Summary failed ({e}) – the game continues normally.", "p2_chap_info": "{n} chapters · {u} messages not summarized yet (this branch)", "p2_chap_empty": "No chapters yet. They are created automatically or via “Summarize now”.", "p2_chap_n": "Chapter {i} · {n} messages", "p2_pin": "📌 Pin", "p2_unpin": "📌 Unpin", "p2_regen": "↻ Redo", "p2_chap_del": "Delete this chapter? The messages stay.", "p2_chap_nothing": "Not enough new messages to summarize yet.", "p2_img_empty": "The image provider returned no image.", "p2_img_bad": "Could not read the image.", "p2_img_nokey": "The image provider needs an API key (System → Power tools → Images).", "p2_img_running": "🖼️ Generating image …", "p2_img_full": "Image storage limit reached ({n} MB).", "p2_img_ok": "Image saved.", "p2_img_fail": "Image failed: {e}", "p2_sampler": "🎛️ Sampler (empty = not sent)", "p2_preset": "Choose a preset …", "p2_pre_creative": "Creative", "p2_pre_balanced": "Balanced", "p2_pre_precise": "Precise", "p2_basic": "Basic parameters only (strict providers)", "p2_chap_btn": "📜 Open chronicle", "tab_chronik": "Chronicle", "p2_chap_of": "Chapters of branch “{s}”", "p2_card": "🧪 Power tools", "p2_insp_btn": "🔍 Show last request", "p2_tpl_title": "📝 Prompt templates", "p2_tpl_gm": "Game master (turn)", "p2_tpl_comp": "Companion (turn)", "p2_tpl_style": "Style synthesis (editor)", "p2_tpl_reset": "↺ Default", "p2_tpl_save": "Save", "p2_img_title": "🖼️ Images (optional)", "p2_img_on": "Allow image generation", "p2_img_prov": "Image provider", "p2_img_p_openai": "OpenAI-compatible (/images/generations)", "p2_img_p_poll": "Pollinations (external, no key)", "p2_img_ext": "⚠️ External service: the image prompt (scene, names) is sent to image.pollinations.ai.", "p2_img_max": "Storage limit per adventure (MB)", "p2_img_exp": "Include images in exports (larger file)", "p2_basic_reset": "↺ Allow advanced parameters for all providers again", "p2_insp_title": "🔍 Last request", "p2_chap_title": "📜 Chronicle – chapter memory", "p2_chap_auto": "Automatically every", "p2_chap_msgs": "messages", "p2_chap_now": "✍️ Summarize now", "p2_g_title": "🧪 Power features in brief", "p2_g_html": "<b>Alternatives:</b> 🔄 Swipe makes a new reply, ◀ 2/3 ▶ browses, ✂️ deletes the shown one, ✏️ edits it. The shown version goes into history, memory and the editor.\n<b>Branches:</b> 🌿 branches from this message. Map, inventory, memories and chapters are separate per branch; switch branches at the top of the chat.\n<b>Last request:</b> System → 🧪 shows the exact request with estimated tokens per part, keys masked.\n<b>Templates & samplers:</b> turn templates for game master, companions and editor with “↺ Default”. In the character dialog: min_p, top_k, penalties, max_tokens – empty fields are not sent. If a provider rejects them (400), the app sends only basic parameters to it.\n<b>Scene images:</b> off by default. 🎨 next to the map: the game master writes an English image prompt (tags for SD/anime models, sentences for Flux/DALL-E), then the provider renders it. Modes: scene, last message, portrait, custom prompt. View/edit the prompt, cancel any time. 17 providers (incl. ArliAI, A1111/Forge, OpenAI, Together, OpenRouter, Gemini, Stability, Hugging Face, fal, NovelAI, Horde, Pollinations). Images are stored downscaled on the device, optional in exports.\n<b>Chapter memory:</b> every N messages (or when the history exceeds the budget) the game master summarizes older messages. Chapters share the lore/memory budget; view, edit, 📌 pin and redo in the 📜 Chronicle tab (per branch).\n<b>Image providers:</b> ✅ live-tested: ArliAI · 🧪 request shape mock-tested: A1111/Forge/SD.Next/Draw Things, OpenAI, OpenAI-compatible, Together, NanoGPT, AI/ML API, Electron Hub, xAI, OpenRouter, Google Imagen, Stability, Hugging Face, fal.ai, NovelAI (V3), AI Horde, Pollinations · ⛔ not directly in the browser: ComfyUI (workflow), Black Forest Labs, Workers AI (no CORS), Chutes, Z.AI (proxy), SillyTavern Extras."});
+
+  Object.assign(I18N.de, {"img_p_arliai": "ArliAI (txt2img, SD.Next)", "img_p_a1111": "Automatic1111 / Forge / SD.Next / Draw Things (lokal)", "img_p_openai": "OpenAI (gpt-image / DALL-E)", "img_p_oaicompat": "OpenAI-kompatibel (eigene URL, z. B. sd.cpp, LocalAI)", "img_p_together": "Together AI", "img_p_nanogpt": "NanoGPT", "img_p_aimlapi": "AI/ML API", "img_p_electronhub": "Electron Hub", "img_p_xai": "xAI (Grok Image)", "img_p_openrouter": "OpenRouter (Bild-Modelle)", "img_p_google": "Google Gemini API (Imagen)", "img_p_stability": "Stability AI (Stable Image)", "img_p_huggingface": "Hugging Face Inference", "img_p_fal": "fal.ai", "img_p_novelai": "NovelAI (V3-Modelle)", "img_p_horde": "AI Horde (Community)", "img_p_pollinations": "Pollinations (extern, ohne Key)", "img_p_comfy": "ComfyUI – Workflow nötig", "img_p_bfl": "Black Forest Labs – kein CORS", "img_p_chutes": "Chutes – Proxy nötig", "img_p_workersai": "Cloudflare Workers AI – kein CORS", "img_p_zai": "Z.AI – Proxy nötig", "img_p_extras": "SillyTavern Extras – veraltet", "img_e_auth": "Zugriff verweigert ({s}): API-Key prüfen.", "img_e_pay": "Guthaben/Abo reicht nicht ({s}).", "img_e_404": "Nicht gefunden ({s}) – Endpunkt, Modell oder Sampler prüfen.", "img_rec": "Empfehlung des Modells übernommen: {s}, {n} Schritte, CFG {c}.", "img_e_rate": "Zu viele Anfragen ({s}) – kurz warten.", "img_e_srv": "Fehler beim Bild-Server ({s}).", "img_e_bad": "Anfrage abgelehnt ({s}).", "img_e_http": "HTTP-Fehler {s}.", "img_e_net": "Keine Verbindung zum Bild-Anbieter (Netzwerk oder CORS). Lokale Server mit CORS starten, z. B. A1111: --api --cors-allow-origins=*", "img_e_model": "Bitte ein Bild-Modell wählen (bei ArliAI Pflicht: sd_model_checkpoint) – 📋 lädt die Liste.", "img_e_noprompt": "Die Spielleitung hat keinen Bild-Prompt geliefert.", "img_e_nomsg": "Noch keine Szene im Chat – erst eine Antwort der Spielleitung abwarten.", "img_cancelled": "Abgebrochen.", "img_off": "Bilder sind aus – System → 🧪 Profi-Werkzeuge → Bilder.", "img_using": "Anbieter: {p} · Modell: {m} · {s}", "img_go": "✨ Prompt schreiben & Bild erzeugen", "img_go_custom": "🎨 Bild aus eigenem Prompt erzeugen", "img_cancel": "Abbrechen", "img_st_write": "✍️ 1/2 – Spielleitung schreibt den Bild-Prompt …", "img_st_gen": "🎨 2/2 – Bild wird erzeugt …", "img_st_queue": "🎨 2/2 – In der Warteschlange: Platz {q}, ca. {s} s", "img_na_group": "Nicht direkt im Browser (Proxy/Workflow nötig)", "img_key_reused": "leer = ArliAI-Chat-Key aus deinem Profil", "img_key_none": "kein ArliAI-Chat-Key gefunden – hier eintragen", "img_key_notneeded": "kein Key nötig", "img_key_opt": "optional", "img_h_arliai": "Laut ArliAI-Doku: POST /sdapi/v1/txt2img, Modell (sd_model_checkpoint) ist Pflicht, max. 40 Schritte. 📋 lädt die Modelle.", "img_h_a1111": "Lokal: WebUI mit --api --cors-allow-origins=* starten (Draw Things: HTTP-API aktivieren).", "img_h_horde": "Ohne Key anonym (langsam, Warteschlange). Ein eigener Key bringt Vorrang.", "img_h_novelai": "Nur V3-Modelle (nai-diffusion-3, nai-diffusion-furry-3); V4 nutzt ein anderes Format.", "img_h_openrouter": "Bild über chat/completions mit modalities [image, text].", "img_h_oaicompat": "Jeder Server mit /v1/images/generations (z. B. stable-diffusion.cpp, LocalAI).", "img_models_loading": "Modelle werden geladen …", "img_models_ok": "{n} Modelle geladen – im Feld „Modell“ auswählen.", "img_models_fail": "Modell-Liste fehlgeschlagen: {e} – Modell bitte von Hand eintragen.", "img_test_ok": "✅ Verbindung funktioniert:", "img_prompt": "Prompt", "img_edit_redo": "✏️ Prompt bearbeiten & neu erzeugen", "img_fab": "Szenenbild erzeugen", "img_reuse": "ArliAI-Chat-Key wiederverwenden, wenn leer", "img_models_btn": "Modell-Liste laden", "img_size": "Größe / Format", "img_steps": "Schritte", "img_seed": "Seed (−1 = zufällig)", "img_neg": "Negativ-Prompt (Standard)", "img_style": "Stil-Präfix (vor jedem Prompt)", "img_test": "🧪 Verbindung testen (Testbild)", "img_title": "🎨 Szenenbild", "img_mode": "Was soll ins Bild?", "img_m_scene": "Aktuelle Szene", "img_m_last": "Letzte Nachricht", "img_m_portrait": "Porträt einer Figur", "img_m_custom": "Eigener Prompt", "img_char": "Figur", "img_pos": "Positiv (Englisch)", "img_negp": "Negativ", "img_redo": "🎨 Mit diesem Prompt neu erzeugen", "p2_img_nokey": "Für den Bild-Anbieter fehlt der API-Key (System → 🧪 Profi-Werkzeuge → Bilder)."});
+  Object.assign(I18N.en, {"img_p_arliai": "ArliAI (txt2img, SD.Next)", "img_p_a1111": "Automatic1111 / Forge / SD.Next / Draw Things (local)", "img_p_openai": "OpenAI (gpt-image / DALL-E)", "img_p_oaicompat": "OpenAI-compatible (own URL, e.g. sd.cpp, LocalAI)", "img_p_together": "Together AI", "img_p_nanogpt": "NanoGPT", "img_p_aimlapi": "AI/ML API", "img_p_electronhub": "Electron Hub", "img_p_xai": "xAI (Grok Image)", "img_p_openrouter": "OpenRouter (image models)", "img_p_google": "Google Gemini API (Imagen)", "img_p_stability": "Stability AI (Stable Image)", "img_p_huggingface": "Hugging Face Inference", "img_p_fal": "fal.ai", "img_p_novelai": "NovelAI (V3 models)", "img_p_horde": "AI Horde (Community)", "img_p_pollinations": "Pollinations (external, no key)", "img_p_comfy": "ComfyUI – needs a workflow", "img_p_bfl": "Black Forest Labs – no CORS", "img_p_chutes": "Chutes – needs a proxy", "img_p_workersai": "Cloudflare Workers AI – no CORS", "img_p_zai": "Z.AI – needs a proxy", "img_p_extras": "SillyTavern Extras – deprecated", "img_e_auth": "Access denied ({s}): check the API key.", "img_e_pay": "Insufficient credits/plan ({s}).", "img_e_404": "Not found ({s}) – check endpoint, model or sampler.", "img_rec": "Applied the model’s recommendation: {s}, {n} steps, CFG {c}.", "img_e_rate": "Too many requests ({s}) – wait a moment.", "img_e_srv": "Image server error ({s}).", "img_e_bad": "Request rejected ({s}).", "img_e_http": "HTTP error {s}.", "img_e_net": "Cannot reach the image provider (network or CORS). Start local servers with CORS, e.g. A1111: --api --cors-allow-origins=*", "img_e_model": "Please choose an image model (required for ArliAI: sd_model_checkpoint) – 📋 loads the list.", "img_e_noprompt": "The game master returned no image prompt.", "img_e_nomsg": "No scene in the chat yet – wait for a game master reply first.", "img_cancelled": "Cancelled.", "img_off": "Images are off – System → 🧪 Power tools → Images.", "img_using": "Provider: {p} · Model: {m} · {s}", "img_go": "✨ Write prompt & generate image", "img_go_custom": "🎨 Generate from my prompt", "img_cancel": "Cancel", "img_st_write": "✍️ 1/2 – The game master is writing the image prompt …", "img_st_gen": "🎨 2/2 – Generating image …", "img_st_queue": "🎨 2/2 – Queued: position {q}, about {s} s", "img_na_group": "Not directly in the browser (proxy/workflow needed)", "img_key_reused": "empty = ArliAI chat key from your profile", "img_key_none": "no ArliAI chat key found – enter one here", "img_key_notneeded": "no key needed", "img_key_opt": "optional", "img_h_arliai": "Per ArliAI docs: POST /sdapi/v1/txt2img, the model (sd_model_checkpoint) is required, max 40 steps. 📋 loads the models.", "img_h_a1111": "Local: start the WebUI with --api --cors-allow-origins=* (Draw Things: enable the HTTP API).", "img_h_horde": "Anonymous without a key (slow, queued). Your own key gives priority.", "img_h_novelai": "V3 models only (nai-diffusion-3, nai-diffusion-furry-3); V4 uses a different format.", "img_h_openrouter": "Image via chat/completions with modalities [image, text].", "img_h_oaicompat": "Any server with /v1/images/generations (e.g. stable-diffusion.cpp, LocalAI).", "img_models_loading": "Loading models …", "img_models_ok": "{n} models loaded – pick one in the “Model” field.", "img_models_fail": "Model list failed: {e} – please type the model by hand.", "img_test_ok": "✅ Connection works:", "img_prompt": "Prompt", "img_edit_redo": "✏️ Edit prompt & regenerate", "img_fab": "Generate scene image", "img_reuse": "Reuse the ArliAI chat key when empty", "img_models_btn": "Load model list", "img_size": "Size / aspect", "img_steps": "Steps", "img_seed": "Seed (−1 = random)", "img_neg": "Negative prompt (default)", "img_style": "Style prefix (before every prompt)", "img_test": "🧪 Test connection (test image)", "img_title": "🎨 Scene image", "img_mode": "What should the image show?", "img_m_scene": "Current scene", "img_m_last": "Last message", "img_m_portrait": "Character portrait", "img_m_custom": "Custom prompt", "img_char": "Character", "img_pos": "Positive (English)", "img_negp": "Negative", "img_redo": "🎨 Regenerate with this prompt", "p2_img_nokey": "The image provider needs an API key (System → 🧪 Power tools → Images)."});
   function t(key) {
     const lang = (state && state.lang === "en") ? "en" : "de";
     return I18N[lang]?.[key] || I18N["de"]?.[key] || key;
@@ -2827,21 +2944,22 @@
     const stats = { n: 0, used: 0, budget: 0, cut: [], more: 0, over: false };
     if (!(maxLoreBudget > 0)) maxLoreBudget = loreBudgetTokens();
     stats.budget = maxLoreBudget;
-    if (!state.lorebook || !Array.isArray(state.lorebook) || state.lorebook.length === 0) { if (isGM) { lastLoreStats = stats; updateLoreShareUI(); } return ""; }
+    const LB = p2Lore();
+    if (!LB.length && !p2ChapText().length) { if (isGM) { lastLoreStats = stats; updateLoreShareUI(); } P2.loreParts = { lore: 0, mem: 0 }; return ""; }
     const act = new Map(); // id -> { e, tier, score }
     let pool = currentTriggerText || "";
     const prio = e => (parseInt(e.priority, 10) || 10);
-    state.lorebook.forEach(e => { if (!e || (!isGM && e.gmOnly) || !e.constant || act.has(e.id)) return; act.set(e.id, { e, tier: 0, score: prio(e) }); pool += " " + (e.content || ""); });
+    LB.forEach(e => { if (!e || (!isGM && e.gmOnly) || !e.constant || act.has(e.id)) return; act.set(e.id, { e, tier: 0, score: prio(e) }); pool += " " + (e.content || ""); });
     wbPlaceEntries(isGM).forEach(e => { if (act.has(e.id)) return; act.set(e.id, { e, tier: 1, direct: true, score: prio(e) }); pool += " " + (e.content || ""); });
     // Relevanz: im Chat erwähnte Einträge vor Folge-Einträgen; innerhalb: Priorität, Treffer in den letzten 2 Nachrichten, Trefferzahl, Aktualität (Chronik)
     const recent = getLoreContextForDepth(messagesList, 2, currentTriggerText), recentL = recent.toLowerCase();
-    const times = state.lorebook.filter(e => e && e.ai).map(e => e.updatedAt || e.createdAt || 0).sort((a, b) => a - b);
+    const times = LB.filter(e => e && e.ai).map(e => e.updatedAt || e.createdAt || 0).sort((a, b) => a - b);
     const recency = e => { if (!e.ai || !times.length) return 0; const tt = e.updatedAt || e.createdAt || 0; let k = 0; while (k < times.length && times[k] < tt) k++; return 2 * k / times.length; };
     let added = true, pass = 0;
     const scanCache = new Map();
     while (added && pass < 2) {
       added = false; pass++;
-      state.lorebook.forEach(e => {
+      LB.forEach(e => {
         if (!e || (!isGM && e.gmOnly) || act.has(e.id)) return;
         if (!e.keys || !String(e.keys).trim()) return;
         const depth = Math.max(1, parseInt(e.scanDepth, 10) || 8);
@@ -2864,11 +2982,15 @@
       if (stats.used + est > maxLoreBudget) { if (a.direct) stats.cut.push(a.e.title || "?"); else stats.more++; continue; } // direkt erwähnte melden; Folge-Einträge (nur über andere Lore) nur zählen
       out.push(a.e); stats.used += est;
     }
+    const chap = p2ChapInject(Math.max(0, maxLoreBudget - stats.used)); stats.used += chap.used;
     stats.n = out.length;
     if (isGM || !lastLoreStats) { lastLoreStats = stats; updateLoreShareUI(); }
-    if (out.length === 0) return "";
+    const memT = out.filter(e => e.ai && e.aiKind === "memory").reduce((n, e) => n + estimateTokens(`[${e.title}]\n${e.content}`), 0) + estimateTokens(chap.text);
+    const loreT = out.filter(e => !(e.ai && e.aiKind === "memory")).reduce((n, e) => n + estimateTokens(`[${e.title}]\n${e.content}`), 0);
+    P2.loreParts = { lore: loreT, mem: memT };
+    if (out.length === 0) return chap.text;
     const header = state.lang === "en" ? "\n\n[Relevant World Lore]:\n" : "\n\n[Relevantes Weltwissen]:\n";
-    return header + out.map(e => `[${e.title}]\n${e.content}`).join("\n\n");
+    return header + out.map(e => `[${e.title}]\n${e.content}`).join("\n\n") + chap.text;
   }
   function updateLoreShareUI() {
     const v = document.getElementById("lore-share-val"), el = document.getElementById("setting-lore-share"), info = document.getElementById("lore-share-info");
@@ -3114,6 +3236,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     if (character.role === "editor" && payload.repetition_penalty > 1.05) payload.repetition_penalty = 1.05; // Lektor muss Dialoge wörtlich übernehmen
     payload.stop = isArli ? ["[END_OF_TURN]"] : getSafeStopTokens(targetUrl);
     if (think && payload.repetition_penalty > 1.05) payload.repetition_penalty = 1.05;   // hohe Strafe lässt langes Denken entgleisen
+    const p2Sent = p2ApplySampler(payload, character, targetUrl, isStrictOpenAI);
     const rsKeys = rsApply(payload, targetUrl, cleanModel, think, rsBud, rsMode(character) !== "auto").filter(k => !(opts.drop || []).includes(k));
     (opts.drop || []).forEach(k => { delete payload[k]; });
     // Fehlertext nennt ein gesendetes Reasoning-Feld -> genau diese Felder einmal weglassen
@@ -3142,6 +3265,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     arm(FIRST_BYTE_MS, tf("err_timeout_first", { m: cleanModel, s: FIRST_BYTE_MS / 1000, n: character.name || "" }));
 
     let res;
+    p2Record(targetUrl, headers, payload, character);
     try {
       res = await fetch(targetUrl, {
         method: "POST", headers, body: JSON.stringify(payload),
@@ -3162,6 +3286,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
       // Server kennt die Reasoning-Parameter nicht -> einmal ohne sie
       const bad = (res.status === 400 || res.status === 422) ? rsRejected(err) : null;
       if (bad) { console.warn(`[${cleanModel}] Reasoning-Parameter abgelehnt (${bad.join(", ")}) – ohne sie erneut`); return again({ drop: bad }); }
+      if ((res.status === 400 || res.status === 422) && !opts.basic && p2Sent.length && !p2Basic(character, targetUrl)) { console.warn(`[${cleanModel}] Zusatz-Parameter abgelehnt – nur Basis-Parameter`); p2MarkBasic(targetUrl); return again({ basic: true }); }
       throw new Error(tf("err_api", { s: res.status, e: pvDetail(0, err, cleanKey) }) + pvChatHint(res.status, err, targetUrl));
     }
 
@@ -3678,7 +3803,9 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
         world: JSON.parse(JSON.stringify(baseSnapshot.world)),
         userProgression: sanitizeProgression(baseSnapshot.userProgression),
         companionProgression: JSON.parse(JSON.stringify(baseSnapshot.companionProgression)),
-        map: wbBranchMap(baseSnapshot)
+        map: wbBranchMap(baseSnapshot),
+        branchOf: { id: state.activeSessionId, msgId: pendingBranchData.msgId, idx: msgIdx + 1, ts: Date.now() },
+        chapters: JSON.parse(JSON.stringify(p2Chaps().filter(c => c && slicedMessages.some(m => m && m.id === c.toId))))
       };
 
       state.sessions.unshift(newSession);
@@ -3813,6 +3940,10 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
   }
 
   function buildGMPromptContent(userName, triggerText, fateDirective, gmProgressionGuide, protectedListStr, isEn) {
+    const tp = p2Tpl("gm"); if (!tp) return buildGMPromptContentDefault(userName, triggerText, fateDirective, gmProgressionGuide, protectedListStr, isEn);
+    return p2Fill(tp, { user: userName, trigger: triggerText, fate: fateDirective, guide: gmProgressionGuide, protected: protectedListStr });
+  }
+  function buildGMPromptContentDefault(userName, triggerText, fateDirective, gmProgressionGuide, protectedListStr, isEn) {
     const safeUser = String(userName || "Player").toUpperCase();
     return isEn ? `[PLAYER ACTION BY ${safeUser}]:\n"${triggerText}"\n\n[DIRECTION & LOGICAL EFFECT]:
 1. The player's input is AN ATTEMPT, never a fait accompli!
@@ -3833,6 +3964,10 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
   }
 
   function buildCompanionPromptContent(comp, userName, triggerText, cleanGmScene, companionsContext, compInventoryGuide, isEn) {
+    const tp = p2Tpl("comp"); if (!tp) return buildCompanionPromptContentDefault(comp, userName, triggerText, cleanGmScene, companionsContext, compInventoryGuide, isEn);
+    return p2Fill(tp, { name: comp?.name || "", user: userName, trigger: triggerText, scene: cleanGmScene || "", companions: companionsContext || "", guide: compInventoryGuide || "" });
+  }
+  function buildCompanionPromptContentDefault(comp, userName, triggerText, cleanGmScene, companionsContext, compInventoryGuide, isEn) {
     const safeComp = String(comp?.name || "Companion").toUpperCase();
     const safeUser = String(userName || "Player").toUpperCase();
     return isEn ? `[CURRENT WORLD SCENE]:\n${cleanGmScene || "The surroundings remain unchanged."}\n\n[ACTION BY ${safeUser}]:\n"${triggerText}"\n\n${companionsContext ? `[PREVIOUS REACTIONS OF COMPANIONS]:\n${companionsContext}\n\n` : ""}[DIRECTION FOR ${safeComp}]: React directly to the scene, to ${safeUser}, and interact with present companions. Stay in character.${compInventoryGuide}`
@@ -3907,14 +4042,17 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     return "";
   }
   // drafts: [{name, text, gm?, voice?}] in Reihenfolge dieses Zuges
+  function p2StyleDefault(isEn, U = "{user}") {
+    return isEn
+      ? `### ROLE: STYLE SYNTHESIS (EDITOR)\nYou are not a participant in the story. Rework ONLY the drafts of this turn below into ONE chapter in your style.\nRULES:\n1. Content only from the drafts: invent nothing (no new actions, places, items, thoughts, NPCs) and drop no event; keep the order (narration first, then the reactions as listed).\n2. Spoken words stay verbatim and with the right speaker.\n3. ${U}'s message is narrated as an action (in second person \"you\"), not quoted as speech unless it is direct speech; do not extend it or put new words into ${U}'s mouth.\n4. A draft under [NAME] describes NAME: its \"I/my\" means NAME (narrate in third person); \"you\" is always ${U}.\n5. No tags or square brackets, no heading, no recap of earlier events, no meta comments.\n6. About as long as the drafts together.`
+      : `### ROLLE: STIL-SYNTHESE (LEKTOR)\nDu bist kein Mitspieler. Schreibe NUR die Entwürfe dieses Zuges unten in deinem Stil zu EINEM Kapitel um.\nREGELN:\n1. Inhalt nur aus den Entwürfen: nichts erfinden (keine neuen Handlungen, Orte, Gegenstände, Gedanken, NPCs), kein Ereignis und keinen Absatz weglassen; Reihenfolge bleibt (erst die Erzählung, dann die Reaktionen wie aufgeführt).\n2. Wörtliche Rede bleibt wörtlich und beim richtigen Sprecher.\n3. Die Nachricht von ${U} wird als Handlung erzählt (in der 2. Person „du“), nicht als Rede zitiert, außer sie ist wörtliche Rede; nicht erweitern, ${U} keine neuen Worte in den Mund legen.\n4. Ein Entwurf unter [NAME] beschreibt NAME: „ich/mein“ darin meint NAME (in der 3. Person erzählen); „du“ ist immer ${U}.\n5. Keine Tags oder eckigen Klammern, keine Überschrift, keine Nacherzählung früherer Ereignisse, keine Meta-Kommentare.\n6. Etwa so lang wie die Entwürfe zusammen.`;
+  }
   async function runEditorSynthesis({ editorChar, userName, triggerText, drafts, onChunk, maxTokens, prevTail }) {
     const isEn = state.lang === "en", U = String(userName || (isEn ? "Player" : "Spieler"));
     const use = drafts.filter(d => d && String(d.text || "").trim());
     const gloss = editorGlossary(use, U);
     const label = d => d.gm ? (isEn ? "NARRATION & NPCS" : "ERZÄHLUNG & NPCS") : d.voice ? (isEn ? "NPC VOICES" : "NPC-STIMMEN") : String(d.name || "").toUpperCase();
-    const sys = isEn
-      ? `### ROLE: STYLE SYNTHESIS (EDITOR)\nYou are not a participant in the story. Rework ONLY the drafts of this turn below into ONE chapter in your style.\nRULES:\n1. Content only from the drafts: invent nothing (no new actions, places, items, thoughts, NPCs) and drop no event; keep the order (narration first, then the reactions as listed).\n2. Spoken words stay verbatim and with the right speaker.\n3. ${U}'s message is narrated as an action (in second person \"you\"), not quoted as speech unless it is direct speech; do not extend it or put new words into ${U}'s mouth.\n4. A draft under [NAME] describes NAME: its \"I/my\" means NAME (narrate in third person); \"you\" is always ${U}.\n5. No tags or square brackets, no heading, no recap of earlier events, no meta comments.\n6. About as long as the drafts together.`
-      : `### ROLLE: STIL-SYNTHESE (LEKTOR)\nDu bist kein Mitspieler. Schreibe NUR die Entwürfe dieses Zuges unten in deinem Stil zu EINEM Kapitel um.\nREGELN:\n1. Inhalt nur aus den Entwürfen: nichts erfinden (keine neuen Handlungen, Orte, Gegenstände, Gedanken, NPCs), kein Ereignis und keinen Absatz weglassen; Reihenfolge bleibt (erst die Erzählung, dann die Reaktionen wie aufgeführt).\n2. Wörtliche Rede bleibt wörtlich und beim richtigen Sprecher.\n3. Die Nachricht von ${U} wird als Handlung erzählt (in der 2. Person „du“), nicht als Rede zitiert, außer sie ist wörtliche Rede; nicht erweitern, ${U} keine neuen Worte in den Mund legen.\n4. Ein Entwurf unter [NAME] beschreibt NAME: „ich/mein“ darin meint NAME (in der 3. Person erzählen); „du“ ist immer ${U}.\n5. Keine Tags oder eckigen Klammern, keine Überschrift, keine Nacherzählung früherer Ereignisse, keine Meta-Kommentare.\n6. Etwa so lang wie die Entwürfe zusammen.`;
+    const sys = p2Tpl("style") ? p2Fill(p2Tpl("style"), { user: U }) : p2StyleDefault(isEn, U); P2.loreParts = { lore: 0, mem: 0 };
     const parts = [];
     if (gloss.length) parts.push(`[${isEn ? "NAMES & TERMS (spelling only)" : "NAMEN & BEGRIFFE (nur Schreibweise)"}]: ${gloss.join(", ")}`);
     if (prevTail) parts.push(`[${isEn ? "END OF PREVIOUS CHAPTER (connection only, do not repeat)" : "ENDE DES VORIGEN KAPITELS (nur Anschluss, nicht wiederholen)"}]: ${prevTail}`);
@@ -6123,6 +6261,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
   }
   function wbNewEntry(fields) {
     const e = { id: generateId("lore"), category: wbChronicleFolder(), constant: false, priority: 25, scanDepth: 8, ai: true, createdAt: Date.now(), ...fields };
+    if (e.aiKind === "memory") { e.sess = state.activeSessionId; e.at = (state.messages || []).length; }   // Erinnerung gehört zum Strang
     if (!Array.isArray(state.lorebook)) state.lorebook = [];
     state.lorebook.push(e);
     const mems = state.lorebook.filter(l => l && l.ai && l.aiKind === "memory");
@@ -6283,14 +6422,16 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
   const wbPins = {}; // Stecknadeln je Ebene (nur für diese Sitzung, nicht gespeichert)
   function updateMapFab() {
     const fab = document.getElementById("map-fab"); if (!fab) return;
-    const on = wbOn("map"); fab.classList.toggle("hidden", !on);
+    const on = wbOn("map"); fab.classList.toggle("hidden", !on); imgFab();
+    { const ib = document.getElementById("img-fab"); if (ib && !on) { ib.style.left = "auto"; ib.style.right = "8px"; } }
     const anchor = document.getElementById("clear-chat-btn"), panel = document.getElementById("view-chat");
-    if (panel) panel.classList.toggle("has-map-fab", on); // erste Nachricht beginnt unter dem Karten-Knopf
+    if (panel) panel.classList.toggle("has-map-fab", on || imgCfg().on); // erste Nachricht beginnt unter dem Karten-Knopf
     if (!on) return;
     if (!anchor || !panel || !panel.classList.contains("active")) return;
     const b = anchor.getBoundingClientRect(), p = panel.getBoundingClientRect(); if (!b.width) return;
     const left = Math.min(Math.round(b.left + b.width / 2 - fab.offsetWidth / 2 - p.left), Math.round(p.width - fab.offsetWidth - 4));
     fab.style.left = left + "px"; fab.style.right = "auto";
+    const ib = document.getElementById("img-fab"); if (ib) { ib.style.left = Math.max(4, left - fab.offsetWidth - 8) + "px"; ib.style.right = "auto"; }
   }
   function openMapModal() {
     const modal = document.getElementById("map-modal"); if (!modal) return;
@@ -6647,7 +6788,7 @@ Start${start ? ` (Start: ${start})` : ""}. Höchstens 60 Orte. Nichts erfinden. 
   function wbPlaceEntries(isGM) {
     if (!wbOn("map")) return [];
     const cur = WK.norm(curPlaceName()); if (!cur) return [];
-    return (state.lorebook || []).filter(l => l && l.ai && l.place && (isGM || !l.gmOnly) && WK.norm(l.place) === cur).slice(-4);
+    return p2Lore().filter(l => l && l.ai && l.place && (isGM || !l.gmOnly) && WK.norm(l.place) === cur).slice(-4);
   }
   function wbMapSnap(sess) {
     const mp = sess && sess.map && typeof sess.map === "object" ? sess.map : {};
@@ -6996,6 +7137,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       body.appendChild(box);
     });
     xioGuideSection(body, mk);
+    { const det = mk("details", "guide-mod"); det.id = "guide-p2"; det.appendChild(mk("summary", "guide-sum", t("p2_g_title"))); const ul = mk("ul", "guide-tips"); t("p2_g_html").split("\n").forEach(li => { const e = document.createElement("li"); e.innerHTML = li; ul.appendChild(e); }); det.appendChild(ul); body.appendChild(det); }
     body.appendChild(mk("h4", "guide-h", t("guide_tips_title")));
     const ul = mk("ul", "guide-tips"); t("guide_tips_html").split("\n").forEach(li => { const e = document.createElement("li"); e.innerHTML = li; ul.appendChild(e); }); body.appendChild(ul);
   }
@@ -7530,6 +7672,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       return;
     }
 
+    { const bb = p2BranchBar(); if (bb) chatContainer.appendChild(bb); }
     state.messages.forEach((m) => {
       if (!m) return;
       ensureMsgVariants(m);
@@ -7609,11 +7752,15 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
         <button class="msg-action-btn" style="color:var(--danger);" onclick="deleteSingleMessage(${jsArg(safeId)})" title="${t("btn_delete")}">${t("btn_delete")}</button>`;
       if (m.type !== "user" && !isGenerating) {
         toolbar.innerHTML += `<button class="msg-action-btn" onclick="regenerateLastTurn(${jsArg(safeId)})">${t("btn_swipe")}</button>`;
+        if (m.variants && m.variants.length > 1) toolbar.innerHTML += `<button class="msg-action-btn p2-del-alt" onclick="p2DeleteVariant(${jsArg(safeId)})" title="${escapeHTML(t("p2_del_alt_tt"))}" aria-label="${escapeHTML(t("p2_del_alt_tt"))}">✂️</button>`;
       }
+      if (!isGenerating) toolbar.innerHTML += `<button class="msg-action-btn p2-branch-btn" onclick="p2BranchHere(${jsArg(safeId)})" title="${escapeHTML(t("p2_branch_here"))}" aria-label="${escapeHTML(t("p2_branch_here"))}">🌿</button>`;
+      if (m.imgId) { const im = document.createElement("div"); im.className = "p2-img"; im.innerHTML = `<img data-img="${escapeHTML(m.imgId)}" alt="${escapeHTML(t("p2_img_alt"))}" loading="lazy"><button class="order-btn" onclick="imgRemove(${jsArg(safeId)})" title="${escapeHTML(t("p2_img_del"))}" aria-label="${escapeHTML(t("p2_img_del"))}">✕</button>${m.imgPrompt ? `<details class="img-pr"><summary>${escapeHTML(t("img_prompt"))}</summary><p>${escapeHTML(m.imgPrompt.pos || "")}</p>${m.imgPrompt.neg ? `<p class="p1-note">− ${escapeHTML(m.imgPrompt.neg)}</p>` : ""}<button class="msg-action-btn" onclick="imgOpen(${jsArg(safeId)})">${escapeHTML(t("img_edit_redo"))}</button></details>` : ""}`; div.appendChild(im); }
       div.appendChild(toolbar);
       chatContainer.appendChild(div);
     });
     renderQuickTriggers();
+    imgFill(chatContainer);
     autoScroll(false);
   }
 
@@ -7714,6 +7861,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
             </div>
           </div>
           <div style="display:flex; gap:6px;">
+            ${imgCfg().on ? `<button class="order-btn" onclick="imgGenerate(${jsArg(safeCharId)}, 'char')" title="${escapeHTML(t("p2_img_char"))}" aria-label="${escapeHTML(t("p2_img_char"))}">🖼️</button>` : ""}
             <button class="order-btn" onclick="exportChar(${jsArg(safeCharId)})" title="${escapeHTML(t("xio_export_one"))}" aria-label="${escapeHTML(t("xio_export_one"))}">⬇️</button>
             <button class="order-btn" onclick="editChar(${jsArg(safeCharId)})">✏️</button>
             <button class="order-btn" style="color:var(--danger);" onclick="deleteChar(${jsArg(safeCharId)})">🗑</button>
@@ -8018,6 +8166,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     const combEl = document.getElementById("setting-combined");
     if (combEl) combEl.checked = !!state.settings.combined;
     if (typeof aioRenderSettings === "function") { aioApplyClass(); aioRenderSettings(); abRenderSettings(); }
+    if (typeof imgRenderSettings === "function") { imgRenderSettings(); p2TplRender(); }
     const ecEl = document.getElementById("setting-editor-cont");
     if (ecEl) ecEl.checked = !!state.settings.editorContinuity;
     const thEl = document.getElementById("setting-thoughts");
@@ -8187,6 +8336,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       if (targetView === "view-chat") { autoScroll(true); updateMapFab(); }
       if (targetView === "view-party") { renderPlayerConfig(); renderCharacters(); }
       if (targetView === "view-lorebook") renderLorebook();
+      if (targetView === "view-chronik") p2ChronikRender();
       if (targetView === "view-settings") renderSettings();
     };
   });
@@ -8272,6 +8422,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       document.getElementById("char-topp").value = "0.9";
       document.getElementById("topp-val").innerText = "0.9";
       document.getElementById("char-reppenalty").value = "1.1";
+      ["char-minp", "char-topk", "char-freqp", "char-presp", "char-maxtok"].forEach(id => { document.getElementById(id).value = ""; }); document.getElementById("char-basic").checked = false;
       document.getElementById("reppenalty-val").innerText = "1.1";
       document.getElementById("char-reasoning").value = "auto";
       document.getElementById("char-thinkbudget").value = String(RS_DEFAULT_BUDGET);
@@ -8307,6 +8458,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     document.getElementById("topp-val").innerText = cTopP;
     const cRep = c.repPenalty !== undefined ? c.repPenalty : 1.1;
     document.getElementById("char-reppenalty").value = cRep;
+    [["char-minp", "minP"], ["char-topk", "topK"], ["char-freqp", "freqPenalty"], ["char-presp", "presPenalty"], ["char-maxtok", "maxTokens"]].forEach(([id, f]) => { document.getElementById(id).value = c[f] ?? ""; }); document.getElementById("char-basic").checked = !!c.basicParams;
     document.getElementById("reppenalty-val").innerText = cRep;
     document.getElementById("char-reasoning").value = rsMode(c);
     document.getElementById("char-thinkbudget").value = String(rsBudget(c));
@@ -8342,6 +8494,8 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
         thinkBudget: rsBudget({ thinkBudget: document.getElementById("char-thinkbudget")?.value }),
         prompt: String(document.getElementById("char-prompt")?.value || "").trim()
       };
+      [["char-minp", "minP"], ["char-topk", "topK"], ["char-freqp", "freqPenalty"], ["char-presp", "presPenalty"], ["char-maxtok", "maxTokens"]].forEach(([id, f]) => { const v = parseFloat(document.getElementById(id)?.value); if (!isNaN(v)) newChar[f] = v; });
+      if (document.getElementById("char-basic")?.checked) newChar.basicParams = true;
 
       const idx = state.characters.findIndex(x => x && x.id === id);
       if (idx >= 0) state.characters[idx] = newChar;
@@ -9056,7 +9210,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     } catch (e) { console.warn("Auto-Sicherung fehlgeschlagen:", e); showToast(t("ab_fail"), "error"); return false; }
     finally { abBusy = false; }
   }
-  function abAfterRound() { if (typeof rmAfterRound === "function") rmAfterRound(); abDirty = true; abRounds++; const c = abCfg(); if (c.on && c.rounds > 0 && abRounds >= c.rounds) autoBackupNow("rounds"); }
+  function abAfterRound() { setTimeout(() => { p2ChapCheck(false); }, 60); if (typeof rmAfterRound === "function") rmAfterRound(); abDirty = true; abRounds++; const c = abCfg(); if (c.on && c.rounds > 0 && abRounds >= c.rounds) autoBackupNow("rounds"); }
   function abBeforeSessionChange() { const c = abCfg(); if (c.on && c.session && (state.messages || []).length) { const b = JSON.parse(JSON.stringify(state)); b._app = "multi-rp-studio"; b._version = 1; autoBackupNow("session", JSON.stringify(b)); } }
   setInterval(() => { const c = abCfg(); if (c.on && c.minutes > 0 && abDirty && !isGenerating && Date.now() - abLastTs >= c.minutes * 60000) autoBackupNow("timer"); }, 30000);
   function abFmtSize(n) { return n >= 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; }
@@ -9110,14 +9264,14 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     ps_unsupported: "– nicht unterstützt", ps_usage_lbl: "Belegt", ps_usage: "{u} von ca. {q}", ps_ask: "🛡️ Dauerhaft speichern anfragen",
     ps_note: "Alles liegt nur in diesem Browser. iPhone/iPad: Safari kann Website-Daten nach ca. 7 Tagen ohne Besuch löschen – als App zum Home-Bildschirm hinzufügen und regelmäßig als Datei exportieren.",
     ps_denied: "Der Browser hat dauerhaften Speicher (noch) nicht gewährt. Häufige Nutzung oder „Zum Home-Bildschirm“ hilft.",
-    cx_title: "📦 Kampagne als Datei", cx_last: "Letzte Sicherungsdatei: {d}", cx_never: "Noch keine Sicherungsdatei exportiert.",
+    cx_title: "📦 Abenteuer als Datei", cx_last: "Letzte Sicherungsdatei: {d}", cx_never: "Noch keine Sicherungsdatei exportiert.",
     cx_keys_chk: "🔑 API-Keys mitexportieren (nicht empfohlen)",
     cx_keys_warn: "Die Datei enthält dann deine API-Keys im Klartext. Jeder, der sie bekommt, kann auf deine Kosten Anfragen senden. Nur für dich selbst und nie teilen. Trotzdem mitexportieren?",
-    cx_done: "Kampagne exportiert: {f}", cx_done_keys: "⚠️ Mit API-Keys exportiert – Datei nicht teilen.",
+    cx_done: "Abenteuer exportiert: {f}", cx_done_keys: "⚠️ Mit API-Keys exportiert – Datei nicht teilen.",
     rm_rounds: "Erinnern nach N Runden", rm_days: "… oder nach X Tagen", rm_hint: "Erinnerung an die Sicherungsdatei. 0 = aus.",
     rm_txt_rounds: "💾 {n} Runden seit der letzten Sicherungsdatei.", rm_txt_days: "💾 {n} Tage seit der letzten Sicherungsdatei.", rm_txt_never: "💾 Noch nie als Datei gesichert.",
     rm_txt_tail: " Browser-Daten können verloren gehen.", rm_go: "📦 Sichern", rm_later: "Später",
-    im_title: "📥 Kampagne importieren", im_mode: "Wie importieren?", im_replace: "Ersetzen", im_replace_d: "Alles Aktuelle wird durch die Datei ersetzt.",
+    im_title: "📥 Abenteuer importieren", im_mode: "Wie importieren?", im_replace: "Ersetzen", im_replace_d: "Alles Aktuelle wird durch die Datei ersetzt.",
     im_merge: "Zusammenführen", im_merge_d: "Neue Figuren, Lore-Einträge, Abenteuer und Orte kommen dazu. Vorhandenes und deine Einstellungen bleiben.",
     im_safety: "Vorher wird automatisch eine Sicherung des aktuellen Stands angelegt (System → Automatische Sicherungen).", im_ok: "Importieren",
     im_s_chars: "Figuren", im_s_sess: "Abenteuer", im_s_msgs: "Nachrichten", im_s_lore: "Lore-Einträge", im_s_places: "Orte auf der Karte", im_s_setting: "Setting · Sprache", im_s_date: "Exportiert am",
@@ -9163,19 +9317,19 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     ui_ed_stopped: "Lektor abgebrochen ({e}) – bisheriger Text bzw. Entwürfe übernommen.", ui_ed_cut: "Lektor-Text wurde am letzten vollständigen Satz beendet.", ui_ed_failed: "Lektor fehlgeschlagen – Erzähltext übernommen. {e}"
   });
   Object.assign(I18N.en, {
-    btn_export: "📦 Export campaign", btn_import: "📥 Import campaign", opt_manual: "✍️ OpenAI-compatible / custom URL",
+    btn_export: "📦 Export adventure", btn_import: "📥 Import adventure", opt_manual: "✍️ OpenAI-compatible / custom URL",
     ps_title: "🛡️ Persistent storage", ps_yes: "✅ Yes", ps_no: "⚠️ No", ps_expl_yes: "The browser will not delete the data on its own.", ps_expl_no: "The browser may delete the data when space runs low.",
     ps_unsupported: "– not supported", ps_usage_lbl: "Used", ps_usage: "{u} of about {q}", ps_ask: "🛡️ Request persistent storage",
     ps_note: "Everything lives only in this browser. iPhone/iPad: Safari may delete website data after about 7 days without a visit – add the app to the Home Screen and export a file regularly.",
     ps_denied: "The browser has not granted persistent storage (yet). Regular use or “Add to Home Screen” helps.",
-    cx_title: "📦 Campaign file", cx_last: "Last backup file: {d}", cx_never: "No backup file exported yet.",
+    cx_title: "📦 Adventure file", cx_last: "Last backup file: {d}", cx_never: "No backup file exported yet.",
     cx_keys_chk: "🔑 Include API keys (not recommended)",
     cx_keys_warn: "The file will then contain your API keys in plain text. Anyone who gets it can send requests at your expense. Only for yourself, never share it. Include them anyway?",
-    cx_done: "Campaign exported: {f}", cx_done_keys: "⚠️ Exported with API keys – do not share the file.",
+    cx_done: "Adventure exported: {f}", cx_done_keys: "⚠️ Exported with API keys – do not share the file.",
     rm_rounds: "Remind after N rounds", rm_days: "… or after X days", rm_hint: "Reminder to save a backup file. 0 = off.",
     rm_txt_rounds: "💾 {n} rounds since your last backup file.", rm_txt_days: "💾 {n} days since your last backup file.", rm_txt_never: "💾 Never saved as a file yet.",
     rm_txt_tail: " Browser data can get lost.", rm_go: "📦 Save", rm_later: "Later",
-    im_title: "📥 Import campaign", im_mode: "How to import?", im_replace: "Replace", im_replace_d: "Everything current is replaced by the file.",
+    im_title: "📥 Import adventure", im_mode: "How to import?", im_replace: "Replace", im_replace_d: "Everything current is replaced by the file.",
     im_merge: "Merge", im_merge_d: "New characters, lore entries, adventures and places are added. Existing data and your settings stay.",
     im_safety: "A backup of the current state is created automatically first (System → Automatic backups).", im_ok: "Import",
     im_s_chars: "Characters", im_s_sess: "Adventures", im_s_msgs: "Messages", im_s_lore: "Lore entries", im_s_places: "Places on the map", im_s_setting: "Setting · language", im_s_date: "Exported on",
@@ -9220,7 +9374,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     ui_think_only: "{n}: the model ({m}) spent its whole token budget on thinking and gave no answer. Please try again or use a model without reasoning.",
     ui_ed_stopped: "Editor stopped ({e}) – kept the text so far / the drafts.", ui_ed_cut: "Editor text was cut at the last full sentence.", ui_ed_failed: "Editor failed – kept the narrator text. {e}"
   });
-  I18N.de.btn_export = "📦 Kampagne exportieren"; I18N.de.btn_import = "📥 Kampagne importieren"; I18N.de.opt_manual = "✍️ OpenAI-kompatibel / eigene URL";
+  I18N.de.btn_export = "📦 Abenteuer exportieren"; I18N.de.btn_import = "📥 Abenteuer importieren"; I18N.de.opt_manual = "✍️ OpenAI-kompatibel / eigene URL";
 
   // ---------- Dauerhafter Speicher (navigator.storage.persist) ----------
   var P1S = { supported: !!(navigator.storage && navigator.storage.persist), persisted: null, asked: 0, firstSave: false };
@@ -9244,6 +9398,487 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     if (u && navigator.storage && navigator.storage.estimate) { try { const e = await navigator.storage.estimate(); u.textContent = tf("ps_usage", { u: psFmt(e.usage || 0), q: psFmt(e.quota || 0) }); } catch (e) {} }
   }
   { const b = document.getElementById("ps-ask-btn"); if (b) b.onclick = async () => { const ok = await psRequest(true); if (!ok) showToast(t("ps_denied"), "info"); }; }
+
+  // ===================== PHASE 2: Swipes/Stränge · Prompt-Kontrolle · Bilder · Kapitel-Gedächtnis =====================
+  var P2 = { last: null, loreParts: null, chapBusy: false, imgCache: new Map() };
+  // ---------- 1) Stränge: Erinnerungen gehören zum Strang, in dem sie entstanden (ältere ohne Strang gelten überall) ----------
+  function p2SessVis() {   // sessId -> Zeitgrenze (aktueller Strang: unbegrenzt; Vorfahren: bis zum Abzweig)
+    const vis = new Map(); let s = getActiveSession(), cut = Infinity, guard = 0;
+    while (s && guard++ < 50) { vis.set(s.id, cut); const b = s.branchOf; if (!b || !b.id) break; cut = Math.min(cut, +b.idx || 0); s = (state.sessions || []).find(x => x && x.id === b.id); }
+    return vis;
+  }
+  function p2LoreVisible(l, vis) { if (!l || !l.sess) return !!l; const c = vis.get(l.sess); return c !== undefined && (c === Infinity || (+l.at || 0) <= c); }
+  function p2Lore() { const vis = p2SessVis(); return (state.lorebook || []).filter(l => p2LoreVisible(l, vis)); }
+  function p2MsgData(m) {   // aktuelle Fassung einer Nachricht in der Form, die der Abzweig-Dialog erwartet
+    if (m.type === "combined") return { type: "combined", gmText: m.gmText || "", companionParts: JSON.parse(JSON.stringify(m.companionParts || [])), charText: m.charText || "", fullTotal: m.text || "" };
+    return { type: m.type, text: m.text || "" };
+  }
+  function p2BranchHere(msgId) {
+    if (isGenerating) return;
+    const idx = state.messages.findIndex(m => m && m.id === msgId); if (idx < 0) return;
+    pendingBranchData = { msgIdx: idx, msgId, updatedData: p2MsgData(state.messages[idx]) };
+    document.getElementById("branch-session-title").value = `${getActiveSession().title} (${t("ui_branch")} ${state.sessions.length + 1})`;
+    document.getElementById("branch-modal").classList.add("active");
+  }
+  function p2DeleteVariant(msgId) {
+    if (isGenerating) return;
+    const m = state.messages.find(x => x && x.id === msgId); if (!m || !Array.isArray(m.variants) || m.variants.length < 2) return;
+    showConfirmModal(tf("p2_del_alt", { n: m.currentVariant + 1 }), () => {
+      const i = m.currentVariant; m.variants.splice(i, 1); if (Array.isArray(m.snapshots)) m.snapshots.splice(i, 1);
+      m.currentVariant = Math.min(i, m.variants.length - 1); m.currentVariant = (m.currentVariant - 1 + m.variants.length) % m.variants.length;
+      cycleVariant(m.id, 1);   // übernimmt Text/Teile der nun gewählten Fassung (+ Snapshot bei letzter Nachricht)
+    });
+  }
+  function p2Family() {   // alle Stränge desselben Ursprungs
+    const all = (state.sessions || []).filter(Boolean), byId = new Map(all.map(s => [s.id, s]));
+    const root = s => { let g = 0; while (s && s.branchOf && byId.get(s.branchOf.id) && g++ < 50) s = byId.get(s.branchOf.id); return s; };
+    const r = root(getActiveSession()); return all.filter(s => root(s) === r);
+  }
+  function p2BranchBar() {
+    const fam = p2Family(); if (fam.length < 2) return null;
+    const bar = document.createElement("div"); bar.className = "p2-branch-bar";
+    const sel = document.createElement("select"); sel.id = "p2-branch-sel"; sel.setAttribute("aria-label", t("p2_branch_sw"));
+    fam.forEach(s => { const o = document.createElement("option"); o.value = s.id; o.textContent = (s.branchOf ? "🌿 " : "🌳 ") + (s.title || "–"); sel.appendChild(o); });
+    sel.value = state.activeSessionId;
+    sel.onchange = () => { if (isGenerating) { sel.value = state.activeSessionId; return; } abBeforeSessionChange(); state.activeSessionId = sel.value; syncActiveMessages(); saveState(); renderSessionsUI(); renderChat(); updateMapFab(); };
+    const lb = document.createElement("span"); lb.textContent = t("p2_branch_sw"); bar.appendChild(lb); bar.appendChild(sel); return bar;
+  }
+  // ---------- 2) Prompt-Kontrolle ----------
+  const p2Tok = s => estimateTokens(String(s || ""));
+  function p2Record(url, headers, payload, character) {
+    const sys = payload.messages[0] && payload.messages[0].role === "system" ? payload.messages[0].content : "";
+    const lp = P2.loreParts || { lore: 0, mem: 0 }; P2.loreParts = null;
+    const hist = payload.messages.slice(sys ? 1 : 0).reduce((n, m) => n + p2Tok(m.content), 0);
+    const h = {}; Object.keys(headers).forEach(k => { h[k] = /authorization/i.test(k) ? String(headers[k]).replace(/^(Bearer\s+).*?(.{0,4})$/i, (x, a, b) => a + "••••" + b) : headers[k]; });
+    P2.last = { ts: Date.now(), url, char: character.name || "", headers: h, body: JSON.parse(JSON.stringify(payload)), parts: { system: Math.max(0, p2Tok(sys) - lp.lore - lp.mem), lore: lp.lore, memory: lp.mem, history: hist } };
+  }
+  function p2OpenInspector() {
+    const L = P2.last, box = document.getElementById("p2-insp-body"); if (!box) return;
+    if (!L) box.innerHTML = `<p class="guide-p">${escapeHTML(t("p2_insp_none"))}</p>`;
+    else {
+      const p = L.parts, tot = p.system + p.lore + p.memory + p.history;
+      box.innerHTML = `<p class="p1-note">${escapeHTML(new Date(L.ts).toLocaleTimeString())} · ${escapeHTML(L.char)} · ${escapeHTML(L.body.model || "")}</p>
+        <div class="im-stats" id="p2-insp-parts">${[["p2_part_sys", p.system], ["p2_part_lore", p.lore], ["p2_part_mem", p.memory], ["p2_part_hist", p.history], ["p2_part_total", tot]].map(([k, v]) => `<span>${escapeHTML(t(k))}</span><b>≈ ${v}</b>`).join("")}</div>
+        <p class="p1-note">${escapeHTML(t("p2_insp_note"))}</p><pre class="guide-code" id="p2-insp-json"></pre>`;
+      document.getElementById("p2-insp-json").textContent = "POST " + L.url + "\n" + JSON.stringify(L.headers, null, 2) + "\n\n" + JSON.stringify(L.body, null, 2);
+    }
+    document.getElementById("p2-insp-modal").classList.add("active");
+  }
+  // Vorlagen: Platzhalter {user} {trigger} {fate} {protected} {guide} (Spielleitung) · {name} {user} {scene} {trigger} {companions} {guide} (Begleiter) · Stil: freier Text
+  const P2_TPL_KINDS = ["gm", "comp", "style"];
+  function p2TplDefault(kind) {
+    const en = state.lang === "en";
+    if (kind === "gm") return buildGMPromptContentDefault("{user}", "{trigger}", "{fate}", "{guide}", "{protected}", en);
+    if (kind === "comp") return buildCompanionPromptContentDefault({ name: "{name}" }, "{user}", "{trigger}", "{scene}", "{companions}", "{guide}", en);
+    return p2StyleDefault(en);
+  }
+  function p2Tpl(kind) { const x = state.settings.tpl && state.settings.tpl[kind]; return typeof x === "string" && x.trim() ? x : ""; }
+  function p2Fill(tpl, vars) { return tpl.replace(/\{(\w+)\}/g, (m, k) => { if (vars[k] !== undefined) return String(vars[k]); const lk = k.toLowerCase(); return vars[lk] !== undefined && k === k.toUpperCase() ? String(vars[lk]).toUpperCase() : m; }); }
+  function p2TplRender() {
+    const sel = document.getElementById("p2-tpl-kind"), ta = document.getElementById("p2-tpl-text"); if (!sel || !ta) return;
+    const k = sel.value; ta.value = p2Tpl(k) || p2TplDefault(k);
+    document.getElementById("p2-tpl-state").textContent = p2Tpl(k) ? t("p2_tpl_custom") : t("p2_tpl_default");
+    document.getElementById("p2-tpl-help").textContent = t("p2_tpl_vars_" + k);
+  }
+  function p2TplSave() {
+    const k = document.getElementById("p2-tpl-kind").value, v = document.getElementById("p2-tpl-text").value;
+    if (!state.settings.tpl || typeof state.settings.tpl !== "object") state.settings.tpl = {};
+    if (!v.trim() || v === p2TplDefault(k)) delete state.settings.tpl[k]; else state.settings.tpl[k] = v.slice(0, 20000);
+    saveState(); p2TplRender();
+  }
+  // Sampler: nur gesetzte Felder senden; strikte Anbieter / „nur Basis“ bekommen keine Zusatzfelder
+  const P2_SAMPLER = [["minP", "min_p", 0, 1], ["topK", "top_k", 0, 500], ["freqPenalty", "frequency_penalty", -2, 2], ["presPenalty", "presence_penalty", -2, 2], ["maxTokens", "max_tokens", 16, 32000]];
+  const P2_PRESETS = { creative: { temp: 1.0, topP: 0.95, minP: 0.05, topK: "", repPenalty: 1.05, freqPenalty: "", presPenalty: 0.3 }, balanced: { temp: 0.7, topP: 0.9, minP: 0.05, topK: "", repPenalty: 1.1, freqPenalty: "", presPenalty: "" }, precise: { temp: 0.35, topP: 0.8, minP: 0.1, topK: 40, repPenalty: 1.1, freqPenalty: "", presPenalty: "" } };
+  function p2Basic(character, url) { return !!character.basicParams || !!(state.settings.basicUrls && state.settings.basicUrls[String(url).replace(/\/chat\/completions$/, "")]); }
+  function p2ApplySampler(payload, character, url, strict) {
+    const basic = p2Basic(character, url), sent = [];
+    P2_SAMPLER.forEach(([f, k, lo, hi]) => {
+      const raw = character[f]; if (raw === undefined || raw === null || raw === "") return;
+      const v = parseFloat(raw); if (isNaN(v)) return;
+      const val = Math.max(lo, Math.min(hi, k === "top_k" || k === "max_tokens" ? Math.round(v) : v));
+      if (k === "max_tokens") { payload.max_tokens = val; if (payload.max_completion_tokens) payload.max_completion_tokens = val; return; }
+      if (basic || (strict && (k === "min_p" || k === "top_k"))) return;
+      payload[k] = val; sent.push(k);
+    });
+    if (basic) { delete payload.repetition_penalty; delete payload.max_completion_tokens; }
+    return sent.concat(payload.repetition_penalty !== undefined ? ["repetition_penalty"] : []);
+  }
+  function p2MarkBasic(url) { if (!state.settings.basicUrls || typeof state.settings.basicUrls !== "object") state.settings.basicUrls = {}; state.settings.basicUrls[String(url).replace(/\/chat\/completions$/, "")] = true; saveState(); showToast(t("p2_basic_on"), "info"); }
+  // ---------- 4) Kapitel-Gedächtnis (pro Strang, im Lore-/Erinnerungs-Budget) ----------
+  function p2ChapCfg() { const c = state.settings.chap && typeof state.settings.chap === "object" ? state.settings.chap : {}; return { on: c.on !== false, every: sanitizeInt(c.every, 6, 400, 30), keep: sanitizeInt(c.keep, 2, 100, 12) }; }
+  function p2Chaps(sess) { sess = sess || getActiveSession(); if (!Array.isArray(sess.chapters)) sess.chapters = []; return sess.chapters; }
+  function p2ChapEnd(sess) {   // Index der ersten noch nicht zusammengefassten Nachricht
+    const ch = p2Chaps(sess), msgs = sess.messages || []; let end = 0;
+    ch.forEach(c => { const i = msgs.findIndex(m => m && m.id === c.toId); end = Math.max(end, i >= 0 ? i + 1 : Math.min(msgs.length, +c.to || 0)); });
+    return end;
+  }
+  function p2ChapText(sess) {   // für die Prompt-Einbindung
+    return p2Chaps(sess).filter(c => c && String(c.text || "").trim());
+  }
+  function p2MsgPlain(m) { const v = m.variants && m.variants[m.currentVariant || 0]; const x = m.type === "combined" ? (m.text || [m.gmText, ...(m.companionParts || []).map(p => `${p.charName}: ${p.text}`)].join("\n")) : (typeof v === "object" ? v.text : v) || m.text || ""; return stripThink(stripAppTags(String(x || ""))).trim(); }
+  async function p2ChatOnce(character, sys, user, maxTokens, sig) {   // eigener, nicht-streamender Aufruf (stört den laufenden Zug nicht)
+    const url = resolveEndpoint(character.baseUrl), key = String(character.apiKey || "").trim().replace(/^Bearer\s+/i, "");
+    const payload = { model: String(character.model || "").trim(), messages: [{ role: "system", content: sys }, { role: "user", content: user }], temperature: 0.3, max_tokens: maxTokens, stream: false };
+    const headers = { "Content-Type": "application/json" }; if (key) headers.Authorization = "Bearer " + key;
+    const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 120000);
+    if (sig) { if (sig.aborted) ctl.abort(); sig.addEventListener("abort", () => ctl.abort(), { once: true }); }
+    try {
+      const r = await fetch(url, { method: "POST", headers, body: JSON.stringify(payload), signal: ctl.signal });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const j = await r.json(); const c = j && j.choices && j.choices[0]; return stripThink(String((c && (c.message ? c.message.content : c.text)) || "")).trim();
+    } finally { clearTimeout(tm); }
+  }
+  async function p2Summarize(sess, from, to, existing) {
+    const gm = state.characters.find(c => c && c.role === "gm") || state.characters.find(c => c && c.role !== "editor");
+    if (!gm || !gm.model) throw new Error(t("p2_chap_nogm"));
+    const en = state.lang === "en", msgs = (sess.messages || []).slice(from, to);
+    const body = msgs.map(m => `[${m.type === "user" ? (state.user?.name || "Player") : (m.senderName || m.gmName || "GM")}]: ${p2MsgPlain(m)}`).join("\n").slice(-24000);
+    const sys = en ? "You write a compact chapter summary of a roleplay for long-term memory. 4–8 sentences, past tense, facts only: events, decisions, places, promises, relationships, items. No tags, no commentary."
+                   : "Du schreibst eine kompakte Kapitel-Zusammenfassung eines Rollenspiels für das Langzeitgedächtnis. 4–8 Sätze, Präteritum, nur Fakten: Ereignisse, Entscheidungen, Orte, Versprechen, Beziehungen, Gegenstände. Keine Tags, keine Kommentare.";
+    const text = await p2ChatOnce(gm, sys, (en ? "[CHAPTER]\n" : "[KAPITEL]\n") + body, 500);
+    if (!text) throw new Error(t("ui_no_reply"));
+    const c = existing || { id: generateId("chap"), pinned: false };
+    Object.assign(c, { fromId: msgs[0] && msgs[0].id, toId: msgs[msgs.length - 1] && msgs[msgs.length - 1].id, from, to, n: msgs.length, text: text.slice(0, 4000), ts: Date.now() });
+    if (!existing) p2Chaps(sess).push(c);
+    return c;
+  }
+  async function p2ChapCheck(force) {
+    const cfg = p2ChapCfg(); if ((!cfg.on && !force) || P2.chapBusy || isGenerating) return false;
+    const sess = getActiveSession(), msgs = sess.messages || [], from = p2ChapEnd(sess), to = msgs.length - cfg.keep;
+    const n = to - from; if (n <= 0) return false;
+    const chatBudget = (state.settings.maxTokenBudget || 3200) - loreBudgetTokens();
+    const over = msgs.slice(from).reduce((s, m) => s + p2Tok(p2MsgPlain(m)), 0) > chatBudget;
+    if (!force && n < cfg.every && !(over && n >= 6)) return false;
+    P2.chapBusy = true; p2ChapStatus(t("p2_chap_running"));
+    try { await p2Summarize(sess, from, to); saveState(); p2ChapStatus(""); p2ChapRender(); return true; }
+    catch (e) { console.warn("Kapitel-Zusammenfassung:", e); p2ChapStatus(tf("p2_chap_fail", { e: String(e.message || e).slice(0, 80) })); return false; }
+    finally { P2.chapBusy = false; }
+  }
+  function p2ChapStatus(s) { const el = document.getElementById("p2-chap-status"); if (el) el.textContent = s; }
+  function p2ChapRender() {
+    const box = document.getElementById("p2-chap-list"); if (!box) return;
+    const sess = getActiveSession(), ch = p2Chaps(sess); box.innerHTML = "";
+    document.getElementById("p2-chap-info").textContent = tf("p2_chap_info", { n: ch.length, u: Math.max(0, (sess.messages || []).length - p2ChapEnd(sess)) });
+    if (!ch.length) box.innerHTML = `<p class="guide-p">${escapeHTML(t("p2_chap_empty"))}</p>`;
+    ch.forEach((c, i) => {
+      const d = document.createElement("div"); d.className = "guide-mod p2-chap"; d.dataset.id = c.id;
+      d.innerHTML = `<h4>${c.pinned ? "📌 " : ""}${escapeHTML(tf("p2_chap_n", { i: i + 1, n: c.n || "?" }))}</h4>`;
+      const ta = document.createElement("textarea"); ta.value = c.text || ""; ta.rows = 4; ta.className = "p2-chap-ta";
+      ta.onchange = () => { c.text = ta.value.slice(0, 4000); c.edited = true; saveState(); }; d.appendChild(ta);
+      const row = document.createElement("div"); row.className = "guide-btns";
+      const B = (txt, fn, cls) => { const b = document.createElement("button"); b.className = "msg-action-btn" + (cls ? " " + cls : ""); b.textContent = txt; b.onclick = fn; row.appendChild(b); };
+      B(c.pinned ? t("p2_unpin") : t("p2_pin"), () => { c.pinned = !c.pinned; saveState(); p2ChapRender(); }, "p2-pin");
+      B(t("p2_regen"), async () => { if (P2.chapBusy) return; P2.chapBusy = true; p2ChapStatus(t("p2_chap_running")); const msgs = sess.messages || []; let f = msgs.findIndex(m => m && m.id === c.fromId), e = msgs.findIndex(m => m && m.id === c.toId); if (f < 0) f = +c.from || 0; e = e < 0 ? (+c.to || f + 1) : e + 1;
+        try { await p2Summarize(sess, f, e, c); c.edited = false; saveState(); p2ChapStatus(""); } catch (er) { p2ChapStatus(tf("p2_chap_fail", { e: String(er.message || er).slice(0, 80) })); } finally { P2.chapBusy = false; p2ChapRender(); } }, "p2-regen");
+      B("🗑", () => showConfirmModal(t("p2_chap_del"), () => { const k = ch.indexOf(c); if (k >= 0) ch.splice(k, 1); saveState(); p2ChapRender(); }), "p2-chap-del");
+      d.appendChild(row); box.appendChild(d);
+    });
+  }
+  function p2ChronikRender() { p2ChapRender(); p2ChapStatus(P2.chapBusy ? t("p2_chap_running") : ""); const c = p2ChapCfg(); document.getElementById("p2-chap-on").checked = c.on; document.getElementById("p2-chap-every").value = c.every; const b = document.getElementById("p2-chap-branch"); if (b) b.textContent = (getActiveSession().branchOf ? "🌿 " : "🌳 ") + tf("p2_chap_of", { s: getActiveSession().title || "–" }); }
+  function p2OpenChapters() { closeModal("session-modal"); document.querySelector('.nav-tab[data-view="view-chronik"]').click(); }
+  // Kapitel in den gemeinsamen Lore-/Erinnerungs-Topf: angeheftete zuerst, dann die neuesten, solange Platz ist
+  function p2ChapInject(budgetLeft) {
+    const list = p2ChapText(); if (!list.length) return { text: "", used: 0 };
+    const order = list.map((c, i) => ({ c, i })).sort((a, b) => (b.c.pinned - a.c.pinned) || b.i - a.i), pick = []; let used = 0;
+    for (const { c, i } of order) { const est = p2Tok(c.text) + 4; if (!c.pinned && used + est > budgetLeft) continue; pick.push({ c, i }); used += est; }
+    if (!pick.length) return { text: "", used: 0 };
+    pick.sort((a, b) => a.i - b.i);
+    const h = state.lang === "en" ? "\n\n[Story so far – chapter memory]:\n" : "\n\n[Bisherige Handlung – Kapitel-Gedächtnis]:\n";
+    return { text: h + pick.map(({ c, i }) => `${state.lang === "en" ? "Chapter" : "Kapitel"} ${i + 1}: ${c.text}`).join("\n"), used };
+  }
+  // ---------- 3) Bilder (optional, Standard aus) ----------
+  const IMG_DB = "multi_rp_images";
+  let imgDbP = null;
+  function imgDb() { if (imgDbP) return imgDbP; imgDbP = new Promise((res, rej) => { try { const r = indexedDB.open(IMG_DB, 1); r.onupgradeneeded = e => { const db = e.target.result; if (!db.objectStoreNames.contains("img")) db.createObjectStore("img", { keyPath: "id" }); }; r.onsuccess = () => res(r.result); r.onerror = () => { imgDbP = null; rej(r.error); }; } catch (e) { imgDbP = null; rej(e); } }); return imgDbP; }
+  function imgTx(mode, fn) { return imgDb().then(db => new Promise((res, rej) => { const tx = db.transaction("img", mode), st = tx.objectStore("img"); let out; const r = fn(st); if (r) r.onsuccess = () => { out = r.result; }; tx.oncomplete = () => res(out); tx.onerror = () => rej(tx.error); })); }
+  async function imgGet(id) { if (P2.imgCache.has(id)) return P2.imgCache.get(id); const r = await imgTx("readonly", st => st.get(id)).catch(() => null); if (r) P2.imgCache.set(id, r.data); return r ? r.data : null; }
+  async function imgPut(id, data, camp) { await imgTx("readwrite", st => st.put({ id, data, camp: camp || state._campId || "", ts: Date.now(), size: data.length })); P2.imgCache.set(id, data); }
+  async function imgCampSize(camp) { const all = await imgTx("readonly", st => st.getAll()).catch(() => []); return (all || []).filter(r => r.camp === camp).reduce((n, r) => n + (r.size || 0), 0); }
+  async function imgDelCamp(camp) { const all = await imgTx("readonly", st => st.getAll()).catch(() => []); for (const r of all || []) if (r.camp === camp) await imgTx("readwrite", st => st.delete(r.id)); }
+  // ---------- Szenenbilder: Anbieter-Adapter (Konfiguration + Builder), Prompt durch die Spielleitung ----------
+  // Jeder Anbieter: Standard-URL, Key-Pflicht, sichtbare Felder, Standardwerte, optional Modell-Liste; run() liefert einen Blob.
+  const IMG_SIZES = ["1024x1024", "832x1216", "1216x832", "896x1152", "1152x896", "768x768", "768x1344", "1344x768", "512x512"];
+  const IMG_D = { size: "1024x1024", steps: 30, cfg: 7, sampler: "", seed: -1, neg: "", style: "" };
+  const imgB64Blob = (b64, type) => { const s = String(b64).replace(/^data:[^,]*,/, ""), bin = atob(s), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new Blob([u], { type: type || "image/png" }); };
+  async function imgUrlBlob(u, sig) { if (/^data:/.test(u)) return imgB64Blob(u, (u.match(/^data:([^;,]+)/) || [])[1]); const r = await fetch(u, { signal: sig }); if (!r.ok) throw imgHttpErr(r.status, await r.text().catch(() => "")); return r.blob(); }
+  function imgHttpErr(status, text, key) {   // gut lesbare Fehlermeldung aus Status + Antworttext
+    let d = ""; try { const j = JSON.parse(text); const e = (typeof j.error === "string" && (j.detail || j.message)) ? (j.detail || j.message) : (j.error || j.errors || j); d = typeof e === "string" ? e : (e.message || e.detail || e.msg || j.message || j.detail || (Array.isArray(e) ? e.map(x => x.message || x).join("; ") : JSON.stringify(e))); } catch (_) { d = String(text || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(); }
+    if (key) d = d.split(key).join("••••");
+    const k = status === 401 || status === 403 ? "img_e_auth" : status === 402 ? "img_e_pay" : status === 404 ? "img_e_404" : status === 429 ? "img_e_rate" : status >= 500 ? "img_e_srv" : status === 400 || status === 422 ? "img_e_bad" : "img_e_http";
+    const e = new Error(tf(k, { s: status }) + (d ? " – " + String(d).slice(0, 220) : "")); e.status = status; return e;
+  }
+  async function imgJson(url, opt, key, sig) {
+    let r; try { r = await fetch(url, { ...opt, signal: sig }); } catch (e) { if (e.name === "AbortError") throw e; throw new Error(t("img_e_net")); }
+    const tx = await r.text(); if (!r.ok) throw imgHttpErr(r.status, tx, key);
+    try { return JSON.parse(tx); } catch (_) { throw new Error(t("p2_img_bad")); }
+  }
+  const imgWH = c => { const [w, h] = String(c.size || "1024x1024").split("x").map(n => parseInt(n, 10) || 1024); return { w, h }; };
+  const imgAspect = c => { const { w, h } = imgWH(c), r = w / h, L = [["1:1", 1], ["3:4", .75], ["4:3", 4 / 3], ["9:16", 9 / 16], ["16:9", 16 / 9], ["2:3", 2 / 3], ["3:2", 1.5]]; return L.reduce((a, b) => Math.abs(b[1] - r) < Math.abs(a[1] - r) ? b : a)[0]; };
+  const imgAuth = c => c.key ? { Authorization: "Bearer " + c.key } : {};
+  const imgBase = c => String(c.url || "").replace(/\/+$/, "");
+  function imgSdBody(c, P, needModel) {   // A1111/SD.Next-Form (ArliAI: genau laut Doku, sd_model_checkpoint Pflicht)
+    const { w, h } = imgWH(c), b = { prompt: P.pos, negative_prompt: P.neg, steps: c.steps, sampler_name: c.sampler || undefined, width: w, height: h };
+    if (needModel) b.sd_model_checkpoint = c.model; b.seed = c.seed; b.cfg_scale = c.cfg;
+    if (!needModel && c.model) b.override_settings = { sd_model_checkpoint: c.model };
+    if (!b.sampler_name) delete b.sampler_name; return b;
+  }
+  async function imgSdRun(c, P, sig, needModel, path) {
+    if (needModel && !c.model) throw new Error(t("img_e_model"));
+    try { return await imgSdRun1(c, P, sig, needModel, path); }
+    catch (e) { if (!(e.status === 404 && /sampler/i.test(e.message)) || c._retry) throw e;
+      const meta = (IMG.models[c.prov] || []).find(m => m.id === c.model), alt = (meta && meta.rec && meta.rec.sampler_name) || "Default"; if (alt === c.sampler) throw e;
+      console.warn("Sampler abgelehnt, erneut mit", alt); return imgSdRun1({ ...c, sampler: alt, _retry: true }, P, sig, needModel, path); }
+  }
+  async function imgSdRun1(c, P, sig, needModel, path) {
+    const j = await imgJson(imgBase(c) + (path || "/sdapi/v1/txt2img"), { method: "POST", headers: { "Content-Type": "application/json", ...imgAuth(c) }, body: JSON.stringify(imgSdBody(c, P, needModel)) }, c.key, sig);
+    if (!j.images || !j.images[0]) throw new Error(t("p2_img_empty") + (j.error ? " – " + (j.error.message || j.error) : "")); return imgB64Blob(j.images[0]);
+  }
+  async function imgSdModels(c, sig) { const j = await imgJson(imgBase(c) + "/sdapi/v1/sd-models", { headers: imgAuth(c) }, c.key, sig); return (Array.isArray(j) ? j : []).filter(m => !/caption|tagger/i.test(m.modelType || "")).map(m => ({ id: m.title || m.model_name, type: m.modelType || "", rec: m.recommendedSampler || null })); }
+  async function imgOaiRun(c, P, sig, extra) {   // /v1/images/generations (OpenAI, Together, NanoGPT, AI/ML API, Electron Hub, xAI, lokale Server)
+    const { w, h } = imgWH(c), b = { model: c.model, prompt: P.pos + (extra && extra.negInPrompt && P.neg ? `. Avoid: ${P.neg}` : ""), n: 1 };
+    if (!(extra && extra.noSize)) b.size = `${w}x${h}`;
+    if (/^dall-e/i.test(c.model) || (extra && extra.b64)) b.response_format = extra && extra.b64 === "base64" ? "base64" : "b64_json";
+    Object.assign(b, extra && extra.body ? extra.body(c, P) : {});
+    const j = await imgJson(imgBase(c) + "/images/generations", { method: "POST", headers: { "Content-Type": "application/json", ...imgAuth(c) }, body: JSON.stringify(b) }, c.key, sig);
+    const d = j && j.data && j.data[0]; if (!d) throw new Error(t("p2_img_empty"));
+    return d.b64_json || d.base64 ? imgB64Blob(d.b64_json || d.base64) : d.url ? imgUrlBlob(d.url, sig) : Promise.reject(new Error(t("p2_img_empty")));
+  }
+  async function imgOaiModels(c, sig, filt) { const j = await imgJson(imgBase(c) + "/models", { headers: imgAuth(c) }, c.key, sig); return ((j && j.data) || (Array.isArray(j) ? j : [])).filter(filt || (() => true)).map(m => ({ id: m.id || m.name, type: m.type || "" })); }
+  async function imgUnzipFirst(buf) {   // NovelAI liefert ein ZIP; erste Datei lesen (stored oder deflate)
+    const v = new DataView(buf); if (v.getUint32(0, true) !== 0x04034b50) throw new Error(t("p2_img_bad"));
+    const m = v.getUint16(8, true), cs = v.getUint32(18, true), n = v.getUint16(26, true), x = v.getUint16(28, true), data = new Uint8Array(buf, 30 + n + x, cs);
+    if (m === 0) return new Blob([data], { type: "image/png" });
+    const ds = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw")); return new Blob([await new Response(ds).arrayBuffer()], { type: "image/png" });
+  }
+  const IMG_PROV = {
+    arliai: { url: "https://api.arliai.com", key: "req", f: "model size steps cfg sampler seed neg", d: { steps: 30, sampler: "DPM++ 2M Karras", size: "1024x1024", seed: -1, cfg: 7, neg: "nsfw, nude, lowres, bad anatomy, text, watermark" }, models: imgSdModels, run: (c, P, s) => imgSdRun(c, P, s, true) },
+    a1111: { url: "http://127.0.0.1:7860", key: "opt", local: true, f: "model size steps cfg sampler seed neg", d: { steps: 25, sampler: "DPM++ 2M Karras", cfg: 7, neg: "nsfw, nude, lowres, bad anatomy, text, watermark" }, models: imgSdModels, run: (c, P, s) => imgSdRun(c, P, s, false) },
+    openai: { url: "https://api.openai.com/v1", key: "req", f: "model size", d: { model: "gpt-image-1", size: "1024x1024" }, models: (c, s) => imgOaiModels(c, s, m => /image|dall/i.test(m.id)), run: (c, P, s) => imgOaiRun(c, P, s, { negInPrompt: true }) },
+    oaicompat: { url: "http://127.0.0.1:8080/v1", key: "opt", f: "model size neg", d: { model: "" }, models: (c, s) => imgOaiModels(c, s), run: (c, P, s) => imgOaiRun(c, P, s, { b64: true, body: (c, P) => P.neg ? { negative_prompt: P.neg } : {} }) },
+    together: { url: "https://api.together.xyz/v1", key: "req", f: "model size steps seed neg", d: { model: "black-forest-labs/FLUX.1-schnell", steps: 4 }, models: (c, s) => imgOaiModels(c, s, m => m.type === "image"),
+      run: (c, P, s) => imgOaiRun(c, P, s, { noSize: true, b64: "base64", body: (c, P) => { const { w, h } = imgWH(c), o = { width: w, height: h, steps: c.steps }; if (P.neg) o.negative_prompt = P.neg; if (c.seed >= 0) o.seed = c.seed; return o; } }) },
+    nanogpt: { url: "https://nano-gpt.com/v1", key: "req", f: "model size", d: { model: "hidream" }, models: (c, s) => imgOaiModels(c, s, m => /image|flux|dall|hidream|recraft|sd/i.test(m.id)), run: (c, P, s) => imgOaiRun(c, P, s, { b64: true, negInPrompt: true }) },
+    aimlapi: { url: "https://api.aimlapi.com/v1", key: "req", f: "model size", d: { model: "flux/schnell" }, run: (c, P, s) => imgOaiRun(c, P, s, { negInPrompt: true }) },
+    electronhub: { url: "https://api.electronhub.ai/v1", key: "req", f: "model size", d: { model: "flux-schnell" }, models: (c, s) => imgOaiModels(c, s, m => /image|flux|dall|sd/i.test(m.id + (m.type || ""))), run: (c, P, s) => imgOaiRun(c, P, s, { b64: true, negInPrompt: true }) },
+    xai: { url: "https://api.x.ai/v1", key: "req", f: "model", d: { model: "grok-2-image" }, run: (c, P, s) => imgOaiRun(c, P, s, { noSize: true, b64: true, negInPrompt: true }) },
+    openrouter: { url: "https://openrouter.ai/api/v1", key: "req", f: "model", d: { model: "google/gemini-2.5-flash-image" }, models: (c, s) => imgOaiModels(c, s, m => (m.architecture && (m.architecture.output_modalities || []).includes("image")) || /image/i.test(m.id)),
+      run: async (c, P, s) => { const j = await imgJson(imgBase(c) + "/chat/completions", { method: "POST", headers: { "Content-Type": "application/json", ...imgAuth(c) }, body: JSON.stringify({ model: c.model, modalities: ["image", "text"], messages: [{ role: "user", content: `Generate an image: ${P.pos}${P.neg ? `. Avoid: ${P.neg}` : ""}` }] }) }, c.key, s);
+        const im = j && j.choices && j.choices[0] && j.choices[0].message && (j.choices[0].message.images || [])[0], u = im && (im.image_url ? im.image_url.url : im.url); if (!u) throw new Error(t("p2_img_empty")); return imgUrlBlob(u, s); } },
+    google: { url: "https://generativelanguage.googleapis.com/v1beta", key: "req", f: "model size", d: { model: "imagen-4.0-generate-001" },
+      run: async (c, P, s) => { if (!c.model) throw new Error(t("img_e_model")); const j = await imgJson(`${imgBase(c)}/models/${encodeURIComponent(c.model)}:predict`, { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": c.key }, body: JSON.stringify({ instances: [{ prompt: P.pos }], parameters: { sampleCount: 1, aspectRatio: imgAspect(c) } }) }, c.key, s);
+        const p = j && j.predictions && j.predictions[0]; if (!p || !p.bytesBase64Encoded) throw new Error(t("p2_img_empty")); return imgB64Blob(p.bytesBase64Encoded, p.mimeType); } },
+    stability: { url: "https://api.stability.ai", key: "req", f: "model size seed neg", d: { model: "core" },
+      run: async (c, P, s) => { const fd = new FormData(); fd.append("prompt", P.pos); if (P.neg) fd.append("negative_prompt", P.neg); fd.append("aspect_ratio", imgAspect(c)); if (c.seed >= 0) fd.append("seed", String(c.seed)); fd.append("output_format", "png");
+        const m = /^sd3/.test(c.model) ? "sd3" : (c.model || "core"); if (m === "sd3") fd.append("model", c.model);
+        let r; try { r = await fetch(`${imgBase(c)}/v2beta/stable-image/generate/${m}`, { method: "POST", headers: { Accept: "image/*", ...imgAuth(c) }, body: fd, signal: s }); } catch (e) { if (e.name === "AbortError") throw e; throw new Error(t("img_e_net")); }
+        if (!r.ok) throw imgHttpErr(r.status, await r.text(), c.key); return r.blob(); } },
+    huggingface: { url: "https://router.huggingface.co/hf-inference/models", key: "req", f: "model size steps cfg seed neg", d: { model: "black-forest-labs/FLUX.1-schnell", steps: 4, cfg: 0 },
+      run: async (c, P, s) => { const { w, h } = imgWH(c), pr = { width: w, height: h, num_inference_steps: c.steps, guidance_scale: c.cfg }; if (P.neg) pr.negative_prompt = P.neg; if (c.seed >= 0) pr.seed = c.seed;
+        let r; try { r = await fetch(`${imgBase(c)}/${c.model}`, { method: "POST", headers: { "Content-Type": "application/json", Accept: "image/png", ...imgAuth(c) }, body: JSON.stringify({ inputs: P.pos, parameters: pr }), signal: s }); } catch (e) { if (e.name === "AbortError") throw e; throw new Error(t("img_e_net")); }
+        if (!r.ok) throw imgHttpErr(r.status, await r.text(), c.key); return r.blob(); } },
+    fal: { url: "https://fal.run", key: "req", f: "model size steps cfg seed", d: { model: "fal-ai/flux/schnell", steps: 4, cfg: 3.5 },
+      run: async (c, P, s) => { const { w, h } = imgWH(c), b = { prompt: P.pos, image_size: { width: w, height: h }, num_inference_steps: c.steps, guidance_scale: c.cfg, num_images: 1, sync_mode: true }; if (c.seed >= 0) b.seed = c.seed;
+        const j = await imgJson(`${imgBase(c)}/${c.model}`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Key " + c.key }, body: JSON.stringify(b) }, c.key, s);
+        const u = j && j.images && j.images[0] && j.images[0].url; if (!u) throw new Error(t("p2_img_empty")); return imgUrlBlob(u, s); } },
+    novelai: { url: "https://image.novelai.net", key: "req", f: "model size steps cfg sampler seed neg", d: { model: "nai-diffusion-3", steps: 28, cfg: 5, sampler: "k_euler_ancestral", size: "832x1216" }, tags: true,
+      run: async (c, P, s) => { const { w, h } = imgWH(c), pa = { width: w, height: h, scale: c.cfg, sampler: c.sampler || "k_euler_ancestral", steps: c.steps, n_samples: 1, ucPreset: 0, qualityToggle: true, negative_prompt: P.neg }; if (c.seed >= 0) pa.seed = c.seed;
+        let r; try { r = await fetch(`${imgBase(c)}/ai/generate-image`, { method: "POST", headers: { "Content-Type": "application/json", ...imgAuth(c) }, body: JSON.stringify({ input: P.pos, model: c.model, action: "generate", parameters: pa }), signal: s }); } catch (e) { if (e.name === "AbortError") throw e; throw new Error(t("img_e_net")); }
+        if (!r.ok) throw imgHttpErr(r.status, await r.text(), c.key); return imgUnzipFirst(await r.arrayBuffer()); } },
+    horde: { url: "https://aihorde.net/api/v2", key: "opt", f: "model size steps cfg sampler seed neg", d: { steps: 25, cfg: 7, sampler: "k_euler_a", size: "768x768" },
+      models: async (c, s) => (await imgJson(imgBase(c) + "/status/models?type=image", {}, "", s)).sort((a, b) => (b.count || 0) - (a.count || 0)).map(m => ({ id: m.name, type: "" })),
+      run: async (c, P, s) => { const { w, h } = imgWH(c), H = { "Content-Type": "application/json", apikey: c.key || "0000000000", "Client-Agent": "multi-rp-studio:1:local" };
+        const pr = { width: Math.round(w / 64) * 64, height: Math.round(h / 64) * 64, steps: c.steps, cfg_scale: c.cfg, sampler_name: c.sampler || "k_euler_a", n: 1 }; if (c.seed >= 0) pr.seed = String(c.seed);
+        const b = { prompt: P.pos + (P.neg ? " ### " + P.neg : ""), params: pr, r2: false, nsfw: false }; if (c.model) b.models = [c.model];
+        const j = await imgJson(imgBase(c) + "/generate/async", { method: "POST", headers: H, body: JSON.stringify(b) }, c.key, s); if (!j.id) throw new Error(t("p2_img_empty"));
+        for (let i = 0; i < 200; i++) { await new Promise((ok, no) => { const tm = setTimeout(ok, i ? 3000 : 1500); s && s.addEventListener("abort", () => { clearTimeout(tm); no(new DOMException("Aborted", "AbortError")); }, { once: true }); });
+          const st = await imgJson(imgBase(c) + "/generate/check/" + j.id, { headers: { "Client-Agent": H["Client-Agent"] } }, "", s); if (st.faulted) throw new Error(t("p2_img_empty")); IMG.onWait && IMG.onWait(st); if (st.done) break; }
+        const st = await imgJson(imgBase(c) + "/generate/status/" + j.id, { headers: { "Client-Agent": H["Client-Agent"] } }, "", s), g = st.generations && st.generations[0]; if (!g || !g.img) throw new Error(t("p2_img_empty"));
+        return /^https?:/.test(g.img) ? imgUrlBlob(g.img, s) : imgB64Blob(g.img, "image/webp"); } },
+    pollinations: { url: "https://image.pollinations.ai", key: "none", ext: true, f: "model size seed", d: { model: "flux", size: "1024x1024" },
+      models: async (c, s) => (await imgJson(imgBase(c) + "/models", {}, "", s)).map(m => ({ id: typeof m === "string" ? m : m.name, type: "" })),
+      run: (c, P, s) => { const { w, h } = imgWH(c), q = new URLSearchParams({ width: w, height: h, nologo: "true", seed: c.seed >= 0 ? c.seed : Math.floor(Math.random() * 1e6) }); if (c.model) q.set("model", c.model); return imgUrlBlob(`${imgBase(c)}/prompt/${encodeURIComponent(P.pos)}?${q}`, s); } },
+  };
+  // Nicht direkt im Browser nutzbar (Server-Proxy oder Workflow nötig) – in der Auswahl als Hinweis gelistet
+  const IMG_NA = ["comfy", "bfl", "chutes", "workersai", "zai", "extras"];
+  const IMG = { ctl: null, busy: false, models: {}, onWait: null };
+  function imgArliKey() {   // vorhandenen ArliAI-Chat-Key wiederverwenden (Profil oder Figur mit ArliAI-URL)
+    const all = [state.user, ...(state.characters || [])].filter(x => x && /arliai\.com/i.test(String(x.baseUrl || "")) && x.apiKey);
+    return all.length ? String(all[0].apiKey).trim().replace(/^Bearer\s+/i, "") : "";
+  }
+  function imgCfg() {
+    const raw = state.user && state.user.img && typeof state.user.img === "object" ? state.user.img : {};
+    let prov = IMG_PROV[raw.prov] ? raw.prov : "arliai";
+    if (!raw.p && raw.prov === "openai") prov = "openai";   // Altstand (Phase 2): { prov, url, key, model }
+    const P = IMG_PROV[prov], own = (raw.p && raw.p[prov]) || (!raw.p && raw.prov === prov ? { url: raw.url, key: raw.key, model: raw.model } : {});
+    const v = { ...IMG_D, url: P.url, model: "", ...P.d, ...Object.fromEntries(Object.entries(own).filter(([k, x]) => x !== undefined && x !== "")) };
+    const num = (x, lo, hi, d) => { const n = parseFloat(x); return isNaN(n) ? d : Math.min(hi, Math.max(lo, n)); };
+    const reuse = own.reuse !== false && prov === "arliai";
+    let key = String(own.key || "").trim().replace(/^Bearer\s+/i, ""); if (!key && reuse) key = imgArliKey();
+    return { on: raw.on === true, prov, def: P, url: String(v.url || P.url), key, ownKey: String(own.key || ""), reuse, model: String(v.model || "").trim(), size: IMG_SIZES.includes(v.size) ? v.size : (/^\d{3,4}x\d{3,4}$/.test(v.size) ? v.size : "1024x1024"),
+      steps: Math.round(num(v.steps, 1, 150, 30)), cfg: num(v.cfg, 0, 30, 7), sampler: String(v.sampler || ""), seed: Math.round(num(v.seed, -1, 4294967295, -1)), neg: String(v.neg || ""), style: String(v.style || ""), mode: raw.mode || "scene", maxMB: sanitizeInt(raw.maxMB, 1, 500, 25) };
+  }
+  function imgStripKeys(img) { if (!img || typeof img !== "object") return; img.key = ""; if (img.p) Object.values(img.p).forEach(o => { if (o) o.key = ""; }); }
+  const IMG_STYLE = { fantasy: "detailed fantasy painting, dramatic light", modern: "cinematic photograph, natural light, contemporary", scifi: "science fiction concept art, neon, high detail" };
+  function imgIsTags(c) {   // Tag-Stil für SD1.5/SDXL/Pony/Illustrious/NovelAI, sonst natürliche Sprache (Flux, DALL-E, Imagen, Qwen …)
+    if (c.def.tags) return true; const meta = (IMG.models[c.prov] || []).find(m => m.id === c.model);
+    if (meta && meta.type) return /^(SDXL|SD1|SD15|SD)$/i.test(meta.type);
+    if (/flux|dall|gpt-image|imagen|qwen|z-image|krea|lumina|grok|gemini|hidream|recraft|sd3|core|ultra/i.test(c.model)) return false;
+    return /sdxl|sd-?1|pony|illustr|anime|noob|animagine|nai|xl/i.test(c.model) || ((c.prov === "a1111" || c.prov === "horde") && !c.model);
+  }
+  function imgTarget() { return [...(state.messages || [])].reverse().find(m => m && m.type !== "user") || null; }
+  function imgSceneContext(mode, charId) {
+    const en = true, w = state.world || {}, plain = m => p2MsgPlain(m).replace(/\s+/g, " ").trim();
+    const present = (state.characters || []).filter(c => c && c.role === "companion" && c.active !== false).slice(0, 5);
+    const who = present.map(c => `- ${c.name}: ${String(c.appearance || c.prompt || "").replace(/\s+/g, " ").slice(0, 260)}`).join("\n");
+    const user = state.user ? `- ${state.user.name || "Player"} (player): ${String(state.user.appearance || state.user.persona || "").replace(/\s+/g, " ").slice(0, 200)}` : "";
+    const msgs = mode === "last" ? [imgTarget()].filter(Boolean) : (state.messages || []).filter(Boolean).slice(-6);
+    const ch = mode === "portrait" ? (state.characters || []).find(c => c && c.id === charId) : null;
+    if (ch) return `[CHARACTER PORTRAIT]\n${ch.name}: ${String(ch.appearance || ch.prompt || "").replace(/\s+/g, " ").slice(0, 700)}\n[SETTING STYLE]: ${IMG_STYLE[stKind()] || IMG_STYLE.fantasy}`;
+    return [`[LOCATION]: ${w.location || "?"} · ${w.time || ""} · ${w.weather || ""}`, `[SETTING STYLE]: ${IMG_STYLE[stKind()] || IMG_STYLE.fantasy}`, `[CHARACTERS PRESENT]:\n${[user, who].filter(Boolean).join("\n") || "-"}`, `[RECENT STORY]:\n${msgs.map(m => (m.type === "user" ? "Player: " : "") + plain(m).slice(0, 700)).join("\n\n")}`].join("\n\n");
+  }
+  function imgWriterSys(c, mode) {
+    const tags = imgIsTags(c);
+    return `You write prompts for an image generator (${c.prov}${c.model ? ", model " + c.model : ""}). Describe ONE still image of ${mode === "portrait" ? "the character (head and shoulders portrait)" : mode === "last" ? "the moment in the last message" : "the current scene"}: subjects with their visible appearance, setting, lighting, mood, camera framing. Visual facts only, no story, no names the model cannot know (describe people instead), no text in the image.
+${tags ? "Style: comma-separated booru-style tags, most important first (e.g. 1girl, silver hair, cloak, foggy harbor, lantern light, night, cinematic lighting). Max 60 tags." : "Style: one or two fluent English sentences of natural language, concrete and vivid, max 90 words."}
+Write in English. Answer EXACTLY in this format:
+POSITIVE: <prompt>
+NEGATIVE: <short ${tags ? "tag list" : "comma list"} of things to avoid>`;
+  }
+  function imgParse(txt) {
+    const s = String(txt || "").replace(/```[a-z]*|```/g, ""), p = s.match(/POSITIVE\s*:\s*([\s\S]*?)(?:\n\s*NEGATIVE\s*:|$)/i), n = s.match(/NEGATIVE\s*:\s*([\s\S]*)$/i);
+    const pos = (p ? p[1] : s).replace(/\s+/g, " ").trim(); return { pos: pos.slice(0, 1800), neg: (n ? n[1] : "").replace(/\s+/g, " ").trim().slice(0, 600) };
+  }
+  async function imgWritePrompt(mode, charId, sig) {
+    const c = imgCfg(), gm = state.characters.find(x => x && x.role === "gm" && x.model) || state.characters.find(x => x && x.role !== "editor" && x.model);
+    if (!gm) throw new Error(t("p2_chap_nogm"));
+    const out = await p2ChatOnce(gm, imgWriterSys(c, mode), imgSceneContext(mode, charId), 400, sig);
+    const P = imgParse(out); if (!P.pos) throw new Error(t("img_e_noprompt")); return P;
+  }
+  function imgFinal(c, P) { return { pos: [c.style, P.pos].filter(x => x && x.trim()).join(", "), neg: [P.neg, c.neg].filter(x => x && x.trim()).join(", ") }; }
+  async function imgRender(P, sig) {   // Prompt → Bild (Data-URL, verkleinert)
+    const c = imgCfg(); if (c.def.key === "req" && !c.key) throw new Error(t("p2_img_nokey"));
+    if ((await imgCampSize(state._campId)) > c.maxMB * 1048576) throw new Error(tf("p2_img_full", { n: c.maxMB }));
+    const blob = await c.def.run(c, imgFinal(c, P), sig);
+    const data = await compressImageToDataUrl(blob, 768); if (!/^data:image/.test(data)) throw new Error(t("p2_img_bad")); return data;
+  }
+  function imgErrMsg(e) { if (e && e.name === "AbortError") return t("img_cancelled"); const m = String((e && e.message) || e); return /Failed to fetch|NetworkError|Load failed/i.test(m) ? t("img_e_net") : m; }
+  // ----- Dialog am Szenen-Knopf -----
+  let imgDlg = { target: null, mode: "scene" };
+  function imgOpen(msgId) {
+    const c = imgCfg(); if (!c.on) { showToast(t("img_off"), "info"); return; }
+    const m = msgId ? state.messages.find(x => x && x.id === msgId) : imgTarget(), g = id => document.getElementById(id);
+    imgDlg = { target: m ? m.id : null };
+    g("img-mode").value = msgId ? "custom" : (c.mode === "custom" ? "scene" : c.mode);
+    g("img-char").innerHTML = (state.characters || []).filter(x => x && x.role !== "editor").map(x => `<option value="${escapeHTML(x.id)}">${escapeHTML(x.name)}</option>`).join("");
+    const pr = m && m.imgPrompt; g("img-pos").value = pr ? pr.pos : ""; g("img-neg2").value = pr ? pr.neg : "";
+    g("img-prompt-det").open = !!pr; g("img-prev").innerHTML = ""; imgStatus("");
+    g("img-prov-note").textContent = tf("img_using", { p: t("img_p_" + c.prov), m: c.model || "–", s: c.size });
+    imgModeUI(); imgBusyUI(false); g("img-modal").classList.add("active");
+  }
+  function imgModeUI() { const g = id => document.getElementById(id), m = g("img-mode").value; g("img-char-row").hidden = m !== "portrait"; if (m === "custom") g("img-prompt-det").open = true; g("img-go").textContent = m === "custom" ? t("img_go_custom") : t("img_go"); }
+  function imgStatus(s, step) { const el = document.getElementById("img-status"); if (!el) return; el.textContent = s; el.dataset.step = step || ""; el.hidden = !s; }
+  function imgBusyUI(b) { const g = id => document.getElementById(id); IMG.busy = b; ["img-go", "img-redo", "img-mode", "img-char"].forEach(id => { if (g(id)) g(id).disabled = b; }); g("img-cancel").textContent = b ? t("img_cancel") : t("btn_close"); g("img-modal").classList.toggle("img-busy", b); }
+  async function imgRun(rewrite) {
+    if (IMG.busy) return; const g = id => document.getElementById(id), mode = g("img-mode").value, charId = g("img-char").value;
+    const target = mode === "portrait" ? null : (imgDlg.target ? state.messages.find(x => x && x.id === imgDlg.target) : imgTarget());
+    if (mode !== "portrait" && !target) { imgStatus(t("img_e_nomsg"), "err"); return; }
+    IMG.ctl = new AbortController(); const sig = IMG.ctl.signal; imgBusyUI(true);
+    try {
+      let P = { pos: g("img-pos").value.trim(), neg: g("img-neg2").value.trim() };
+      if ((rewrite && mode !== "custom") || !P.pos) { imgStatus(t("img_st_write"), "write"); P = await imgWritePrompt(mode === "custom" ? "scene" : mode, charId, sig); g("img-pos").value = P.pos; g("img-neg2").value = P.neg; }
+      imgStatus(t("img_st_gen"), "gen"); IMG.onWait = st => { if (st && st.queue_position !== undefined) imgStatus(tf("img_st_queue", { q: st.queue_position, s: st.wait_time || 0 }), "gen"); };
+      const data = await imgRender(P, sig);
+      if (mode === "portrait") { const ch = state.characters.find(x => x && x.id === charId); if (ch) { ch.avatar = await compressImageToDataUrl(await (await fetch(data)).blob(), 160); renderCharacters(); } }
+      else { const id = generateId("img"); await imgPut(id, data); target.imgId = id; target.imgPrompt = { pos: P.pos, neg: P.neg, prov: imgCfg().prov, model: imgCfg().model }; }
+      saveState(); renderChat(); g("img-prev").innerHTML = `<img src="${data}" alt="${escapeHTML(t("p2_img_alt"))}">`; imgStatus(t("p2_img_ok"), "ok");
+      if (!state.user.img) state.user.img = {}; if (mode !== "custom") { state.user.img.mode = mode; saveState(); }
+    } catch (e) { console.warn("Bild:", e); imgStatus((e && e.name === "AbortError") ? t("img_cancelled") : tf("p2_img_fail", { e: imgErrMsg(e).slice(0, 300) }), "err"); }
+    finally { IMG.ctl = null; IMG.onWait = null; imgBusyUI(false); }
+  }
+  function imgCancel() { if (IMG.busy && IMG.ctl) { IMG.ctl.abort(); return; } closeModal("img-modal"); }
+  async function imgGenerate(target, kind) {   // Figur-Porträt (Karte) – ohne Dialog, Prompt schreibt die Spielleitung, sonst einfache Beschreibung
+    const c = imgCfg(); if (!c.on || kind !== "char") return; const ch = state.characters.find(x => x && x.id === target); if (!ch) return;
+    showToast(t("p2_img_running"), "info");
+    try { let P; try { P = await imgWritePrompt("portrait", ch.id); } catch (_) { P = { pos: `${IMG_STYLE[stKind()] || IMG_STYLE.fantasy}, portrait of ${String(ch.appearance || ch.prompt || ch.name).replace(/\s+/g, " ").slice(0, 300)}`, neg: "" }; }
+      const data = await imgRender(P); ch.avatar = await compressImageToDataUrl(await (await fetch(data)).blob(), 160); saveState(); renderCharacters(); renderChat(); showToast(t("p2_img_ok"), "success");
+    } catch (e) { showToast(tf("p2_img_fail", { e: imgErrMsg(e).slice(0, 160) }), "error"); }
+  }
+  function imgFab() { const f = document.getElementById("img-fab"); if (f) f.classList.toggle("hidden", !imgCfg().on); }
+  function imgRemove(msgId) { const m = state.messages.find(x => x && x.id === msgId); if (!m || !m.imgId) return; const id = m.imgId; delete m.imgId; if (!(state.sessions || []).some(s => (s.messages || []).some(x => x && x.imgId === id))) imgTx("readwrite", st => st.delete(id)).catch(() => {}); saveState(); renderChat(); }
+  function imgFill(root) { (root || document).querySelectorAll("img[data-img]:not([src])").forEach(async el => { const d = await imgGet(el.dataset.img); if (d) el.src = d; else el.closest(".p2-img")?.classList.add("missing"); }); }
+  // Export/Import: Bilder optional als _images mitnehmen
+  async function imgCollect(st) { const ids = new Set(); (st.sessions || []).forEach(s => (s.messages || []).forEach(m => { if (m && m.imgId) ids.add(m.imgId); })); const out = {}; for (const id of ids) { const d = await imgGet(id); if (d) out[id] = d; } return out; }
+  async function imgAbsorb(st, camp) {   // _images aus einer Datei in die Bild-DB übernehmen (nur gültige Bilddaten)
+    const im = st && st._images; if (!im || typeof im !== "object") return 0; let n = 0;
+    for (const [id, d] of Object.entries(im)) { if (typeof d === "string" && /^data:image\/(webp|png|jpe?g);base64,/.test(d) && d.length < 3000000 && /^[A-Za-z0-9_\-]+$/.test(id)) { try { await imgPut(id, d, camp); n++; } catch (e) {} } }
+    delete st._images; return n;
+  }
+  // ----- Einstellungen -----
+  const IMG_FIELDS = ["url", "key", "model", "size", "steps", "cfg", "sampler", "seed", "neg", "style"];
+  function imgRenderSettings() {
+    const c = imgCfg(), g = id => document.getElementById(id); if (!g("p2-img-on")) return;
+    const sel = g("p2-img-prov"); if (!sel.options.length) {
+      sel.innerHTML = Object.keys(IMG_PROV).map(k => `<option value="${k}">${escapeHTML(t("img_p_" + k))}</option>`).join("") + `<optgroup label="${escapeHTML(t("img_na_group"))}">${IMG_NA.map(k => `<option value="na_${k}" disabled>${escapeHTML(t("img_p_" + k))}</option>`).join("")}</optgroup>`;
+      g("img-size").innerHTML = IMG_SIZES.map(s => `<option value="${s}">${s.replace("x", " × ")}</option>`).join("");
+    }
+    g("p2-img-on").checked = c.on; sel.value = c.prov;
+    const own = (state.user.img && state.user.img.p && state.user.img.p[c.prov]) || {};
+    g("p2-img-url").value = c.url; g("p2-img-key").value = c.ownKey; g("p2-img-model").value = c.model; g("img-size").value = c.size;
+    g("img-steps").value = c.steps; g("img-cfg").value = c.cfg; g("img-sampler").value = c.sampler; g("img-seed").value = c.seed; g("img-neg").value = c.neg; g("img-style").value = c.style;
+    g("img-reuse").checked = c.reuse; g("img-reuse-row").hidden = c.prov !== "arliai";
+    g("p2-img-key").placeholder = c.prov === "arliai" && c.reuse && !c.ownKey ? (imgArliKey() ? t("img_key_reused") : t("img_key_none")) : c.def.key === "none" ? t("img_key_notneeded") : c.def.key === "opt" ? t("img_key_opt") : "";
+    const f = new Set(c.def.f.split(" ")); document.querySelectorAll("#p2-img-box [data-f]").forEach(el => { el.hidden = !f.has(el.dataset.f); });
+    g("p2-img-key-row").hidden = c.def.key === "none"; g("img-models-btn").hidden = !c.def.models;
+    g("p2-img-ext").hidden = !c.def.ext; g("img-hint").textContent = t("img_h_" + c.prov) === "img_h_" + c.prov ? "" : t("img_h_" + c.prov); g("img-hint").hidden = !g("img-hint").textContent;
+    g("img-models-dl").innerHTML = (IMG.models[c.prov] || []).map(m => `<option value="${escapeHTML(m.id)}">${escapeHTML(m.type)}</option>`).join("");
+    g("p2-img-max").value = c.maxMB; g("p2-img-exp").checked = state.settings.exportImages === true; imgFab();
+  }
+  function imgSaveSettings(ev) {
+    const g = id => document.getElementById(id); if (!state.user.img || typeof state.user.img !== "object") state.user.img = {};
+    const I = state.user.img, cur = imgCfg();
+    if (!I.p) { I.p = {}; if (I.url || I.key || I.model) I.p[cur.prov] = { url: I.url, key: I.key, model: I.model }; delete I.url; delete I.key; delete I.model; }
+    I.on = g("p2-img-on").checked; I.maxMB = sanitizeInt(g("p2-img-max").value, 1, 500, 25); state.settings.exportImages = g("p2-img-exp").checked;
+    if (ev && ev.target && ev.target.id === "p2-img-prov") I.prov = g("p2-img-prov").value;
+    else { I.prov = cur.prov; I.p[cur.prov] = { url: g("p2-img-url").value.trim(), key: g("p2-img-key").value.trim(), reuse: g("img-reuse").checked, model: g("p2-img-model").value.trim(), size: g("img-size").value,
+      steps: g("img-steps").value, cfg: g("img-cfg").value, sampler: g("img-sampler").value.trim(), seed: g("img-seed").value, neg: g("img-neg").value.trim(), style: g("img-style").value.trim() };
+      const meta = ev && ev.target && ev.target.id === "p2-img-model" && (IMG.models[cur.prov] || []).find(m => m.id === g("p2-img-model").value.trim());
+      if (meta && meta.rec) { const o = I.p[cur.prov]; if (meta.rec.sampler_name) o.sampler = meta.rec.sampler_name; if (meta.rec.steps) o.steps = Math.min(40, meta.rec.steps); if (meta.rec.cfg_scale !== undefined) o.cfg = meta.rec.cfg_scale; showToast(tf("img_rec", { s: o.sampler, n: o.steps, c: o.cfg }), "info"); } }
+    saveState(); imgRenderSettings(); renderChat(); renderCharacters();
+  }
+  async function imgLoadModels() {
+    const c = imgCfg(), out = document.getElementById("img-test-out"); if (!c.def.models) return;
+    out.textContent = t("img_models_loading");
+    try { const L = await c.def.models(c); IMG.models[c.prov] = L; imgRenderSettings(); out.textContent = tf("img_models_ok", { n: L.length }); if (!c.model && L[0]) { document.getElementById("p2-img-model").value = L[0].id; imgSaveSettings(); } }
+    catch (e) { out.textContent = tf("img_models_fail", { e: imgErrMsg(e).slice(0, 200) }); }
+  }
+  async function imgTest() {
+    const out = document.getElementById("img-test-out"), c = imgCfg(); out.textContent = t("img_st_gen");
+    try { const d = await imgRender({ pos: "a red apple on a wooden table, soft daylight", neg: "blurry" });
+      out.innerHTML = `<span>${escapeHTML(t("img_test_ok"))}</span><img src="${d}" alt="Test" class="img-test-img">`; }
+    catch (e) { out.textContent = tf("p2_img_fail", { e: imgErrMsg(e).slice(0, 300) }); }
+  }
+  // ---------- Verdrahtung ----------
+  { const g = id => document.getElementById(id);
+    if (g("p2-insp-btn")) g("p2-insp-btn").onclick = p2OpenInspector;
+    if (g("p2-tpl-kind")) g("p2-tpl-kind").onchange = p2TplRender;
+    if (g("p2-tpl-save")) g("p2-tpl-save").onclick = () => { p2TplSave(); showToast(t("p2_tpl_saved"), "success"); };
+    if (g("p2-tpl-reset")) g("p2-tpl-reset").onclick = () => { const k = g("p2-tpl-kind").value; if (state.settings.tpl) delete state.settings.tpl[k]; saveState(); p2TplRender(); showToast(t("p2_tpl_reset_ok"), "info"); };
+    if (g("p2-basic-reset")) g("p2-basic-reset").onclick = () => { state.settings.basicUrls = {}; saveState(); showToast(t("p2_basic_cleared"), "info"); };
+    ["p2-img-on", "p2-img-prov", "p2-img-url", "p2-img-key", "p2-img-model", "p2-img-max", "p2-img-exp", "img-reuse", "img-size", "img-steps", "img-cfg", "img-sampler", "img-seed", "img-neg", "img-style"].forEach(id => { if (g(id)) g(id).onchange = imgSaveSettings; });
+    if (g("img-models-btn")) g("img-models-btn").onclick = imgLoadModels;
+    if (g("img-test-btn")) g("img-test-btn").onclick = imgTest;
+    if (g("img-fab")) g("img-fab").onclick = () => imgOpen();
+    if (g("img-mode")) g("img-mode").onchange = imgModeUI;
+    if (g("img-go")) g("img-go").onclick = () => imgRun(true);
+    if (g("img-redo")) g("img-redo").onclick = () => imgRun(false);
+    if (g("img-cancel")) g("img-cancel").onclick = imgCancel;
+    if (g("p2-chap-btn")) g("p2-chap-btn").onclick = p2OpenChapters;
+    if (g("p2-chap-now")) g("p2-chap-now").onclick = async () => { if (!(await p2ChapCheck(true)) && !P2.chapBusy && !document.getElementById("p2-chap-status").textContent) p2ChapStatus(t("p2_chap_nothing")); };
+    const sc = () => { state.settings.chap = { on: g("p2-chap-on").checked, every: sanitizeInt(g("p2-chap-every").value, 6, 400, 30), keep: p2ChapCfg().keep }; saveState(); };
+    if (g("p2-chap-on")) g("p2-chap-on").onchange = sc; if (g("p2-chap-every")) g("p2-chap-every").onchange = sc;
+    if (g("char-preset")) g("char-preset").onchange = e => { const p = P2_PRESETS[e.target.value]; if (!p) return; const set = (id, v, lbl) => { const el = g(id); if (el) el.value = v; if (lbl && g(lbl)) g(lbl).innerText = v; };
+      set("char-temp", p.temp, "temp-val"); set("char-topp", p.topP, "topp-val"); set("char-reppenalty", p.repPenalty, "reppenalty-val"); set("char-minp", p.minP); set("char-topk", p.topK); set("char-freqp", p.freqPenalty); set("char-presp", p.presPenalty); e.target.value = ""; };
+  }
 
   // ---------- HAUPTMENÜ: mehrere Kampagnen nebeneinander (IndexedDB: "state" = aktive Kampagne, "camp:<id>" = übrige, "campaigns" = Verzeichnis) ----------
   // Global (für alle Kampagnen gleich): Spieler-Profil inkl. Anbieter/Key (state.user), Sprache. Alles andere gehört zur Kampagne.
@@ -9337,27 +9972,28 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       await mmStore(st, mmUniqueName((m ? m.name : mmName(st)) + " " + t("mm_copy_sfx"))); mmRender(); showToast(t("mm_dup_ok"), "success");
     } catch (e) { showToast(t("mm_quota"), "error"); }
   }
-  function mmTag(st) {   // Backup-Format wie „Kampagne exportieren“, API-Keys nur wenn ausdrücklich erlaubt
+  function mmTag(st) {   // Backup-Format wie „Abenteuer exportieren“, API-Keys nur wenn ausdrücklich erlaubt
     const b = mmClone(st), incl = state.settings.stripKeysOnExport === false;
     b._app = "multi-rp-studio"; b._version = 1; b._kind = "campaign"; b._exportedAt = new Date().toISOString(); delete b._campId;
-    if (!incl) { if (b.user) b.user.apiKey = ""; (b.characters || []).forEach(c => { if (c) c.apiKey = ""; }); }
+    if (!incl) { if (b.user) { b.user.apiKey = ""; imgStripKeys(b.user.img); } (b.characters || []).forEach(c => { if (c) c.apiKey = ""; }); }
     return b;
   }
   async function mmExport(id) {
     if (id === state._campId) { cxExport(); return; }
     const st = await idbGet("camp:" + id); if (!st) return;
-    dlJSON(`multi_rp_${xioSlug(mmName(st)) || "kampagne"}_${xioDate()}.json`, mmTag(st)); showToast(t("mm_exported"), "success");
+    const b = mmTag(st); if (state.settings.exportImages === true) b._images = await imgCollect(st);
+    dlJSON(`multi_rp_${xioSlug(mmName(st)) || "abenteuer"}_${xioDate()}.json`, b); showToast(t("mm_exported"), "success");
   }
   async function mmExportAll() {
     await saveState(); const out = [];
-    for (const m of MM.idx.list) { const st = await mmLoad(m.id); if (st) out.push(mmTag(st)); }
-    dlJSON(`multi_rp_alle_kampagnen_${xioDate()}.json`, { type: "multirp-bundle", version: 1, _app: "multi-rp-studio", exportedAt: new Date().toISOString(), campaigns: out });
+    for (const m of MM.idx.list) { const st = await mmLoad(m.id); if (st) { const b = mmTag(st); if (state.settings.exportImages === true) b._images = await imgCollect(st); out.push(b); } }
+    dlJSON(`multi_rp_alle_abenteuer_${xioDate()}.json`, { type: "multirp-bundle", version: 1, _app: "multi-rp-studio", exportedAt: new Date().toISOString(), campaigns: out });
     showToast(tf("mm_exported_all", { n: out.length }), "success");
   }
   function mmDelete(id) {
     const m = MM.idx.list.find(x => x.id === id); if (!m) return;
     showConfirmModal(tf("mm_del_confirm", { n: m.name }), async () => {
-      MM.idx.list = MM.idx.list.filter(x => x.id !== id);
+      MM.idx.list = MM.idx.list.filter(x => x.id !== id); imgDelCamp(id).catch(() => {});
       try { const all = await abTx("readonly", st => st.getAll()); for (const b of all || []) if ((b.camp || MM.idx.legacy) === id) await abTx("readwrite", st => st.delete(b.id)); } catch (e) {}
       if (id !== state._campId) { await idbDel("camp:" + id); await mmSaveIdx(); mmRender(); showToast(t("mm_deleted"), "info"); return; }
       // aktive Kampagne gelöscht → auf eine andere wechseln (oder eine leere anlegen)
@@ -9371,7 +10007,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       location.reload();
     });
   }
-  // Mehrere Backups auf einmal: jede gültige Kampagne wird eine eigene Kampagne; kaputte Dateien einzeln melden
+  // Mehrere Backups auf einmal: jede gültige Kampagne wird ein eigenes Abenteuer; kaputte Dateien einzeln melden
   async function mmReadFiles(files) {
     const rows = [];
     for (const f of [...files]) {
@@ -9409,7 +10045,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       if (!r.cand) continue;
       const dup = MM.idx.list.some(m => m.name.toLowerCase() === r.name.toLowerCase());
       if (dup && skip) { s++; continue; }
-      try { await mmStore(r.cand, dup ? mmUniqueName(r.name) : r.name); n++; } catch (e) { showToast(t("mm_quota"), "error"); break; }
+      try { const imgs = r.cand._images; delete r.cand._images; const nid = await mmStore(r.cand, dup ? mmUniqueName(r.name) : r.name); if (imgs) await imgAbsorb({ _images: imgs }, nid); n++; } catch (e) { showToast(t("mm_quota"), "error"); break; }
     }
     mmRender(); showToast(tf("mm_im_done", { n, s }), n ? "success" : "info");
   }
@@ -9531,6 +10167,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     const u = XIO_URL(c.baseUrl); if (u) o.baseUrl = u;
     if (c.temp !== undefined) o.temperature = +c.temp; if (c.topP !== undefined) o.topP = +c.topP; if (c.repPenalty !== undefined) o.repetitionPenalty = +c.repPenalty;
     if (c.reasoning && c.reasoning !== "auto") o.reasoning = c.reasoning;
+    P2_SAMPLER.forEach(([f, k]) => { if (c[f] !== undefined && c[f] !== "" && !isNaN(parseFloat(c[f]))) o[k] = +c[f]; }); if (c.basicParams) o.basicParams = true;
     return o;
   }
   function charFile(list) { return { type: "multirp-character", version: XIO_VER, exportedAt: new Date().toISOString(), characters: list.map(charToPublic) }; }
@@ -9551,7 +10188,8 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     const baseUrl = XIO_URL(x.baseUrl);
     return { id: "", _src: typeof x.id === "string" ? x.id : "", name: name.slice(0, 120), avatar: xioAvatar(x.avatar), role,
       baseUrl, model: xioStr(x.model), temp: num(x.temperature ?? x.temp, 0, 2, 0.7), topP: num(x.topP, 0, 1, 0.9), repPenalty: num(x.repetitionPenalty ?? x.repPenalty, 0.5, 2, 1.1),
-      reasoning: rsMode(x), thinkBudget: rsBudget(x), prompt: card ? cardToPrompt(x) : xioStr(x.prompt, x.system_prompt) };
+      reasoning: rsMode(x), thinkBudget: rsBudget(x), prompt: card ? cardToPrompt(x) : xioStr(x.prompt, x.system_prompt),
+      ...Object.fromEntries(P2_SAMPLER.map(([f, k, lo, hi]) => [f, parseFloat(x[k] ?? x[f])]).filter(([f, v]) => !isNaN(v)).map(([f, v]) => [f, v])), ...(x.basicParams === true ? { basicParams: true } : {}) };
   }
   function charParse(raw, avatar) {
     let d; try { d = typeof raw === "string" ? JSON.parse(raw.replace(/^\uFEFF/, "")) : raw; } catch (e) { throw xioErr("xio_e_json", { m: e.message }); }
@@ -9675,18 +10313,19 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     const as = getActiveSession(); if (as) { as.messages = Array.isArray(state.messages) ? state.messages : []; as.world = state.world; }
     const b = JSON.parse(JSON.stringify(state));
     b._app = "multi-rp-studio"; b._version = 1; b._kind = "campaign"; b._exportedAt = new Date().toISOString(); delete b._campId;
-    if (!includeKeys) { if (b.user) b.user.apiKey = ""; (b.characters || []).forEach(c => { if (c) c.apiKey = ""; }); }
+    if (!includeKeys) { if (b.user) { b.user.apiKey = ""; imgStripKeys(b.user.img); } (b.characters || []).forEach(c => { if (c) c.apiKey = ""; }); }
     return b;
   }
   function cxFileName() {
     const s = getActiveSession(), d = new Date(), p = n => String(n).padStart(2, "0");
-    const slug = String((s && s.title) || "kampagne").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 40) || "kampagne";
+    const slug = String((s && s.title) || "abenteuer").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 40) || "abenteuer";
     return `multi_rp_${slug}_${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}.json`;
   }
-  function cxExport() {
+  async function cxExport() {
     const incl = state.settings.stripKeysOnExport === false;
-    const name = cxFileName();
-    dlJSON(name, cxBuild(incl));
+    const name = cxFileName(), b = cxBuild(incl);
+    if (state.settings.exportImages === true) b._images = await imgCollect(b);
+    dlJSON(name, b);
     state.settings.lastExportTs = Date.now(); state.settings.roundsSinceExport = 0; saveState();
     rmHide(); cxRenderLast();
     showToast(tf("cx_done", { f: name }) + (incl ? " " + t("cx_done_keys") : ""), incl ? "info" : "success");
@@ -9761,6 +10400,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     const langBeforeImport = state.lang === "en" ? "en" : "de";
     const keep = {}; ["lastExportTs", "roundsSinceExport", "remindSnoozeTs", "firstUseTs", "backupReminder", "stripKeysOnExport"].forEach(k => { if (state.settings[k] !== undefined) keep[k] = state.settings[k]; });
     let msg = t("toast_import_ok");
+    if (p.cand && p.cand._images) await imgAbsorb(p.cand, state._campId);
     if (mode === "merge") { const r = imMerge(state, p.cand); state = r.state; msg = tf("im_merged", r.n); }
     else { const cid = state._campId, cn = state.campaignName; state = p.cand; Object.assign(state.settings, keep); state.campaignName = p.cand.campaignName || cn; }
     state._campId = (typeof MM !== "undefined" && MM.idx && MM.idx.active) || state._campId;
