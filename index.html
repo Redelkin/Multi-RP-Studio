@@ -2,7 +2,7 @@
 <html lang="de" class="h-full">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
   <title>Multi-RP Studio Pro</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0e0c0a">
@@ -12,7 +12,7 @@
   <style>
     :root {
       --bg:#0e0c0a; --surface:#17130f; --surface-2:#221c16; --surface-3:#2d261e;
-      --fg:#f5ece0; --muted:#b8a892; --dim:#887864; --border:#383026;
+      --fg:#f5ece0; --muted:#b8a892; --dim:#978773; --border:#383026;
       --gold:#dfa047; --gold-hover:#f0b45d; --gold-glow:rgba(223,160,71,0.22);
       --danger:#c94c40; --danger-hover:#e05e52; --success:#3f9e68;
       --gm-bg:#22170d; --gm-border:#b45309; --gm-text:#fef3c7;
@@ -280,7 +280,7 @@
     .map-shell:not(.list) #map-places { display:none; }
     .map-shell.list #map-stage, .map-shell.list #map-drag-btn { display:none !important; }
     .orte-top { display:flex; gap:8px; align-items:center; position:sticky; top:-10px; z-index:2; background:#0e0c0a; padding:2px 0 6px; }
-    .orte-top input { flex:1; font-size:15px; padding:8px 12px; }
+    .orte-top input { flex:1; font-size:16px; padding:8px 12px; }
     #orte-count { font-size:11px; color:var(--muted); white-space:nowrap; }
     .orte-grp { display:flex; flex-direction:column; gap:5px; }
     .orte-h { display:flex; justify-content:space-between; align-items:baseline; gap:8px; background:none; border:0; border-bottom:1px solid #dfa04744; padding:6px 2px 5px; color:var(--gold); font:700 13px 'Cinzel',Georgia,serif; letter-spacing:0.16em; text-transform:uppercase; text-align:left; width:100%; }
@@ -310,7 +310,7 @@
     .orte-det .acts button { border:1px solid #dfa04788; background:#241c13; color:#f0c26e; font:600 11px 'Cinzel',Georgia,serif; letter-spacing:0.08em; padding:6px 10px; cursor:pointer; min-height:32px; }
     .orte-det .acts button.show { background:#3a2b17; border-color:var(--gold); color:#ffd88a; }
     .orte-empty { color:var(--muted); font-size:13px; text-align:center; padding:24px 10px; line-height:1.45; }
-    #places-text { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12.5px; line-height:1.5; min-height:260px; white-space:pre; overflow-x:auto; }
+    #places-text { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:16px; line-height:1.5; min-height:260px; white-space:pre; overflow-x:auto; }
     /* ===== SETTING-THEMES: Fantasy = Original (keine Überschreibung); Modern & Sci-Fi über data-theme + Variablen ===== */
     html[data-theme="modern"] {
       --bg:#111318; --surface:#181b22; --surface-2:#20242d; --surface-3:#2a2f3a;
@@ -437,6 +437,39 @@
     .guide-role.on { color:var(--fg); border-color:var(--gold); }
     .guide-code { margin:0; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11.5px; line-height:1.45; white-space:pre-wrap; word-break:break-word; background:var(--bg); color:var(--fg); border:1px solid var(--border); border-radius:8px; padding:8px 9px; max-height:none; user-select:text; -webkit-user-select:text; }
     .guide-copy { align-self:flex-end; }
+    .main-menu { position:fixed; inset:0; z-index:150; background:var(--bg); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:max(12px, env(safe-area-inset-top)) 14px max(16px, env(safe-area-inset-bottom)); }
+    .main-menu[hidden] { display:none; }
+    .main-menu.mm-drag { outline:2px dashed var(--gold); outline-offset:-8px; }
+    .mm-wrap { max-width:650px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
+    .mm-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .mm-logo { font-size:20px; color:var(--gold); }
+    .mm-hint { font-size:12.5px; color:var(--muted); line-height:1.4; margin:0; }
+    .mm-list { display:flex; flex-direction:column; gap:10px; }
+    .mm-card { margin:0; display:flex; flex-direction:column; gap:6px; }
+    .mm-card.mm-active { border-color:var(--gold); }
+    .mm-head { display:flex; align-items:center; gap:10px; }
+    .mm-ico { font-size:24px; flex-shrink:0; }
+    .mm-tt { flex:1; min-width:0; }
+    .mm-name { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .mm-sub { font-size:11.5px; color:var(--muted); }
+    .mm-sum { font-size:12.5px; color:var(--fg); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .mm-badge { font-size:10.5px; color:var(--gold); border:1px solid var(--gold); border-radius:9px; padding:1px 7px; flex-shrink:0; }
+    .mm-acts { display:flex; gap:6px; align-items:center; }
+    .mm-acts .mm-open { flex:1; padding:9px 8px; font-size:13px; }
+    .mm-acts .order-btn { width:38px; height:38px; flex-shrink:0; }
+    .mm-acts .mm-del { color:var(--danger); }
+    .mm-im-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; max-height:300px; overflow:auto; }
+    .mm-im-list li { background:var(--surface-2); border-radius:8px; padding:7px 9px; font-size:13px; display:flex; flex-direction:column; gap:2px; }
+    .mm-im-list li.bad { border:1px solid var(--danger); }
+    .mm-im-list small { color:var(--muted); font-size:11.5px; word-break:break-word; } .mm-im-list small.w { color:#f2c46d; }
+    body.mm-on { overflow:hidden; }
+    .im-mode[hidden] { display:none; }
+    .xio-row { display:flex; gap:8px; } .xio-row .btn { flex:1; font-size:12.5px; padding:9px 6px; }
+    .xio-file { position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; pointer-events:none; }
+    .xio-list { margin:0; padding-left:18px; font-size:12.5px; line-height:1.45; max-height:180px; overflow:auto; }
+    .xio-list .dup { color:var(--gold); } .xio-list small { color:var(--muted); }
+    .guide-sum { font-size:13.5px; color:var(--gold); font-weight:700; cursor:pointer; padding:2px 0; }
+    .guide-btns { display:flex; gap:6px; justify-content:flex-end; }
     .guide-p { font-size:12.5px; line-height:1.5; color:var(--muted); margin:0; }
     .guide-p b { color:var(--fg); }
     .guide-table { width:100%; border-collapse:collapse; font-size:11.5px; }
@@ -486,6 +519,40 @@
     .ab-when { font-size:12.5px; font-weight:600; }
     .ab-label { font-size:11.5px; color:var(--muted); overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
     .ab-empty { font-size:12px; color:var(--muted); padding:6px 2px; }
+    /* ===== Phase 1: Datensicherheit, Provider-Assistent, Barrierefreiheit ===== */
+    input, textarea, select { font-family:inherit; }   /* Fantasy: Eingabefelder waren Monospace (Browser-Standard) */
+    :focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+    input:focus-visible, textarea:focus-visible, select:focus-visible { outline:none; }
+    .modal-content:focus, .map-shell:focus { outline:none; }
+    .p1-box { display:flex; flex-direction:column; gap:7px; padding:10px; background:var(--surface-2); border-radius:8px; }
+    .p1-h { font-weight:700; font-size:13px; color:var(--gold); }
+    .p1-row { display:flex; justify-content:space-between; align-items:baseline; gap:10px; font-size:12.5px; }
+    .p1-row b { text-align:right; font-weight:600; }
+    .p1-note { font-size:11.5px; color:var(--muted); line-height:1.4; margin:0; }
+    .p1-ok { color:#8fd19e; } .p1-warn { color:#f2c46d; } .p1-err { color:#ff9a8f; }
+    .p1-chk { display:flex; align-items:center; gap:8px; font-size:12.5px; cursor:pointer; }
+    .bk-remind { display:flex; align-items:center; gap:8px; padding:7px 10px; font-size:12.5px; line-height:1.35; background:var(--surface); border-top:1px solid var(--gold); flex-shrink:0; }
+    .bk-remind[hidden] { display:none; }
+    .bk-remind span { flex:1; min-width:0; }
+    .bk-remind .btn { padding:6px 10px; font-size:12.5px; min-height:34px; flex-shrink:0; }
+    .bk-remind .msg-action-btn { flex-shrink:0; min-height:34px; }
+    .im-stats { display:grid; grid-template-columns:1fr auto; gap:3px 10px; font-size:13px; padding:8px 10px; background:var(--surface-2); border-radius:8px; }
+    .im-stats b { color:var(--gold); text-align:right; }
+    .im-warn { font-size:12px; line-height:1.4; color:#f2c46d; margin:0; padding-left:16px; }
+    .im-mode { border:1px solid var(--border); border-radius:8px; padding:8px 10px; margin:0; display:flex; flex-direction:column; gap:8px; }
+    .im-mode legend { font-size:12px; color:var(--muted); padding:0 4px; }
+    .im-mode label { display:flex; gap:8px; align-items:flex-start; font-size:13px; cursor:pointer; line-height:1.35; }
+    .im-mode input { width:18px; height:18px; margin-top:1px; flex-shrink:0; accent-color:var(--gold); }
+    .im-mode small { display:block; color:var(--muted); font-size:11.5px; }
+    .pv-hint { font-size:11.5px; color:var(--muted); line-height:1.4; margin:-2px 0 0; }
+    .pv-test-btn { font-size:13px; }
+    .pv-res { font-size:12.5px; line-height:1.4; padding:8px 10px; border-radius:8px; background:var(--surface-2); border:1px solid var(--border); display:flex; flex-direction:column; gap:4px; overflow-wrap:anywhere; }
+    .pv-res:empty { display:none; }
+    .pv-res.ok { border-color:#8fd19e88; } .pv-res.warn { border-color:#f2c46d88; } .pv-res.err { border-color:#ff9a8f88; }
+    .pv-res small { color:var(--muted); font-size:11px; }
+    .pv-chips { display:flex; flex-wrap:wrap; gap:5px; margin-top:2px; }
+    .pv-chips button { font-size:11.5px; padding:5px 8px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--fg); cursor:pointer; min-height:30px; }
+    .im-mode label, .im-mode small { text-transform:none; letter-spacing:normal; }
 </style>
 </head>
 <body>
@@ -493,7 +560,23 @@
 <div id="app">
   <div id="toast-layer"></div>
 
+  <div id="main-menu" class="main-menu" hidden>
+    <div class="mm-wrap">
+      <div class="mm-top"><div class="font-serif-title mm-logo">⚔ Multi-RP Studio</div><button class="header-btn hdr-round" id="mm-close" title="Zurück zur Kampagne" data-i18n-title="mm_back">✕</button></div>
+      <p class="mm-hint" data-i18n="mm_desc">Deine Kampagnen auf diesem Gerät. Spieler-Profil und Anbieter gelten für alle.</p>
+      <div class="xio-row">
+        <button class="btn btn-primary" id="mm-new-btn" data-i18n="mm_new">+ Neue Kampagne</button>
+        <button class="btn btn-secondary" id="mm-import-btn" data-i18n="mm_import">📥 Backups laden</button>
+      </div>
+      <input type="file" id="mm-file" accept=".json,application/json" multiple class="xio-file">
+      <div id="mm-list" class="mm-list"></div>
+      <button class="btn btn-secondary" id="mm-export-all" data-i18n="mm_export_all">⬇️ Alle Kampagnen herunterladen</button>
+      <p class="mm-hint mm-drop" data-i18n="mm_drop">Tipp (Desktop): Backup-Dateien einfach hierher ziehen.</p>
+    </div>
+  </div>
+
   <header>
+    <button class="header-btn hdr-round" id="mm-home-btn" title="Hauptmenü" data-i18n-title="mm_home">🏠</button>
     <button class="header-btn font-serif-title" id="session-modal-btn" title="Abenteuer wechseln" data-i18n-title="tt_switch_adv">
       <span class="hdr-sword">⚔</span>
       <span id="active-session-title" class="hdr-title">Neues Abenteuer</span>
@@ -519,9 +602,10 @@
   <main>
     <section class="view-panel active" id="view-chat">
       <div id="chat-messages"></div>
-      <button id="map-fab" class="header-btn map-fab" onclick="openMapModal()" title="Karte öffnen" data-i18n-title="tt_map" aria-label="🗺️">🗺️</button>
+      <button id="map-fab" class="header-btn map-fab" onclick="openMapModal()" title="Karte öffnen" data-i18n-title="tt_map">🗺️</button>
       <button id="scroll-bottom-btn" class="scroll-bottom-btn" title="Nach unten scrollen" data-i18n-title="tt_scroll">↓</button>
       <div id="status-indicator"><span>⚡</span><span id="status-text" data-i18n="status_ready">Bereit</span></div>
+      <div id="bk-remind" class="bk-remind" role="status" hidden><span id="bk-remind-txt"></span><button class="btn btn-primary" id="bk-remind-go" data-i18n="rm_go">📦 Sichern</button><button class="msg-action-btn" id="bk-remind-later" data-i18n="rm_later">Später</button></div>
       <div class="quick-triggers" id="quick-triggers"></div>
       <div class="input-bar">
         <button class="header-btn" id="assist-suggest-btn" title="Aktions-Vorschlag" data-i18n-title="tt_suggest" style="width:38px; height:38px; padding:0; justify-content:center; color:#f59e0b; display:none; flex-shrink:0;">💡</button>
@@ -567,20 +651,12 @@
               </label>
               <div class="form-group">
                 <label data-i18n="lbl_provider">Provider</label>
-                <select id="user-cfg-provider-preset">
-                  <option value="custom" data-i18n="opt_manual">Manuell</option>
-                  <option value="https://openrouter.ai/api/v1">OpenRouter</option>
-                  <option value="https://api.totalgpt.ai/v1">Infermatic / TotalGPT</option>
-                  <option value="https://api.groq.com/openai/v1">Groq</option>
-                  <option value="https://api.together.xyz/v1">Together AI</option>
-                  <option value="https://api.deepseek.com/v1">DeepSeek</option>
-                  <option value="https://api.openai.com/v1">OpenAI</option>
-                  <option value="http://localhost:11434/v1" data-i18n="opt_ollama">Ollama (Lokal)</option>
-                </select>
+                <select id="user-cfg-provider-preset"><option value="custom" data-i18n="opt_manual">Manuell</option></select>
               </div>
-              <div class="form-group"><label>Base URL</label><input type="text" id="user-cfg-baseurl" value="https://openrouter.ai/api/v1"></div>
-              <div class="form-group"><label>API Key</label><input type="password" id="user-cfg-apikey" placeholder="sk-..."></div>
-              <div class="form-group"><label data-i18n="lbl_model">Modell</label><input type="text" id="user-cfg-model" data-i18n-ph="ph_model" placeholder="z. B. mistralai/mistral-small-3"></div>
+              <div class="form-group"><label>Base URL</label><input type="url" id="user-cfg-baseurl" value="https://openrouter.ai/api/v1" inputmode="url" autocapitalize="off" spellcheck="false"></div>
+              <div class="form-group"><label>API Key</label><input type="password" id="user-cfg-apikey" placeholder="sk-..." autocomplete="off" spellcheck="false"></div>
+              <div class="form-group"><label data-i18n="lbl_model">Modell</label><input type="text" id="user-cfg-model" list="user-model-list" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-ph="ph_model" placeholder="z. B. mistralai/mistral-small-3"><datalist id="user-model-list"></datalist></div>
+<p class="pv-hint" id="user-pv-hint"></p><button type="button" class="btn btn-secondary pv-test-btn" id="user-pv-test" data-i18n="pv_test">🔌 Verbindung testen</button><div class="pv-res" id="user-pv-result" aria-live="polite"></div>
               <div class="form-group">
                 <label>Temperature: <span id="user-temp-val">0.6</span></label>
                 <input type="range" id="user-cfg-temp" min="0.0" max="1.2" step="0.05" value="0.6" oninput="document.getElementById('user-temp-val').innerText=this.value">
@@ -594,6 +670,11 @@
           <button class="btn btn-secondary" style="flex:1;" id="import-png-btn" data-i18n="btn_import_png">📥 Tavern/Chub PNG</button>
           <input type="file" id="char-png-input" accept="image/png" style="display:none;">
         </div>
+        <div class="xio-row">
+          <button class="btn btn-secondary" id="char-export-btn" data-i18n="xio_char_export">⬇️ Alle exportieren</button>
+          <button class="btn btn-secondary" id="char-import-btn" data-i18n="xio_char_import">📂 Importieren</button>
+          <input type="file" id="char-import-file" accept=".json,.png,application/json,image/png" class="xio-file">
+        </div>
         <div id="characters-list" style="display:flex; flex-direction:column; gap:10px;"></div>
       </div>
     </section>
@@ -603,6 +684,11 @@
         <div style="display:flex; gap:8px;">
           <button class="btn btn-primary" style="flex:1.2;" id="add-lore-btn" data-i18n="btn_add_lore">+ Neuer Eintrag</button>
           <button class="btn btn-secondary" style="flex:1;" id="add-folder-btn" data-i18n="btn_add_folder">📁 + Ordner</button>
+        </div>
+        <div class="xio-row">
+          <button class="btn btn-secondary" id="lore-export-btn" data-i18n="xio_lore_export">⬇️ Lorebook exportieren</button>
+          <button class="btn btn-secondary" id="lore-import-btn" data-i18n="xio_lore_import">📂 Einträge importieren</button>
+          <input type="file" id="lore-import-file" accept=".json,application/json" class="xio-file">
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; font-size:11.5px; color:var(--muted); padding:0 4px;">
           <span id="lore-stats-count">0 Einträge in 0 Ordnern</span>
@@ -655,6 +741,8 @@
             <input type="checkbox" id="setting-aio-editor">
             <span data-i18n="aio_editor_chk">✒️ Lektor auch im All-in-One (langsamer, Standard aus)</span>
           </label>
+          <button type="button" class="btn btn-secondary pv-test-btn" id="aio-pv-test" data-i18n="pv_aio_test">🔌 Erzähler-Verbindung testen</button>
+          <div class="pv-res" id="aio-pv-result" aria-live="polite"></div>
         </div>
         <div class="card">
           <div class="card-title font-serif-title" style="color:var(--gold);" data-i18n="editor_title">✒️ Lektor-Pipeline (Stil-Veredelung)</div>
@@ -724,15 +812,28 @@
             </div>
             <button class="btn btn-primary" id="manual-save-btn" onclick="manualSave()" style="margin-top:4px;" data-i18n="manual_save_btn">💾 Jetzt sichern</button>
           </div>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer; margin-top:4px;">
-            <input type="checkbox" id="setting-strip-keys" checked>
-            <span><strong data-i18n="strip_keys_chk">API-Keys beim Export entfernen</strong></span>
-          </label>
-          <div style="display:flex; gap:8px;">
-            <button class="btn btn-secondary" style="flex:1;" id="export-btn" data-i18n="btn_export">Backup exportieren</button>
-            <button class="btn btn-secondary" style="flex:1;" id="import-btn" data-i18n="btn_import">Backup laden</button>
+          <div class="p1-box" id="ps-box">
+            <div class="p1-row"><span data-i18n="ps_title">🛡️ Dauerhafter Speicher</span><b id="ps-state">…</b></div>
+            <div class="p1-row"><span data-i18n="ps_usage_lbl">Belegt</span><b id="ps-usage">–</b></div>
+            <p class="p1-note" id="ps-expl"></p>
+            <p class="p1-note" data-i18n="ps_note">Alles liegt nur in diesem Browser.</p>
+            <button class="btn btn-secondary" id="ps-ask-btn" data-i18n="ps_ask" hidden>🛡️ Dauerhaft speichern anfragen</button>
           </div>
-          <input type="file" id="import-file" accept=".json" style="display:none;">
+          <div class="p1-box" id="cx-box">
+            <div class="p1-h" data-i18n="cx_title">📦 Kampagne als Datei</div>
+            <p class="p1-note" id="cx-last"></p>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-primary" style="flex:1;" id="export-btn" data-i18n="btn_export">📦 Kampagne exportieren</button>
+              <button class="btn btn-secondary" style="flex:1;" id="import-btn" data-i18n="btn_import">📥 Kampagne importieren</button>
+            </div>
+            <input type="file" id="import-file" accept=".json,application/json" style="display:none;">
+            <label class="p1-chk"><input type="checkbox" id="setting-include-keys"><span data-i18n="cx_keys_chk">🔑 API-Keys mitexportieren (nicht empfohlen)</span></label>
+            <div class="ab-grid">
+              <label><span data-i18n="rm_rounds">Erinnern nach N Runden</span><input type="number" id="rm-rounds" min="0" max="500" value="25"></label>
+              <label><span data-i18n="rm_days">… oder nach X Tagen</span><input type="number" id="rm-days" min="0" max="90" value="7"></label>
+            </div>
+            <p class="p1-note" data-i18n="rm_hint">Erinnerung an die Sicherungsdatei. 0 = aus.</p>
+          </div>
           <div id="ab-box" style="display:flex; flex-direction:column; gap:8px; padding:10px; background:var(--surface-2); border-radius:8px; margin-top:4px;">
             <div style="font-weight:700; font-size:13px; color:var(--gold);" data-i18n="ab_title">🗂️ Automatische Sicherungen</div>
             <div style="font-size:12px; color:var(--muted); line-height:1.35;" data-i18n="ab_desc">Sicherungen im App-Speicher dieses Geräts.</div>
@@ -745,9 +846,8 @@
             </div>
             <button class="btn btn-secondary" id="ab-now-btn" data-i18n="ab_now">💾 Jetzt sichern</button>
             <div id="ab-list" style="display:flex; flex-direction:column; gap:6px;"></div>
-            <div id="ab-usage" style="font-size:11px; color:var(--muted);"></div>
           </div>
-          <button class="btn btn-danger" id="reset-btn" style="margin-top:4px;" data-i18n="btn_reset">Werkseinstellungen zurücksetzen</button>
+          <button class="btn btn-danger" id="reset-btn" style="margin-top:4px;" data-i18n="btn_reset">🗑 Abenteuer löschen</button>
         </div>
         <button class="thanks-btn" id="thanks-btn" onclick="openThanks()" data-i18n="thanks_btn">💛 Danke</button>
       </div>
@@ -766,7 +866,7 @@
       <div class="modal-header">
         <div style="display:flex; align-items:center; gap:8px;">
           <span class="font-serif-title" data-i18n="modal_bag_title">🎒 Verfassung & Ausrüstung</span>
-          <span id="bag-modal-level-badge" onclick="promptChangeLevel()" style="font-size:11px; background:var(--gold); color:#17130f; font-weight:bold; padding:2px 7px; border-radius:10px; cursor:pointer;">Stufe 1</span>
+          <span id="bag-modal-level-badge" onclick="promptChangeLevel()" role="button" tabindex="0" title="Stufe ändern" data-i18n-title="a11y_level" style="font-size:11px; background:var(--gold); color:#17130f; font-weight:bold; padding:2px 7px; border-radius:10px; cursor:pointer;">Stufe 1</span>
         </div>
         <button class="header-btn" onclick="closeModal('bag-modal')">✕</button>
       </div>
@@ -914,20 +1014,12 @@
           <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
             <div class="form-group">
               <label data-i18n="lbl_provider">Provider</label>
-              <select id="char-provider-preset">
-                <option value="custom" data-i18n="opt_manual">Manuell</option>
-                <option value="https://openrouter.ai/api/v1">OpenRouter</option>
-                <option value="https://api.totalgpt.ai/v1">Infermatic / TotalGPT</option>
-                <option value="https://api.groq.com/openai/v1">Groq</option>
-                <option value="https://api.together.xyz/v1">Together AI</option>
-                <option value="https://api.deepseek.com/v1">DeepSeek</option>
-                <option value="https://api.openai.com/v1">OpenAI</option>
-                <option value="http://localhost:11434/v1" data-i18n="opt_ollama">Ollama (Lokal)</option>
-              </select>
+              <select id="char-provider-preset"><option value="custom" data-i18n="opt_manual">Manuell</option></select>
             </div>
-            <div class="form-group"><label>Base URL</label><input type="text" id="char-baseurl" value="https://openrouter.ai/api/v1"></div>
-            <div class="form-group"><label>API Key</label><input type="password" id="char-apikey" placeholder="sk-..."></div>
-            <div class="form-group"><label data-i18n="lbl_model">Modell</label><input type="text" id="char-model" data-i18n-ph="ph_model" placeholder="z. B. mistralai/mistral-small-3"></div>
+            <div class="form-group"><label>Base URL</label><input type="url" id="char-baseurl" value="https://openrouter.ai/api/v1" inputmode="url" autocapitalize="off" spellcheck="false"></div>
+            <div class="form-group"><label>API Key</label><input type="password" id="char-apikey" placeholder="sk-..." autocomplete="off" spellcheck="false"></div>
+            <div class="form-group"><label data-i18n="lbl_model">Modell</label><input type="text" id="char-model" list="char-model-list" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-ph="ph_model" placeholder="z. B. mistralai/mistral-small-3"><datalist id="char-model-list"></datalist></div>
+<p class="pv-hint" id="char-pv-hint"></p><button type="button" class="btn btn-secondary pv-test-btn" id="char-pv-test" data-i18n="pv_test">🔌 Verbindung testen</button><div class="pv-res" id="char-pv-result" aria-live="polite"></div>
             <div class="form-group">
               <label>Temperature: <span id="temp-val">0.7</span></label>
               <input type="range" id="char-temp" min="0.0" max="1.5" step="0.05" value="0.7" oninput="document.getElementById('temp-val').innerText=this.value">
@@ -1037,7 +1129,7 @@
         <div id="map-world"></div>
         <div class="map-vig"></div>
         <svg class="map-ui map-comp" viewBox="-50 -50 100 100" aria-hidden="true"><circle r="44" fill="#15110dcc" stroke="#dfa04788" stroke-width="1.5"/><path d="M0-27L6 0L0 27L-6 0Z" fill="#dfa04744" stroke="#dfa047" stroke-width="1"/><path d="M0-27L6 0H-6Z" fill="#dfa047"/><text y="-31" text-anchor="middle" font-family="Cinzel,Georgia,serif" font-size="12" font-weight="700" fill="#f0c26e">N</text></svg>
-        <div class="map-ui map-zoom"><button onclick="WK.zoomBy(1.5)" aria-label="+">+</button><button onclick="WK.zoomBy(1/1.5)" aria-label="-">−</button><button onclick="WK.reset()" data-i18n-title="map_reset" title="Ansicht zurücksetzen"><svg viewBox="-12 -12 24 24" width="18" height="18" aria-hidden="true" style="display:block;margin:auto;"><circle r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M0-11V-4M0 4V11M-11 0H-4M4 0H11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
+        <div class="map-ui map-zoom"><button onclick="WK.zoomBy(1.5)" title="Hineinzoomen" data-i18n-title="a11y_zoom_in">+</button><button onclick="WK.zoomBy(1/1.5)" title="Herauszoomen" data-i18n-title="a11y_zoom_out">−</button><button onclick="WK.reset()" data-i18n-title="map_reset" title="Ansicht zurücksetzen"><svg viewBox="-12 -12 24 24" width="18" height="18" aria-hidden="true" style="display:block;margin:auto;"><circle r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M0-11V-4M0 4V11M-11 0H-4M4 0H11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
         <div class="map-ui map-scale"><span id="map-scale-txt"></span><div class="bar" id="map-scale-bar"></div></div>
         <div class="map-ui" id="map-gest" data-i18n="map_gestures">Tippen: Menü · Wischen: umsehen · Lange drücken: Nadel</div>
         <div class="map-ui" id="map-measure" aria-live="polite"></div>
@@ -1049,7 +1141,7 @@
           <button class="btn btn-secondary" onclick="openPlacesModal()" data-i18n="map_btn_list">📝 Ortsliste</button>
         </div>
         <div class="map-ui" id="map-card">
-          <button class="x" onclick="hideMapCard()" aria-label="x">×</button>
+          <button class="x" onclick="hideMapCard()" title="Schließen" data-i18n-title="a11y_close">×</button>
           <div class="k" id="map-card-k"></div>
           <h2 id="map-card-t"></h2>
           <div class="orn"></div>
@@ -1113,6 +1205,87 @@
         <button class="header-btn" id="thanks-close-btn" onclick="closeModal('thanks-modal')">✕</button>
       </div>
       <div class="modal-body thanks-text" id="thanks-body"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="import-modal">
+    <div class="modal-content" style="max-width:420px;">
+      <div class="modal-header">
+        <span class="font-serif-title" data-i18n="im_title">📥 Kampagne importieren</span>
+        <button class="header-btn" onclick="closeModal('import-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="p1-note" id="im-file"></p>
+        <div class="im-stats" id="im-stats"></div>
+        <ul class="im-warn" id="im-warn"></ul>
+        <fieldset class="im-mode">
+          <legend data-i18n="im_mode">Wie importieren?</legend>
+          <label><input type="radio" name="im-mode" id="im-mode-replace" value="replace" checked><span><b data-i18n="im_replace">Ersetzen</b><small data-i18n="im_replace_d">Alles Aktuelle wird durch die Datei ersetzt.</small></span></label>
+          <label><input type="radio" name="im-mode" id="im-mode-merge" value="merge"><span><b data-i18n="im_merge">Zusammenführen</b><small data-i18n="im_merge_d">Neues kommt dazu.</small></span></label>
+        </fieldset>
+        <p class="p1-note" data-i18n="im_safety">Vorher wird automatisch eine Sicherung angelegt.</p>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secondary" style="flex:1;" onclick="closeModal('import-modal')" data-i18n="btn_cancel">Abbrechen</button>
+          <button class="btn btn-primary" style="flex:1;" id="im-ok-btn" data-i18n="im_ok">Importieren</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="mm-new-modal">
+    <div class="modal-content" style="max-width:420px;">
+      <div class="modal-header"><span class="font-serif-title" data-i18n="mm_new_title">+ Neue Kampagne</span><button class="header-btn" onclick="closeModal('mm-new-modal')">✕</button></div>
+      <div class="modal-body">
+        <div class="form-group"><label data-i18n="lbl_name">Name</label><input type="text" id="mm-new-name" maxlength="80" autocomplete="off" data-i18n-ph="mm_new_ph" placeholder="z. B. Die Nebelküste"></div>
+        <fieldset class="im-mode st-pick"><legend data-i18n="st_title">🎭 Setting</legend>
+          <label><input type="radio" name="mm-st" value="fantasy"><span><b data-i18n="st_fantasy">🐉 Fantasy</b></span></label>
+          <label><input type="radio" name="mm-st" value="modern"><span><b data-i18n="st_modern">🌃 Modern</b></span></label>
+          <label><input type="radio" name="mm-st" value="scifi"><span><b data-i18n="st_scifi">🚀 Sci-Fi</b></span></label>
+        </fieldset>
+        <p class="p1-note" data-i18n="mm_new_note">Die aktuelle Kampagne bleibt unverändert gespeichert. Figuren und Lore legst du in der neuen Kampagne an.</p>
+        <div style="display:flex; gap:8px;"><button class="btn btn-secondary" style="flex:1;" onclick="closeModal('mm-new-modal')" data-i18n="btn_cancel">Abbrechen</button><button class="btn btn-primary" style="flex:1;" id="mm-new-ok" data-i18n="mm_create">Anlegen & starten</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="mm-import-modal">
+    <div class="modal-content" style="max-width:420px;">
+      <div class="modal-header"><span class="font-serif-title" data-i18n="mm_im_title">📥 Backups laden</span><button class="header-btn" onclick="closeModal('mm-import-modal')">✕</button></div>
+      <div class="modal-body">
+        <p class="p1-note" id="mm-im-sum"></p>
+        <ul class="mm-im-list" id="mm-im-list"></ul>
+        <fieldset class="im-mode" id="mm-im-mode"><legend data-i18n="mm_im_mode">Name schon vorhanden:</legend>
+          <label><input type="radio" name="mm-im" id="mm-im-rename" checked><span><b data-i18n="mm_im_rename">Als neue Kampagne „(2)“</b></span></label>
+          <label><input type="radio" name="mm-im" id="mm-im-skip"><span><b data-i18n="mm_im_skip">Überspringen</b></span></label>
+        </fieldset>
+        <p class="p1-note" data-i18n="mm_im_note">Jedes Backup wird eine eigene Kampagne. Nichts Vorhandenes wird überschrieben.</p>
+        <div style="display:flex; gap:8px;"><button class="btn btn-secondary" style="flex:1;" onclick="closeModal('mm-import-modal')" data-i18n="btn_cancel">Abbrechen</button><button class="btn btn-primary" style="flex:1;" id="mm-im-ok" data-i18n="im_ok">Importieren</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="xio-modal">
+    <div class="modal-content" style="max-width:420px;">
+      <div class="modal-header">
+        <span class="font-serif-title" id="xio-title">📂 Import</span>
+        <button class="header-btn" onclick="closeModal('xio-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="p1-note" id="xio-file"></p>
+        <div class="im-stats" id="xio-stats"></div>
+        <ul class="xio-list" id="xio-list"></ul>
+        <ul class="im-warn" id="xio-warn"></ul>
+        <fieldset class="im-mode" id="xio-mode">
+          <legend data-i18n="xio_mode">Doppelte (gleicher Name):</legend>
+          <label><input type="radio" name="xio-mode" id="xio-mode-skip" value="skip" checked><span><b data-i18n="xio_skip">Überspringen</b><small data-i18n="xio_skip_d">Vorhandene bleiben unverändert.</small></span></label>
+          <label><input type="radio" name="xio-mode" id="xio-mode-overwrite" value="overwrite"><span><b data-i18n="xio_over">Überschreiben</b><small data-i18n="xio_over_d">Inhalt wird ersetzt, Verknüpfungen bleiben.</small></span></label>
+          <label><input type="radio" name="xio-mode" id="xio-mode-both" value="both"><span><b data-i18n="xio_both">Beide behalten</b><small data-i18n="xio_both_d">Import wird als Kopie „(2)“ angelegt.</small></span></label>
+        </fieldset>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secondary" style="flex:1;" onclick="closeModal('xio-modal')" data-i18n="btn_cancel">Abbrechen</button>
+          <button class="btn btn-primary" style="flex:1;" id="xio-ok-btn" data-i18n="im_ok">Importieren</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1185,7 +1358,7 @@
       turn_order: "Ablauf-Reihenfolge (Turn Order)", backup_title: "Speicher & Datensicherung",
       manual_save_lbl: "Manueller Speicherstand", manual_save_btn: "💾 Jetzt sichern",
       strip_keys_chk: "API-Keys beim Export entfernen", btn_export: "Backup exportieren",
-      btn_import: "Backup laden", btn_reset: "Werkseinstellungen zurücksetzen",
+      btn_import: "Backup laden", btn_reset: "🗑 Abenteuer löschen",
       modal_bag_title: "🎒 Verfassung & Ausrüstung", bag_tab_inv: "🎒 Beutel",
       bag_tab_wounds: "🩹 Wunden", bag_tab_status: "🔮 Status", bag_tab_skills: "⚡ Talente",
       ph_bag_input: "Neuer Eintrag...",
@@ -1303,7 +1476,7 @@
       turn_order: "Turn order", backup_title: "Storage & backup",
       manual_save_lbl: "Manual save", manual_save_btn: "💾 Save now",
       strip_keys_chk: "Remove API keys when exporting", btn_export: "Export backup",
-      btn_import: "Import backup", btn_reset: "Factory reset",
+      btn_import: "Import backup", btn_reset: "🗑 Delete adventure",
       modal_bag_title: "🎒 Condition & gear", bag_tab_inv: "🎒 Bag",
       bag_tab_wounds: "🩹 Wounds", bag_tab_status: "🔮 Status", bag_tab_skills: "⚡ Skills",
       ph_bag_input: "New entry...",
@@ -1401,6 +1574,15 @@
   // Weltkarte 2: Ebenen, Orte-Reiter, Stecknadeln, Nebel, Reisezeiten
   Object.assign(I18N.de, {"map_far": "vom Hörensagen · fern", "map_world": "Welt", "map_tab_map": "🗺️ Karte", "map_tab_places": "📍 Orte", "map_card_enter": "🚪 Betreten", "map_card_show": "🗺️ Auf Karte zeigen", "map_card_kids": "{n} Orte darin", "map_card_from_here": "≈ {d} von hier · 🚶 {f} · 🐎 {h}", "map_card_far": "Weit entfernt – der Weg dorthin ist noch unbekannt.", "map_rumor": "Gerücht", "map_rumor_desc": "Nur vom Hörensagen bekannt. Das Land dazwischen ist noch unerforscht.", "map_pin_one": "📍 Lange drücken: zweite Nadel setzen", "map_pin_tap": "Nadel antippen entfernt sie", "map_pin_dist": "≈ {d} Luftlinie", "map_pin_travel": "🚶 {f} · 🐎 {h} · 🛒 {c}", "map_gestures": "Tippen: Menü · Wischen: umsehen · Lange drücken: Nadel", "map_scale_foot": "{f} zu Fuß", "u_day": "Tag", "u_days": "Tage", "u_h": "Std.", "u_min": "Min.", "wb_travel_hint": "[REISE] Reise von {a} nach {b}: ca. {d}, zu Fuß ~{f}, zu Pferd ~{h}, mit dem Karren ~{c}. Halte die verstrichene Zeit (Tag, Tageszeit, Proviant, Erschöpfung) konsistent.", "wb_travel_far": "[REISE] Reise von {a} nach {b}: eine weite Reise, die Entfernung ist unbekannt (eher Wochen als Tage). Halte die verstrichene Zeit konsistent.", "wb_travel_from": "Reisezeiten ab {a} (zu Fuß): ", "orte_title": "📍 Orte", "orte_search_ph": "Orte durchsuchen…", "orte_no_region": "Weitere Orte", "orte_empty": "Keine Orte gefunden.", "orte_cur": "📍 hier", "orte_visited": "✓ besucht", "orte_unk": "? geschätzt", "orte_in": "in {p}", "lbl_loc_parent": "Teil von", "ph_loc_parent": "z. B. Roa (leer = keiner)", "places_desc": "Eine Zeile pro Ort: Name | Typ | Lage | Entfernung | Teil von | Terrain (optional: Insel, Ring:0/1/2, Wald, Feld…). Die Karte folgt der Weltstruktur, nicht einer festen Vorlage.", "tt_map_tabs": "Karte oder Ortsliste"});
   Object.assign(I18N.en, {"map_far": "known by rumor · far away", "map_world": "World", "map_tab_map": "🗺️ Map", "map_tab_places": "📍 Places", "map_card_enter": "🚪 Enter", "map_card_show": "🗺️ Show on map", "map_card_kids": "{n} places inside", "map_card_from_here": "≈ {d} from here · 🚶 {f} · 🐎 {h}", "map_card_far": "Far away – the way there is still unknown.", "map_rumor": "Rumor", "map_rumor_desc": "Known only by rumor. The land in between is still unexplored.", "map_pin_one": "📍 Long-press to set a second pin", "map_pin_tap": "Tap a pin to remove it", "map_pin_dist": "≈ {d} as the crow flies", "map_pin_travel": "🚶 {f} · 🐎 {h} · 🛒 {c}", "map_gestures": "Tap: menu · Swipe: look around · Long-press: pin", "map_scale_foot": "{f} on foot", "u_day": "day", "u_days": "days", "u_h": "h", "u_min": "min", "wb_travel_hint": "[TRAVEL] Journey from {a} to {b}: about {d}, on foot ~{f}, on horseback ~{h}, by cart ~{c}. Keep the passing of time (day, time of day, supplies, fatigue) consistent.", "wb_travel_far": "[TRAVEL] Journey from {a} to {b}: a long journey, distance unknown (weeks rather than days). Keep the passing of time consistent.", "wb_travel_from": "Travel times from {a} (on foot): ", "orte_title": "📍 Places", "orte_search_ph": "Search places…", "orte_no_region": "Other places", "orte_empty": "No places found.", "orte_cur": "📍 here", "orte_visited": "✓ visited", "orte_unk": "? estimated", "orte_in": "in {p}", "lbl_loc_parent": "Part of", "ph_loc_parent": "e.g. Roa (empty = none)", "places_desc": "One line per place: Name | Type | Position | Distance | Part of | Terrain (optional: Island, Ring:0/1/2, Forest, Field…). The map follows world structure, not a fixed template.", "tt_map_tabs": "Map or place list"});
+
+  Object.assign(I18N.de, {"ui_quota": "Speicherlimit erreicht!", "ui_save_disabled": "Speichern gesperrt.", "ui_saving": "💾 Speichere...", "ui_saved_ok": "Erfolgreich gesichert! ✓", "ui_saved_prefix": "Zuletzt:", "ui_crash_restored": "Notfall-Wiederherstellung: Daten gerettet!", "ui_lang_switched": "Sprache umgestellt!", "ui_level": "Stufe", "ui_wound": "Wunde", "ui_wound_treated": "Wunde versorgt", "ui_skill": "Talent", "ui_level_prompt": "Neue Stufe / Rang eingeben:", "ui_level_set": "Stufe auf", "ui_removed": "Entfernt:", "ui_no_reply": "Keine Antwort erhalten – bitte erneut versuchen.", "ui_branch": "Strang", "ui_msg_updated": "Nachricht aktualisiert.", "ui_need_user_model": "Bitte zuerst ein KI-Modell für deine Spielfigur eintragen.", "ui_need_chars": "Erstelle zuerst Charaktere.", "ui_folder_prompt": "Name des neuen Lorebook-Ordners:", "ui_folder_default": "Neuer Ordner", "ui_folder_exists": "Ein Ordner mit diesem Namen existiert bereits.", "ui_lore_edit_title": "Lore-Eintrag bearbeiten", "ui_lore_del": "Lore-Eintrag löschen?", "ui_editor_off": "Deaktiviert (Direkte Ausgabe)", "ui_adv_title_prompt": "Titel des neuen Abenteuers:", "ui_adv_rename_prompt": "Neuer Titel für dieses Abenteuer:", "ui_clear_hist": "Möchtest du den Verlauf leeren?", "ui_adv_del": "Abenteuer wirklich löschen?", "ui_profile_saved": "Spieler-Profil gespeichert!", "ui_char_edit_title": "Charakter bearbeiten", "ui_char_del": "Charakter wirklich löschen?", "ui_card_imported": "Charakterkarte importiert!", "ui_clear_all_hist": "Gesamten Verlauf dieses Abenteuers leeren?", "ui_reset_confirm": "Dieses Abenteuer löschen?", "ui_import_failed": "Import fehlgeschlagen: "});
+  Object.assign(I18N.en, {"ui_quota": "Storage quota exceeded!", "ui_save_disabled": "Saving is disabled.", "ui_saving": "💾 Saving...", "ui_saved_ok": "Successfully saved! ✓", "ui_saved_prefix": "Saved:", "ui_crash_restored": "Crash Recovery: Data restored!", "ui_lang_switched": "Language switched!", "ui_level": "Level", "ui_wound": "Wound", "ui_wound_treated": "Wound treated", "ui_skill": "Skill", "ui_level_prompt": "Enter new Level / Rank:", "ui_level_set": "Level set to", "ui_removed": "Removed:", "ui_no_reply": "No reply received – please try again.", "ui_branch": "Branch", "ui_msg_updated": "Message updated.", "ui_need_user_model": "Please enter an AI model for your character first.", "ui_need_chars": "Please create characters first.", "ui_folder_prompt": "Name of the new Lorebook folder:", "ui_folder_default": "New Folder", "ui_folder_exists": "A folder with this name already exists.", "ui_lore_edit_title": "Edit Lorebook Entry", "ui_lore_del": "Delete Lorebook entry?", "ui_editor_off": "Disabled (Direct Output)", "ui_adv_title_prompt": "Title of the new adventure:", "ui_adv_rename_prompt": "New title for this adventure:", "ui_clear_hist": "Clear chat history for this adventure?", "ui_adv_del": "Delete adventure?", "ui_profile_saved": "Player profile saved!", "ui_char_edit_title": "Edit Character", "ui_char_del": "Really delete character?", "ui_card_imported": "Character card imported!", "ui_clear_all_hist": "Clear entire history for this adventure?", "ui_reset_confirm": "Delete this adventure?", "ui_import_failed": "Import failed: "});
+
+  Object.assign(I18N.de, {"xio_lore_export": "⬇️ Lorebook exportieren", "xio_lore_import": "📂 Einträge importieren", "xio_char_export": "⬇️ Alle exportieren", "xio_char_import": "📂 Importieren (JSON/PNG)", "xio_export_one": "Als Datei exportieren", "xio_title_lore": "📂 Lore-Einträge importieren", "xio_title_char": "📂 Charaktere importieren", "xio_s_found": "Gefunden", "xio_s_new": "Neu", "xio_s_conf": "Gleicher Name schon vorhanden", "xio_dup": "(doppelt)", "xio_mode": "Doppelte (gleicher Name):", "xio_skip": "Überspringen", "xio_skip_d": "Vorhandene bleiben unverändert.", "xio_over": "Überschreiben", "xio_over_d": "Inhalt wird ersetzt, Verknüpfungen (Karte, Reihenfolge) bleiben.", "xio_both": "Beide behalten", "xio_both_d": "Import wird als Kopie „(2)“ mit neuer ID angelegt.", "xio_done": "Import fertig: {a} neu, {o} überschrieben, {s} übersprungen.", "xio_exported": "{n} exportiert.", "xio_nokeys": "Ohne API-Keys.", "xio_nothing": "Nichts zum Exportieren.", "xio_fail_lore": "Lore-Import nicht möglich:", "xio_fail_char": "Charakter-Import nicht möglich:", "xio_e_json": "Die Datei ist kein gültiges JSON. Prüfe Kommas, Klammern und Anführungszeichen („\"“). Details: {m}", "xio_e_lore_fmt": "Unbekanntes Format. Erwartet wird ein Eintrag wie {\"name\": \"…\", \"content\": \"…\"}, eine Liste davon oder ein Lorebook mit \"entries\". Siehe Anleitung → Dateiformat.", "xio_e_char_fmt": "Unbekanntes Format. Erwartet wird ein Charakter wie {\"name\": \"…\", \"prompt\": \"…\"}, eine Liste davon, {\"characters\": […]} oder eine Character Card (V2/V3).", "xio_e_is_char": "Diese Datei enthält Charaktere. Bitte im Tab „Gruppe“ importieren.", "xio_e_is_lore": "Diese Datei enthält Lore-Einträge. Bitte im Tab „Lore“ importieren.", "xio_e_none": "Keine brauchbaren Einträge gefunden. {w}", "xio_w_notobj": "Eintrag {i}: kein Objekt in { } – übersprungen.", "xio_w_lore_empty": "Eintrag {i}: weder \"name\" noch \"content\" – übersprungen.", "xio_w_char_noname": "Charakter {i}: \"name\" fehlt – übersprungen.", "xio_w_loc": "Eintrag {i} („{n}“): \"location\" braucht mindestens \"type\" – Ort ignoriert.", "xio_w_book": "„{n}“ enthält ein eingebettetes Lorebook – im Tab „Lore“ mit derselben Datei importierbar.", "xio_g_title": "📄 Dateiformat: Lorebook & Charaktere", "xio_g_intro_html": "Einfache JSON-Dateien zum Teilen. Pflicht ist nur <b>name</b> (Lore: <b>name</b> oder <b>content</b>), alles andere hat Standardwerte. <b>keys</b> darf Text mit Kommas oder eine Liste sein. IDs vergibt die App selbst; API-Keys werden nie exportiert. Importiert werden auch SillyTavern World Info, Character Cards V2/V3 (JSON und PNG) und Kampagnen-Backups.", "xio_g_lore_min": "Lore-Eintrag (minimal)", "xio_g_lore_full": "Ganzes Lorebook (vollständig)", "xio_g_char_min": "Charakter (minimal)", "xio_g_char_full": "Charakter-Liste (vollständig)", "xio_g_dl": "⬇️ Vorlage"});
+  Object.assign(I18N.en, {"xio_lore_export": "⬇️ Export lorebook", "xio_lore_import": "📂 Import entries", "xio_char_export": "⬇️ Export all", "xio_char_import": "📂 Import (JSON/PNG)", "xio_export_one": "Export as file", "xio_title_lore": "📂 Import lore entries", "xio_title_char": "📂 Import characters", "xio_s_found": "Found", "xio_s_new": "New", "xio_s_conf": "Same name already exists", "xio_dup": "(duplicate)", "xio_mode": "Duplicates (same name):", "xio_skip": "Skip", "xio_skip_d": "Existing ones stay unchanged.", "xio_over": "Overwrite", "xio_over_d": "Content is replaced, links (map, turn order) are kept.", "xio_both": "Keep both", "xio_both_d": "The import is added as a copy “(2)” with a new id.", "xio_done": "Import done: {a} new, {o} overwritten, {s} skipped.", "xio_exported": "{n} exported.", "xio_nokeys": "Without API keys.", "xio_nothing": "Nothing to export.", "xio_fail_lore": "Lore import not possible:", "xio_fail_char": "Character import not possible:", "xio_e_json": "The file is not valid JSON. Check commas, brackets and quotes (\"). Details: {m}", "xio_e_lore_fmt": "Unknown format. Expected an entry like {\"name\": \"…\", \"content\": \"…\"}, a list of them, or a lorebook with \"entries\". See Guide → File format.", "xio_e_char_fmt": "Unknown format. Expected a character like {\"name\": \"…\", \"prompt\": \"…\"}, a list of them, {\"characters\": […]} or a Character Card (V2/V3).", "xio_e_is_char": "This file contains characters. Please import it in the “Party” tab.", "xio_e_is_lore": "This file contains lore entries. Please import it in the “Lore” tab.", "xio_e_none": "No usable entries found. {w}", "xio_w_notobj": "Entry {i}: not an object in { } – skipped.", "xio_w_lore_empty": "Entry {i}: neither \"name\" nor \"content\" – skipped.", "xio_w_char_noname": "Character {i}: \"name\" is missing – skipped.", "xio_w_loc": "Entry {i} (“{n}”): \"location\" needs at least \"type\" – place ignored.", "xio_w_book": "“{n}” contains an embedded lorebook – import the same file in the “Lore” tab.", "xio_g_title": "📄 File format: lorebook & characters", "xio_g_intro_html": "Simple JSON files for sharing. Only <b>name</b> is required (lore: <b>name</b> or <b>content</b>); everything else has defaults. <b>keys</b> may be comma-separated text or a list. The app assigns ids itself; API keys are never exported. SillyTavern World Info, Character Cards V2/V3 (JSON and PNG) and campaign backups can be imported too.", "xio_g_lore_min": "Lore entry (minimal)", "xio_g_lore_full": "Whole lorebook (full)", "xio_g_char_min": "Character (minimal)", "xio_g_char_full": "Character list (full)", "xio_g_dl": "⬇️ Template"});
+
+  Object.assign(I18N.de, {"mm_home": "Hauptmenü", "mm_back": "Zurück zur Kampagne", "mm_desc": "Deine Kampagnen auf diesem Gerät. Spieler-Profil, Anbieter und Sprache gelten für alle.", "mm_new": "+ Neue Kampagne", "mm_import": "📥 Backups laden", "mm_export_all": "⬇️ Alle Kampagnen herunterladen", "mm_drop": "Tipp (Desktop): Backup-Dateien einfach hierher ziehen. Mehrere auf einmal gehen auch.", "mm_unnamed": "Kampagne", "mm_new_default": "Neue Kampagne", "mm_new_title": "+ Neue Kampagne", "mm_new_ph": "z. B. Die Nebelküste", "mm_new_note": "Die aktuelle Kampagne bleibt unverändert gespeichert. Figuren und Lore legst du in der neuen Kampagne an.", "mm_create": "Anlegen & starten", "mm_open": "▶ Weiterspielen", "mm_rename": "Umbenennen", "mm_duplicate": "Duplizieren", "mm_export": "Als Backup herunterladen", "mm_delete": "Löschen", "mm_current": "aktuell", "mm_last": "zuletzt {d}", "mm_meta": "{c} · {m} · {l}", "mm_c1": "1 Charakter", "mm_cn": "{n} Charaktere", "mm_m1": "1 Nachricht", "mm_mn": "{n} Nachrichten", "mm_l1": "1 Lore-Eintrag", "mm_ln": "{n} Lore-Einträge", "mm_no_chars": "Noch keine Figuren", "mm_copy_sfx": "(Kopie)", "mm_dup_ok": "Kampagne dupliziert.", "mm_exported": "Kampagne heruntergeladen.", "mm_exported_all": "{n} Kampagnen in einer Datei heruntergeladen.", "mm_deleted": "Kampagne gelöscht.", "mm_del_confirm": "Kampagne „{n}“ mit allen Abenteuern, Chats, Lore und Karte endgültig löschen? Das lässt sich nicht rückgängig machen (vorher ggf. ⬇️ herunterladen).", "mm_switch_fail": "Wechsel nicht möglich – die aktuelle Kampagne bleibt geöffnet.", "mm_quota": "Speicher voll – Kampagne konnte nicht angelegt werden.", "mm_im_title": "📥 Backups laden", "mm_im_sum": "{ok} Kampagne(n) lesbar, {bad} Datei(en) fehlerhaft.", "mm_im_mode": "Name schon vorhanden:", "mm_im_rename": "Als neue Kampagne „(2)“ anlegen", "mm_im_skip": "Überspringen", "mm_im_note": "Jedes Backup wird eine eigene Kampagne. Nichts Vorhandenes wird überschrieben.", "mm_im_done": "{n} Kampagne(n) importiert, {s} übersprungen.", "mm_dup": "Name existiert schon", "mm_bundle_empty": "Die Sammeldatei enthält keine Kampagnen.", "mm_err_bundle": "Das ist eine Sammeldatei mit mehreren Kampagnen – bitte im Hauptmenü (🏠) über „Backups laden“ importieren."});
+  Object.assign(I18N.en, {"mm_home": "Main menu", "mm_back": "Back to campaign", "mm_desc": "Your campaigns on this device. Player profile, provider and language apply to all of them.", "mm_new": "+ New campaign", "mm_import": "📥 Load backups", "mm_export_all": "⬇️ Download all campaigns", "mm_drop": "Tip (desktop): just drop backup files here. Several at once work too.", "mm_unnamed": "Campaign", "mm_new_default": "New campaign", "mm_new_title": "+ New campaign", "mm_new_ph": "e.g. The Misty Coast", "mm_new_note": "The current campaign stays saved unchanged. Create characters and lore inside the new campaign.", "mm_create": "Create & start", "mm_open": "▶ Continue", "mm_rename": "Rename", "mm_duplicate": "Duplicate", "mm_export": "Download as backup", "mm_delete": "Delete", "mm_current": "current", "mm_last": "last {d}", "mm_meta": "{c} · {m} · {l}", "mm_c1": "1 character", "mm_cn": "{n} characters", "mm_m1": "1 message", "mm_mn": "{n} messages", "mm_l1": "1 lore entry", "mm_ln": "{n} lore entries", "mm_no_chars": "No characters yet", "mm_copy_sfx": "(copy)", "mm_dup_ok": "Campaign duplicated.", "mm_exported": "Campaign downloaded.", "mm_exported_all": "{n} campaigns downloaded in one file.", "mm_deleted": "Campaign deleted.", "mm_del_confirm": "Permanently delete campaign “{n}” with all adventures, chats, lore and map? This cannot be undone (download it with ⬇️ first if needed).", "mm_switch_fail": "Switching failed – the current campaign stays open.", "mm_quota": "Storage full – the campaign could not be created.", "mm_im_title": "📥 Load backups", "mm_im_sum": "{ok} campaign(s) readable, {bad} file(s) broken.", "mm_im_mode": "Name already exists:", "mm_im_rename": "Add as new campaign “(2)”", "mm_im_skip": "Skip", "mm_im_note": "Every backup becomes its own campaign. Nothing existing is overwritten.", "mm_im_done": "{n} campaign(s) imported, {s} skipped.", "mm_dup": "name already exists", "mm_bundle_empty": "The bundle file contains no campaigns.", "mm_err_bundle": "This is a bundle file with several campaigns – please import it from the main menu (🏠) via “Load backups”."});
 
   function t(key) {
     const lang = (state && state.lang === "en") ? "en" : "de";
@@ -1754,16 +1936,18 @@
       const sess = getActiveSession();
       sess.messages = Array.isArray(state.messages) ? state.messages : [];
       sess.world = state.world;
+      if (!MM.open) state._lastPlayed = Date.now();
       await idbSet("state", state);
       updateLastSavedIndicator();
       localStorage.removeItem(CRASH_BUFFER_KEY);
+      if (typeof psOnSave === "function") psOnSave();
     } catch (err) {
       console.warn("IndexedDB Speicherfehler, sichere in LocalStorage:", err);
       try {
         localStorage.setItem(LOCAL_STORAGE_BACKUP, JSON.stringify(state));
         updateLastSavedIndicator();
       } catch (e) {
-        showToast(state.lang === "en" ? "Storage quota exceeded!" : "Speicherlimit erreicht!", "error");
+        showToast(t("ui_quota"), "error");
       }
     } finally {
       isSaving = false;
@@ -1773,21 +1957,21 @@
 
   async function manualSave() {
     if (dbReadFailed || isResetting) {
-      showToast(state.lang === "en" ? "Saving is disabled." : "Speichern gesperrt.", "error");
+      showToast(t("ui_save_disabled"), "error");
       return;
     }
     const saveBtn = document.getElementById("manual-save-btn");
-    if (saveBtn) { saveBtn.disabled = true; saveBtn.innerText = state.lang === "en" ? "💾 Saving..." : "💾 Speichere..."; }
+    if (saveBtn) { saveBtn.disabled = true; saveBtn.innerText = t("ui_saving"); }
     await saveState();
     if (saveBtn) { saveBtn.disabled = false; saveBtn.innerText = t("manual_save_btn"); }
-    showToast(state.lang === "en" ? "Successfully saved! ✓" : "Erfolgreich gesichert! ✓", "success");
+    showToast(t("ui_saved_ok"), "success");
   }
 
   function updateLastSavedIndicator() {
     const el = document.getElementById("last-saved-time");
     if (el) {
       const now = new Date();
-      const prefix = state.lang === "en" ? "Saved:" : "Zuletzt:";
+      const prefix = t("ui_saved_prefix");
       el.innerText = `${prefix} ${now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', second:'2-digit' })} ✓`;
       el.style.color = "var(--gold)";
     }
@@ -1810,7 +1994,7 @@
         if (crashData.world) { session.world = crashData.world; state.world = crashData.world; }
         if (crashData.userProgression) session.userProgression = sanitizeProgression(crashData.userProgression);
         await saveState();
-        showConfirmModal(state.lang === "en" ? "Crash Recovery: Data restored!" : "Notfall-Wiederherstellung: Daten gerettet!", () => {});
+        showConfirmModal(t("ui_crash_restored"), () => {});
       } else {
         syncActiveMessages();
       }
@@ -1863,7 +2047,8 @@
     updateAssistBtnVisibility();
     updateMapFab();
     if (document.getElementById("map-modal")?.classList.contains("active")) { hideMapCard(); renderMapView(true); if (mapView === "list") renderPlacesList(); }
-    showToast(lang === "en" ? "Language switched!" : "Sprache umgestellt!", "success");
+    try { pvRefreshForms(); rmCheck(); a11yScan(); } catch (e) {}
+    showToast(t("ui_lang_switched"), "success");
   }
 
   function formatAvatar(av, size = 18) {
@@ -2187,7 +2372,7 @@
       saveState();
       renderAmbientBar();
       closeModal("world-modal");
-      showToast(state.lang === "en" ? `World State: ${day} • ${time} • ${location}` : `Welt-Status: ${day} • ${time} • ${location}`, "success");
+      showToast(tf("ui_world_state", { d: day, t: time, l: location }), "success");
     };
   }
 
@@ -2373,7 +2558,7 @@
           // FIX L4 (live): unveränderte Stufe nicht erneut melden; Platzhalter („—“) setzt keine Stufe zurück
           if (newLvl === null || newLvl === String(lp.level ?? "") || /^[—–\-?\s]+$/.test(newLvl)) continue;
           lp.level = newLvl;
-          notices.push(`⭐ ${ln}: ${state.lang === "en" ? "Level" : "Stufe"} ${newLvl}!`);
+          notices.push(`⭐ ${ln}: ${t("ui_level")} ${newLvl}!`);
           continue;
         }
 
@@ -2401,13 +2586,13 @@
             targetProg.wounds[existingIdx] = cleanVal;
           } else {
             targetProg.wounds.push(cleanVal);
-            notices.push(`🩹 ${targetName}: +${state.lang === "en" ? "Wound" : "Wunde"} (${cleanVal})`);
+            notices.push(`🩹 ${targetName}: +${t("ui_wound")} (${cleanVal})`);
           }
         } else if (key === "-WOUND") {
           const idx = findBestMatchingItemIndex(targetProg.wounds, rawVal, rawText);
           if (idx !== -1) {
             const rem = targetProg.wounds.splice(idx, 1)[0];
-            notices.push(`✨ ${targetName}: ${state.lang === "en" ? "Wound treated" : "Wunde versorgt"} (${rem})`);
+            notices.push(`✨ ${targetName}: ${t("ui_wound_treated")} (${rem})`);
           }
         } else if (key === "+STATUS") {
           const cleanVal = cleanItemName(rawVal);
@@ -2433,7 +2618,7 @@
             targetProg.skills[existingIdx] = cleanVal;
           } else {
             targetProg.skills.push(cleanVal);
-            notices.push(`⚡ ${targetName}: +${state.lang === "en" ? "Skill" : "Talent"} (${cleanVal})`);
+            notices.push(`⚡ ${targetName}: +${t("ui_skill")} (${cleanVal})`);
           }
         } else if (key === "-SKILL") {
           const idx = findBestMatchingItemIndex(targetProg.skills, rawVal, rawText);
@@ -2462,13 +2647,13 @@
   function promptChangeLevel() {
     const prog = getProgressionFor(activeBagCharId);
     if (!prog) return;
-    const promptText = state.lang === "en" ? "Enter new Level / Rank:" : "Neue Stufe / Rang eingeben:";
+    const promptText = t("ui_level_prompt");
     showPromptModal(t("modal_bag_title"), promptText, prog.level || "1", (newLvl) => {
       if (newLvl !== null && String(newLvl).trim()) {
         prog.level = String(newLvl).trim();
         saveState();
         renderBagModalContent();
-        showToast(`⭐ ${state.lang === "en" ? "Level set to" : "Stufe auf"} ${prog.level}!`, "success");
+        showToast(`⭐ ${t("ui_level_set")} ${prog.level}!`, "success");
       }
     });
   }
@@ -2517,7 +2702,7 @@
     const lvlBadge = document.getElementById("bag-modal-level-badge");
     if (!prog || !container) return;
 
-    if (lvlBadge) lvlBadge.innerText = `${state.lang === "en" ? "Level" : "Stufe"} ${prog.level || '1'}`;
+    if (lvlBadge) lvlBadge.innerText = `${t("ui_level")} ${prog.level || '1'}`;
     stLevelUi();
     if (!Array.isArray(prog.wounds)) prog.wounds = [];
     if (!Array.isArray(prog.inventory)) prog.inventory = [];
@@ -2560,7 +2745,7 @@
       saveState();
       updateHeaderBagCounter();
       renderBagModalContent();
-      showToast(`🗑️ ${state.lang === "en" ? "Removed:" : "Entfernt:"} "${removed}"`);
+      showToast(`🗑️ ${t("ui_removed")} "${removed}"`);
     }
   }
 
@@ -2895,7 +3080,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     const cleanModel = String(character.model || "").trim().replace(/^["']|["']$/g, '');
     const targetUrl = resolveEndpoint(character.baseUrl);
 
-    if (!cleanModel) throw new Error(state.lang === "en" ? `No model assigned for "${character.name || 'Player'}"` : `Kein Modell für "${character.name || 'Spieler'}" hinterlegt.`);
+    if (!cleanModel) throw new Error(tf("ui_no_model_for", { n: character.name || (state.lang === "en" ? "Player" : "Spieler") }));
 
     const companionProg = getCompanionLiveProgression(character);
     const worldAmbient = getWorldAmbientPrompt();
@@ -2969,7 +3154,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
       let note = "";
       if (window.location.protocol === "https:" && targetUrl.startsWith("http://")) note = "\n\n" + t("err_mixed");
       else if (fetchErr.message?.includes("Failed to fetch")) note = "\n\n" + t("err_cors");
-      throw new Error(tf("err_network", { e: fetchErr.message }) + note);
+      throw new Error(tf("err_network", { e: fetchErr.message }) + note + pvChatHint(0, "", targetUrl.replace(/\/chat\/completions$/, ""), fetchErr));
     }
 
     if (!res.ok) {
@@ -2977,7 +3162,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
       // Server kennt die Reasoning-Parameter nicht -> einmal ohne sie
       const bad = (res.status === 400 || res.status === 422) ? rsRejected(err) : null;
       if (bad) { console.warn(`[${cleanModel}] Reasoning-Parameter abgelehnt (${bad.join(", ")}) – ohne sie erneut`); return again({ drop: bad }); }
-      throw new Error(tf("err_api", { s: res.status, e: err }));
+      throw new Error(tf("err_api", { s: res.status, e: pvDetail(0, err, cleanKey) }) + pvChatHint(res.status, err, targetUrl));
     }
 
     const reader = res.body.getReader();
@@ -2990,6 +3175,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     let abortStream = false;
     let isThinking = false;
     let degCheckAt = 0;
+    let sawData = false, rawAll = "";
 
     while (!abortStream) {
       if (isAborted || (activeAbortController && activeAbortController.signal.aborted)) {
@@ -3012,6 +3198,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
 
       for (const line of lines) {
         const trimmed = line.trim();
+        if (trimmed.startsWith("data:")) sawData = true; else if (!sawData && rawAll.length < 2000000) rawAll += line + "\n";
         if (trimmed.startsWith("data:") && trimmed !== "data:[DONE]" && trimmed !== "data: [DONE]") {
           try {
             const jsonStr = trimmed.slice(5).trim();
@@ -3112,6 +3299,17 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     }
     disarm();
     if (timeoutReason) throw new Error(timeoutReason);
+    if (!sawData && !fullText && rawAll.trim().startsWith("{")) {   // Server ignorierte stream:true und schickte normales JSON
+      try {
+        const j = JSON.parse(rawAll);
+        if (j.error) streamError = j.error.message || JSON.stringify(j.error);
+        else {
+          const ch = (j.choices && j.choices[0]) || {}, mm = ch.message || {}, rc = mm.reasoning_content || mm.reasoning || "";
+          fullText = ((rc ? "<think>\n" + rc + "\n</think>\n" : "") + String(mm.content ?? ch.text ?? "")).split("[END_OF_TURN]")[0];
+          lastFinishReason = ch.finish_reason || ""; partialStreamingText = fullText; if (onChunk) onChunk(fullText);
+        }
+      } catch (e) {}
+    }
     if (streamError) {
       const bad = !fullText.trim() ? rsRejected(streamError) : null;
       if (bad) { console.warn(`[${cleanModel}] Reasoning-Parameter abgelehnt (${bad.join(", ")}) – ohne sie erneut`); return again({ drop: bad }); }
@@ -3127,9 +3325,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
         if (onChunk) onChunk("");
         return again({ retry: true });
       }
-      if (/<think>|<\/think>/i.test(fullText)) throw new Error(state.lang === "en"
-        ? `${character.name || cleanModel}: the model (${cleanModel}) spent its whole token budget on thinking and gave no answer. Please try again or use a model without reasoning.`
-        : `${character.name || cleanModel}: Das Modell (${cleanModel}) hat sein ganzes Token-Budget zum Nachdenken verbraucht und nichts geantwortet. Bitte erneut versuchen oder ein Modell ohne Reasoning wählen.`);
+      if (/<think>|<\/think>/i.test(fullText)) throw new Error(tf("ui_think_only", { n: character.name || cleanModel, m: cleanModel }));
     }
     if (!think) { const nt = noThink(fullText).trim(); if (nt) fullText = nt; }   // Denken aus: Denkreste entfernen
     return fullText.trim();
@@ -3299,7 +3495,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     const sess = getActiveSession(); if (sess) sess.messages = state.messages;
     restoreLatestSnapshot();
     if (!isAborted && !document.querySelector("#confirm-modal.active"))
-      showToast(state.lang === "en" ? "No reply received – please try again." : "Keine Antwort erhalten – bitte erneut versuchen.", "error");
+      showToast(t("ui_no_reply"), "error");
   }
 
   function deleteSingleMessage(msgId) {
@@ -3394,7 +3590,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
     if (hasSubsequent) {
       pendingBranchData = { msgIdx, msgId: safeId, updatedData };
       const currentSess = getActiveSession();
-      const branchText = state.lang === "en" ? "Branch" : "Strang";
+      const branchText = t("ui_branch");
       document.getElementById("branch-session-title").value = `${currentSess.title} (${branchText} ${state.sessions.length + 1})`;
       document.getElementById("branch-modal").classList.add("active");
       return;
@@ -3493,7 +3689,7 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
       renderChat();
       closeModal("branch-modal");
       pendingBranchData = null;
-      showToast(state.lang === "en" ? `🌿 New Branch: "${titleInput}"!` : `🌿 Neuer Strang: "${titleInput}"!`, "success");
+      showToast(tf("ui_new_branch", { t: titleInput }), "success");
 
       if (branchedMsg.type !== "user") {
         processWorldUpdates(branchedMsg.text);
@@ -3517,19 +3713,19 @@ Du steuerst Stufenaufstieg, Ausrüstung und Zustände direkt über System-Tags a
       renderChat();
       closeModal("branch-modal");
       pendingBranchData = null;
-      showToast(state.lang === "en" ? "Message updated." : "Nachricht aktualisiert.");
+      showToast(t("ui_msg_updated"));
     };
   }
 
   async function handleSuggestAction() {
     if (isGenerating) return;
     if (!state.user?.model?.trim()) { 
-      showConfirmModal(state.lang === "en" ? "Please enter an AI model for your character first." : "Bitte zuerst ein KI-Modell für deine Spielfigur eintragen.", () => {}); 
+      showConfirmModal(t("ui_need_user_model"), () => {}); 
       return; 
     }
     isAborted = false; activeAbortController = new AbortController(); setGenerating(true);
     const isEn = state.lang === "en";
-    updateStatus((state.user?.name || "User") + (isEn ? " is thinking..." : " denkt nach..."));
+    updateStatus((state.user?.name || "User") + t("st_thinking"));
     const uName = String(state.user?.name || (isEn ? "Player" : "Spieler")).toUpperCase();
     const lastMsg = state.messages.length > 0 ? state.messages[state.messages.length - 1] : null;
     const lastSituation = lastMsg ? (lastMsg.text || lastMsg.charText || lastMsg.gmText || "") : (isEn ? "Beginning of adventure." : "Beginn des Abenteuers.");
@@ -3576,7 +3772,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     let text = inputEl.value.trim();
     if (!text || isGenerating) return;
     if (!Array.isArray(state.characters) || state.characters.length === 0) { 
-      showConfirmModal(state.lang === "en" ? "Please create characters first." : "Erstelle zuerst Charaktere.", () => {}); 
+      showConfirmModal(t("ui_need_chars"), () => {}); 
       return; 
     }
 
@@ -3587,7 +3783,7 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     if (state.user?.enableAutoRewrite && state.user?.model?.trim()) {
       isAborted = false; activeAbortController = new AbortController(); setGenerating(true);
       const isEn = state.lang === "en";
-      updateStatus((state.user.name || "User") + (isEn ? " refining input..." : " veredelt Eingabe..."));
+      updateStatus((state.user.name || "User") + t("st_refining"));
       const rewriteInstruction = isEn ? `### ROLE: STYLE REFINER FOR ${String(state.user.name || "Player").toUpperCase()}\nRAW INPUT: "${text}"\nSTRICT: Transform this into 1-2 dense sentences in present tense fitting the character. Zero invention. Do not preempt NPCs. Pure text.`
         : `### ROLLE: STIL-VEREDLER FÜR ${String(state.user.name || "Spieler").toUpperCase()}\nROH-EINGABE: "${text}"\nSTRIKT: Verwandle das in 1-2 dichte Sätze im Präsens passend zur Figur. Zero-Invention. Keine NPC-Vorwegnahme. Reiner Text.`;
       try {
@@ -6799,6 +6995,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       const b = mk("button", "msg-action-btn guide-copy", t("guide_copy")); b.dataset.copy = m.id; b.onclick = () => stCopy(m.code); box.appendChild(b);
       body.appendChild(box);
     });
+    xioGuideSection(body, mk);
     body.appendChild(mk("h4", "guide-h", t("guide_tips_title")));
     const ul = mk("ul", "guide-tips"); t("guide_tips_html").split("\n").forEach(li => { const e = document.createElement("li"); e.innerHTML = li; ul.appendChild(e); }); body.appendChild(ul);
   }
@@ -6856,7 +7053,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
 
       // MODUS A: LEKTOR-PIPELINE
       } else if (editorChar && gmChar && companions.length > 0) {
-        updateStatus(gmChar.name + (isEn ? " designs setting..." : " entwirft Welt & Kulisse..."));
+        updateStatus(gmChar.name + t("st_gm_designs"));
         const gmPrompt = buildGMPromptContent(userName, triggerText, fateDirective, gmProgressionGuide, protectedListStr, isEn);
         const gmTurn = await executeActorTurn({
           actor: gmChar, effectiveHistory: effectiveHistoryForScan, userPromptContent: gmPrompt, isGM: true, customMaxTokens: 1400
@@ -6867,7 +7064,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
         for (const comp of companions) {
           if (isAborted) return;
           if (shouldSkipCompanion(comp, gmTurn.full)) continue; // PATCH: kein API-Aufruf, kein Block für den Lektor
-          updateStatus(comp.name + (isEn ? " reacts..." : " reagiert..."));
+          updateStatus(comp.name + t("st_reacts"));
           const compProg = getProgressionFor(comp.id);
           const compInventoryGuide = (isNpcVoiceChar(comp) ? "" : getInventoryPromptDirective(comp.name, compProg));
           const companionsContext = accumulatedCompanions.map(c => `[${isEn ? "REACTION OF" : "REAKTION VON"} ${String(c.name).toUpperCase()}]:\n${c.text}`).join("\n\n");
@@ -6881,7 +7078,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
           accumulatedCompanions.push({ name: comp.name, text: compTurn.clean, voice: isNpcVoiceChar(comp) });
         }
 
-        updateStatus(editorChar.name + (isEn ? " crafting novel chapter..." : " verfasst Kapitel..."));
+        updateStatus(editorChar.name + t("st_editor"));
         let contentEl;
         let editorMsgObj;
 
@@ -6924,9 +7121,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
         if (edCut && stripThink(editorTurn.raw || "").length < 300) {
           editorTurn.raw = [gmTurn.clean, ...accumulatedCompanions.map(c => `**${c.name}:** ${c.text}`)].filter(x => x && String(x).trim()).join("\n\n");
         }
-        if (edCut) showToast(edErr
-          ? (isEn ? "Editor stopped (" + String(edErr.message || edErr).slice(0, 80) + ") – kept the text so far / the drafts." : "Lektor abgebrochen (" + String(edErr.message || edErr).slice(0, 80) + ") – bisheriger Text bzw. Entwürfe übernommen.")
-          : (isEn ? "Editor text was cut at the last full sentence." : "Lektor-Text wurde am letzten vollständigen Satz beendet."), edErr ? "error" : "info");
+        if (edCut) showToast(edErr ? tf("ui_ed_stopped", { e: String(edErr.message || edErr).slice(0, 80) }) : t("ui_ed_cut"), edErr ? "error" : "info");
         if (editorTurn.raw) editorTurn.raw = editorTurn.raw.replace(/^(\s*(?:<think>[\s\S]*?<\/think>)?\s*)#{1,6}[^\n]*\n+/, "$1");
 
         flushThrottled(contentEl, editorTurn.raw);
@@ -6969,7 +7164,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
         const compsContainer = container ? container.querySelector(".combined-companions-target") : null;
         autoScroll(true);
 
-        updateStatus(gmChar.name + (isEn ? " describes setting..." : " beschreibt die Welt..."));
+        updateStatus(gmChar.name + t("st_gm_describes"));
         activeStreamSubRole = "gm";
 
         const gmPrompt = buildGMPromptContent(userName, triggerText, fateDirective, gmProgressionGuide, protectedListStr, isEn);
@@ -7001,7 +7196,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
           autoScroll(true);
 
           const compStreamEl = compPartDiv.querySelector(`.comp-stream-${comp.id}`);
-          updateStatus(comp.name + (isEn ? " answers..." : " antwortet..."));
+          updateStatus(comp.name + t("st_answers"));
 
           const compProg = getProgressionFor(comp.id);
           const compInventoryGuide = (isNpcVoiceChar(comp) ? "" : getInventoryPromptDirective(comp.name, compProg));
@@ -7038,7 +7233,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
           const char = state.characters.find(c => c && c.id === charId);
           if (!char || char.role === 'editor') continue;
           const isGM = char.role === "gm";
-          updateStatus(char.name + (isEn ? " generating..." : " generiert..."));
+          updateStatus(char.name + t("st_generating"));
 
           let botMsgObj;
           if (appendToExistingMsgId && charId === state.settings.order[0]) {
@@ -7113,7 +7308,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     activeAbortController = new AbortController(); 
     setGenerating(true);
     const isEn = state.lang === "en";
-    updateStatus(char.name + (isEn ? " answers..." : " antwortet..."));
+    updateStatus(char.name + t("st_answers"));
     const turnPreIds = new Set(state.messages.map(m => m && m.id));
 
     const isGM = char.role === "gm";
@@ -7472,6 +7667,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       const currentUrl = u.baseUrl || "https://openrouter.ai/api/v1";
       presetEl.value = Array.from(presetEl.options).some(o => o.value === currentUrl) ? currentUrl : "custom";
     }
+    try { pvHint("user"); } catch (e) {}
   }
 
   function renderCharacters() {
@@ -7518,6 +7714,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
             </div>
           </div>
           <div style="display:flex; gap:6px;">
+            <button class="order-btn" onclick="exportChar(${jsArg(safeCharId)})" title="${escapeHTML(t("xio_export_one"))}" aria-label="${escapeHTML(t("xio_export_one"))}">⬇️</button>
             <button class="order-btn" onclick="editChar(${jsArg(safeCharId)})">✏️</button>
             <button class="order-btn" style="color:var(--danger);" onclick="deleteChar(${jsArg(safeCharId)})">🗑</button>
           </div>
@@ -7550,7 +7747,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     const totalEntries = state.lorebook.length;
     const statsEl = document.getElementById("lore-stats-count");
     if (statsEl) {
-      const countLabel = state.lang === "en" ? `${totalEntries} entries in ${state.loreCategories.length} folders` : `${totalEntries} Einträge in ${state.loreCategories.length} Ordnern`;
+      const countLabel = tf("lore_count", { n: totalEntries, f: state.loreCategories.length });
       statsEl.innerText = countLabel;
     }
 
@@ -7588,6 +7785,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
                   </div>
                 </div>
                 <div style="display:flex; gap:4px;">
+                  <button class="order-btn" style="width:28px; height:28px;" onclick="exportLore(${jsArg(safeLoreId)})" title="${escapeHTML(t("xio_export_one"))}" aria-label="${escapeHTML(t("xio_export_one"))}">⬇️</button>
                   <button class="order-btn" style="width:28px; height:28px;" onclick="editLore(${jsArg(safeLoreId)})">✏️</button>
                   <button class="order-btn" style="width:28px; height:28px; color:var(--danger);" onclick="deleteLore(${jsArg(safeLoreId)})">🗑</button>
                 </div>
@@ -7650,13 +7848,13 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
   }
 
   function createNewFolder() {
-    const promptText = state.lang === "en" ? "Name of the new Lorebook folder:" : "Name des neuen Lorebook-Ordners:";
-    const defName = state.lang === "en" ? "New Folder" : "Neuer Ordner";
+    const promptText = t("ui_folder_prompt");
+    const defName = t("ui_folder_default");
     showPromptModal(t("btn_add_folder"), promptText, defName, (name) => {
       if (!name || !name.trim()) return;
       const cleanName = name.trim();
       if (state.loreCategories.includes(cleanName)) {
-        showConfirmModal(state.lang === "en" ? "A folder with this name already exists." : "Ein Ordner mit diesem Namen existiert bereits.", () => {});
+        showConfirmModal(t("ui_folder_exists"), () => {});
         return;
       }
       state.loreCategories.push(cleanName);
@@ -7672,8 +7870,8 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
   const inlineNewFolderBtn = document.getElementById("inline-new-folder-btn");
   if (inlineNewFolderBtn) {
     inlineNewFolderBtn.onclick = () => {
-      const promptText = state.lang === "en" ? "Name of the new Lorebook folder:" : "Name des neuen Lorebook-Ordners:";
-      const defName = state.lang === "en" ? "New Folder" : "Neuer Ordner";
+      const promptText = t("ui_folder_prompt");
+      const defName = t("ui_folder_default");
       showPromptModal(t("btn_add_folder"), promptText, defName, (name) => {
         if (!name || !name.trim()) return;
         const cleanName = name.trim();
@@ -7689,7 +7887,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
   }
 
   function renameFolder(oldName) {
-    const promptText = state.lang === "en" ? `New name for "${oldName}":` : `Neuer Name für "${oldName}":`;
+    const promptText = tf("ui_folder_rename", { n: oldName });
     showPromptModal(t("tooltip_rename"), promptText, oldName, (newName) => {
       if (!newName || !newName.trim() || newName.trim() === oldName) return;
       const cleanNew = newName.trim();
@@ -7703,7 +7901,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
   }
 
   function deleteFolder(catName) {
-    const confirmMsg = state.lang === "en" ? `Delete folder "${catName}"? All contained entries will be moved to "General".` : `Ordner "${catName}" wirklich entfernen? Alle enthaltenen Einträge werden nach "Allgemein" verschoben.`;
+    const confirmMsg = tf("ui_folder_del", { n: catName });
     showConfirmModal(confirmMsg, () => {
       state.loreCategories = state.loreCategories.filter(c => c !== catName);
       state.lorebook.forEach(entry => { if (entry && entry.category === catName) entry.category = "Allgemein"; });
@@ -7750,7 +7948,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     const safeId = sanitizeId(id, "lore");
     const l = state.lorebook.find(x => x && x.id === safeId);
     if (!l) return;
-    document.getElementById("lore-modal-title").innerText = state.lang === "en" ? "Edit Lorebook Entry" : "Lore-Eintrag bearbeiten";
+    document.getElementById("lore-modal-title").innerText = t("ui_lore_edit_title");
     document.getElementById("lore-id").value = l.id;
     document.getElementById("lore-title").value = l.title;
     document.getElementById("lore-constant").checked = !!l.constant;
@@ -7797,7 +7995,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
 
   function deleteLore(id) {
     const safeId = sanitizeId(id, "lore");
-    showConfirmModal(state.lang === "en" ? "Delete Lorebook entry?" : "Lore-Eintrag löschen?", () => {
+    showConfirmModal(t("ui_lore_del"), () => {
       state.lorebook = state.lorebook.filter(x => x && x.id !== safeId);
       saveState();
       renderLorebook();
@@ -7807,7 +8005,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
   function renderSettings() {
     const editorSelect = document.getElementById("setting-editor");
     if (editorSelect) {
-      editorSelect.innerHTML = `<option value="">${state.lang === "en" ? "Disabled (Direct Output)" : "Deaktiviert (Direkte Ausgabe)"}</option>`;
+      editorSelect.innerHTML = `<option value="">${t("ui_editor_off")}</option>`;
       state.characters.filter(c => c && c.role === "editor").forEach(c => {
         const opt = document.createElement("option");
         opt.value = sanitizeId(c.id, "char"); 
@@ -7829,8 +8027,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     const budgValEl = document.getElementById("budget-val");
     if (budgValEl) budgValEl.innerText = (state.settings.maxTokenBudget || 3200) + " Tokens";
     updateLoreShareUI();
-    const stripEl = document.getElementById("setting-strip-keys");
-    if (stripEl) stripEl.checked = !!state.settings.stripKeysOnExport;
+    if (typeof cxRenderLast === "function") { cxRenderLast(); psRender(); }
     const wbs = wbSettings();
     [["setting-wb-map", "map"], ["setting-wb-memories", "memories"], ["setting-wb-lore", "lore"]].forEach(([elId, k]) => { const el = document.getElementById(elId); if (el) el.checked = !!wbs[k]; });
     stRenderSettings();
@@ -7900,7 +8097,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
   if (newSessionBtn) {
     newSessionBtn.onclick = () => {
       if (isGenerating) return;
-      const promptText = state.lang === "en" ? "Title of the new adventure:" : "Titel des neuen Abenteuers:";
+      const promptText = t("ui_adv_title_prompt");
       const defTitle = (state.lang === "en" ? "Adventure " : "Abenteuer ") + (state.sessions.length + 1);
       showPromptModal(t("session_title"), promptText, defTitle, (title) => {
         if (!title?.trim()) return;
@@ -7931,7 +8128,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     renameSessionBtn.onclick = () => {
       if (isGenerating) return;
       const current = getActiveSession();
-      const promptText = state.lang === "en" ? "New title for this adventure:" : "Neuer Titel für dieses Abenteuer:";
+      const promptText = t("ui_adv_rename_prompt");
       showPromptModal(t("tooltip_rename"), promptText, current.title, (title) => {
         if (!title?.trim()) return;
         current.title = title.trim();
@@ -7948,7 +8145,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     deleteSessionBtn.onclick = () => {
       if (isGenerating) return;
       if (state.sessions.length <= 1) {
-        showConfirmModal(state.lang === "en" ? "Clear chat history for this adventure?" : "Möchtest du den Verlauf leeren?", () => {
+        showConfirmModal(t("ui_clear_hist"), () => {
           state.messages = [];
           const curr = getActiveSession();
           curr.messages = [];
@@ -7965,7 +8162,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
         });
         return;
       }
-      showConfirmModal(state.lang === "en" ? "Delete adventure?" : "Abenteuer wirklich löschen?", () => {
+      showConfirmModal(t("ui_adv_del"), () => {
         state.sessions = state.sessions.filter(s => s && s.id !== state.activeSessionId);
         state.activeSessionId = state.sessions[0].id;
         syncActiveMessages();
@@ -8032,7 +8229,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       saveState();
       renderChat();
       updateAssistBtnVisibility();
-      showToast(state.lang === "en" ? "Player profile saved!" : "Spieler-Profil gespeichert!", "success");
+      showToast(t("ui_profile_saved"), "success");
     };
   }
 
@@ -8080,6 +8277,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       document.getElementById("char-thinkbudget").value = String(RS_DEFAULT_BUDGET);
       document.getElementById("thinkbudget-val").innerText = String(RS_DEFAULT_BUDGET);
       document.getElementById("char-prompt").value = "";
+      pvRefreshForms();
       const modal = document.getElementById("char-modal");
       if (modal) modal.classList.add("active");
     };
@@ -8090,7 +8288,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     const safeId = sanitizeId(id, "char");
     const c = state.characters.find(x => x && x.id === safeId);
     if (!c) return;
-    document.getElementById("char-modal-title").innerText = state.lang === "en" ? "Edit Character" : "Charakter bearbeiten";
+    document.getElementById("char-modal-title").innerText = t("ui_char_edit_title");
     document.getElementById("char-id").value = c.id;
     document.getElementById("char-name").value = c.name;
     document.getElementById("char-avatar").value = c.avatar;
@@ -8114,6 +8312,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     document.getElementById("char-thinkbudget").value = String(rsBudget(c));
     document.getElementById("thinkbudget-val").innerText = String(rsBudget(c));
     document.getElementById("char-prompt").value = c.prompt || "";
+    pvRefreshForms();
     const modal = document.getElementById("char-modal");
     if (modal) modal.classList.add("active");
   }
@@ -8162,7 +8361,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
   function deleteChar(id) {
     if (isGenerating) return;
     const safeId = sanitizeId(id, "char");
-    showConfirmModal(state.lang === "en" ? "Really delete character?" : "Charakter wirklich löschen?", () => {
+    showConfirmModal(t("ui_char_del"), () => {
       state.characters = state.characters.filter(x => x && x.id !== safeId);
       state.settings.order = state.settings.order.filter(oId => oId !== safeId);
       if (state.settings.editorId === safeId) state.settings.editorId = "";
@@ -8290,13 +8489,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
         const rawName = (d && d.name !== undefined && d.name !== null) ? String(d.name).trim() : file.name.replace(/\.png$/i, '');
         const safeName = rawName || (state.lang === "en" ? "Nameless" : "Ohne Namen");
 
-        const sysPrompt = d.system_prompt ? String(d.system_prompt) : "";
-        const personality = d.personality ? `[Personality]: ${String(d.personality)}` : "";
-        const description = d.description ? `[Description]: ${String(d.description)}` : "";
-        const scenario = d.scenario ? `[Scenario]: ${String(d.scenario)}` : "";
-        const mesExample = d.mes_example ? `[Dialogues]:\n${String(d.mes_example)}` : "";
-
-        const importedPrompt = [sysPrompt, personality, description, scenario, mesExample].filter(Boolean).join("\n\n");
+        const importedPrompt = cardToPrompt(d);
         const newChar = {
           id: generateId("char"), 
           name: safeName, 
@@ -8318,7 +8511,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
         renderCharacters(); 
         renderSettings(); 
         renderChat();
-        showToast(state.lang === "en" ? "Character card imported!" : "Charakterkarte importiert!", "success");
+        showToast(t("ui_card_imported"), "success");
       } catch (err) {
         showConfirmModal(err.message || String(err), () => {});
       } finally { 
@@ -8373,10 +8566,6 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     };
   }
 
-  const setStripEl = document.getElementById("setting-strip-keys");
-  if (setStripEl) {
-    setStripEl.onchange = (e) => { state.settings.stripKeysOnExport = e.target.checked; saveState(); };
-  }
 
   [["setting-wb-map", "map"], ["setting-wb-memories", "memories"], ["setting-wb-lore", "lore"]].forEach(([elId, k]) => {
     const el = document.getElementById(elId);
@@ -8395,7 +8584,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     clearChatBtn.onclick = () => {
       if (isGenerating) abortCurrentGeneration();
       if (!Array.isArray(state.messages) || state.messages.length === 0) return;
-      showConfirmModal(state.lang === "en" ? "Clear entire history for this adventure?" : "Gesamten Verlauf dieses Abenteuers leeren?", () => {
+      showConfirmModal(t("ui_clear_all_hist"), () => {
         state.messages = []; 
         getActiveSession().messages = []; 
         saveState(); 
@@ -8406,210 +8595,131 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
 
   const resetBtn = document.getElementById("reset-btn");
   if (resetBtn) {
-    resetBtn.onclick = () => {
-      showConfirmModal(state.lang === "en" ? "Reset everything to factory default?" : "Alles auf Werkseinstellungen zurücksetzen?", async () => {
-        isResetting = true;
-        try {
-          localStorage.removeItem(CRASH_BUFFER_KEY);
-          localStorage.removeItem(LOCAL_STORAGE_BACKUP);
-          const freshState = JSON.parse(JSON.stringify(BLANK_STATE));
-          freshState.lang = state.lang === "en" ? "en" : "de";
-          freshState.sessions[0].title = freshState.lang === "en" ? "New Adventure" : "Neues Abenteuer";
-          await idbSet("state", freshState);
-          state = freshState;
-          location.reload();
-        } catch (err) {
-          console.error("Reset-Fehler:", err);
-          location.reload();
+    // Löscht die geöffnete Kampagne wie im Hauptmenü (Rückfrage, Auto-Sicherungen), danach Hauptmenü. Spieler-Profil/Keys bleiben (global).
+    resetBtn.onclick = () => { if (MM.idx && state._campId) mmDelete(state._campId); };
+  }
+
+  // ROBUSTER JSON-IMPORT (Phase 1: Prüfung -> Vorschau -> Ersetzen/Zusammenführen; auch für automatische Sicherungen)
+  function normalizeImport(raw) {
+    let imported = typeof raw === "string" ? JSON.parse(raw) : raw;
+    if (!imported || typeof imported !== "object" || Array.isArray(imported)) throw new Error(t("im_err_obj"));
+    const warn = [], dropped = {};
+    const objs = (a, what) => { if (!Array.isArray(a)) return []; const ok = a.filter(x => x && typeof x === "object" && !Array.isArray(x)); if (ok.length < a.length) dropped[what] = (dropped[what] || 0) + a.length - ok.length; return ok; };
+    if (imported.state && typeof imported.state === "object") {
+      imported = imported.state;
+    }
+    if (imported.type === "multirp-bundle") throw new Error(t("mm_err_bundle"));
+
+    // FIX 3: Nur echte Multi-RP-Backups annehmen (sonst löscht z. B. eine beliebige JSON-Datei alles)
+    const isOfficial = imported._app === "multi-rp-studio";
+    const hasLegacyData = Array.isArray(imported.characters) || Array.isArray(imported.sessions);
+    if (!isOfficial && !hasLegacyData) {
+      throw new Error(t("im_err_app"));
+    }
+
+    const candidateState = {
+      ...BLANK_STATE,
+      ...imported,
+      world: { ...DEFAULT_WORLD, ...(imported.world || {}) },
+      user: { ...BLANK_STATE.user, ...(imported.user || {}) },
+      settings: { ...BLANK_STATE.settings, ...(imported.settings || {}) },
+      characters: objs(imported.characters, t("im_s_chars")),
+      lorebook: objs(imported.lorebook, t("im_s_lore")),
+      loreCategories: Array.isArray(imported.loreCategories) ? imported.loreCategories.filter(c => typeof c === "string" && c.trim()) : [...DEFAULT_LORE_CATS],
+      sessions: objs(imported.sessions, t("im_s_sess"))
+    };
+
+    candidateState.lang = (imported.lang === "en" || imported.lang === "de") ? imported.lang : (state.lang === "en" ? "en" : "de");
+    candidateState.mapPlaces = sanitizeMapPlaces(imported.mapPlaces, 200);
+    candidateState.settings.showThoughts = !!candidateState.settings.showThoughts;
+    candidateState.settings.editorContinuity = !!candidateState.settings.editorContinuity;
+    candidateState.settings.allInOne = !!candidateState.settings.allInOne;
+    candidateState.settings.aioEditor = !!candidateState.settings.aioEditor;
+    { const ab = candidateState.settings.autoBackup && typeof candidateState.settings.autoBackup === "object" ? candidateState.settings.autoBackup : {};
+      candidateState.settings.autoBackup = { on: ab.on !== false, rounds: sanitizeInt(ab.rounds, 0, 200, 5), minutes: sanitizeInt(ab.minutes, 0, 1440, 15), session: ab.session !== false, keep: sanitizeInt(ab.keep, 1, 50, 5) }; }
+    candidateState.settings.weltbuch = sanitizeWbSettings(imported.settings && imported.settings.weltbuch);
+    candidateState.settings.setting = sanitizeSetting(imported.settings && imported.settings.setting); // alte Backups ohne Setting = Fantasy
+
+    candidateState.settings.order = Array.isArray(candidateState.settings.order) 
+      ? candidateState.settings.order.map(id => sanitizeId(id, "char")) 
+      : [];
+    candidateState.settings.editorId = candidateState.settings.editorId 
+      ? sanitizeId(candidateState.settings.editorId, "char", true) 
+      : "";
+
+    candidateState.characters = candidateState.characters.map(c => ({
+      ...c,
+      id: sanitizeId(c?.id, "char"),
+      name: String(c?.name || (candidateState.lang === "en" ? "Nameless" : "Ohne Namen")),
+      model: String(c?.model || ""),
+      role: ["gm", "companion", "editor"].includes(c?.role) ? c.role : "companion",
+      reasoning: rsMode(c), thinkBudget: rsBudget(c)
+    }));
+
+    candidateState.lorebook = candidateState.lorebook.map(l => ({
+      ...l,
+      id: sanitizeId(l?.id, "lore"),
+      title: String(l?.title || "Untitled"),
+      priority: sanitizeInt(l?.priority, 1, 100, 10),
+      scanDepth: sanitizeInt(l?.scanDepth, 1, 50, 8),
+      keys: String(l?.keys || ""),
+      content: String(l?.content || "")
+    })).map(l => sanitizeLoreExtras(l));
+
+    if (!candidateState.sessions.length) {
+      candidateState.sessions = [{
+        id: generateId("sess"),
+        title: t("im_default_sess"),
+        createdAt: Date.now(),
+        messages: Array.isArray(candidateState.messages) ? candidateState.messages : [],
+        world: { ...candidateState.world },
+        userProgression: createBlankProgression(),
+        companionProgression: {}
+      }];
+    } else {
+      candidateState.sessions.forEach(sess => {
+        sess.id = sanitizeId(sess.id, "sess");
+        sess.title = String(sess.title || "Adventure");
+        sess.map = sanitizeSessMap(sess.map);
+        sess.world = { ...DEFAULT_WORLD, ...(sess.world || {}) };
+        sess.userProgression = sanitizeProgression(sess.userProgression);
+        if (sess.companionProgression && typeof sess.companionProgression === "object") {
+          for (const cId in sess.companionProgression) {
+            sess.companionProgression[cId] = sanitizeProgression(sess.companionProgression[cId]);
+          }
+        } else {
+          sess.companionProgression = {};
         }
+
+        sess.messages = Array.isArray(sess.messages) ? objs(sess.messages, t("im_s_msgs")).map(m => ({
+          ...m,
+          id: sanitizeId(m?.id, "msg"),
+          currentVariant: sanitizeInt(m?.currentVariant, 0, Math.max(0, (m?.variants?.length || 1) - 1), 0),
+          variants: Array.isArray(m?.variants) ? m.variants : [m?.text || ""]
+        })) : [];
       });
-    };
+    }
+
+    candidateState.activeSessionId = sanitizeId(candidateState.activeSessionId, "sess");
+    if (!candidateState.sessions.some(s => s && s.id === candidateState.activeSessionId)) {
+      candidateState.activeSessionId = candidateState.sessions[0].id;
+    }
+
+      for (const w in dropped) warn.push(tf("im_w_dropped", { n: dropped[w], w }));
+      if ((+imported._version || 1) > 1) warn.push(t("im_w_newer"));
+      const hasKeys = !!(String(candidateState.user.apiKey || "").trim() || candidateState.characters.some(c => String(c.apiKey || "").trim()));
+      return { cand: candidateState, warn, info: { exportedAt: imported._exportedAt || "", hasKeys } };
   }
-
-  const exportBtn = document.getElementById("export-btn");
-  if (exportBtn) {
-    exportBtn.onclick = () => {
-      const stripEl = document.getElementById("setting-strip-keys");
-      const strip = stripEl ? stripEl.checked : true;
-      const backup = JSON.parse(JSON.stringify(state));
-
-      backup._app = "multi-rp-studio";
-      backup._version = 1;
-
-      if (strip) {
-        if (backup.user) backup.user.apiKey = "";
-        if (Array.isArray(backup.characters)) backup.characters.forEach(c => { if (c) c.apiKey = ""; });
-      }
-      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); 
-      a.href = url;
-      a.download = `multi_rp_backup_${Date.now()}.json`;
-      document.body.appendChild(a); 
-      a.click(); 
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    };
-  }
-
-  // ROBUSTER JSON-IMPORT
   const importFileInputEl = document.getElementById("import-file");
   const importBtn = document.getElementById("import-btn");
   if (importBtn && importFileInputEl) importBtn.onclick = () => importFileInputEl.click();
-
   if (importFileInputEl) {
     importFileInputEl.onchange = (e) => {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = async (event) => {
-        try {
-          let imported = JSON.parse(event.target.result);
-
-          if (!imported || typeof imported !== "object" || Array.isArray(imported)) {
-            throw new Error(state.lang === "en" ? "File is not a valid JSON object." : "Datei ist kein gültiges JSON-Objekt.");
-          }
-
-          if (imported.state && typeof imported.state === "object") {
-            imported = imported.state;
-          }
-
-          // FIX 3: Nur echte Multi-RP-Backups annehmen (sonst löscht z. B. eine beliebige JSON-Datei alles)
-          const isOfficial = imported._app === "multi-rp-studio";
-          const hasLegacyData = Array.isArray(imported.characters) || Array.isArray(imported.sessions);
-          if (!isOfficial && !hasLegacyData) {
-            throw new Error(state.lang === "en"
-              ? "Unrecognized file. This does not appear to be a Multi-RP Studio backup."
-              : "Nicht erkannt: Diese Datei ist kein Multi-RP Studio Backup.");
-          }
-
-          const candidateState = {
-            ...BLANK_STATE,
-            ...imported,
-            world: { ...DEFAULT_WORLD, ...(imported.world || {}) },
-            user: { ...BLANK_STATE.user, ...(imported.user || {}) },
-            settings: { ...BLANK_STATE.settings, ...(imported.settings || {}) },
-            characters: Array.isArray(imported.characters) ? imported.characters : [],
-            lorebook: Array.isArray(imported.lorebook) ? imported.lorebook : [],
-            loreCategories: Array.isArray(imported.loreCategories) ? imported.loreCategories : [...DEFAULT_LORE_CATS],
-            sessions: Array.isArray(imported.sessions) ? imported.sessions : []
-          };
-
-          candidateState.lang = (imported.lang === "en" || imported.lang === "de") ? imported.lang : (state.lang === "en" ? "en" : "de");
-          candidateState.mapPlaces = sanitizeMapPlaces(imported.mapPlaces, 200);
-          candidateState.settings.showThoughts = !!candidateState.settings.showThoughts;
-          candidateState.settings.editorContinuity = !!candidateState.settings.editorContinuity;
-          candidateState.settings.allInOne = !!candidateState.settings.allInOne;
-          candidateState.settings.aioEditor = !!candidateState.settings.aioEditor;
-          { const ab = candidateState.settings.autoBackup && typeof candidateState.settings.autoBackup === "object" ? candidateState.settings.autoBackup : {};
-            candidateState.settings.autoBackup = { on: ab.on !== false, rounds: sanitizeInt(ab.rounds, 0, 200, 5), minutes: sanitizeInt(ab.minutes, 0, 1440, 15), session: ab.session !== false, keep: sanitizeInt(ab.keep, 1, 50, 5) }; }
-          candidateState.settings.weltbuch = sanitizeWbSettings(imported.settings && imported.settings.weltbuch);
-          candidateState.settings.setting = sanitizeSetting(imported.settings && imported.settings.setting); // alte Backups ohne Setting = Fantasy
-
-          candidateState.settings.order = Array.isArray(candidateState.settings.order) 
-            ? candidateState.settings.order.map(id => sanitizeId(id, "char")) 
-            : [];
-          candidateState.settings.editorId = candidateState.settings.editorId 
-            ? sanitizeId(candidateState.settings.editorId, "char", true) 
-            : "";
-
-          candidateState.characters = candidateState.characters.map(c => ({
-            ...c,
-            id: sanitizeId(c?.id, "char"),
-            name: String(c?.name || (candidateState.lang === "en" ? "Nameless" : "Ohne Namen")),
-            model: String(c?.model || ""),
-            role: ["gm", "companion", "editor"].includes(c?.role) ? c.role : "companion",
-            reasoning: rsMode(c), thinkBudget: rsBudget(c)
-          }));
-
-          candidateState.lorebook = candidateState.lorebook.map(l => ({
-            ...l,
-            id: sanitizeId(l?.id, "lore"),
-            title: String(l?.title || "Untitled"),
-            priority: sanitizeInt(l?.priority, 1, 100, 10),
-            scanDepth: sanitizeInt(l?.scanDepth, 1, 50, 8),
-            keys: String(l?.keys || ""),
-            content: String(l?.content || "")
-          })).map(l => sanitizeLoreExtras(l));
-
-          if (!candidateState.sessions.length) {
-            candidateState.sessions = [{
-              id: generateId("sess"),
-              title: candidateState.lang === "en" ? "Default" : "Standard",
-              createdAt: Date.now(),
-              messages: Array.isArray(candidateState.messages) ? candidateState.messages : [],
-              world: { ...candidateState.world },
-              userProgression: createBlankProgression(),
-              companionProgression: {}
-            }];
-          } else {
-            candidateState.sessions.forEach(sess => {
-              if (!sess) return;
-              sess.id = sanitizeId(sess.id, "sess");
-              sess.title = String(sess.title || "Adventure");
-              sess.map = sanitizeSessMap(sess.map);
-              sess.world = { ...DEFAULT_WORLD, ...(sess.world || {}) };
-              sess.userProgression = sanitizeProgression(sess.userProgression);
-              if (sess.companionProgression && typeof sess.companionProgression === "object") {
-                for (const cId in sess.companionProgression) {
-                  sess.companionProgression[cId] = sanitizeProgression(sess.companionProgression[cId]);
-                }
-              } else {
-                sess.companionProgression = {};
-              }
-
-              sess.messages = Array.isArray(sess.messages) ? sess.messages.map(m => ({
-                ...m,
-                id: sanitizeId(m?.id, "msg"),
-                currentVariant: sanitizeInt(m?.currentVariant, 0, Math.max(0, (m?.variants?.length || 1) - 1), 0),
-                variants: Array.isArray(m?.variants) ? m.variants : [m?.text || ""]
-              })) : [];
-            });
-          }
-
-          candidateState.activeSessionId = sanitizeId(candidateState.activeSessionId, "sess");
-          if (!candidateState.sessions.some(s => s && s.id === candidateState.activeSessionId)) {
-            candidateState.activeSessionId = candidateState.sessions[0].id;
-          }
-
-          const charCount = candidateState.characters.length;
-          const sessCount = candidateState.sessions.length;
-          const confirmText = state.lang === "en"
-            ? `Load backup containing ${charCount} character(s) and ${sessCount} adventure(s)?\n\nWARNING: Current data will be overwritten.`
-            : `Backup mit ${charCount} Charakter(en) und ${sessCount} Abenteuer(n) laden?\n\nHINWEIS: Aktuelle Daten werden überschrieben.`;
-
-          showConfirmModal(confirmText, async () => {
-            if (isGenerating) abortCurrentGeneration(); // FIX 4: kein laufender Zug schreibt ins neue Backup
-            const langBeforeImport = state.lang === "en" ? "en" : "de";
-            state = candidateState;
-            document.querySelectorAll(".lang-btn").forEach(btn => {
-              const isAct = btn.dataset.lang === (state.lang || "de");
-              btn.classList.toggle("btn-primary", isAct);
-              btn.classList.toggle("btn-secondary", !isAct);
-            });
-            applyTranslations();
-            syncActiveMessages();
-            renderSessionsUI();
-            renderAmbientBar();
-            renderChat();
-            renderPlayerConfig();
-            renderCharacters();
-            renderLorebook();
-            renderSettings();
-            updateAssistBtnVisibility();
-            updateHeaderBagCounter();
-            closeMapModal();
-            updateMapFab();
-            await saveState();
-            showToast(t("toast_import_ok") + ((state.lang === "en" ? "en" : "de") !== langBeforeImport ? " " + t("toast_import_lang") : ""), "success");
-          });
-
-        } catch (err) {
-          showConfirmModal((state.lang === "en" ? "Import failed: " : "Import fehlgeschlagen: ") + (err.message || String(err)), () => {});
-        } finally {
-          importFileInputEl.value = "";
-        }
-      };
+      reader.onload = (event) => { try { imHandleText(event.target.result, { name: file.name, size: file.size }); } finally { importFileInputEl.value = ""; } };
+      reader.onerror = () => { showConfirmModal(t("ui_import_failed") + t("im_err_json"), () => {}); importFileInputEl.value = ""; };
       reader.readAsText(file);
     };
   }
@@ -8671,12 +8781,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
         const lsRaw = localStorage.getItem(LOCAL_STORAGE_BACKUP);
         if (lsRaw) loadedState = JSON.parse(lsRaw);
       } catch (e) {}
-      showConfirmModal(
-        state.lang === "en"
-          ? "Database could not be read. " + (loadedState ? "An emergency copy was loaded. " : "") + "Saving is paused to prevent data loss. Export a backup if needed and reload the page."
-          : "Die Datenbank konnte nicht gelesen werden. " + (loadedState ? "Eine Notfallkopie wurde geladen. " : "") + "Speichern ist pausiert, damit nichts verloren geht. Bei Bedarf Backup exportieren und die Seite neu laden.",
-        () => {}
-      );
+      showConfirmModal(tf("db_read_fail", { x: loadedState ? t("db_read_copy") : "" }), () => {});
     }
 
     if (!loadedState) {
@@ -8765,6 +8870,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     if (!dbReadFailed) {
       await checkCrashRecovery();
       await saveState();
+      try { await mmInit(); } catch (e) { console.warn("Hauptmenü:", e); }
     }
 
     const activeLang = state.lang || "de";
@@ -8786,7 +8892,11 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     updateAssistBtnVisibility();
     updateLastSavedIndicator();
     updateHeaderBagCounter();
+    if (mmShouldShowOnStart()) mmShow(true);
     updateMapFab();
+    if (!state.settings.firstUseTs) { state.settings.firstUseTs = Date.now(); if (!dbReadFailed) saveState(); }
+    psRequest(true);
+    rmCheck(); a11yScan();
   }
 
   window.addEventListener("resize", () => updateMapFab());
@@ -8802,7 +8912,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     aio_banner: "⚡ All-in-One aktiv: {n} erzählt alles in einer Antwort. Begleiter sind NPC-Infos.", aio_banner_none: "⚡ All-in-One aktiv – lege einen Spielleiter an, der alles erzählt.",
     aio_role_narr: "⚡ Erzähler für alles", aio_role_npc: "📇 NPC-Info (spielt der Erzähler)", aio_role_ed: "✒️ Lektor (im All-in-One optional)",
     aio_off_btn: "Mehr-Rollen-Modus", aio_status: "{n} erzählt …", aio_toast_on: "⚡ All-in-One an – eine Antwort pro Runde.", aio_toast_off: "👥 Mehr-Rollen-Gruppe wiederhergestellt.",
-    ab_title: "🗂️ Automatische Sicherungen", ab_desc: "Sicherungen im App-Speicher dieses Geräts (nicht im Download-Ordner). Datei-Export bleibt unten möglich.",
+    ab_title: "🗂️ Automatische Sicherungen", ab_desc: "Sicherungen im App-Speicher dieses Geräts (nicht im Download-Ordner). Sie verschwinden mit den Browser-Daten – dafür gibt es oben die Datei.",
     ab_on: "Automatisch sichern", ab_rounds: "alle N Runden", ab_minutes: "alle X Minuten", ab_session: "beim Abenteuer-Wechsel", ab_keep: "behalten (letzte K)",
     ab_now: "💾 Jetzt sichern", ab_empty: "Noch keine automatische Sicherung.", ab_restore: "↺ Laden", ab_delete: "🗑", ab_saved: "Sicherung angelegt.",
     ab_confirm_del: "Diese Sicherung löschen?", ab_quota: "Speicher fast voll – älteste Sicherungen entfernt.", ab_fail: "Automatische Sicherung nicht möglich (Speicher voll?).",
@@ -8815,7 +8925,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     aio_banner: "⚡ All-in-One active: {n} narrates everything in one reply. Companions are NPC info.", aio_banner_none: "⚡ All-in-One active – add a game master who narrates everything.",
     aio_role_narr: "⚡ Narrator for everything", aio_role_npc: "📇 NPC info (played by the narrator)", aio_role_ed: "✒️ Editor (optional in All-in-One)",
     aio_off_btn: "Multi-role mode", aio_status: "{n} narrates …", aio_toast_on: "⚡ All-in-One on – one reply per round.", aio_toast_off: "👥 Multi-role party restored.",
-    ab_title: "🗂️ Automatic backups", ab_desc: "Backups in this device's app storage (not the downloads folder). File export is still available below.",
+    ab_title: "🗂️ Automatic backups", ab_desc: "Backups in this device's app storage (not the downloads folder). They disappear with the browser data – that is what the file above is for.",
     ab_on: "Back up automatically", ab_rounds: "every N rounds", ab_minutes: "every X minutes", ab_session: "on adventure switch", ab_keep: "keep (last K)",
     ab_now: "💾 Back up now", ab_empty: "No automatic backup yet.", ab_restore: "↺ Load", ab_delete: "🗑", ab_saved: "Backup created.",
     ab_confirm_del: "Delete this backup?", ab_quota: "Storage almost full – oldest backups removed.", ab_fail: "Automatic backup not possible (storage full?).",
@@ -8872,13 +8982,13 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     let text = tr.raw;
     const edc = state.settings.aioEditor ? (state.characters || []).find(c => c && c.id === state.settings.editorId && c.role === "editor") : null;
     if (edc && tr.clean) {
-      updateStatus(edc.name + (isEn ? " crafting novel chapter..." : " verfasst Kapitel..."));
+      updateStatus(edc.name + t("st_editor"));
       try {
         const et = await runEditorSynthesis({ editorChar: edc, userName, triggerText, drafts: [{ name: narr.name, text: tr.clean, gm: true }],
           onChunk: (ch) => renderThrottled(contentEl, ch), maxTokens: Math.min(4096, Math.max(1600, Math.round(estimateTokens(tr.clean) * 1.15) + 300)),
           prevTail: editorPrevTail(state.messages.indexOf(msg)) });
         if (et.raw && stripThink(et.raw).length > 200 && lastFinishReason !== "degenerate") text = et.raw;
-      } catch (e) { if (isAborted || e.name === "AbortError") throw e; showToast((isEn ? "Editor failed – kept the narrator text. " : "Lektor fehlgeschlagen – Erzähltext übernommen. ") + String(e.message || e).slice(0, 80), "error"); }
+      } catch (e) { if (isAborted || e.name === "AbortError") throw e; showToast(tf("ui_ed_failed", { e: String(e.message || e).slice(0, 80) }), "error"); }
     }
     flushThrottled(contentEl, text);
     if (contentEl) contentEl.classList.remove("cursor");
@@ -8920,7 +9030,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     return abDbP;
   }
   function abTx(mode, fn) { return abDb().then(db => new Promise((res, rej) => { const tx = db.transaction(AB_STORE, mode), st = tx.objectStore(AB_STORE); let out; const r = fn(st); if (r) r.onsuccess = () => { out = r.result; }; tx.oncomplete = () => res(out); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error || new Error("abort")); })); }
-  async function abList() { try { const all = await abTx("readonly", st => st.getAll()); return (all || []).map(b => ({ id: b.id, ts: b.ts, size: b.size, label: b.label, reason: b.reason })).sort((a, b) => b.ts - a.ts); } catch (e) { return []; } }
+  async function abList() { try { const all = await abTx("readonly", st => st.getAll()); const cid = state._campId, leg = MM.idx && MM.idx.legacy; return (all || []).filter(b => !cid || (b.camp || leg) === cid).map(b => ({ id: b.id, ts: b.ts, size: b.size, label: b.label, reason: b.reason })).sort((a, b) => b.ts - a.ts); } catch (e) { return []; } }
   async function abPrune(keep) { const l = await abList(); for (const b of l.slice(keep)) await abTx("readwrite", st => st.delete(b.id)); }
   async function autoBackupNow(reason = "manual", snapshotText = null) {
     if (abBusy || dbReadFailed || isResetting) return false;
@@ -8929,7 +9039,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       const cfg = abCfg();
       const data = snapshotText || (() => { const b = JSON.parse(JSON.stringify(state)); b._app = "multi-rp-studio"; b._version = 1; return JSON.stringify(b); })();
       const sess = (state.sessions || []).find(s => s && s.id === state.activeSessionId);
-      const rec = { id: "ab_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6), ts: Date.now(), size: new Blob([data]).size, label: String((sess && sess.title) || "").slice(0, 80), reason, data };
+      const rec = { id: "ab_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6), ts: Date.now(), size: new Blob([data]).size, label: String((sess && sess.title) || "").slice(0, 80), reason, data, camp: state._campId || "" };
       let ok = false;
       for (let i = 0; i < 3 && !ok; i++) {
         try { await abTx("readwrite", st => st.put(rec)); ok = true; }
@@ -8946,7 +9056,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     } catch (e) { console.warn("Auto-Sicherung fehlgeschlagen:", e); showToast(t("ab_fail"), "error"); return false; }
     finally { abBusy = false; }
   }
-  function abAfterRound() { abDirty = true; abRounds++; const c = abCfg(); if (c.on && c.rounds > 0 && abRounds >= c.rounds) autoBackupNow("rounds"); }
+  function abAfterRound() { if (typeof rmAfterRound === "function") rmAfterRound(); abDirty = true; abRounds++; const c = abCfg(); if (c.on && c.rounds > 0 && abRounds >= c.rounds) autoBackupNow("rounds"); }
   function abBeforeSessionChange() { const c = abCfg(); if (c.on && c.session && (state.messages || []).length) { const b = JSON.parse(JSON.stringify(state)); b._app = "multi-rp-studio"; b._version = 1; autoBackupNow("session", JSON.stringify(b)); } }
   setInterval(() => { const c = abCfg(); if (c.on && c.minutes > 0 && abDirty && !isGenerating && Date.now() - abLastTs >= c.minutes * 60000) autoBackupNow("timer"); }, 30000);
   function abFmtSize(n) { return n >= 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; }
@@ -8968,9 +9078,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
   // Laden über den normalen Import (gleiche Prüfungen + Bestätigung)
   async function abRestore(id) {
     const rec = await abTx("readonly", st => st.get(id)); if (!rec) return;
-    const inp = document.getElementById("import-file"); if (!inp || !inp.onchange) return;
-    const dt = new DataTransfer(); dt.items.add(new File([rec.data], "autobackup.json", { type: "application/json" }));
-    inp.files = dt.files; inp.onchange({ target: inp });
+    imHandleText(rec.data, { name: t("im_src_auto") + " · " + new Date(rec.ts).toLocaleString(state.lang === "en" ? "en-GB" : "de-DE") + (rec.label ? " · " + rec.label : ""), size: rec.size });
   }
   function abRenderSettings() {
     const c = abCfg();
@@ -8995,6 +9103,913 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
   }
   document.addEventListener("click", e => { const pop = document.getElementById("world-pop"); if (pop && pop.classList.contains("open") && !e.target.closest("#world-pop") && !e.target.closest("#world-chip")) toggleWorldChip(false); }, true);
   aioApplyClass();
+
+  // ===================== PHASE 1 (17.10.2026): Datensicherheit · Provider-Assistent · Barrierefreiheit =====================
+  Object.assign(I18N.de, {
+    ps_title: "🛡️ Dauerhafter Speicher", ps_yes: "✅ Ja", ps_no: "⚠️ Nein", ps_expl_yes: "Der Browser löscht die Daten nicht von selbst.", ps_expl_no: "Der Browser darf die Daten bei Platzmangel löschen.",
+    ps_unsupported: "– nicht unterstützt", ps_usage_lbl: "Belegt", ps_usage: "{u} von ca. {q}", ps_ask: "🛡️ Dauerhaft speichern anfragen",
+    ps_note: "Alles liegt nur in diesem Browser. iPhone/iPad: Safari kann Website-Daten nach ca. 7 Tagen ohne Besuch löschen – als App zum Home-Bildschirm hinzufügen und regelmäßig als Datei exportieren.",
+    ps_denied: "Der Browser hat dauerhaften Speicher (noch) nicht gewährt. Häufige Nutzung oder „Zum Home-Bildschirm“ hilft.",
+    cx_title: "📦 Kampagne als Datei", cx_last: "Letzte Sicherungsdatei: {d}", cx_never: "Noch keine Sicherungsdatei exportiert.",
+    cx_keys_chk: "🔑 API-Keys mitexportieren (nicht empfohlen)",
+    cx_keys_warn: "Die Datei enthält dann deine API-Keys im Klartext. Jeder, der sie bekommt, kann auf deine Kosten Anfragen senden. Nur für dich selbst und nie teilen. Trotzdem mitexportieren?",
+    cx_done: "Kampagne exportiert: {f}", cx_done_keys: "⚠️ Mit API-Keys exportiert – Datei nicht teilen.",
+    rm_rounds: "Erinnern nach N Runden", rm_days: "… oder nach X Tagen", rm_hint: "Erinnerung an die Sicherungsdatei. 0 = aus.",
+    rm_txt_rounds: "💾 {n} Runden seit der letzten Sicherungsdatei.", rm_txt_days: "💾 {n} Tage seit der letzten Sicherungsdatei.", rm_txt_never: "💾 Noch nie als Datei gesichert.",
+    rm_txt_tail: " Browser-Daten können verloren gehen.", rm_go: "📦 Sichern", rm_later: "Später",
+    im_title: "📥 Kampagne importieren", im_mode: "Wie importieren?", im_replace: "Ersetzen", im_replace_d: "Alles Aktuelle wird durch die Datei ersetzt.",
+    im_merge: "Zusammenführen", im_merge_d: "Neue Figuren, Lore-Einträge, Abenteuer und Orte kommen dazu. Vorhandenes und deine Einstellungen bleiben.",
+    im_safety: "Vorher wird automatisch eine Sicherung des aktuellen Stands angelegt (System → Automatische Sicherungen).", im_ok: "Importieren",
+    im_s_chars: "Figuren", im_s_sess: "Abenteuer", im_s_msgs: "Nachrichten", im_s_lore: "Lore-Einträge", im_s_places: "Orte auf der Karte", im_s_setting: "Setting · Sprache", im_s_date: "Exportiert am",
+    im_w_dropped: "{n} ungültige Einträge ({w}) werden übersprungen.", im_w_newer: "Die Datei stammt aus einer neueren App-Version – unbekannte Felder werden übernommen, aber evtl. nicht genutzt.",
+    im_w_keys: "🔑 Die Datei enthält API-Keys. Ersetzen übernimmt sie.", im_w_empty: "Die Datei enthält keine Figuren und keine Nachrichten.",
+    im_err_obj: "Datei ist kein gültiges JSON-Objekt.", im_err_json: "Die Datei ist kein lesbares JSON (beschädigt oder abgeschnitten?).",
+    im_err_app: "Nicht erkannt: Diese Datei ist kein Multi-RP Studio Backup.", im_merged: "Zusammengeführt: +{c} Figuren, +{l} Lore, +{s} Abenteuer, +{p} Orte ({k} schon vorhanden).",
+    im_src_auto: "Automatische Sicherung", ab_r_import: "vor Import", im_default_sess: "Standard",
+    db_read_fail: "Die Datenbank konnte nicht gelesen werden. {x}Speichern ist pausiert, damit nichts verloren geht. Bei Bedarf Backup exportieren und die Seite neu laden.", db_read_copy: "Eine Notfallkopie wurde geladen. ",
+    pv_test: "🔌 Verbindung testen", pv_testing: "⏳ Teste Verbindung …", pv_aio_test: "🔌 Erzähler-Verbindung testen", pv_models_found: "{n} Modelle verfügbar – antippen zum Übernehmen:",
+    pv_h_arliai: "Key: arliai.com → Account → API-Keys. Jede Rolle braucht den Key. Parallel-Limit je nach Plan beachten.",
+    pv_h_openrouter: "Key: openrouter.ai/keys. Modell-ID im Format anbieter/modell.", pv_h_deepseek: "Key: platform.deepseek.com → API Keys.",
+    pv_h_openai: "Key: platform.openai.com → API keys.", pv_h_infermatic: "Key im Infermatic-/TotalGPT-Konto.", pv_h_groq: "Key: console.groq.com/keys.", pv_h_together: "Key: api.together.ai → Settings → API Keys.",
+    pv_h_ollama: "Kein Key nötig. Ollama mit OLLAMA_ORIGINS=* starten, sonst blockiert der Browser (CORS). Nur am selben Gerät: „localhost“ ist auf dem Handy das Handy selbst.",
+    pv_h_koboldcpp: "Kein Key nötig. KoboldCPP läuft standardmäßig auf Port 5001; das Modell heißt beliebig. Nur am selben Gerät erreichbar.",
+    pv_h_lmstudio: "Kein Key nötig. LM Studio → Developer → Server starten und „Enable CORS“ einschalten. Modell-ID wie in LM Studio angezeigt.",
+    pv_h_custom: "Jeder OpenAI-kompatible Dienst: Base URL bis einschließlich /v1 eintragen (ohne /chat/completions).", pv_h_models: "Beispiele: {m}",
+    pv_ok_t: "✅ Verbindung steht – {m} antwortet ({ms} ms).", pv_ok_f: "Alles bereit. Speichern nicht vergessen.",
+    pv_note_notlisted: "Hinweis: Das Modell steht nicht in der Modellliste des Anbieters, hat aber geantwortet.",
+    pv_nomodel_list_t: "✅ Verbunden – {n} Modelle gefunden.", pv_nomodel_list_f: "Wähle unten ein Modell oder trage die Modell-ID ein und teste erneut.",
+    pv_nomodel_t: "⚠️ Server erreichbar, aber kein Modell eingetragen.", pv_nomodel_f: "Trage die Modell-ID ein und teste erneut.",
+    pv_url_t: "❌ Ungültige Base URL.", pv_url_f: "Sie muss mit http:// oder https:// beginnen, z. B. https://api.arliai.com/v1.",
+    pv_nokey_t: "❌ Kein API-Key eingetragen.", pv_nokey_f: "Dieser Anbieter braucht einen Key. Füge ihn im Feld „API Key“ ein.",
+    pv_401_t: "❌ 401 – API-Key ungültig oder fehlt.", pv_401_f: "Key neu kopieren (ohne Leerzeichen, ohne „Bearer“). Passt der Key zum Anbieter der Base URL?",
+    pv_403_t: "❌ 403 – Zugriff verweigert.", pv_403_f: "Der Key ist gültig, darf das aber nicht: Plan/Guthaben, Modell-Freigabe oder Region beim Anbieter prüfen.",
+    pv_404_t: "❌ 404 – Adresse nicht gefunden.", pv_404_f: "Base URL prüfen: meist endet sie auf /v1 (z. B. https://openrouter.ai/api/v1), ohne /chat/completions.",
+    pv_model_t: "❌ Modell „{m}“ nicht gefunden.", pv_model_f: "Modell-ID exakt so schreiben wie beim Anbieter (Groß-/Kleinschreibung). Vorschläge unten antippen.",
+    pv_429_t: "❌ 429 – Zu viele Anfragen oder Kontingent erschöpft.", pv_429_f: "Kurz warten. Prüfe Guthaben/Tageslimit und das Parallel-Limit deines Plans (mehrere Rollen gleichzeitig zählen mehrfach).",
+    pv_5xx_t: "❌ {s} – Fehler beim Anbieter.", pv_5xx_f: "Der Server des Anbieters ist überlastet oder gestört. Später erneut versuchen oder ein anderes Modell wählen.",
+    pv_http_t: "❌ Fehler {s}.", pv_http_f: "Die Meldung des Anbieters steht unten.",
+    pv_badjson_t: "⚠️ Antwort ist kein OpenAI-kompatibles JSON.", pv_badjson_f: "Ist die Base URL wirklich eine OpenAI-kompatible API (endet meist auf /v1)?",
+    pv_timeout_t: "❌ Zeitüberschreitung – keine Antwort.", pv_timeout_f: "Server antwortet nicht. Läuft er? Ist das Modell gerade überlastet oder lädt es noch (lokal: erstes Laden dauert)?",
+    pv_offline_t: "❌ Keine Internetverbindung.", pv_offline_f: "Gerät ist offline. Verbindung prüfen und erneut testen.",
+    pv_mixed_t: "❌ Blockiert: HTTP-Adresse von einer HTTPS-Seite.", pv_mixed_f: "Browser erlauben von https:// keine Aufrufe an http:// (außer localhost). Nutze eine https://-Adresse (z. B. Tunnel) oder öffne die App lokal.",
+    pv_local_t: "❌ Lokaler Server nicht erreichbar.", pv_local_f: "Läuft der Server ({u})? Port richtig? CORS erlauben: Ollama mit OLLAMA_ORIGINS=*, LM Studio „Enable CORS“. Auf dem Handy ist localhost das Handy selbst.",
+    pv_cors_t: "❌ Verbindung fehlgeschlagen (Netzwerk oder CORS).", pv_cors_f: "Base URL auf Tippfehler prüfen. Manche Anbieter erlauben keine Aufrufe direkt aus dem Browser (CORS) – dann einen anderen Anbieter oder einen Proxy nutzen.",
+    pv_chat_hint: "💡 {f}", pv_no_narr: "Lege zuerst einen Spielleiter an.",
+    a11y_close: "Schließen", a11y_edit: "Bearbeiten", a11y_add: "Hinzufügen", a11y_up: "Nach oben", a11y_down: "Nach unten", a11y_copy: "Kopieren",
+    a11y_regen: "Neu erzeugen", a11y_prev: "Zurück", a11y_next: "Weiter", a11y_stop: "Stopp", a11y_settings: "Einstellungen", a11y_zoom_in: "Hineinzoomen", a11y_zoom_out: "Herauszoomen", a11y_level: "Stufe ändern",
+    ui_world_state: "Welt-Status: {d} • {t} • {l}", ui_no_model_for: "Kein Modell für \u201e{n}\u201c hinterlegt.", ui_new_branch: "🌿 Neuer Strang: \u201e{t}\u201c!",
+    ui_folder_rename: "Neuer Name für \u201e{n}\u201c:", ui_folder_del: "Ordner \u201e{n}\u201c wirklich entfernen? Alle enthaltenen Einträge werden nach \u201eAllgemein\u201c verschoben.",
+    ui_think_only: "{n}: Das Modell ({m}) hat sein ganzes Token-Budget zum Nachdenken verbraucht und nichts geantwortet. Bitte erneut versuchen oder ein Modell ohne Reasoning wählen.",
+    ui_ed_stopped: "Lektor abgebrochen ({e}) – bisheriger Text bzw. Entwürfe übernommen.", ui_ed_cut: "Lektor-Text wurde am letzten vollständigen Satz beendet.", ui_ed_failed: "Lektor fehlgeschlagen – Erzähltext übernommen. {e}"
+  });
+  Object.assign(I18N.en, {
+    btn_export: "📦 Export campaign", btn_import: "📥 Import campaign", opt_manual: "✍️ OpenAI-compatible / custom URL",
+    ps_title: "🛡️ Persistent storage", ps_yes: "✅ Yes", ps_no: "⚠️ No", ps_expl_yes: "The browser will not delete the data on its own.", ps_expl_no: "The browser may delete the data when space runs low.",
+    ps_unsupported: "– not supported", ps_usage_lbl: "Used", ps_usage: "{u} of about {q}", ps_ask: "🛡️ Request persistent storage",
+    ps_note: "Everything lives only in this browser. iPhone/iPad: Safari may delete website data after about 7 days without a visit – add the app to the Home Screen and export a file regularly.",
+    ps_denied: "The browser has not granted persistent storage (yet). Regular use or “Add to Home Screen” helps.",
+    cx_title: "📦 Campaign file", cx_last: "Last backup file: {d}", cx_never: "No backup file exported yet.",
+    cx_keys_chk: "🔑 Include API keys (not recommended)",
+    cx_keys_warn: "The file will then contain your API keys in plain text. Anyone who gets it can send requests at your expense. Only for yourself, never share it. Include them anyway?",
+    cx_done: "Campaign exported: {f}", cx_done_keys: "⚠️ Exported with API keys – do not share the file.",
+    rm_rounds: "Remind after N rounds", rm_days: "… or after X days", rm_hint: "Reminder to save a backup file. 0 = off.",
+    rm_txt_rounds: "💾 {n} rounds since your last backup file.", rm_txt_days: "💾 {n} days since your last backup file.", rm_txt_never: "💾 Never saved as a file yet.",
+    rm_txt_tail: " Browser data can get lost.", rm_go: "📦 Save", rm_later: "Later",
+    im_title: "📥 Import campaign", im_mode: "How to import?", im_replace: "Replace", im_replace_d: "Everything current is replaced by the file.",
+    im_merge: "Merge", im_merge_d: "New characters, lore entries, adventures and places are added. Existing data and your settings stay.",
+    im_safety: "A backup of the current state is created automatically first (System → Automatic backups).", im_ok: "Import",
+    im_s_chars: "Characters", im_s_sess: "Adventures", im_s_msgs: "Messages", im_s_lore: "Lore entries", im_s_places: "Places on the map", im_s_setting: "Setting · language", im_s_date: "Exported on",
+    im_w_dropped: "{n} invalid entries ({w}) will be skipped.", im_w_newer: "The file comes from a newer app version – unknown fields are kept but may not be used.",
+    im_w_keys: "🔑 The file contains API keys. Replace will take them over.", im_w_empty: "The file contains no characters and no messages.",
+    im_err_obj: "File is not a valid JSON object.", im_err_json: "The file is not readable JSON (damaged or truncated?).",
+    im_err_app: "Unrecognized file. This does not appear to be a Multi-RP Studio backup.", im_merged: "Merged: +{c} characters, +{l} lore, +{s} adventures, +{p} places ({k} already present).",
+    im_src_auto: "Automatic backup", ab_r_import: "before import", im_default_sess: "Default",
+    db_read_fail: "Database could not be read. {x}Saving is paused to prevent data loss. Export a backup if needed and reload the page.", db_read_copy: "An emergency copy was loaded. ",
+    pv_test: "🔌 Test connection", pv_testing: "⏳ Testing connection …", pv_aio_test: "🔌 Test narrator connection", pv_models_found: "{n} models available – tap to use:",
+    pv_h_arliai: "Key: arliai.com → Account → API keys. Every role needs the key. Mind your plan's parallel-request limit.",
+    pv_h_openrouter: "Key: openrouter.ai/keys. Model ID in the form provider/model.", pv_h_deepseek: "Key: platform.deepseek.com → API keys.",
+    pv_h_openai: "Key: platform.openai.com → API keys.", pv_h_infermatic: "Key in your Infermatic / TotalGPT account.", pv_h_groq: "Key: console.groq.com/keys.", pv_h_together: "Key: api.together.ai → Settings → API keys.",
+    pv_h_ollama: "No key needed. Start Ollama with OLLAMA_ORIGINS=* or the browser blocks it (CORS). Same device only: on a phone, “localhost” is the phone itself.",
+    pv_h_koboldcpp: "No key needed. KoboldCPP runs on port 5001 by default; any model name works. Same device only.",
+    pv_h_lmstudio: "No key needed. LM Studio → Developer → start the server and turn on “Enable CORS”. Use the model ID shown in LM Studio.",
+    pv_h_custom: "Any OpenAI-compatible service: enter the base URL up to and including /v1 (without /chat/completions).", pv_h_models: "Examples: {m}",
+    pv_ok_t: "✅ Connected – {m} replies ({ms} ms).", pv_ok_f: "All set. Don't forget to save.",
+    pv_note_notlisted: "Note: the model is not in the provider's model list, but it replied.",
+    pv_nomodel_list_t: "✅ Connected – {n} models found.", pv_nomodel_list_f: "Pick a model below or enter the model ID and test again.",
+    pv_nomodel_t: "⚠️ Server reachable, but no model entered.", pv_nomodel_f: "Enter the model ID and test again.",
+    pv_url_t: "❌ Invalid base URL.", pv_url_f: "It must start with http:// or https://, e.g. https://api.arliai.com/v1.",
+    pv_nokey_t: "❌ No API key entered.", pv_nokey_f: "This provider needs a key. Paste it into the “API Key” field.",
+    pv_401_t: "❌ 401 – API key invalid or missing.", pv_401_f: "Copy the key again (no spaces, no “Bearer”). Does the key belong to the provider of the base URL?",
+    pv_403_t: "❌ 403 – Access denied.", pv_403_f: "The key is valid but not allowed to do this: check plan/credit, model access or region with the provider.",
+    pv_404_t: "❌ 404 – Address not found.", pv_404_f: "Check the base URL: it usually ends in /v1 (e.g. https://openrouter.ai/api/v1), without /chat/completions.",
+    pv_model_t: "❌ Model “{m}” not found.", pv_model_f: "Write the model ID exactly as the provider does (case matters). Tap a suggestion below.",
+    pv_429_t: "❌ 429 – Too many requests or quota used up.", pv_429_f: "Wait a moment. Check credit/daily limit and your plan's parallel limit (several roles at once count several times).",
+    pv_5xx_t: "❌ {s} – Provider error.", pv_5xx_f: "The provider's server is overloaded or down. Try again later or pick another model.",
+    pv_http_t: "❌ Error {s}.", pv_http_f: "The provider's message is shown below.",
+    pv_badjson_t: "⚠️ Reply is not OpenAI-compatible JSON.", pv_badjson_f: "Is the base URL really an OpenAI-compatible API (usually ends in /v1)?",
+    pv_timeout_t: "❌ Timeout – no reply.", pv_timeout_f: "The server does not answer. Is it running? Is the model overloaded or still loading (local: first load takes a while)?",
+    pv_offline_t: "❌ No internet connection.", pv_offline_f: "The device is offline. Check the connection and test again.",
+    pv_mixed_t: "❌ Blocked: HTTP address from an HTTPS page.", pv_mixed_f: "Browsers do not allow calls from https:// to http:// (except localhost). Use an https:// address (e.g. a tunnel) or open the app locally.",
+    pv_local_t: "❌ Local server not reachable.", pv_local_f: "Is the server running ({u})? Right port? Allow CORS: Ollama with OLLAMA_ORIGINS=*, LM Studio “Enable CORS”. On a phone, localhost is the phone itself.",
+    pv_cors_t: "❌ Connection failed (network or CORS).", pv_cors_f: "Check the base URL for typos. Some providers do not allow calls straight from the browser (CORS) – use another provider or a proxy.",
+    pv_chat_hint: "💡 {f}", pv_no_narr: "Create a game master first.",
+    a11y_close: "Close", a11y_edit: "Edit", a11y_add: "Add", a11y_up: "Move up", a11y_down: "Move down", a11y_copy: "Copy",
+    a11y_regen: "Regenerate", a11y_prev: "Previous", a11y_next: "Next", a11y_stop: "Stop", a11y_settings: "Settings", a11y_zoom_in: "Zoom in", a11y_zoom_out: "Zoom out", a11y_level: "Change level",
+    ui_world_state: "World state: {d} • {t} • {l}", ui_no_model_for: "No model assigned for “{n}”.", ui_new_branch: "🌿 New branch: “{t}”!",
+    ui_folder_rename: "New name for “{n}”:", ui_folder_del: "Delete folder “{n}”? All contained entries will be moved to “General”.",
+    ui_think_only: "{n}: the model ({m}) spent its whole token budget on thinking and gave no answer. Please try again or use a model without reasoning.",
+    ui_ed_stopped: "Editor stopped ({e}) – kept the text so far / the drafts.", ui_ed_cut: "Editor text was cut at the last full sentence.", ui_ed_failed: "Editor failed – kept the narrator text. {e}"
+  });
+  I18N.de.btn_export = "📦 Kampagne exportieren"; I18N.de.btn_import = "📥 Kampagne importieren"; I18N.de.opt_manual = "✍️ OpenAI-kompatibel / eigene URL";
+
+  // ---------- Dauerhafter Speicher (navigator.storage.persist) ----------
+  var P1S = { supported: !!(navigator.storage && navigator.storage.persist), persisted: null, asked: 0, firstSave: false };
+  async function psRequest(ask) {
+    if (!P1S.supported) { psRender(); return null; }
+    try {
+      P1S.persisted = navigator.storage.persisted ? await navigator.storage.persisted() : null;
+      if (!P1S.persisted && ask) { P1S.asked++; P1S.persisted = await navigator.storage.persist(); }
+    } catch (e) { console.warn("storage.persist:", e); }
+    psRender(); return P1S.persisted;
+  }
+  function psOnSave() { if (!P1S.firstSave) { P1S.firstSave = true; if (!P1S.persisted) psRequest(true); } }
+  const psFmt = n => n >= 1073741824 ? (n / 1073741824).toFixed(1) + " GB" : abFmtSize(n);
+  async function psRender() {
+    const st = document.getElementById("ps-state"); if (!st) return;
+    st.textContent = !P1S.supported ? t("ps_unsupported") : P1S.persisted ? t("ps_yes") : P1S.persisted === false ? t("ps_no") : "…";
+    st.className = P1S.persisted ? "p1-ok" : P1S.supported ? "p1-warn" : "";
+    const ex = document.getElementById("ps-expl"); if (ex) ex.textContent = P1S.persisted ? t("ps_expl_yes") : P1S.persisted === false ? t("ps_expl_no") : "";
+    const ask = document.getElementById("ps-ask-btn"); if (ask) ask.hidden = !P1S.supported || !!P1S.persisted;
+    const u = document.getElementById("ps-usage");
+    if (u && navigator.storage && navigator.storage.estimate) { try { const e = await navigator.storage.estimate(); u.textContent = tf("ps_usage", { u: psFmt(e.usage || 0), q: psFmt(e.quota || 0) }); } catch (e) {} }
+  }
+  { const b = document.getElementById("ps-ask-btn"); if (b) b.onclick = async () => { const ok = await psRequest(true); if (!ok) showToast(t("ps_denied"), "info"); }; }
+
+  // ---------- HAUPTMENÜ: mehrere Kampagnen nebeneinander (IndexedDB: "state" = aktive Kampagne, "camp:<id>" = übrige, "campaigns" = Verzeichnis) ----------
+  // Global (für alle Kampagnen gleich): Spieler-Profil inkl. Anbieter/Key (state.user), Sprache. Alles andere gehört zur Kampagne.
+  var MM = { idx: null, open: false, pending: null };
+  const MM_SKIP = "multi_rp_skip_menu";
+  const mmClone = o => JSON.parse(JSON.stringify(o));
+  async function idbDel(key) { const db = await openDB(); return new Promise((res, rej) => { try { const tx = db.transaction(STORE_NAME, "readwrite"); tx.objectStore(STORE_NAME).delete(key); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); } catch (e) { rej(e); } }); }
+  function mmName(st, fb) { return String((st && st.campaignName) || (st && st.sessions && st.sessions[0] && st.sessions[0].title) || fb || t("mm_unnamed")).slice(0, 80); }
+  function mmMeta(st, id) {
+    const sess = Array.isArray(st.sessions) ? st.sessions : [], ch = (st.characters || []).filter(c => c && c.role !== "editor");
+    const as = sess.find(s => s && s.id === st.activeSessionId) || sess[0] || {};
+    return { id, name: mmName(st), kind: sanitizeSetting(st.settings && st.settings.setting).kind, last: +st._lastPlayed || 0,
+      chars: ch.length, names: ch.slice(0, 3).map(c => String(c.name || "")), lore: (st.lorebook || []).filter(Boolean).length,
+      msgs: sess.reduce((n, s) => n + ((s && s.messages) || []).length, 0), sess: sess.length, loc: String((as.world && as.world.location) || "").slice(0, 40) };
+  }
+  async function mmSaveIdx() { await idbSet("campaigns", MM.idx); }
+  function mmActiveMeta() { return mmMeta(state, state._campId); }
+  function mmUpdMeta(m) { const i = MM.idx.list.findIndex(x => x.id === m.id); if (i >= 0) MM.idx.list[i] = m; else MM.idx.list.push(m); }
+  // Beim Laden: Verzeichnis anlegen (Migration der bisherigen Einzel-Kampagne → Kampagne 1, verlustfrei: der Stand bleibt unverändert unter "state")
+  async function mmInit() {
+    let idx = null; try { idx = await idbGet("campaigns"); } catch (e) { return; }
+    if (!idx || !Array.isArray(idx.list)) {
+      const id = state._campId || generateId("camp");
+      state._campId = id; if (!state.campaignName) state.campaignName = mmName(state);
+      idx = { v: 1, active: id, legacy: id, list: [] }; MM.idx = idx; mmUpdMeta(mmActiveMeta());
+      await saveState(); await mmSaveIdx(); return;
+    }
+    MM.idx = idx;
+    if (state._campId && idx.list.some(x => x.id === state._campId)) idx.active = state._campId;   // "state" ist maßgeblich (Absturz mitten im Wechsel)
+    else state._campId = idx.active || (idx.list[0] && idx.list[0].id) || generateId("camp");
+    idx.active = state._campId;
+    try { await idbDel("camp:" + idx.active); } catch (e) {}   // evtl. veraltete Kopie der aktiven Kampagne
+    mmUpdMeta(mmActiveMeta()); await mmSaveIdx();
+  }
+  function mmShouldShowOnStart() {
+    let flag = null; try { flag = sessionStorage.getItem(MM_SKIP); sessionStorage.removeItem(MM_SKIP); } catch (e) {}
+    if (!MM.idx || flag === "1") return false;
+    if (flag === "menu") return true;   // nach „Abenteuer löschen“
+    return MM.idx.list.length > 1 || MM.idx.list.some(m => m.chars || m.msgs || m.lore);
+  }
+  async function mmLoad(id) { if (id === state._campId) { const as = getActiveSession(); as.messages = state.messages; as.world = state.world; } return id === state._campId ? mmClone(state) : await idbGet("camp:" + id); }
+  // Wechsel: aktuellen Stand sicher wegschreiben, neue Kampagne nach "state", neu laden (keine Reste aus Karte/Chat im Speicher)
+  async function mmSwitch(id) {
+    if (!MM.idx || dbReadFailed) return;
+    if (id === state._campId) { mmShow(false); return; }
+    if (isGenerating) abortCurrentGeneration();
+    try {
+      const nxt = await idbGet("camp:" + id); if (!nxt) throw new Error("missing");
+      { const as = getActiveSession(); as.messages = Array.isArray(state.messages) ? state.messages : []; as.world = state.world; } state._lastPlayed = Date.now(); const cur = mmClone(state);
+      await idbSet("camp:" + cur._campId, cur); mmUpdMeta(mmMeta(cur, cur._campId));
+      nxt.user = mmClone(state.user); nxt._campId = id; nxt.lang = state.lang;   // Spieler-Profil & Sprache sind global
+      await idbSet("state", nxt); MM.idx.active = id; await mmSaveIdx();
+      isResetting = true;   // ab hier schreibt nichts mehr den alten Stand
+      try { localStorage.removeItem(CRASH_BUFFER_KEY); localStorage.setItem(LOCAL_STORAGE_BACKUP, JSON.stringify(nxt)); } catch (e) { try { localStorage.removeItem(LOCAL_STORAGE_BACKUP); } catch (e2) {} }
+      try { sessionStorage.setItem(MM_SKIP, "1"); } catch (e) {}
+      location.reload();
+    } catch (e) { isResetting = false; console.warn("Kampagnenwechsel:", e); showToast(t("mm_switch_fail"), "error"); }
+  }
+  async function mmStore(st, name) {   // neue Kampagne ablegen (ohne zu wechseln)
+    const id = generateId("camp"); st._campId = id; st.campaignName = name; st.user = mmClone(state.user); st._lastPlayed = Date.now();
+    await idbSet("camp:" + id, st); mmUpdMeta(mmMeta(st, id)); await mmSaveIdx(); return id;
+  }
+  function mmUniqueName(n) { const has = x => MM.idx.list.some(m => m.name.toLowerCase() === x.toLowerCase()); if (!has(n)) return n; let i = 2; while (has(`${n} (${i})`)) i++; return `${n} (${i})`; }
+  function mmBlank(name, kind) {
+    const b = mmClone(BLANK_STATE); b.lang = state.lang;
+    b.sessions[0].id = generateId("sess"); b.sessions[0].title = state.lang === "en" ? "New Adventure" : "Neues Abenteuer"; b.sessions[0].createdAt = Date.now(); b.activeSessionId = b.sessions[0].id;
+    b.settings.setting = sanitizeSetting({ kind }); b.campaignName = name; return b;
+  }
+  function mmNew() {
+    const inp = document.getElementById("mm-new-name"); inp.value = "";
+    document.querySelectorAll("#mm-new-modal .st-pick input").forEach(r => { r.checked = r.value === stKind(); });
+    document.getElementById("mm-new-modal").classList.add("active"); setTimeout(() => inp.focus(), 50);
+  }
+  async function mmCreate() {
+    const name = mmUniqueName(String(document.getElementById("mm-new-name").value || "").trim() || t("mm_new_default"));
+    const kind = (document.querySelector("#mm-new-modal .st-pick input:checked") || {}).value || "fantasy";
+    closeModal("mm-new-modal");
+    try { const id = await mmStore(mmBlank(name, kind), name); await mmSwitch(id); } catch (e) { showToast(t("mm_quota"), "error"); }
+  }
+  function mmRename(id) {
+    const m = MM.idx.list.find(x => x.id === id); if (!m) return;
+    showPromptModal(t("mm_rename"), "", m.name, async v => {
+      const name = String(v || "").trim().slice(0, 80); if (!name) return;
+      if (id === state._campId) { state.campaignName = name; await saveState(); mmUpdMeta(mmActiveMeta()); }
+      else { const st = await idbGet("camp:" + id); if (!st) return; st.campaignName = name; await idbSet("camp:" + id, st); mmUpdMeta(mmMeta(st, id)); }
+      await mmSaveIdx(); mmRender();
+    });
+  }
+  async function mmDuplicate(id) {
+    try { const st = await mmLoad(id); if (!st) return; const m = MM.idx.list.find(x => x.id === id);
+      await mmStore(st, mmUniqueName((m ? m.name : mmName(st)) + " " + t("mm_copy_sfx"))); mmRender(); showToast(t("mm_dup_ok"), "success");
+    } catch (e) { showToast(t("mm_quota"), "error"); }
+  }
+  function mmTag(st) {   // Backup-Format wie „Kampagne exportieren“, API-Keys nur wenn ausdrücklich erlaubt
+    const b = mmClone(st), incl = state.settings.stripKeysOnExport === false;
+    b._app = "multi-rp-studio"; b._version = 1; b._kind = "campaign"; b._exportedAt = new Date().toISOString(); delete b._campId;
+    if (!incl) { if (b.user) b.user.apiKey = ""; (b.characters || []).forEach(c => { if (c) c.apiKey = ""; }); }
+    return b;
+  }
+  async function mmExport(id) {
+    if (id === state._campId) { cxExport(); return; }
+    const st = await idbGet("camp:" + id); if (!st) return;
+    dlJSON(`multi_rp_${xioSlug(mmName(st)) || "kampagne"}_${xioDate()}.json`, mmTag(st)); showToast(t("mm_exported"), "success");
+  }
+  async function mmExportAll() {
+    await saveState(); const out = [];
+    for (const m of MM.idx.list) { const st = await mmLoad(m.id); if (st) out.push(mmTag(st)); }
+    dlJSON(`multi_rp_alle_kampagnen_${xioDate()}.json`, { type: "multirp-bundle", version: 1, _app: "multi-rp-studio", exportedAt: new Date().toISOString(), campaigns: out });
+    showToast(tf("mm_exported_all", { n: out.length }), "success");
+  }
+  function mmDelete(id) {
+    const m = MM.idx.list.find(x => x.id === id); if (!m) return;
+    showConfirmModal(tf("mm_del_confirm", { n: m.name }), async () => {
+      MM.idx.list = MM.idx.list.filter(x => x.id !== id);
+      try { const all = await abTx("readonly", st => st.getAll()); for (const b of all || []) if ((b.camp || MM.idx.legacy) === id) await abTx("readwrite", st => st.delete(b.id)); } catch (e) {}
+      if (id !== state._campId) { await idbDel("camp:" + id); await mmSaveIdx(); mmRender(); showToast(t("mm_deleted"), "info"); return; }
+      // aktive Kampagne gelöscht → auf eine andere wechseln (oder eine leere anlegen)
+      let next = MM.idx.list.slice().sort((a, b) => b.last - a.last)[0];
+      if (!next) { const name = t("mm_new_default"); const nid = await mmStore(mmBlank(name, stKind()), name); next = { id: nid }; }
+      const nxt = await idbGet("camp:" + next.id); nxt.user = mmClone(state.user); nxt._campId = next.id;
+      await idbSet("state", nxt); MM.idx.active = next.id; await mmSaveIdx();
+      isResetting = true;
+      try { localStorage.removeItem(CRASH_BUFFER_KEY); localStorage.setItem(LOCAL_STORAGE_BACKUP, JSON.stringify(nxt)); } catch (e) { try { localStorage.removeItem(LOCAL_STORAGE_BACKUP); } catch (e2) {} }
+      try { sessionStorage.setItem(MM_SKIP, "menu"); } catch (e) {}
+      location.reload();
+    });
+  }
+  // Mehrere Backups auf einmal: jede gültige Kampagne wird eine eigene Kampagne; kaputte Dateien einzeln melden
+  async function mmReadFiles(files) {
+    const rows = [];
+    for (const f of [...files]) {
+      let txt; try { txt = await f.text(); } catch (e) { rows.push({ file: f.name, err: t("im_err_json") }); continue; }
+      let d; try { d = JSON.parse(String(txt).replace(/^\uFEFF/, "")); } catch (e) { rows.push({ file: f.name, err: t("im_err_json") }); continue; }
+      const list = d && d.type === "multirp-bundle" && Array.isArray(d.campaigns) ? d.campaigns : [d];
+      if (!list.length) rows.push({ file: f.name, err: t("mm_bundle_empty") });
+      list.forEach((x, i) => {
+        const label = f.name + (list.length > 1 ? ` #${i + 1}` : "");
+        try { const r = normalizeImport(x); rows.push({ file: label, cand: r.cand, warn: r.warn, name: mmName(r.cand, f.name.replace(/\.json$/i, "")) }); }
+        catch (e) { rows.push({ file: label, err: e instanceof SyntaxError ? t("im_err_json") : (e.message || String(e)) }); }
+      });
+    }
+    mmPreview(rows);
+  }
+  function mmPreview(rows) {
+    MM.pending = rows;
+    const ok = rows.filter(r => r.cand), names = new Set(MM.idx.list.map(m => m.name.toLowerCase()));
+    let conf = 0;
+    document.getElementById("mm-im-list").innerHTML = rows.map(r => {
+      if (!r.cand) return `<li class="bad"><b>❌ ${escapeHTML(r.file)}</b><small>${escapeHTML(r.err)}</small></li>`;
+      const m = mmMeta(r.cand, ""), dup = names.has(r.name.toLowerCase()); if (dup) conf++;
+      return `<li><b>✅ ${escapeHTML(r.name)}</b><small>${escapeHTML(r.file)} · ${escapeHTML(mmCounts(m))}${dup ? " · " + escapeHTML(t("mm_dup")) : ""}</small>${r.warn.length ? `<small class="w">${escapeHTML(r.warn.join(" "))}</small>` : ""}</li>`;
+    }).join("");
+    document.getElementById("mm-im-sum").textContent = tf("mm_im_sum", { ok: ok.length, bad: rows.length - ok.length });
+    document.getElementById("mm-im-mode").hidden = !conf;
+    document.getElementById("mm-im-rename").checked = true;
+    document.getElementById("mm-im-ok").disabled = !ok.length;
+    document.getElementById("mm-import-modal").classList.add("active");
+  }
+  async function mmImportApply() {
+    const rows = MM.pending || []; MM.pending = null; closeModal("mm-import-modal");
+    const skip = document.getElementById("mm-im-skip").checked; let n = 0, s = 0;
+    for (const r of rows) {
+      if (!r.cand) continue;
+      const dup = MM.idx.list.some(m => m.name.toLowerCase() === r.name.toLowerCase());
+      if (dup && skip) { s++; continue; }
+      try { await mmStore(r.cand, dup ? mmUniqueName(r.name) : r.name); n++; } catch (e) { showToast(t("mm_quota"), "error"); break; }
+    }
+    mmRender(); showToast(tf("mm_im_done", { n, s }), n ? "success" : "info");
+  }
+  const mmPl = (k, n) => n === 1 ? t(k + "1") : tf(k + "n", { n });
+  const mmCounts = m => tf("mm_meta", { c: mmPl("mm_c", m.chars), m: mmPl("mm_m", m.msgs), l: mmPl("mm_l", m.lore) });
+  const MM_ICON = { fantasy: "🐉", modern: "🌃", scifi: "🚀" };
+  function mmRender() {
+    const box = document.getElementById("mm-list"); if (!box || !MM.idx) return;
+    mmUpdMeta(mmActiveMeta());
+    const loc = state.lang === "en" ? "en-GB" : "de-DE";
+    box.innerHTML = "";
+    MM.idx.list.slice().sort((a, b) => (b.id === state._campId) - (a.id === state._campId) || b.last - a.last).forEach(m => {
+      const card = document.createElement("div"); card.className = "card mm-card" + (m.id === state._campId ? " mm-active" : ""); card.dataset.id = m.id;
+      const when = m.last ? new Date(m.last).toLocaleString(loc, { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "–";
+      const sum = m.names.length ? m.names.join(", ") + (m.chars > 3 ? " …" : "") : t("mm_no_chars");
+      card.innerHTML = `<div class="mm-head"><span class="mm-ico">${MM_ICON[m.kind] || "🐉"}</span><div class="mm-tt"><div class="card-title font-serif-title mm-name">${escapeHTML(m.name)}</div>
+        <div class="mm-sub">${escapeHTML(t("st_" + m.kind).replace(/^\S+\s/, ""))} · ${escapeHTML(tf("mm_last", { d: when }))}</div></div>${m.id === state._campId ? `<span class="mm-badge">${escapeHTML(t("mm_current"))}</span>` : ""}</div>
+        <div class="mm-sum">${escapeHTML(sum)}${m.loc ? " · 📍 " + escapeHTML(m.loc) : ""}</div><div class="mm-sub">${escapeHTML(mmCounts(m))}</div>`;
+      const row = document.createElement("div"); row.className = "mm-acts";
+      const B = (cls, txt, lbl, fn) => { const b = document.createElement("button"); b.className = cls; b.textContent = txt; if (lbl) { b.title = lbl; b.setAttribute("aria-label", lbl); } b.onclick = fn; row.appendChild(b); return b; };
+      B("btn btn-primary mm-open", t("mm_open"), "", () => mmSwitch(m.id));
+      B("order-btn", "✏️", t("mm_rename"), () => mmRename(m.id));
+      B("order-btn", "📑", t("mm_duplicate"), () => mmDuplicate(m.id));
+      B("order-btn", "⬇️", t("mm_export"), () => mmExport(m.id));
+      B("order-btn mm-del", "🗑", t("mm_delete"), () => mmDelete(m.id));
+      card.appendChild(row); box.appendChild(card);
+    });
+  }
+  function mmShow(on) {
+    const el = document.getElementById("main-menu"); if (!el || !MM.idx) return;
+    MM.open = !!on; el.hidden = !on; document.body.classList.toggle("mm-on", !!on);
+    if (on) { if (!dbReadFailed) saveState(); mmRender(); el.scrollTop = 0; }
+  }
+  { const g = id => document.getElementById(id);
+    if (g("mm-new-btn")) g("mm-new-btn").onclick = mmNew;
+    if (g("mm-new-ok")) g("mm-new-ok").onclick = mmCreate;
+    if (g("mm-new-name")) g("mm-new-name").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); mmCreate(); } };
+    if (g("mm-import-btn")) g("mm-import-btn").onclick = () => g("mm-file").click();
+    if (g("mm-file")) g("mm-file").onchange = e => { const fs = [...e.target.files]; e.target.value = ""; if (fs.length) mmReadFiles(fs); };
+    if (g("mm-export-all")) g("mm-export-all").onclick = mmExportAll;
+    if (g("mm-im-ok")) g("mm-im-ok").onclick = mmImportApply;
+    if (g("mm-home-btn")) g("mm-home-btn").onclick = () => mmShow(true);
+    if (g("mm-close")) g("mm-close").onclick = () => mmShow(false);
+    const mm = g("main-menu");
+    if (mm) { mm.addEventListener("dragover", e => { e.preventDefault(); mm.classList.add("mm-drag"); }); mm.addEventListener("dragleave", e => { if (e.target === mm) mm.classList.remove("mm-drag"); });
+      mm.addEventListener("drop", e => { e.preventDefault(); mm.classList.remove("mm-drag"); const fs = [...(e.dataTransfer && e.dataTransfer.files || [])].filter(f => /\.json$/i.test(f.name) || f.type === "application/json"); if (fs.length) mmReadFiles(fs); }); }
+  }
+
+  // ---------- Lorebook & Charaktere: Einzel-Export/Import (FORMAT.md; Typ multirp-lorebook / multirp-character, version 1) ----------
+  const XIO_VER = 1;
+  const xioSlug = s => String(s || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 40);
+  function dlJSON(name, obj) {
+    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+  const xioDate = () => { const d = new Date(), p = n => String(n).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`; };
+  const xioArr = v => Array.isArray(v) ? v : (typeof v === "string" ? v.split(/[,;\n]/) : []);
+  const xioKeys = v => xioArr(v).map(k => String(k ?? "").trim()).filter(Boolean);
+  const xioNorm = s => String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
+  const xioObj = x => !!x && typeof x === "object" && !Array.isArray(x);
+  const xioStr = (...v) => { for (const x of v) if (typeof x === "string" && x.trim()) return x.trim(); else if (typeof x === "number") return String(x); return ""; };
+  const xioErr = (key, vars) => { const e = new Error(tf(key, vars)); e.xio = true; return e; };
+  // --- Lore: intern -> lesbares Format (ohne id/Zeitstempel)
+  function loreToPublic(l) {
+    const o = { name: String(l.title || ""), keys: xioKeys(l.keys), content: String(l.content || "") };
+    if (l.category && l.category !== "Allgemein") o.folder = l.category;
+    if (l.constant) o.pinned = true;
+    if (l.gmOnly) o.gmOnly = true;
+    if (sanitizeInt(l.priority, 1, 100, 10) !== 10) o.priority = sanitizeInt(l.priority, 1, 100, 10);
+    if (sanitizeInt(l.scanDepth, 1, 50, 8) !== 8) o.scanDepth = sanitizeInt(l.scanDepth, 1, 50, 8);
+    if (l.loc && l.loc.typ) { o.location = { name: l.loc.name || "", type: l.loc.typ }; if (l.loc.lage) o.location.position = l.loc.lage; if (l.loc.dist) o.location.distance = l.loc.dist; if (l.loc.parent) o.location.partOf = l.loc.parent; }
+    if (l.place) o.place = l.place;
+    if (l.ai) { o.ai = true; o.aiKind = l.aiKind || "memory"; }
+    return o;
+  }
+  function loreFile(list) { return { type: "multirp-lorebook", version: XIO_VER, exportedAt: new Date().toISOString(), folders: [...new Set(list.map(l => l.category || "Allgemein"))], entries: list.map(loreToPublic) }; }
+  function loreFromAny(x, i, warn) {
+    if (!xioObj(x)) { warn.push(tf("xio_w_notobj", { i })); return null; }
+    const content = xioStr(x.content, x.text, x.entry, x.description);
+    const keys = xioKeys(x.keys ?? x.key ?? x.keywords ?? x.triggers);
+    const name = xioStr(x.name, x.title, x.comment) || keys[0] || content.slice(0, 40);
+    if (!name && !content) { warn.push(tf("xio_w_lore_empty", { i })); return null; }
+    const L = x.location ?? x.loc, loc = xioObj(L) ? { name: xioStr(L.name), typ: xioStr(L.type, L.typ), lage: xioStr(L.position, L.lage), dist: xioStr(L.distance, L.dist), parent: xioStr(L.partOf, L.parent) } : null;
+    if (L !== undefined && L !== null && !(loc && loc.typ)) warn.push(tf("xio_w_loc", { i, n: name }));
+    const pin = x.pinned ?? x.constant;
+    const l = { id: "", _src: typeof x.id === "string" || typeof x.id === "number" ? String(x.id) : "", category: xioStr(x.folder, x.category, x.group) || "Allgemein", title: name,
+      constant: pin === true || pin === "true", keys: keys.join(", "), priority: sanitizeInt(x.priority ?? x.insertion_order ?? x.order, 1, 100, 10),
+      scanDepth: sanitizeInt(x.scanDepth, 1, 50, 8), gmOnly: x.gmOnly === true || x.secret === true, content, loc, place: x.place,
+      ai: x.ai === true, aiKind: x.aiKind, about: x.about };
+    return sanitizeLoreExtras(l);
+  }
+  function loreParse(raw) {
+    let d; try { d = typeof raw === "string" ? JSON.parse(raw.replace(/^\uFEFF/, "")) : raw; } catch (e) { throw xioErr("xio_e_json", { m: e.message }); }
+    let list, src = "multirp", folders = [];
+    if (Array.isArray(d)) list = d;
+    else if (!xioObj(d)) throw xioErr("xio_e_lore_fmt");
+    else if (d.type === "multirp-character" || (d.spec && !(d.data && d.data.character_book))) throw xioErr("xio_e_is_char");
+    else if (Array.isArray(d.entries)) { list = d.entries; folders = xioKeys(d.folders); }
+    else if (xioObj(d.entries)) { list = Object.values(d.entries); src = "st"; }
+    else if (d.state && Array.isArray(d.state.lorebook)) { list = d.state.lorebook; src = "campaign"; }
+    else if (Array.isArray(d.lorebook)) { list = d.lorebook; folders = xioKeys(d.loreCategories); src = "campaign"; }
+    else if (d.data && d.data.character_book) { list = xioObj(d.data.character_book.entries) ? Object.values(d.data.character_book.entries) : d.data.character_book.entries; src = "card"; }
+    else if (d.character_book) { list = d.character_book.entries; src = "card"; }
+    else if ("content" in d || "keys" in d || "key" in d || "name" in d || "title" in d) list = [d];
+    else throw xioErr("xio_e_lore_fmt");
+    if (!Array.isArray(list)) throw xioErr("xio_e_lore_fmt");
+    const warn = []; if (xioObj(d) && +d.version > XIO_VER) warn.push(t("im_w_newer"));
+    const items = list.map((x, i) => loreFromAny(x, i + 1, warn)).filter(Boolean);
+    if (!items.length) throw xioErr("xio_e_none", { w: warn.slice(0, 3).join(" ") });
+    return { kind: "lore", items, warn, folders, src };
+  }
+  // --- Charaktere
+  const XIO_URL = u => { try { const x = new URL(String(u || "")); if (!/^https?:$/.test(x.protocol)) return ""; x.username = ""; x.password = ""; x.search = ""; x.hash = ""; return x.toString().replace(/\/$/, ""); } catch (e) { return ""; } };
+  function charToPublic(c) {   // nie apiKey oder andere Geheimnisse
+    const o = { name: String(c.name || ""), avatar: String(c.avatar || "🎭"), role: c.role || "companion", prompt: String(c.prompt || "") };
+    if (c.model) o.model = String(c.model);
+    const u = XIO_URL(c.baseUrl); if (u) o.baseUrl = u;
+    if (c.temp !== undefined) o.temperature = +c.temp; if (c.topP !== undefined) o.topP = +c.topP; if (c.repPenalty !== undefined) o.repetitionPenalty = +c.repPenalty;
+    if (c.reasoning && c.reasoning !== "auto") o.reasoning = c.reasoning;
+    return o;
+  }
+  function charFile(list) { return { type: "multirp-character", version: XIO_VER, exportedAt: new Date().toISOString(), characters: list.map(charToPublic) }; }
+  function cardToPrompt(d) {
+    const f = (k, l) => d[k] ? (l ? `[${l}]: ` : "") + String(d[k]) : "";
+    return [f("system_prompt"), f("personality", "Personality"), f("description", "Description"), f("scenario", "Scenario"), d.mes_example ? `[Dialogues]:\n${String(d.mes_example)}` : ""].filter(Boolean).join("\n\n");
+  }
+  const xioAvatar = a => { const s = typeof a === "string" ? a.trim() : ""; return (/^data:image\/(png|jpe?g|webp|gif);base64,/i.test(s) && s.length < 400000) || (s && s.length <= 16 && !/[<>"']/.test(s)) ? s : "🎭"; };
+  function charFromAny(x, i, warn, card) {
+    if (!xioObj(x)) { warn.push(tf("xio_w_notobj", { i })); return null; }
+    if (xioObj(x.data) && (x.spec || x.data.name)) { x = x.data; card = true; }
+    const name = xioStr(x.name, x.char_name);
+    if (!name) { warn.push(tf("xio_w_char_noname", { i })); return null; }
+    if (!card && !("prompt" in x) && ("description" in x || "personality" in x || "first_mes" in x || "scenario" in x)) card = true;
+    if (card && x.character_book) warn.push(tf("xio_w_book", { n: name }));
+    const r = xioNorm(x.role), role = /^(gm|spielleit|narrator|erz)/.test(r) ? "gm" : /^(editor|lektor)/.test(r) ? "editor" : "companion";
+    const num = (v, lo, hi, def) => { const n = parseFloat(v); return isNaN(n) ? def : Math.max(lo, Math.min(hi, n)); };
+    const baseUrl = XIO_URL(x.baseUrl);
+    return { id: "", _src: typeof x.id === "string" ? x.id : "", name: name.slice(0, 120), avatar: xioAvatar(x.avatar), role,
+      baseUrl, model: xioStr(x.model), temp: num(x.temperature ?? x.temp, 0, 2, 0.7), topP: num(x.topP, 0, 1, 0.9), repPenalty: num(x.repetitionPenalty ?? x.repPenalty, 0.5, 2, 1.1),
+      reasoning: rsMode(x), thinkBudget: rsBudget(x), prompt: card ? cardToPrompt(x) : xioStr(x.prompt, x.system_prompt) };
+  }
+  function charParse(raw, avatar) {
+    let d; try { d = typeof raw === "string" ? JSON.parse(raw.replace(/^\uFEFF/, "")) : raw; } catch (e) { throw xioErr("xio_e_json", { m: e.message }); }
+    let list, card = false;
+    if (Array.isArray(d)) list = d;
+    else if (!xioObj(d)) throw xioErr("xio_e_char_fmt");
+    else if (d.type === "multirp-lorebook" || (xioObj(d.entries) || Array.isArray(d.entries)) && !d.name) throw xioErr("xio_e_is_lore");
+    else if (Array.isArray(d.characters)) list = d.characters;
+    else if (d.state && Array.isArray(d.state.characters)) list = d.state.characters;
+    else if (d.spec || (xioObj(d.data) && d.data.name)) { list = [d]; card = true; }
+    else if (d.name || d.char_name) list = [d];
+    else throw xioErr("xio_e_char_fmt");
+    const warn = []; if (+d.version > XIO_VER) warn.push(t("im_w_newer"));
+    const items = list.map((x, i) => charFromAny(x, i + 1, warn, card)).filter(Boolean);
+    if (avatar && items[0]) items[0].avatar = avatar;
+    if (!items.length) throw xioErr("xio_e_none", { w: warn.slice(0, 3).join(" ") });
+    return { kind: "char", items, warn };
+  }
+  // --- Vorschau & Übernahme
+  let xioPending = null;
+  function xioConflict(kind, it) {
+    if (kind === "lore") return (state.lorebook || []).find(l => l && xioNorm(l.title) === xioNorm(it.title));
+    return (state.characters || []).find(c => c && xioNorm(c.name) === xioNorm(it.name));
+  }
+  function xioPreview(res, meta = {}) {
+    xioPending = { ...res, meta };
+    const conf = res.items.filter(it => xioConflict(res.kind, it)).length, nm = it => res.kind === "lore" ? it.title : it.name;
+    document.getElementById("xio-title").textContent = t(res.kind === "lore" ? "xio_title_lore" : "xio_title_char");
+    document.getElementById("xio-file").textContent = meta.name ? "📄 " + meta.name + (meta.size ? " · " + abFmtSize(meta.size) : "") + (res.src === "st" ? " · SillyTavern" : "") : "";
+    const rows = [["xio_s_found", res.items.length], ["xio_s_new", res.items.length - conf], ["xio_s_conf", conf]];
+    document.getElementById("xio-stats").innerHTML = rows.map(([k, v]) => `<span>${escapeHTML(t(k))}</span><b>${v}</b>`).join("");
+    document.getElementById("xio-list").innerHTML = res.items.slice(0, 12).map(it => `<li${xioConflict(res.kind, it) ? ' class="dup"' : ""}>${escapeHTML(nm(it))}${xioConflict(res.kind, it) ? ` <small>${escapeHTML(t("xio_dup"))}</small>` : ""}</li>`).join("") + (res.items.length > 12 ? `<li>… +${res.items.length - 12}</li>` : "");
+    document.getElementById("xio-warn").innerHTML = res.warn.slice(0, 8).map(w => `<li>${escapeHTML(w)}</li>`).join("") + (res.warn.length > 8 ? `<li>… +${res.warn.length - 8}</li>` : "");
+    document.getElementById("xio-mode").hidden = !conf;
+    document.getElementById("xio-mode-skip").checked = true;
+    document.getElementById("xio-modal").classList.add("active");
+  }
+  function xioApply(mode) {
+    const p = xioPending; if (!p) return null; xioPending = null;
+    mode = mode || (document.getElementById("xio-mode-overwrite")?.checked ? "overwrite" : document.getElementById("xio-mode-both")?.checked ? "both" : "skip");
+    const n = { a: 0, o: 0, s: 0 }, idMap = {};
+    const arr = p.kind === "lore" ? (Array.isArray(state.lorebook) ? state.lorebook : (state.lorebook = [])) : state.characters;
+    const plain = it => { const o = { ...it }; delete o._src; if (p.kind === "lore") { if (!o.loc) delete o.loc; if (!o.place) delete o.place; } return o; };
+    p.items.forEach(it => {
+      const ex = xioConflict(p.kind, it), o = plain(it);
+      if (ex && mode === "skip") { n.s++; if (it._src) idMap[it._src] = ex.id; return; }
+      if (ex && mode === "overwrite") {
+        o.id = ex.id;
+        if (p.kind === "char") { o.apiKey = ex.apiKey || ""; if (!o.baseUrl) o.baseUrl = ex.baseUrl; if (!o.model) o.model = ex.model; }
+        arr[arr.indexOf(ex)] = o; n.o++;
+      } else {
+        o.id = generateId(p.kind === "lore" ? "lore" : "char");
+        if (ex) { if (p.kind === "lore") o.title += " (2)"; else o.name += " (2)"; }
+        if (p.kind === "char") { if (!o.baseUrl) o.baseUrl = state.user?.baseUrl || "https://openrouter.ai/api/v1"; if (!o.model) o.model = state.user?.model || ""; o.apiKey = o.baseUrl === state.user?.baseUrl ? (state.user?.apiKey || "") : ""; if (o.role !== "editor" && !state.settings.order.includes(o.id)) state.settings.order.push(o.id); }
+        arr.push(o); n.a++;
+      }
+      if (it._src) idMap[it._src] = o.id;
+    });
+    if (p.kind === "lore") {
+      state.lorebook.forEach(l => { if (l && l.about && idMap[l.about] && p.items.some(it => it.about === l.about)) l.about = idMap[l.about]; });
+      [...(p.folders || []), ...state.lorebook.map(l => l && l.category)].forEach(c => { if (c && !state.loreCategories.includes(c)) state.loreCategories.push(c); });
+      renderLorebook();
+    } else { renderCharacters(); renderSettings(); renderChat(); }
+    closeModal("xio-modal"); saveState();
+    showToast(tf("xio_done", n), "success");
+    return n;
+  }
+  function xioReadFile(file, kind) {
+    if (!file) return;
+    const fail = err => showConfirmModal(t(kind === "lore" ? "xio_fail_lore" : "xio_fail_char") + "\n" + (err && err.message || String(err)), () => {});
+    const meta = { name: file.name, size: file.size };
+    const isPng = /\.png$/i.test(file.name) || file.type === "image/png";
+    if (isPng && kind === "char") {
+      file.arrayBuffer().then(async buf => { const d = await parsePngCharacterMetadata(buf); const av = await compressImageToDataUrl(new Blob([buf], { type: "image/png" }), 96); xioPreview(charParse({ spec: "png", data: d.name ? d : { ...d, name: file.name.replace(/\.png$/i, "") } }, av), meta); }).catch(fail);
+      return;
+    }
+    file.text().then(txt => xioPreview(kind === "lore" ? loreParse(txt) : charParse(txt), meta)).catch(fail);
+  }
+  function exportLore(id) {
+    const list = (state.lorebook || []).filter(l => l && (!id || l.id === id)); if (!list.length) { showToast(t("xio_nothing"), "info"); return; }
+    dlJSON(id ? `multirp_lore_${xioSlug(list[0].title) || "eintrag"}.json` : `multirp_lorebook_${xioDate()}.json`, loreFile(list));
+    showToast(tf("xio_exported", { n: list.length }), "success");
+  }
+  function exportChar(id) {
+    const list = (state.characters || []).filter(c => c && (!id || c.id === id)); if (!list.length) { showToast(t("xio_nothing"), "info"); return; }
+    dlJSON(id ? `multirp_char_${xioSlug(list[0].name) || "charakter"}.json` : `multirp_characters_${xioDate()}.json`, charFile(list));
+    showToast(tf("xio_exported", { n: list.length }) + " " + t("xio_nokeys"), "success");
+  }
+  [["lore-export-btn", () => exportLore()], ["char-export-btn", () => exportChar()], ["lore-import-btn", () => document.getElementById("lore-import-file").click()], ["char-import-btn", () => document.getElementById("char-import-file").click()], ["xio-ok-btn", () => xioApply()]]
+    .forEach(([id, fn]) => { const b = document.getElementById(id); if (b) b.onclick = fn; });
+  [["lore-import-file", "lore"], ["char-import-file", "char"]].forEach(([id, k]) => { const i = document.getElementById(id); if (i) i.onchange = e => { const f = e.target.files[0]; e.target.value = ""; xioReadFile(f, k); }; });
+  // Vorlagen für die Anleitung (lesbares Format, auch Download)
+  const XIO_TPL = {
+    lore_min: { name: "Silberhafen", keys: "Silberhafen, Hafen", content: "Eine Hafenstadt mit grünem Leuchtturm." },
+    lore_full: { type: "multirp-lorebook", version: 1, folders: ["Orte"], entries: [
+      { name: "Silberhafen", keys: ["Silberhafen", "Hafen"], content: "Eine Hafenstadt mit grünem Leuchtturm. Die Fährleute sprechen kaum.", folder: "Orte", pinned: false, gmOnly: false, priority: 20, scanDepth: 8, location: { name: "Silberhafen", type: "Stadt", position: "östlich von Start", distance: "2 Tage", partOf: "Küstenland" } },
+      { name: "Der Schwur der Fährleute", keys: ["Schwur"], content: "Geheim: Die Fährleute dienen der Flutkönigin.", gmOnly: true }] },
+    char_min: { name: "Mira", prompt: "Mira ist misstrauisch, mutig und spricht knapp." },
+    char_full: { type: "multirp-character", version: 1, characters: [
+      { name: "Erzähler", avatar: "📜", role: "gm", prompt: "Du bist der Spielleiter …", model: "mistralai/mistral-small-3", baseUrl: "https://openrouter.ai/api/v1", temperature: 0.7, topP: 0.9, repetitionPenalty: 1.1 },
+      { name: "Mira", avatar: "🗡️", role: "companion", prompt: "Mira ist misstrauisch, mutig und spricht knapp." }] }
+  };
+  function xioGuideSection(body, mk) {
+    const det = mk("details", "guide-mod"); det.id = "guide-xio";
+    det.appendChild(mk("summary", "guide-sum", t("xio_g_title")));
+    const p = mk("p", "guide-p"); p.innerHTML = t("xio_g_intro_html"); det.appendChild(p);
+    Object.keys(XIO_TPL).forEach(k => {
+      const code = JSON.stringify(XIO_TPL[k], null, 2);
+      det.appendChild(mk("h4", "", t("xio_g_" + k)));
+      det.appendChild(mk("pre", "guide-code", code));
+      const row = mk("div", "guide-btns");
+      const c = mk("button", "msg-action-btn", t("guide_copy")); c.dataset.copy = "xio_" + k; c.onclick = () => stCopy(code); row.appendChild(c);
+      const d = mk("button", "msg-action-btn", t("xio_g_dl")); d.dataset.dl = "xio_" + k; d.onclick = () => dlJSON(`multirp_vorlage_${k}.json`, XIO_TPL[k]); row.appendChild(d);
+      det.appendChild(row);
+    });
+    body.appendChild(det);
+  }
+
+  // ---------- Kampagnen-Export (eine Datei, kompatibel zum bisherigen Backup-Format) ----------
+  function cxBuild(includeKeys) {
+    const as = getActiveSession(); if (as) { as.messages = Array.isArray(state.messages) ? state.messages : []; as.world = state.world; }
+    const b = JSON.parse(JSON.stringify(state));
+    b._app = "multi-rp-studio"; b._version = 1; b._kind = "campaign"; b._exportedAt = new Date().toISOString(); delete b._campId;
+    if (!includeKeys) { if (b.user) b.user.apiKey = ""; (b.characters || []).forEach(c => { if (c) c.apiKey = ""; }); }
+    return b;
+  }
+  function cxFileName() {
+    const s = getActiveSession(), d = new Date(), p = n => String(n).padStart(2, "0");
+    const slug = String((s && s.title) || "kampagne").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 40) || "kampagne";
+    return `multi_rp_${slug}_${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}.json`;
+  }
+  function cxExport() {
+    const incl = state.settings.stripKeysOnExport === false;
+    const name = cxFileName();
+    dlJSON(name, cxBuild(incl));
+    state.settings.lastExportTs = Date.now(); state.settings.roundsSinceExport = 0; saveState();
+    rmHide(); cxRenderLast();
+    showToast(tf("cx_done", { f: name }) + (incl ? " " + t("cx_done_keys") : ""), incl ? "info" : "success");
+  }
+  function cxRenderLast() {
+    const el = document.getElementById("cx-last"); if (!el) return;
+    const ts = +state.settings.lastExportTs || 0;
+    el.textContent = ts ? tf("cx_last", { d: new Date(ts).toLocaleString(state.lang === "en" ? "en-GB" : "de-DE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) }) : t("cx_never");
+    const k = document.getElementById("setting-include-keys"); if (k) k.checked = state.settings.stripKeysOnExport === false;
+    const g = id => document.getElementById(id), c = rmCfg();
+    if (g("rm-rounds")) g("rm-rounds").value = c.rounds; if (g("rm-days")) g("rm-days").value = c.days;
+  }
+  { const b = document.getElementById("export-btn"); if (b) b.onclick = cxExport; }
+  { const k = document.getElementById("setting-include-keys");
+    if (k) k.onchange = () => {
+      if (!k.checked) { state.settings.stripKeysOnExport = true; saveState(); return; }
+      k.checked = false;
+      showConfirmModal(t("cx_keys_warn"), () => { k.checked = true; state.settings.stripKeysOnExport = false; saveState(); });
+    }; }
+
+  // ---------- Import: Prüfung → Vorschau → Ersetzen / Zusammenführen ----------
+  let imPending = null;
+  function imHandleText(text, meta = {}) {
+    let res;
+    try { res = normalizeImport(text); }
+    catch (err) { showConfirmModal(t("ui_import_failed") + (err instanceof SyntaxError ? t("im_err_json") : (err.message || String(err))), () => {}); return false; }
+    imPending = { cand: res.cand, info: res.info, meta };
+    const c = res.cand, msgs = c.sessions.reduce((n, s) => n + ((s && s.messages) || []).length, 0);
+    const places = new Set(); (c.mapPlaces || []).forEach(p => places.add(String(p.name).toLowerCase())); c.sessions.forEach(s => ((s.map && s.map.places) || []).forEach(p => places.add(String(p.name).toLowerCase())));
+    const stLbl = { fantasy: "Fantasy", modern: "Modern", scifi: "Sci-Fi" }[(c.settings.setting && (c.settings.setting.kind || c.settings.setting)) || "fantasy"] || "Fantasy";
+    const rows = [["im_s_chars", c.characters.length + (c.characters.length ? " · " + c.characters.slice(0, 4).map(x => x.name).join(", ") + (c.characters.length > 4 ? " …" : "") : "")],
+      ["im_s_sess", c.sessions.length], ["im_s_msgs", msgs], ["im_s_lore", c.lorebook.length], ["im_s_places", places.size], ["im_s_setting", stLbl + " · " + (c.lang === "en" ? "English" : "Deutsch")]];
+    if (res.info.exportedAt) rows.push(["im_s_date", new Date(res.info.exportedAt).toLocaleString(state.lang === "en" ? "en-GB" : "de-DE")]);
+    const stats = document.getElementById("im-stats");
+    stats.innerHTML = rows.map(([k, v]) => `<span>${escapeHTML(t(k))}</span><b>${escapeHTML(String(v))}</b>`).join("");
+    const warn = res.warn.slice(); if (res.info.hasKeys) warn.push(t("im_w_keys")); if (!c.characters.length && !msgs) warn.push(t("im_w_empty"));
+    document.getElementById("im-warn").innerHTML = warn.map(w => `<li>${escapeHTML(w)}</li>`).join("");
+    document.getElementById("im-file").textContent = meta.name ? "📄 " + meta.name + (meta.size ? " · " + abFmtSize(meta.size) : "") : "";
+    const rep = document.getElementById("im-mode-replace"); if (rep) rep.checked = true;
+    document.getElementById("import-modal").classList.add("active");
+    return true;
+  }
+  function imMerge(cur, inc) {
+    const as = (cur.sessions || []).find(s => s && s.id === cur.activeSessionId); if (as) { as.messages = cur.messages; as.world = cur.world; }
+    const s = JSON.parse(JSON.stringify(cur)), n = { c: 0, l: 0, s: 0, p: 0, k: 0 };
+    const has = (arr, id) => arr.some(x => x && x.id === id);
+    s.settings.order = Array.isArray(s.settings.order) ? s.settings.order : [];
+    inc.characters.forEach(c => { if (has(s.characters, c.id)) { n.k++; return; } s.characters.push(c); n.c++; if (c.role !== "editor" && !s.settings.order.includes(c.id)) s.settings.order.push(c.id); });
+    inc.lorebook.forEach(l => { if (has(s.lorebook, l.id)) { n.k++; return; } s.lorebook.push(l); n.l++; });
+    s.loreCategories = Array.isArray(s.loreCategories) ? s.loreCategories : [...DEFAULT_LORE_CATS];
+    inc.loreCategories.forEach(c => { if (!s.loreCategories.includes(c)) s.loreCategories.push(c); });
+    s.lorebook.forEach(l => { if (l && l.category && !s.loreCategories.includes(l.category)) s.loreCategories.push(l.category); });
+    inc.sessions.forEach(x => {
+      const ex = s.sessions.find(y => y && y.id === x.id);
+      if (ex && JSON.stringify(ex.messages || []) === JSON.stringify(x.messages || [])) { n.k++; return; }
+      const cp = JSON.parse(JSON.stringify(x)); if (ex) { cp.id = generateId("sess"); cp.title = String(cp.title || "") + " (Import)"; }
+      s.sessions.push(cp); n.s++;
+    });
+    const pk = p => String((p && p.name) || "").toLowerCase(), have = new Set((s.mapPlaces || []).map(pk));
+    s.mapPlaces = Array.isArray(s.mapPlaces) ? s.mapPlaces : [];
+    (inc.mapPlaces || []).forEach(p => { if (have.has(pk(p))) return; have.add(pk(p)); s.mapPlaces.push(p); n.p++; });
+    return { state: s, n };
+  }
+  async function imApply() {
+    const p = imPending; if (!p) return; imPending = null;
+    const mode = document.getElementById("im-mode-merge")?.checked ? "merge" : "replace";
+    closeModal("import-modal");
+    if (isGenerating) abortCurrentGeneration(); // kein laufender Zug schreibt in den neuen Stand
+    if ((state.messages || []).length || (state.characters || []).length || (state.lorebook || []).length) {
+      const snap = JSON.stringify(cxBuild(true)); await autoBackupNow("import", snap);   // Sicherheitsnetz (im App-Speicher, mit Keys wie die übrigen Auto-Sicherungen)
+    }
+    const langBeforeImport = state.lang === "en" ? "en" : "de";
+    const keep = {}; ["lastExportTs", "roundsSinceExport", "remindSnoozeTs", "firstUseTs", "backupReminder", "stripKeysOnExport"].forEach(k => { if (state.settings[k] !== undefined) keep[k] = state.settings[k]; });
+    let msg = t("toast_import_ok");
+    if (mode === "merge") { const r = imMerge(state, p.cand); state = r.state; msg = tf("im_merged", r.n); }
+    else { const cid = state._campId, cn = state.campaignName; state = p.cand; Object.assign(state.settings, keep); state.campaignName = p.cand.campaignName || cn; }
+    state._campId = (typeof MM !== "undefined" && MM.idx && MM.idx.active) || state._campId;
+    document.querySelectorAll(".lang-btn").forEach(btn => { const isAct = btn.dataset.lang === (state.lang || "de"); btn.classList.toggle("btn-primary", isAct); btn.classList.toggle("btn-secondary", !isAct); });
+    applyTranslations(); syncActiveMessages(); renderSessionsUI(); renderAmbientBar(); renderChat(); renderPlayerConfig(); renderCharacters(); renderLorebook(); renderSettings();
+    updateAssistBtnVisibility(); updateHeaderBagCounter(); closeMapModal(); updateMapFab();
+    await saveState();
+    showToast(msg + ((state.lang === "en" ? "en" : "de") !== langBeforeImport ? " " + t("toast_import_lang") : ""), "success");
+    rmCheck();
+  }
+  { const b = document.getElementById("im-ok-btn"); if (b) b.onclick = () => imApply(); }
+
+  // ---------- Erinnerung an die Sicherungsdatei ----------
+  function rmCfg() {
+    const c = state.settings.backupReminder && typeof state.settings.backupReminder === "object" ? state.settings.backupReminder : {};
+    return { rounds: sanitizeInt(c.rounds, 0, 500, 25), days: sanitizeInt(c.days, 0, 90, 7) };
+  }
+  function rmDue() {
+    const c = rmCfg(), s = state.settings, now = Date.now();
+    if (!(state.messages || []).length && !(state.sessions || []).some(x => x && (x.messages || []).length)) return null;
+    const rounds = +s.roundsSinceExport || 0;
+    if (c.rounds > 0 && rounds >= c.rounds) return tf("rm_txt_rounds", { n: rounds });
+    const base = Math.max(+s.lastExportTs || +s.firstUseTs || now, +s.remindSnoozeTs || 0);
+    if (c.days > 0 && now - base >= c.days * 86400000) return s.lastExportTs ? tf("rm_txt_days", { n: Math.floor((now - s.lastExportTs) / 86400000) }) : t("rm_txt_never");
+    return null;
+  }
+  function rmCheck() {
+    const box = document.getElementById("bk-remind"); if (!box) return;
+    const txt = rmDue(); box.hidden = !txt;
+    if (txt) document.getElementById("bk-remind-txt").textContent = txt + t("rm_txt_tail");
+  }
+  function rmHide() { const box = document.getElementById("bk-remind"); if (box) box.hidden = true; }
+  function rmAfterRound() { state.settings.roundsSinceExport = (+state.settings.roundsSinceExport || 0) + 1; rmCheck(); }
+  { const g = document.getElementById("bk-remind-go"); if (g) g.onclick = cxExport;
+    const l = document.getElementById("bk-remind-later"); if (l) l.onclick = () => { state.settings.remindSnoozeTs = Date.now(); state.settings.roundsSinceExport = 0; saveState(); rmHide(); };
+    ["rm-rounds", "rm-days"].forEach(id => { const e = document.getElementById(id); if (e) e.onchange = () => {
+      state.settings.backupReminder = { rounds: sanitizeInt(document.getElementById("rm-rounds").value, 0, 500, 25), days: sanitizeInt(document.getElementById("rm-days").value, 0, 90, 7) };
+      saveState(); cxRenderLast(); rmCheck(); }; }); }
+
+  // ---------- Provider-Assistent ----------
+  const PV = [
+    { id: "arliai", n: "ArliAI", url: "https://api.arliai.com/v1", key: 1, m: ["Gemma-4-31B-Schattenblume", "DeepSeek-V4-Flash-0731", "GLM-4.7"] },
+    { id: "openrouter", n: "OpenRouter", url: "https://openrouter.ai/api/v1", key: 1, m: ["deepseek/deepseek-chat-v3-0324", "mistralai/mistral-small-3.2-24b-instruct", "meta-llama/llama-3.3-70b-instruct"] },
+    { id: "deepseek", n: "DeepSeek", url: "https://api.deepseek.com/v1", key: 1, m: ["deepseek-chat", "deepseek-reasoner"] },
+    { id: "openai", n: "OpenAI", url: "https://api.openai.com/v1", key: 1, m: ["gpt-4o-mini", "gpt-4.1-mini"] },
+    { id: "infermatic", n: "Infermatic / TotalGPT", url: "https://api.totalgpt.ai/v1", key: 1, m: [] },
+    { id: "groq", n: "Groq", url: "https://api.groq.com/openai/v1", key: 1, m: ["llama-3.3-70b-versatile"] },
+    { id: "together", n: "Together AI", url: "https://api.together.xyz/v1", key: 1, m: ["meta-llama/Llama-3.3-70B-Instruct-Turbo"] },
+    { id: "ollama", n: "Ollama (lokal / local)", url: "http://localhost:11434/v1", m: ["llama3.1:8b", "mistral-nemo"] },
+    { id: "koboldcpp", n: "KoboldCPP (lokal / local)", url: "http://localhost:5001/v1", m: ["koboldcpp"] },
+    { id: "lmstudio", n: "LM Studio (lokal / local)", url: "http://localhost:1234/v1", m: [] }
+  ];
+  const pvBase = u => String(u || "").trim().replace(/\/+$/, "").replace(/\/chat\/completions$/i, "").replace("api.infermatic.ai", "api.totalgpt.ai");
+  const pvFind = u => PV.find(p => pvBase(p.url).toLowerCase() === pvBase(u).toLowerCase()) || null;
+  const pvIsLocal = u => /^https?:\/\/(localhost|127\.\d+\.\d+\.\d+|0\.0\.0\.0|\[::1\])(:|\/|$)/i.test(String(u || ""));
+  const PV_KEYED = /api\.arliai\.com|openrouter\.ai|api\.openai\.com|api\.deepseek\.com|api\.groq\.com|api\.together\.xyz|api\.totalgpt\.ai/i;
+  // Formular-Felder je Ort (Figur, Spieler)
+  const PV_FORMS = { char: { sel: "char-provider-preset", url: "char-baseurl", key: "char-apikey", model: "char-model" }, user: { sel: "user-cfg-provider-preset", url: "user-cfg-baseurl", key: "user-cfg-apikey", model: "user-cfg-model" } };
+  function pvFillSelect(sel) {
+    if (!sel) return;
+    sel.innerHTML = `<option value="custom" data-i18n="opt_manual">${escapeHTML(t("opt_manual"))}</option>` + PV.map(p => `<option value="${escapeHTML(p.url)}">${escapeHTML(p.n)}</option>`).join("");
+  }
+  function pvHint(f) {
+    const F = PV_FORMS[f], url = document.getElementById(F.url)?.value || "", p = pvFind(url);
+    const sel = document.getElementById(F.sel); if (sel) sel.value = p ? p.url : "custom";
+    const h = document.getElementById(f + "-pv-hint");
+    if (h) h.textContent = t("pv_h_" + (p ? p.id : "custom")) + (p && p.m.length ? " " + tf("pv_h_models", { m: p.m.join(", ") }) : "");
+    const dl = document.getElementById(f + "-model-list");
+    if (dl && !dl.dataset.live) dl.innerHTML = (p ? p.m : []).map(m => `<option value="${escapeHTML(m)}">`).join("");
+    const mi = document.getElementById(F.model); if (mi) mi.placeholder = p && p.m.length ? (state.lang === "en" ? "e.g. " : "z. B. ") + p.m[0] : t("ph_model");
+  }
+  function pvMask(s, key) {
+    let o = String(s || ""); if (key && key.length > 3) o = o.split(key).join("•••");
+    return o.replace(/\b(sk|or|gsk|pk)-[A-Za-z0-9_\-]{6,}/g, "$1-•••").replace(/Bearer\s+\S+/gi, "Bearer •••");
+  }
+  function pvDetail(status, body, key) {
+    let m = "";
+    try { const j = JSON.parse(body); const e = j.error !== undefined ? j.error : j; m = typeof e === "string" ? e : (e && (e.message || e.detail || e.msg)) || j.message || j.detail || ""; if (typeof m !== "string") m = JSON.stringify(m); }
+    catch (e) { m = String(body || "").replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>/gi, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(); }
+    m = pvMask(m, key).slice(0, 300);
+    return (status ? "HTTP " + status : "") + (m ? (status ? ": " : "") + m : "");
+  }
+  function pvStatusKind(st, body) {
+    const b = String(body || "");
+    const modelErr = /model/i.test(b) && /not\s*(found|exist|available|support)|unknown|invalid|no such|does not exist|nicht gefunden|is not a valid/i.test(b);
+    if (st === 401) return "401"; if (st === 403) return modelErr ? "model" : "403";
+    if (st === 404) return modelErr ? "model" : "404"; if (st === 429) return "429";
+    if (st >= 500) return "5xx"; if ((st === 400 || st === 422) && modelErr) return "model";
+    return "http";
+  }
+  function pvNetKind(base, e) {
+    if (e && e.pvTimeout) return "timeout";
+    if (navigator.onLine === false) return "offline";
+    if (location.protocol === "https:" && /^http:/i.test(base) && !pvIsLocal(base)) return "mixed";
+    return pvIsLocal(base) ? "local" : "cors";
+  }
+  function pvMsg(kind, v = {}) { return { title: tf("pv_" + kind + "_t", v), fix: tf("pv_" + kind + "_f", v) }; }
+  // Kurzer Lösungshinweis für Chat-Fehler (gleiche Einordnung wie der Verbindungstest)
+  function pvChatHint(status, body, base, netErr) {
+    const k = netErr ? pvNetKind(base, netErr) : pvStatusKind(status, body);
+    return k === "http" ? "" : "\n\n" + tf("pv_chat_hint", { f: pvMsg(k, { u: base, m: "", s: status }).fix });
+  }
+  async function pvFetch(url, opt, ms) {
+    const c = new AbortController(), tm = setTimeout(() => c.abort(), ms);
+    try { return await fetch(url, { ...opt, signal: c.signal }); }
+    catch (e) { if (c.signal.aborted) { const er = new Error("timeout"); er.pvTimeout = true; throw er; } throw e; }
+    finally { clearTimeout(tm); }
+  }
+  function pvSuggest(model, models) {
+    if (!models || !models.length) return [];
+    const m = String(model || "").toLowerCase(), parts = m.split(/[\/\-_:. ]+/).filter(x => x.length > 2);
+    const score = x => { const l = x.toLowerCase(); return (m && l.includes(m) ? 50 : 0) + parts.reduce((s, p) => s + (l.includes(p) ? 10 : 0), 0); };
+    return models.slice().sort((a, b) => score(b) - score(a)).slice(0, 12);
+  }
+  async function pvTest(cfg) {
+    const base = pvBase(cfg.baseUrl), key = String(cfg.apiKey || "").trim().replace(/^Bearer\s+/i, "").replace(/^["']|["']$/g, ""), model = String(cfg.model || "").trim().replace(/^["']|["']$/g, "");
+    const R = (level, kind, v = {}, extra = {}) => ({ level, kind, ...pvMsg(kind, { u: base, m: model, ...v }), ...extra });
+    if (!/^https?:\/\/[^\s\/]+/i.test(base)) return R("err", "url");
+    if (!key && PV_KEYED.test(base)) return R("err", "nokey");
+    const H = key ? { Authorization: "Bearer " + key } : {};
+    let models = null;
+    try {
+      const r = await pvFetch(base + "/models", { headers: H }, 15000), body = await r.text();
+      if (r.ok) { try { const j = JSON.parse(body), arr = Array.isArray(j) ? j : (j.data || j.models || []); models = arr.map(x => typeof x === "string" ? x : x && (x.id || x.name || x.model)).filter(Boolean).map(String); } catch (e) {} }
+      else if (r.status === 401 || r.status === 403 || r.status === 429) return R("err", String(r.status), {}, { detail: pvDetail(r.status, body, key) });
+    } catch (e) { return R("err", pvNetKind(base, e), {}, { detail: e && e.pvTimeout ? "" : pvMask(String(e && e.message || e), key) }); }
+    if (!model) return models && models.length ? R("warn", "nomodel_list", { n: models.length }, { models }) : R("warn", "nomodel");
+    const inList = models && models.length ? models.some(x => x.toLowerCase() === model.toLowerCase()) : null;
+    const t0 = Date.now();
+    try {
+      const r = await pvFetch(base + "/chat/completions", { method: "POST", headers: { ...H, "Content-Type": "application/json" },
+        body: JSON.stringify({ model, messages: [{ role: "user", content: "Hi" }], max_tokens: 8, stream: false }) }, 45000);
+      const body = await r.text(), ms = Date.now() - t0;
+      if (r.ok) {
+        let j = null; try { j = JSON.parse(body); } catch (e) {}
+        if (!j || !(j.choices || j.error)) return R("warn", "badjson", {}, { detail: pvDetail(0, body, key) });
+        if (j.error) { const d = pvDetail(0, body, key); return R("err", pvStatusKind(400, d), { s: 200 }, { detail: d, models, sugg: pvSuggest(model, models) }); }
+        return R("ok", "ok", { ms }, { models, note: inList === false ? t("pv_note_notlisted") : "" });
+      }
+      let kind = pvStatusKind(r.status, body);
+      if (inList === false && (r.status === 400 || r.status === 404 || r.status === 422)) kind = "model";
+      return R("err", kind, { s: r.status }, { detail: pvDetail(r.status, body, key), models, sugg: kind === "model" ? pvSuggest(model, models) : null });
+    } catch (e) { return R("err", pvNetKind(base, e), {}, { detail: e && e.pvTimeout ? "" : pvMask(String(e && e.message || e), key) }); }
+  }
+  function pvRender(out, res, modelInputId) {
+    if (!out) return;
+    out.className = "pv-res " + res.level; out.dataset.kind = res.kind;
+    const list = res.sugg || (res.level !== "ok" ? pvSuggest(document.getElementById(modelInputId)?.value || "", res.models) : null);
+    out.innerHTML = `<b>${escapeHTML(res.title)}</b>` + (res.level === "ok" && !modelInputId ? "" : `<span>${escapeHTML(res.fix)}</span>`) + (res.note ? `<span class="p1-warn">${escapeHTML(res.note)}</span>` : "") + (res.detail ? `<small>${escapeHTML(res.detail)}</small>` : "")
+      + (list && list.length && modelInputId ? `<small>${escapeHTML(tf("pv_models_found", { n: res.models.length }))}</small><div class="pv-chips"></div>` : "");
+    const chips = out.querySelector(".pv-chips");
+    if (chips) list.forEach(m => { const b = document.createElement("button"); b.type = "button"; b.textContent = m; b.onclick = () => { const mi = document.getElementById(modelInputId); if (mi) { mi.value = m; mi.dispatchEvent(new Event("input")); } chips.querySelectorAll("button").forEach(x => x.classList.toggle("btn-primary", x === b)); }; chips.appendChild(b); });
+    if (res.models && res.models.length && modelInputId) { const dl = document.getElementById(modelInputId.replace(/-model$/, "") + "-model-list"); if (dl) { dl.dataset.live = "1"; dl.innerHTML = res.models.slice(0, 300).map(m => `<option value="${escapeHTML(m)}">`).join(""); } }
+  }
+  async function pvRunTest(btn, out, cfg, modelInputId) {
+    if (!btn || btn.disabled) return;
+    const label = btn.textContent; btn.disabled = true; btn.textContent = t("pv_testing"); out.className = "pv-res"; out.innerHTML = "";
+    try { const res = await pvTest(cfg); pvRender(out, res, modelInputId); return res; }
+    finally { btn.disabled = false; btn.textContent = label; }
+  }
+  // Verdrahtung: Figur-Dialog und Spieler (Ghostwriter) nutzen dieselben Presets; All-in-One testet den Erzähler
+  ["char", "user"].forEach(f => {
+    const F = PV_FORMS[f], sel = document.getElementById(F.sel);
+    pvFillSelect(sel);
+    if (sel) sel.addEventListener("change", () => { if (sel.value !== "custom") { const u = document.getElementById(F.url); if (u) u.value = sel.value; } const dl = document.getElementById(f + "-model-list"); if (dl) delete dl.dataset.live; pvHint(f); const o = document.getElementById(f + "-pv-result"); if (o) { o.className = "pv-res"; o.innerHTML = ""; } });
+    const u = document.getElementById(F.url); if (u) u.addEventListener("input", () => { const dl = document.getElementById(f + "-model-list"); if (dl) delete dl.dataset.live; pvHint(f); });
+    const b = document.getElementById(f + "-pv-test");
+    if (b) b.onclick = () => pvRunTest(b, document.getElementById(f + "-pv-result"), { baseUrl: document.getElementById(F.url)?.value, apiKey: document.getElementById(F.key)?.value, model: document.getElementById(F.model)?.value }, F.model);
+  });
+  { const b = document.getElementById("aio-pv-test");
+    if (b) b.onclick = () => { const n = aioNarrator(), out = document.getElementById("aio-pv-result");
+      if (!n) { out.className = "pv-res err"; out.innerHTML = `<b>${escapeHTML(t("pv_no_narr"))}</b>`; return; }
+      pvRunTest(b, out, { baseUrl: n.baseUrl, apiKey: n.apiKey, model: n.model }, null).then(r => { if (r) out.insertAdjacentHTML("afterbegin", `<small>${escapeHTML(n.name)} · ${escapeHTML(n.model || "–")}</small>`); }); }; }
+  function pvRefreshForms() { ["char", "user"].forEach(f => { const o = document.getElementById(f + "-pv-result"); if (o) { o.className = "pv-res"; o.innerHTML = ""; } const dl = document.getElementById(f + "-model-list"); if (dl) delete dl.dataset.live; pvHint(f); }); }
+
+  // ---------- Barrierefreiheit: Namen für Symbol-Knöpfe, Dialog-Rollen, Escape, Fokus ----------
+  const A11Y_GLYPH = [["✕", "a11y_close"], ["×", "a11y_close"], ["✏", "a11y_edit"], ["🗑", "tooltip_delete"], ["⚙", "a11y_settings"], ["+", "a11y_add"], ["＋", "a11y_add"],
+    ["−", "a11y_zoom_out"], ["↑", "a11y_up"], ["▲", "a11y_up"], ["⬆", "a11y_up"], ["↓", "a11y_down"], ["▼", "a11y_down"], ["⬇", "a11y_down"], ["📋", "a11y_copy"], ["🔄", "a11y_regen"], ["↻", "a11y_regen"],
+    ["◀", "a11y_prev"], ["‹", "a11y_prev"], ["❮", "a11y_prev"], ["▶", "a11y_next"], ["›", "a11y_next"], ["❯", "a11y_next"], ["⏹", "a11y_stop"], ["■", "a11y_stop"], ["➤", "tt_send"], ["💡", "tt_suggest"], ["🎒", "tt_bag"], ["🗺", "tt_map"]];
+  function a11yName(b) {
+    const tx = (b.textContent || "").replace(/\s+/g, "");
+    if (/\p{L}{2,}/u.test(tx)) return null;          // sichtbarer Text reicht als Name
+    const ti = b.getAttribute("title"); if (ti) return ti;
+    const g = tx.replace(/\uFE0F/g, "");
+    for (const [k, key] of A11Y_GLYPH) if (g.startsWith(k)) return t(key);
+    return null;
+  }
+  function a11yScan() {
+    a11yQueued = false;
+    document.querySelectorAll("button, [role=button]").forEach(b => {
+      if (b.hasAttribute("aria-label") && b.dataset.a11y !== "1") return;
+      const n = a11yName(b); if (n && b.getAttribute("aria-label") !== n) { b.setAttribute("aria-label", n); b.dataset.a11y = "1"; }
+    });
+  }
+  let a11yQueued = false;
+  function a11yQueue() { if (!a11yQueued) { a11yQueued = true; setTimeout(a11yScan, 250); } }
+  function a11yInit() {
+    document.querySelectorAll(".modal").forEach(m => {
+      m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true");
+      const h = m.querySelector(".modal-header .font-serif-title, .map-h");
+      if (h) { if (!h.id) h.id = m.id + "-label"; m.setAttribute("aria-labelledby", h.id); }
+      const c = m.querySelector(".modal-content, .map-shell"); if (c) c.setAttribute("tabindex", "-1");
+      new MutationObserver(() => a11yModalChanged(m)).observe(m, { attributes: true, attributeFilter: ["class"] });
+    });
+    const pop = document.getElementById("world-pop"); if (pop) { pop.setAttribute("aria-labelledby", "world-chip"); }
+    const tl = document.getElementById("toast-layer"); if (tl) { tl.setAttribute("role", "status"); tl.setAttribute("aria-live", "polite"); }
+    const si = document.getElementById("status-text"); if (si) si.setAttribute("aria-live", "polite");
+    new MutationObserver(a11yQueue).observe(document.getElementById("app") || document.body, { childList: true, subtree: true });
+    a11yScan();
+  }
+  const a11yFocusStack = [];
+  const a11yCoarse = () => window.matchMedia && matchMedia("(pointer:coarse)").matches;
+  function a11yModalChanged(m) {
+    const on = m.classList.contains("active");
+    if (on && !m._a11yOn) {
+      m._a11yOn = true; a11yFocusStack.push(document.activeElement);
+      const c = m.querySelector(".modal-content, .map-shell") || m;
+      setTimeout(() => { if (m.classList.contains("active") && !m.contains(document.activeElement)) c.focus({ preventScroll: true }); }, 30);
+    } else if (!on && m._a11yOn) {
+      m._a11yOn = false; const f = a11yFocusStack.pop();
+      if (f && f.focus && document.contains(f) && !(a11yCoarse() && /^(INPUT|TEXTAREA|SELECT)$/.test(f.tagName))) f.focus({ preventScroll: true });
+    }
+  }
+  function a11yTopModal() {
+    const a = [...document.querySelectorAll(".modal.active")];
+    if (!a.length) return null;
+    return a.reduce((top, m) => ((+getComputedStyle(m).zIndex || 0) >= (+getComputedStyle(top).zIndex || 0) ? m : top), a[0]);
+  }
+  function a11yEscape() {
+    const pop = document.getElementById("world-pop");
+    if (pop && pop.classList.contains("open")) { toggleWorldChip(false); document.getElementById("world-chip")?.focus(); return true; }
+    const m = a11yTopModal(); if (!m) return false;
+    if (m.id === "confirm-modal") { document.getElementById("confirm-cancel-btn").click(); return true; }
+    if (m.id === "map-modal") { const card = document.getElementById("map-card"); if (card && card.classList.contains("on")) hideMapCard(); else closeMapModal(); return true; }
+    const x = m.querySelector(".modal-header button"); if (x) x.click(); else closeModal(m.id);
+    return true;
+  }
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" || e.key === "Esc") { if (a11yEscape()) { e.preventDefault(); e.stopPropagation(); } return; }
+    if (e.key !== "Tab") return;
+    const m = a11yTopModal(); if (!m) return;
+    const f = [...m.querySelectorAll('button, [href], input:not([type=hidden]), select, textarea, summary, [tabindex]:not([tabindex="-1"])')].filter(x => !x.disabled && x.offsetParent !== null);
+    if (!f.length) return;
+    const i = f.indexOf(document.activeElement);
+    if (e.shiftKey && (i <= 0)) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && (i === -1 || i === f.length - 1)) { e.preventDefault(); f[0].focus(); }
+  }, true);
+  document.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target && e.target.matches && e.target.matches('[role="button"][tabindex]')) { e.preventDefault(); e.target.click(); } });
+  a11yInit();
 
   // App starten
   initApp();
