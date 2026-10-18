@@ -67,6 +67,7 @@
 
     .quick-triggers { display:none; gap:6px; padding:6px 10px; background:var(--surface); border-top:1px solid var(--border); overflow-x:auto; flex-shrink:0; }
     .quick-triggers.visible { display:flex; }
+    .quick-btn.absent, .card.absent { opacity:.5; }
     .quick-btn { background:var(--surface-2); border:1px solid var(--border); color:var(--muted); font-size:12px; padding:4px 9px; border-radius:12px; white-space:nowrap; cursor:pointer; display:flex; align-items:center; gap:4px; min-height:28px; }
 
     input, textarea, select { background-color:var(--surface-2); border:1px solid var(--border); color:var(--fg); border-radius:10px; padding:8px 12px; font-size:16px; outline:none; width:100%; }
@@ -838,6 +839,10 @@
             <input type="checkbox" id="setting-editor-cont">
             <span><strong data-i18n="editor_cont_chk">Anschluss: letzte 1–2 Sätze des vorigen Kapitels mitgeben</strong></span>
           </label>
+          <div class="form-group" style="margin-top:6px;">
+            <label data-i18n="len_label">Antwortlänge pro Runde</label>
+            <select id="setting-reply-len"><option value="short" data-i18n="len_short">Kurz (~60–120 Wörter)</option><option value="medium" data-i18n="len_medium">Mittel (~150–250 Wörter)</option><option value="long" data-i18n="len_long">Lang (~300–450 Wörter)</option></select>
+          </div>
         </div>
         <div class="card">
           <div class="card-title font-serif-title" style="color:var(--gold);" data-i18n="title_format">Standard-Format (ohne Lektor)</div>
@@ -1719,6 +1724,8 @@
   Object.assign(I18N.de, {"mm_home": "Hauptmenü", "mm_back": "Zurück zum Abenteuer", "mm_desc": "Deine Abenteuer auf diesem Gerät. Anbieter, API-Keys und Sprache gelten für alle, das Spieler-Profil gehört zum jeweiligen Abenteuer.", "pp_copy": "Spieler-Profil aus dem aktuellen Abenteuer übernehmen", "pp_note": "Name, Avatar und Persona gelten nur für dieses Abenteuer. Anbieter, Key und Modell gelten für alle.", "mm_new": "+ Neues Abenteuer", "mm_import": "📥 Backups laden", "mm_export_all": "⬇️ Alle Abenteuer herunterladen", "mm_drop": "Tipp (Desktop): Backup-Dateien einfach hierher ziehen. Mehrere auf einmal gehen auch.", "mm_unnamed": "Abenteuer", "mm_new_default": "Neues Abenteuer", "mm_new_title": "+ Neues Abenteuer", "mm_new_ph": "z. B. Die Nebelküste", "mm_new_note": "Das aktuelle Abenteuer bleibt unverändert gespeichert. Figuren und Lore legst du im neuen Abenteuer an.", "mm_create": "Anlegen & starten", "mm_open": "▶ Weiterspielen", "mm_rename": "Umbenennen", "mm_duplicate": "Duplizieren", "mm_export": "Als Backup herunterladen", "mm_delete": "Löschen", "mm_current": "aktuell", "mm_last": "zuletzt {d}", "mm_meta": "{c} · {m} · {l}", "mm_c1": "1 Charakter", "mm_cn": "{n} Charaktere", "mm_m1": "1 Nachricht", "mm_mn": "{n} Nachrichten", "mm_l1": "1 Lore-Eintrag", "mm_ln": "{n} Lore-Einträge", "mm_no_chars": "Noch keine Figuren", "mm_copy_sfx": "(Kopie)", "mm_dup_ok": "Abenteuer dupliziert.", "mm_exported": "Abenteuer heruntergeladen.", "mm_exported_all": "{n} Abenteuer in einer Datei heruntergeladen.", "mm_deleted": "Abenteuer gelöscht.", "mm_del_confirm": "Abenteuer „{n}“ mit allen Chats, Lore und Karte endgültig löschen? Das lässt sich nicht rückgängig machen (vorher ggf. ⬇️ herunterladen).", "mm_switch_fail": "Wechsel nicht möglich – das aktuelle Abenteuer bleibt geöffnet.", "mm_quota": "Speicher voll – Abenteuer konnte nicht angelegt werden.", "mm_im_title": "📥 Backups laden", "mm_im_sum": "{ok} Abenteuer lesbar, {bad} Datei(en) fehlerhaft.", "mm_im_mode": "Name schon vorhanden:", "mm_im_rename": "Als neues Abenteuer „(2)“ anlegen", "mm_im_skip": "Überspringen", "mm_im_note": "Jedes Backup wird ein eigenes Abenteuer. Nichts Vorhandenes wird überschrieben.", "mm_im_done": "{n} Abenteuer importiert, {s} übersprungen.", "mm_dup": "Name existiert schon", "mm_bundle_empty": "Die Sammeldatei enthält keine Abenteuer.", "mm_err_bundle": "Das ist eine Sammeldatei mit mehreren Abenteuern – bitte im Hauptmenü (🏠) über „Backups laden“ importieren."});
   Object.assign(I18N.en, {"mm_home": "Main menu", "mm_back": "Back to adventure", "mm_desc": "Your adventures on this device. Provider, API keys and language apply to all of them; the player profile belongs to each adventure.", "pp_copy": "Copy player profile from the current adventure", "pp_note": "Name, avatar and persona apply to this adventure only. Provider, key and model apply to all adventures.", "mm_new": "+ New adventure", "mm_import": "📥 Load backups", "mm_export_all": "⬇️ Download all adventures", "mm_drop": "Tip (desktop): just drop backup files here. Several at once work too.", "mm_unnamed": "Adventure", "mm_new_default": "New adventure", "mm_new_title": "+ New adventure", "mm_new_ph": "e.g. The Misty Coast", "mm_new_note": "The current adventure stays saved unchanged. Create characters and lore inside the new adventure.", "mm_create": "Create & start", "mm_open": "▶ Continue", "mm_rename": "Rename", "mm_duplicate": "Duplicate", "mm_export": "Download as backup", "mm_delete": "Delete", "mm_current": "current", "mm_last": "last {d}", "mm_meta": "{c} · {m} · {l}", "mm_c1": "1 character", "mm_cn": "{n} characters", "mm_m1": "1 message", "mm_mn": "{n} messages", "mm_l1": "1 lore entry", "mm_ln": "{n} lore entries", "mm_no_chars": "No characters yet", "mm_copy_sfx": "(copy)", "mm_dup_ok": "Adventure duplicated.", "mm_exported": "Adventure downloaded.", "mm_exported_all": "{n} adventures downloaded in one file.", "mm_deleted": "Adventure deleted.", "mm_del_confirm": "Permanently delete adventure “{n}” with all chats, lore and map? This cannot be undone (download it with ⬇️ first if needed).", "mm_switch_fail": "Switching failed – the current adventure stays open.", "mm_quota": "Storage full – the adventure could not be created.", "mm_im_title": "📥 Load backups", "mm_im_sum": "{ok} adventure(s) readable, {bad} file(s) broken.", "mm_im_mode": "Name already exists:", "mm_im_rename": "Add as new adventure “(2)”", "mm_im_skip": "Skip", "mm_im_note": "Every backup becomes its own adventure. Nothing existing is overwritten.", "mm_im_done": "{n} adventure(s) imported, {s} skipped.", "mm_dup": "name already exists", "mm_bundle_empty": "The bundle file contains no adventures.", "mm_err_bundle": "This is a bundle file with several adventures – please import it from the main menu (🏠) via “Load backups”."});
 
+  Object.assign(I18N.de, { pres_present: "🟢 In der Szene", pres_absent: "⚪ Abwesend", pres_loc_ph: "Ort (optional)", len_label: "Antwortlänge pro Runde", len_short: "Kurz (~60–120 Wörter)", len_medium: "Mittel (~150–250 Wörter)", len_long: "Lang (~300–450 Wörter)" });
+  Object.assign(I18N.en, { pres_present: "🟢 In scene", pres_absent: "⚪ Absent", pres_loc_ph: "Location (optional)", len_label: "Reply length per round", len_short: "Short (~60–120 words)", len_medium: "Medium (~150–250 words)", len_long: "Long (~300–450 words)" });
   Object.assign(I18N.de, {"p2_del_alt": "Alternative {n} löschen?", "p2_del_alt_tt": "Diese Alternative löschen", "p2_branch_here": "Ab hier abzweigen", "p2_branch_sw": "🌿 Strang", "p2_img_msg": "Bild zur Szene erzeugen", "p2_img_char": "Porträt erzeugen", "p2_img_alt": "Erzeugtes Szenenbild", "p2_img_del": "Bild entfernen", "p2_insp_none": "Noch keine Anfrage in dieser Sitzung.", "p2_insp_note": "Token sind geschätzt (≈ Zeichen ÷ 2,8). API-Keys sind maskiert.", "p2_part_sys": "System (Rolle, Regeln, Profil)", "p2_part_lore": "Lore", "p2_part_mem": "Erinnerungen & Kapitel", "p2_part_hist": "Verlauf + aktueller Zug", "p2_part_total": "Gesamt", "p2_tpl_custom": "✏️ Eigene Vorlage aktiv", "p2_tpl_default": "Standard-Vorlage", "p2_tpl_vars_gm": "Platzhalter: {user} {trigger} {fate} {protected} {guide}", "p2_tpl_vars_comp": "Platzhalter: {name} {user} {scene} {trigger} {companions} {guide}", "p2_tpl_vars_style": "Systemanweisung des Lektors · Platzhalter: {user}", "p2_tpl_saved": "Vorlage gespeichert.", "p2_tpl_reset_ok": "Standard-Vorlage wiederhergestellt.", "p2_basic_on": "Der Anbieter lehnt Zusatz-Parameter ab – für ihn werden ab jetzt nur Basis-Parameter gesendet.", "p2_basic_cleared": "Erweiterte Parameter sind wieder für alle Anbieter erlaubt.", "p2_chap_nogm": "Keine Spielleitung mit Modell vorhanden.", "p2_chap_running": "⏳ Kapitel wird im Hintergrund zusammengefasst …", "p2_chap_fail": "Zusammenfassung fehlgeschlagen ({e}) – das Spiel läuft normal weiter.", "p2_chap_info": "{n} Kapitel · {u} Nachrichten noch nicht zusammengefasst (gilt für diesen Strang)", "p2_chap_empty": "Noch keine Kapitel. Sie entstehen automatisch oder über „Jetzt zusammenfassen“.", "p2_chap_n": "Kapitel {i} · {n} Nachrichten", "p2_pin": "📌 Anheften", "p2_unpin": "📌 Lösen", "p2_regen": "↻ Neu", "p2_chap_del": "Dieses Kapitel löschen? Die Nachrichten bleiben erhalten.", "p2_chap_nothing": "Noch nicht genug neue Nachrichten zum Zusammenfassen.", "p2_img_empty": "Der Bild-Anbieter hat kein Bild geliefert.", "p2_img_bad": "Bild konnte nicht gelesen werden.", "p2_img_nokey": "Für den Bild-Anbieter fehlt der API-Key (System → Profi-Werkzeuge → Bilder).", "p2_img_running": "🖼️ Bild wird erzeugt …", "p2_img_full": "Speichergrenze für Bilder erreicht ({n} MB).", "p2_img_ok": "Bild gespeichert.", "p2_img_fail": "Bild fehlgeschlagen: {e}", "p2_sampler": "🎛️ Sampler (leer = nicht senden)", "p2_preset": "Voreinstellung wählen …", "p2_pre_creative": "Kreativ", "p2_pre_balanced": "Ausgewogen", "p2_pre_precise": "Präzise", "p2_basic": "Nur Basis-Parameter (für strikte Anbieter)", "p2_chap_btn": "📜 Chronik öffnen", "tab_chronik": "Chronik", "p2_chap_of": "Kapitel des Strangs „{s}“", "p2_card": "🧪 Profi-Werkzeuge", "p2_insp_btn": "🔍 Letzte Anfrage ansehen", "p2_tpl_title": "📝 Prompt-Vorlagen", "p2_tpl_gm": "Spielleitung (Zug)", "p2_tpl_comp": "Begleiter (Zug)", "p2_tpl_style": "Stil-Synthese (Lektor)", "p2_tpl_reset": "↺ Standard", "p2_tpl_save": "Speichern", "p2_img_title": "🖼️ Bilder (optional)", "p2_img_on": "Bilder erzeugen erlauben", "p2_img_prov": "Bild-Anbieter", "p2_img_p_openai": "OpenAI-kompatibel (/images/generations)", "p2_img_p_poll": "Pollinations (extern, ohne Key)", "p2_img_ext": "⚠️ Externer Dienst: Der Bild-Prompt (Szene, Namen) wird an image.pollinations.ai gesendet.", "p2_img_max": "Speichergrenze pro Abenteuer (MB)", "p2_img_exp": "Bilder beim Export mitnehmen (größere Datei)", "p2_basic_reset": "↺ Erweiterte Parameter wieder für alle Anbieter erlauben", "p2_insp_title": "🔍 Letzte Anfrage", "p2_chap_title": "📜 Chronik – Kapitel-Gedächtnis", "p2_chap_auto": "Automatisch alle", "p2_chap_msgs": "Nachrichten", "p2_chap_now": "✍️ Jetzt zusammenfassen", "p2_g_title": "🧪 Profi-Funktionen kurz erklärt", "p2_g_html": "<b>Alternativen:</b> 🔄 Swipe erzeugt eine neue Antwort, ◀ 2/3 ▶ blättert, ✂️ löscht die gezeigte, ✏️ bearbeitet sie. Die gezeigte Fassung geht in den Verlauf, ins Gedächtnis und an den Lektor.\n<b>Stränge:</b> 🌿 zweigt ab dieser Nachricht ab. Karte, Inventar, Erinnerungen und Kapitel laufen pro Strang getrennt; oben im Chat wechselst du zwischen Strängen.\n<b>Letzte Anfrage:</b> System → 🧪 zeigt die genaue Anfrage mit geschätzten Token je Teil, Keys maskiert.\n<b>Vorlagen & Sampler:</b> Zug-Vorlagen für Spielleitung, Begleiter und Lektor mit „↺ Standard“. Im Charakter-Dialog: min_p, top_k, Strafen, max_tokens – leere Felder werden nicht gesendet. Lehnt ein Anbieter sie ab (400), sendet die App für ihn nur noch Basis-Parameter.\n<b>Szenenbilder:</b> standardmäßig aus. 🎨 neben der Karte: die Spielleitung schreibt einen englischen Bild-Prompt (Tags für SD/Anime-Modelle, Sätze für Flux/DALL-E), dann erzeugt der Anbieter das Bild. Modi: Szene, letzte Nachricht, Porträt, eigener Prompt. Prompt ansehen/bearbeiten, Abbrechen jederzeit. 17 Anbieter (u. a. ArliAI, A1111/Forge, OpenAI, Together, OpenRouter, Gemini, Stability, Hugging Face, fal, NovelAI, Horde, Pollinations). Bilder liegen verkleinert im Gerät, beim Export optional.\n<b>Kapitel-Gedächtnis:</b> alle N Nachrichten (oder wenn der Verlauf das Budget sprengt) fasst die Spielleitung ältere Nachrichten zusammen. Kapitel teilen sich das Lore-/Erinnerungs-Budget; ansehen, bearbeiten, 📌 anheften und neu erzeugen im Tab 📜 Chronik (pro Strang).\n<b>Bild-Anbieter:</b> ✅ live getestet: ArliAI · 🧪 Request-Form gemockt getestet: A1111/Forge/SD.Next/Draw Things, OpenAI, OpenAI-kompatibel, Together, NanoGPT, AI/ML API, Electron Hub, xAI, OpenRouter, Google Imagen, Stability, Hugging Face, fal.ai, NovelAI (V3), AI Horde, Pollinations · ⛔ nicht direkt im Browser: ComfyUI (Workflow), Black Forest Labs, Workers AI (kein CORS), Chutes, Z.AI (Proxy), SillyTavern Extras."});
   Object.assign(I18N.en, {"p2_del_alt": "Delete alternative {n}?", "p2_del_alt_tt": "Delete this alternative", "p2_branch_here": "Branch from here", "p2_branch_sw": "🌿 Branch", "p2_img_msg": "Generate scene image", "p2_img_char": "Generate portrait", "p2_img_alt": "Generated scene image", "p2_img_del": "Remove image", "p2_insp_none": "No request in this session yet.", "p2_insp_note": "Tokens are estimated (≈ characters ÷ 2.8). API keys are masked.", "p2_part_sys": "System (role, rules, profile)", "p2_part_lore": "Lore", "p2_part_mem": "Memories & chapters", "p2_part_hist": "History + current turn", "p2_part_total": "Total", "p2_tpl_custom": "✏️ Custom template active", "p2_tpl_default": "Default template", "p2_tpl_vars_gm": "Placeholders: {user} {trigger} {fate} {protected} {guide}", "p2_tpl_vars_comp": "Placeholders: {name} {user} {scene} {trigger} {companions} {guide}", "p2_tpl_vars_style": "System instruction of the editor · placeholder: {user}", "p2_tpl_saved": "Template saved.", "p2_tpl_reset_ok": "Default template restored.", "p2_basic_on": "The provider rejects extra parameters – from now on only basic parameters are sent to it.", "p2_basic_cleared": "Advanced parameters are allowed for all providers again.", "p2_chap_nogm": "No game master with a model.", "p2_chap_running": "⏳ Summarizing a chapter in the background …", "p2_chap_fail": "Summary failed ({e}) – the game continues normally.", "p2_chap_info": "{n} chapters · {u} messages not summarized yet (this branch)", "p2_chap_empty": "No chapters yet. They are created automatically or via “Summarize now”.", "p2_chap_n": "Chapter {i} · {n} messages", "p2_pin": "📌 Pin", "p2_unpin": "📌 Unpin", "p2_regen": "↻ Redo", "p2_chap_del": "Delete this chapter? The messages stay.", "p2_chap_nothing": "Not enough new messages to summarize yet.", "p2_img_empty": "The image provider returned no image.", "p2_img_bad": "Could not read the image.", "p2_img_nokey": "The image provider needs an API key (System → Power tools → Images).", "p2_img_running": "🖼️ Generating image …", "p2_img_full": "Image storage limit reached ({n} MB).", "p2_img_ok": "Image saved.", "p2_img_fail": "Image failed: {e}", "p2_sampler": "🎛️ Sampler (empty = not sent)", "p2_preset": "Choose a preset …", "p2_pre_creative": "Creative", "p2_pre_balanced": "Balanced", "p2_pre_precise": "Precise", "p2_basic": "Basic parameters only (strict providers)", "p2_chap_btn": "📜 Open chronicle", "tab_chronik": "Chronicle", "p2_chap_of": "Chapters of branch “{s}”", "p2_card": "🧪 Power tools", "p2_insp_btn": "🔍 Show last request", "p2_tpl_title": "📝 Prompt templates", "p2_tpl_gm": "Game master (turn)", "p2_tpl_comp": "Companion (turn)", "p2_tpl_style": "Style synthesis (editor)", "p2_tpl_reset": "↺ Default", "p2_tpl_save": "Save", "p2_img_title": "🖼️ Images (optional)", "p2_img_on": "Allow image generation", "p2_img_prov": "Image provider", "p2_img_p_openai": "OpenAI-compatible (/images/generations)", "p2_img_p_poll": "Pollinations (external, no key)", "p2_img_ext": "⚠️ External service: the image prompt (scene, names) is sent to image.pollinations.ai.", "p2_img_max": "Storage limit per adventure (MB)", "p2_img_exp": "Include images in exports (larger file)", "p2_basic_reset": "↺ Allow advanced parameters for all providers again", "p2_insp_title": "🔍 Last request", "p2_chap_title": "📜 Chronicle – chapter memory", "p2_chap_auto": "Automatically every", "p2_chap_msgs": "messages", "p2_chap_now": "✍️ Summarize now", "p2_g_title": "🧪 Power features in brief", "p2_g_html": "<b>Alternatives:</b> 🔄 Swipe makes a new reply, ◀ 2/3 ▶ browses, ✂️ deletes the shown one, ✏️ edits it. The shown version goes into history, memory and the editor.\n<b>Branches:</b> 🌿 branches from this message. Map, inventory, memories and chapters are separate per branch; switch branches at the top of the chat.\n<b>Last request:</b> System → 🧪 shows the exact request with estimated tokens per part, keys masked.\n<b>Templates & samplers:</b> turn templates for game master, companions and editor with “↺ Default”. In the character dialog: min_p, top_k, penalties, max_tokens – empty fields are not sent. If a provider rejects them (400), the app sends only basic parameters to it.\n<b>Scene images:</b> off by default. 🎨 next to the map: the game master writes an English image prompt (tags for SD/anime models, sentences for Flux/DALL-E), then the provider renders it. Modes: scene, last message, portrait, custom prompt. View/edit the prompt, cancel any time. 17 providers (incl. ArliAI, A1111/Forge, OpenAI, Together, OpenRouter, Gemini, Stability, Hugging Face, fal, NovelAI, Horde, Pollinations). Images are stored downscaled on the device, optional in exports.\n<b>Chapter memory:</b> every N messages (or when the history exceeds the budget) the game master summarizes older messages. Chapters share the lore/memory budget; view, edit, 📌 pin and redo in the 📜 Chronicle tab (per branch).\n<b>Image providers:</b> ✅ live-tested: ArliAI · 🧪 request shape mock-tested: A1111/Forge/SD.Next/Draw Things, OpenAI, OpenAI-compatible, Together, NanoGPT, AI/ML API, Electron Hub, xAI, OpenRouter, Google Imagen, Stability, Hugging Face, fal.ai, NovelAI (V3), AI Horde, Pollinations · ⛔ not directly in the browser: ComfyUI (workflow), Black Forest Labs, Workers AI (no CORS), Chutes, Z.AI (proxy), SillyTavern Extras."});
 
@@ -2346,6 +2353,7 @@
   // Alle App-Tags aus sichtbarem Text entfernen (Spielstand, Welt, Weltbuch, optional Stimmen)
   function stripAppTags(text, keepVoices) {
     let s = String(text || "").replace(tagRe("state", "strip"), "").replace(tagRe("sign", "strip"), "").replace(tagRe("wb", "strip"), "");
+    s = stripPresenceTags(s);
     return keepVoices ? s : s.replace(tagRe("voice", "strip"), "");
   }
   // „</think>“ ohne öffnendes „<think>“ (manche Reasoning-Modelle): alles davor ist Denken
@@ -4021,6 +4029,10 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
           : lore);
 
     if (actor.role === "gm") systemInstruction += getWeltbuchPromptRules();
+    { const U0 = String(state.user?.name || (isEn ? "Player" : "Spieler"));
+      if (actor.role === "gm") systemInstruction += presenceDirective(isEn);
+      if (actor.role === "companion") systemInstruction += knowledgeDirective(actor, isEn);
+      if (!isEd) systemInstruction += antiGodmodRule(isEn, U0) + lengthRule(isEn, actor.role === "companion" || !!state.settings.editorId); }
     if (systemTask) systemInstruction += "\n\n" + systemTask;
 
     const turnMarker = isEn ? "=== CURRENT TURN – continue from here, do not repeat anything above ===\n" : "=== AKTUELLER ZUG – setze hier an, nichts von oben wiederholen ===\n";
@@ -4036,11 +4048,11 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     if (!isAborted && rawResponse && actor.role !== "editor") {   // Lektor: Tracking nur aus den Original-Antworten
       processWorldUpdates(rawResponse);
       if (!isNpcVoiceChar(actor)) processLiveMutations(rawResponse, actor.role === "companion" ? actor.id : "user");
-      if (actor.role === "gm") wb = processWeltbuchTags(rawResponse);
+      if (actor.role === "gm") { wb = processWeltbuchTags(rawResponse); applyPresenceTags(rawResponse); }
     }
     // Weltbuch-Tags nie speichern/weitergeben (Anzeige, Begleiter, Lektor, Verlauf).
     // [STIMMEN: …]/[VOICES: …] ist Regie: nur für die Stimmen-Begleitung (scene) und die Überspring-Prüfung (full).
-    const noWb = rawResponse ? stripWeltbuchTags(rawResponse) : rawResponse;
+    const noWb = rawResponse ? stripPresenceTags(stripWeltbuchTags(rawResponse)) : rawResponse;
     const shown = noWb ? stripVoiceTags(noWb) : noWb;
     return { raw: shown, clean: stripThink(shown), scene: stripThink(noWb, true), full: rawResponse || "", voices: extractVoiceTags(rawResponse), wb };
   }
@@ -4073,15 +4085,15 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
   // drafts: [{name, text, gm?, voice?}] in Reihenfolge dieses Zuges
   function p2StyleDefault(isEn, U = "{user}") {
     return isEn
-      ? `### ROLE: STYLE SYNTHESIS (EDITOR)\nYou are not a participant in the story. Rework ONLY the drafts of this turn below into ONE chapter in your style.\nRULES:\n1. Content only from the drafts: invent nothing (no new actions, places, items, thoughts, NPCs) and drop no event; keep the order (narration first, then the reactions as listed).\n2. Spoken words stay verbatim and with the right speaker.\n3. ${U}'s message is narrated as an action (in second person \"you\"), not quoted as speech unless it is direct speech; do not extend it or put new words into ${U}'s mouth.\n4. A draft under [NAME] describes NAME: its \"I/my\" means NAME (narrate in third person); \"you\" is always ${U}.\n5. No tags or square brackets, no heading, no recap of earlier events, no meta comments.\n6. About as long as the drafts together.`
-      : `### ROLLE: STIL-SYNTHESE (LEKTOR)\nDu bist kein Mitspieler. Schreibe NUR die Entwürfe dieses Zuges unten in deinem Stil zu EINEM Kapitel um.\nREGELN:\n1. Inhalt nur aus den Entwürfen: nichts erfinden (keine neuen Handlungen, Orte, Gegenstände, Gedanken, NPCs), kein Ereignis und keinen Absatz weglassen; Reihenfolge bleibt (erst die Erzählung, dann die Reaktionen wie aufgeführt).\n2. Wörtliche Rede bleibt wörtlich und beim richtigen Sprecher.\n3. Die Nachricht von ${U} wird als Handlung erzählt (in der 2. Person „du“), nicht als Rede zitiert, außer sie ist wörtliche Rede; nicht erweitern, ${U} keine neuen Worte in den Mund legen.\n4. Ein Entwurf unter [NAME] beschreibt NAME: „ich/mein“ darin meint NAME (in der 3. Person erzählen); „du“ ist immer ${U}.\n5. Keine Tags oder eckigen Klammern, keine Überschrift, keine Nacherzählung früherer Ereignisse, keine Meta-Kommentare.\n6. Etwa so lang wie die Entwürfe zusammen.`;
+      ? `### ROLE: STYLE SYNTHESIS (EDITOR)\nYou are not a participant in the story. Rework ONLY the drafts of this turn below into ONE chapter in your style.\nRULES:\n1. Content only from the drafts: invent nothing (no new actions, places, items, thoughts, NPCs) and drop no event; keep the order (narration first, then the reactions as listed).\n2. Spoken words stay verbatim and with the right speaker.\n3. ${U}'s message is narrated as an action (in second person \"you\"), not quoted as speech unless it is direct speech; do not extend it or put new words into ${U}'s mouth.\n4. A draft under [NAME] describes NAME: its \"I/my\" means NAME (narrate in third person); \"you\" is always ${U}.\n5. No tags or square brackets, no heading, no recap of earlier events, no meta comments.\n6. Length: see [LENGTH] below.`
+      : `### ROLLE: STIL-SYNTHESE (LEKTOR)\nDu bist kein Mitspieler. Schreibe NUR die Entwürfe dieses Zuges unten in deinem Stil zu EINEM Kapitel um.\nREGELN:\n1. Inhalt nur aus den Entwürfen: nichts erfinden (keine neuen Handlungen, Orte, Gegenstände, Gedanken, NPCs), kein Ereignis und keinen Absatz weglassen; Reihenfolge bleibt (erst die Erzählung, dann die Reaktionen wie aufgeführt).\n2. Wörtliche Rede bleibt wörtlich und beim richtigen Sprecher.\n3. Die Nachricht von ${U} wird als Handlung erzählt (in der 2. Person „du“), nicht als Rede zitiert, außer sie ist wörtliche Rede; nicht erweitern, ${U} keine neuen Worte in den Mund legen.\n4. Ein Entwurf unter [NAME] beschreibt NAME: „ich/mein“ darin meint NAME (in der 3. Person erzählen); „du“ ist immer ${U}.\n5. Keine Tags oder eckigen Klammern, keine Überschrift, keine Nacherzählung früherer Ereignisse, keine Meta-Kommentare.\n6. Länge: siehe [LÄNGE] unten.`;
   }
   async function runEditorSynthesis({ editorChar, userName, triggerText, drafts, onChunk, maxTokens, prevTail }) {
     const isEn = state.lang === "en", U = String(userName || (isEn ? "Player" : "Spieler"));
     const use = drafts.filter(d => d && String(d.text || "").trim());
     const gloss = editorGlossary(use, U);
     const label = d => d.gm ? (isEn ? "NARRATION & NPCS" : "ERZÄHLUNG & NPCS") : d.voice ? (isEn ? "NPC VOICES" : "NPC-STIMMEN") : String(d.name || "").toUpperCase();
-    const sys = p2Tpl("style") ? p2Fill(p2Tpl("style"), { user: U }) : p2StyleDefault(isEn, U); P2.loreParts = { lore: 0, mem: 0 };
+    const sys = (p2Tpl("style") ? p2Fill(p2Tpl("style"), { user: U }) : p2StyleDefault(isEn, U)) + antiGodmodRule(isEn, U) + lengthRule(isEn, false) + (isEn ? "\nOnly characters who have a draft below appear; add no other character." : "\nEs treten nur Figuren auf, die unten einen Entwurf haben; füge keine weitere Figur hinzu."); P2.loreParts = { lore: 0, mem: 0 };
     const parts = [];
     if (gloss.length) parts.push(`[${isEn ? "NAMES & TERMS (spelling only)" : "NAMEN & BEGRIFFE (nur Schreibweise)"}]: ${gloss.join(", ")}`);
     if (prevTail) parts.push(`[${isEn ? "END OF PREVIOUS CHAPTER (connection only, do not repeat)" : "ENDE DES VORIGEN KAPITELS (nur Anschluss, nicht wiederholen)"}]: ${prevTail}`);
@@ -4091,11 +4103,69 @@ STRIKT: Schlage GENAU EINE prägnante Aktion/Erwiderung (1-2 Sätze) im Präsens
     partialStreamingText = "";
     const raw = await streamInfermatic(editorChar, [{ role: "user", content: parts.join("\n\n") }], sys, onChunk, false, [], maxTokens, { bare: true });
     // Tags gehören nie in den Kapiteltext (Auswertung lief schon auf den Original-Antworten)
-    const shown = raw ? stripAppTags(raw).replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim() : raw;
+    const shown = raw ? stripGodmod(stripAppTags(raw), triggerText).replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim() : raw;
     return { raw: shown, clean: stripThink(shown), full: raw || "" };
   }
   // PATCH: NPC-Stimme überspringen, wenn die Spielleitung [STIMMEN: keine] (oder [STIMMEN: —]) signalisiert
   function isNpcVoiceChar(c) { return /stimmen der welt|voices of the world/i.test(String(c?.name || "")) || /^(Du bist DIE STIMMEN DER WELT|You are THE VOICES OF THE WORLD)/i.test(String(c?.prompt || "")); }
+  // ---------- Szenen-Präsenz, Anti-Godmodding, Antwortlänge ----------
+  function isPresent(c) { return !!c && c.present !== false; }
+  const PRES_RE = /\[\s*(ENTERS|BETRITT|KOMMT|LEAVES|GEHT|VERLÄSST|VERLAESST)\s*[:\uFF1A]\s*([^\]\n]*)\]?/gi;
+  function stripPresenceTags(text) { return String(text || "").replace(/\n?[ \t]*\[\s*(?:ENTERS|BETRITT|KOMMT|LEAVES|GEHT|VERLÄSST|VERLAESST)\s*[:\uFF1A][^\]\n]*\]?/gi, ""); }
+  function applyPresenceTags(text) {
+    const src = String(text || ""); let m, changed = false; PRES_RE.lastIndex = 0;
+    while ((m = PRES_RE.exec(src)) !== null) {
+      const enter = /^(ENTERS|BETRITT|KOMMT)$/i.test(m[1]);
+      String(m[2] || "").split(/[,;]|\bund\b|\band\b/i).map(x => x.trim()).filter(Boolean).forEach(n => {
+        const c = (state.characters || []).find(x => x && x.role === "companion" && String(x.name || "").trim().toLowerCase() === n.toLowerCase());
+        if (c && isPresent(c) !== enter) { c.present = enter; changed = true; }
+      });
+    }
+    if (changed) { try { renderCharacters(); renderQuickTriggers(); } catch (e) {} }
+    return changed;
+  }
+  function isAddressed(c, text) {
+    const n = String(c?.name || "").trim(); if (n.length < 2) return false;
+    return new RegExp("(^|[^\\p{L}])" + escapeRegex(n) + "(?=$|[^\\p{L}])", "iu").test(String(text || ""));
+  }
+  // Wer reagiert in diesem Zug? Anwesend, direkt angesprochen oder von der Spielleitung hereingeholt. Abwesende: kein API-Aufruf.
+  function companionActsThisTurn(c, triggerText) { return isPresent(c); }
+  // Spieler spricht eine Figur beim Namen an -> sie kommt in die Szene (vor der Spielleitung, damit die es weiß)
+  function presenceFromPlayer(text) {
+    let ch = false; (state.characters || []).forEach(c => { if (c && c.role === "companion" && !isPresent(c) && isAddressed(c, text)) { c.present = true; ch = true; } });
+    if (ch) { try { renderCharacters(); renderQuickTriggers(); } catch (e) {} } return ch;
+  }
+  function presenceDirective(isEn) {
+    const comps = (state.characters || []).filter(c => c && c.role === "companion" && !isNpcVoiceChar(c));
+    if (!comps.length) return "";
+    const pr = comps.filter(isPresent).map(c => c.name), ab = comps.filter(c => !isPresent(c)).map(c => c.name + (c.location ? ` (${c.location})` : ""));
+    return isEn ? `\n\n[SCENE PRESENCE]: Present: ${pr.join(", ") || "—"}. Absent: ${ab.join(", ") || "—"}. Absent characters are NOT in the scene: do not let them speak or act, and they know nothing of what happens here. To bring someone in or out write on its own line [ENTERS: Name] or [LEAVES: Name].`
+      : `\n\n[SZENEN-PRÄSENZ]: Anwesend: ${pr.join(", ") || "—"}. Abwesend: ${ab.join(", ") || "—"}. Abwesende Figuren sind NICHT in der Szene: lass sie weder sprechen noch handeln, und sie wissen nichts von dem, was hier geschieht. Um jemanden herein- oder hinauszuholen, schreibe in eine eigene Zeile [BETRITT: Name] oder [GEHT: Name].`;
+  }
+  function knowledgeDirective(c, isEn) {
+    if (isPresent(c)) return isEn ? "\nYou only know what your character has seen, heard or been told; never reveal secrets you could not know." : "\nDu weißt nur, was deine Figur selbst gesehen, gehört oder erzählt bekommen hat; verrate keine Geheimnisse, die du nicht wissen kannst.";
+    const loc = c.location ? (isEn ? ` You are at: ${c.location}.` : ` Du bist gerade: ${c.location}.`) : "";
+    return isEn ? `\nYou are NOT physically in the current scene.${loc} You were called by name; answer only as someone far away could (e.g. a call or a thought), and you know nothing of what happened there.` : `\nDu bist NICHT in der aktuellen Szene.${loc} Du wurdest beim Namen gerufen; antworte nur so, wie es jemand aus der Ferne könnte, und du weißt nichts von dem, was dort geschah.`;
+  }
+  function antiGodmodRule(isEn, U) {
+    return isEn ? `\n\n[HARD RULE – PLAYER AGENCY]: ${U} is controlled ONLY by the player. NEVER write ${U}'s speech, thoughts, feelings, decisions or actions beyond what the player wrote. You may only restate the player's own message faithfully. Never write lines like "you murmur/say/ask/think …" with new words. End at a point where ${U} can act.`
+      : `\n\n[HARTE REGEL – SPIELERFREIHEIT]: ${U} wird NUR vom Spieler gesteuert. Schreibe NIEMALS Worte, Gedanken, Gefühle, Entscheidungen oder Handlungen von ${U}, die über das hinausgehen, was der Spieler geschrieben hat. Du darfst nur die eigene Nachricht des Spielers getreu wiedergeben. Niemals Sätze wie „…“, murmelst/sagst/fragst/denkst du mit neuen Worten. Ende an einer Stelle, an der ${U} handeln kann.`;
+  }
+  const LEN_WORDS = { short: [60, 120], medium: [150, 250], long: [300, 450] };
+  function replyLen() { const v = state.settings?.replyLen; return LEN_WORDS[v] ? v : "medium"; }
+  function lengthRule(isEn, part) {
+    const [a, b] = LEN_WORDS[replyLen()];
+    if (part) { const pa = Math.max(25, Math.round(a / 3)), pb = Math.max(50, Math.round(b / 2.5)); return isEn ? `\n[LENGTH]: at most ${pa}–${pb} words. Be concise.` : `\n[LÄNGE]: höchstens ${pa}–${pb} Wörter. Fasse dich knapp.`; }
+    return isEn ? `\n[LENGTH]: the whole chapter ${a}–${b} words. Shorten the drafts if needed (keep dialogue verbatim, drop repetition).` : `\n[LÄNGE]: das ganze Kapitel ${a}–${b} Wörter. Kürze die Entwürfe bei Bedarf (Rede wörtlich behalten, Wiederholungen streichen).`;
+  }
+  // Nachkontrolle: Sätze entfernen, die dem Spieler NEUE wörtliche Rede/Gedanken zuschreiben (Zitat steht nicht in seiner Nachricht)
+  function stripGodmod(text, userMsg) {
+    const norm = x => String(x || "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+    const um = norm(userMsg);
+    const V = "sagst|murmelst|fragst|flüsterst|rufst|denkst|antwortest|meinst|erwiderst|say|murmur|ask|whisper|shout|think|reply|answer|mutter";
+    const re = new RegExp(`(?:^|(?<=[.!?…»«“”"]\\s))[^.!?…\\n]*[„"“»«]([^„"“”»«\\n]{2,200})[“”"«»][^.!?…\\n]*?\\b(?:(?:${V})\\s+(?:du|you)\\b|(?:du|you)\\s+(?:${V}))[^.!?…\\n]*[.!?…]?`, "giu");
+    return String(text || "").replace(re, (all, q) => { const nq = norm(q); return nq && um.includes(nq) ? all : ""; }).replace(/[ \t]{2,}/g, " ").replace(/\n{3,}/g, "\n\n");
+  }
   function shouldSkipCompanion(comp, gmText) {
     const isNpcVoice = isNpcVoiceChar(comp);
     if (!isNpcVoice) return false;
@@ -7197,6 +7267,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     activeStreamMsgRef = null; 
     activeStreamSubRole = "";
     const turnPreIds = new Set(state.messages.map(m => m && m.id));
+    presenceFromPlayer(triggerText);
 
     const protectedNames = getProtectedNames();
     const protectedListStr = protectedNames.join(", ");
@@ -7234,7 +7305,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
         const accumulatedCompanions = [];
         for (const comp of companions) {
           if (isAborted) return;
-          if (shouldSkipCompanion(comp, gmTurn.full)) continue; // PATCH: kein API-Aufruf, kein Block für den Lektor
+          if (!companionActsThisTurn(comp, triggerText) || shouldSkipCompanion(comp, gmTurn.full)) continue; // PATCH: kein API-Aufruf, kein Block für den Lektor
           updateStatus(comp.name + t("st_reacts"));
           const compProg = getProgressionFor(comp.id);
           const compInventoryGuide = (isNpcVoiceChar(comp) ? "" : getInventoryPromptDirective(comp.name, compProg));
@@ -7355,7 +7426,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
         const finishedCompanions = [];
         for (const comp of companions) {
           if (isAborted) return;
-          if (shouldSkipCompanion(comp, gmTurn.full)) continue; // PATCH
+          if (!companionActsThisTurn(comp, triggerText) || shouldSkipCompanion(comp, gmTurn.full)) continue; // PATCH
           activeStreamSubRole = comp.id;
 
           const compPartDiv = document.createElement("div");
@@ -7403,6 +7474,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
           if (isAborted) break;
           const char = state.characters.find(c => c && c.id === charId);
           if (!char || char.role === 'editor') continue;
+          if (char.role === "companion" && !companionActsThisTurn(char, triggerText)) continue;   // abwesend: kein API-Aufruf
           const isGM = char.role === "gm";
           updateStatus(char.name + t("st_generating"));
 
@@ -7804,7 +7876,8 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       if (!c) return;
       if (aioOn() && (!aioN || c.id !== aioN.id)) return;   // All-in-One: nur der Erzähler
       const btn = document.createElement("button");
-      btn.className = "quick-btn";
+      btn.className = "quick-btn" + (c.role === "companion" && !isPresent(c) ? " absent" : "");
+      if (c.role === "companion" && !isPresent(c)) btn.title = t("pres_absent") + (c.location ? " · " + c.location : "");
       btn.innerHTML = `${formatAvatar(c.avatar, 15)} <span>${escapeHTML(c.name)}</span>`;
       btn.onclick = () => triggerSingleBot(c.id);
       bar.appendChild(btn);
@@ -7846,6 +7919,9 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     try { pvHint("user"); } catch (e) {}
   }
 
+  function togglePresence(id) { const c = (state.characters || []).find(x => x && x.id === id); if (!c) return; c.present = !isPresent(c); saveState(); renderCharacters(); renderQuickTriggers(); }
+  function setPresenceLoc(id, v) { const c = (state.characters || []).find(x => x && x.id === id); if (!c) return; c.location = String(v || "").trim().slice(0, 80); saveState(); }
+  window.togglePresence = togglePresence; window.setPresenceLoc = setPresenceLoc;
   function renderCharacters() {
     const list = document.getElementById("characters-list");
     if (!list) return;
@@ -7875,7 +7951,13 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       }
       let bagBtnHtml = "";
       if (c.role === 'companion') {
+        if (!isPresent(c)) card.classList.add("absent");
         bagBtnHtml = `
+          <div class="pres-row" style="display:flex; align-items:center; gap:6px; margin-top:4px; font-size:12px;">
+            <button class="btn btn-secondary pres-toggle" data-pres="${isPresent(c) ? 1 : 0}" onclick="togglePresence(${jsArg(safeCharId)})" style="font-size:12px; padding:4px 8px;">${isPresent(c) ? t("pres_present") : t("pres_absent")}</button>
+            <input class="pres-loc" placeholder="${escapeHTML(t("pres_loc_ph"))}" value="${escapeHTML(c.location || "")}" onchange="setPresenceLoc(${jsArg(safeCharId)}, this.value)" style="flex:1; min-width:0; font-size:16px; padding:4px 6px;">
+          </div>`;
+        bagBtnHtml += `
           <button class="btn btn-secondary" onclick="openBagModal(${jsArg(safeCharId)})" style="font-size:12px; margin-top:4px;">
             ${t("companion_bag_btn")}
           </button>`;
@@ -8196,6 +8278,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     if (combEl) combEl.checked = !!state.settings.combined;
     if (typeof aioRenderSettings === "function") { aioApplyClass(); aioRenderSettings(); abRenderSettings(); }
     if (typeof imgRenderSettings === "function") { imgRenderSettings(); p2TplRender(); }
+    const rlEl = document.getElementById("setting-reply-len"); if (rlEl) rlEl.value = replyLen();
     const ecEl = document.getElementById("setting-editor-cont");
     if (ecEl) ecEl.checked = !!state.settings.editorContinuity;
     const thEl = document.getElementById("setting-thoughts");
@@ -8725,6 +8808,8 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
   if (setCombEl) {
     setCombEl.onchange = (e) => { state.settings.combined = e.target.checked; saveState(); };
   }
+  const setRlEl = document.getElementById("setting-reply-len");
+  if (setRlEl) setRlEl.onchange = (e) => { state.settings.replyLen = e.target.value; saveState(); };
   const setEcEl = document.getElementById("setting-editor-cont");
   if (setEcEl) setEcEl.onchange = (e) => { state.settings.editorContinuity = !!e.target.checked; saveState(); };
   const setThEl = document.getElementById("setting-thoughts");
