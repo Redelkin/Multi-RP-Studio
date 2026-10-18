@@ -168,6 +168,13 @@
 
     .modal { position:fixed; inset:0; background:rgba(0,0,0,0.78); backdrop-filter:blur(3px); z-index:200; display:none; align-items:center; justify-content:center; padding:12px; }
     .modal.active { display:flex; }
+    .img-models-status { font-size:12px; margin-top:6px; padding:6px 8px; border-radius:8px; background:var(--surface); border:1px solid var(--border); white-space:pre-wrap; word-break:break-word; }
+    .img-models-status.err { border-color:#c0392b; color:#ff8a80; }
+    .img-models-list { display:flex; flex-direction:column; gap:4px; overflow-y:auto; max-height:60dvh; }
+    .img-models-list button { text-align:left; padding:12px; min-height:44px; border-radius:10px; border:1px solid var(--border); background:transparent; color:inherit; font-size:15px; display:flex; justify-content:space-between; gap:8px; cursor:pointer; }
+    .img-models-list button.sel { border-color:var(--accent, #6aa0ff); font-weight:bold; }
+    .img-models-list button small { opacity:.65; flex:0 0 auto; }
+    .img-models-count { font-size:12px; opacity:.7; }
     .modal-content { background:var(--surface); border:1px solid var(--border); width:100%; max-width:580px; max-height:88dvh; border-radius:16px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 10px 40px rgba(0,0,0,0.7); }
     .modal-header { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-weight:bold; font-size:15px; }
     .modal-body { padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; }
@@ -764,7 +771,7 @@
             <div class="form-group"><label for="p2-img-url">Base URL</label><input type="url" id="p2-img-url" inputmode="url" autocapitalize="off" spellcheck="false"></div>
             <div class="form-group" id="p2-img-key-row"><label for="p2-img-key">API Key</label><input type="password" id="p2-img-key" autocomplete="off" spellcheck="false">
               <label class="p2-chk" id="img-reuse-row"><input type="checkbox" id="img-reuse"><span data-i18n="img_reuse">ArliAI-Chat-Key wiederverwenden, wenn leer</span></label></div>
-            <div class="form-group" data-f="model"><label for="p2-img-model" data-i18n="lbl_model">Modell</label><div class="xio-row"><input type="text" id="p2-img-model" list="img-models-dl" autocapitalize="off" spellcheck="false" style="flex:1;min-width:0"><button class="btn btn-secondary" id="img-models-btn" style="flex:0 0 auto;width:auto" title="Modell-Liste laden" aria-label="Modell-Liste laden" data-i18n-title="img_models_btn">📋</button></div><datalist id="img-models-dl"></datalist></div>
+            <div class="form-group" data-f="model"><label for="p2-img-model" data-i18n="lbl_model">Modell</label><div class="xio-row"><input type="text" id="p2-img-model" autocomplete="off" autocapitalize="off" spellcheck="false" style="flex:1;min-width:0"><button class="btn btn-secondary" id="img-models-btn" style="flex:0 0 auto;width:auto" title="Modell-Liste laden" aria-label="Modell-Liste laden" data-i18n-title="img_models_btn">📋</button></div><div id="img-models-status" class="img-models-status" role="status" aria-live="polite" hidden></div></div>
             <div class="form-group" data-f="size"><label for="img-size" data-i18n="img_size">Größe / Format</label><select id="img-size"></select></div>
             <div class="p2-grid">
               <label data-f="steps"><span data-i18n="img_steps">Schritte</span><input type="number" id="img-steps" min="1" max="150" inputmode="numeric"></label>
@@ -936,6 +943,16 @@
     <button class="nav-tab" data-view="view-settings"><span class="nav-icon">⚙️</span><span class="nav-label" data-i18n="tab_system">System</span></button>
   </nav>
 
+  <div class="modal" id="img-models-modal" role="dialog" aria-modal="true" aria-labelledby="img-models-title">
+    <div class="modal-content">
+      <div class="modal-header"><span id="img-models-title">📋 <span data-i18n="img_models_pick">Bild-Modell wählen</span></span><button class="btn btn-secondary" id="img-models-close" style="width:auto" aria-label="Schließen" data-i18n-title="img_cancel">✕</button></div>
+      <div class="modal-body" style="gap:8px">
+        <input type="search" id="img-models-search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" data-i18n-ph="img_models_search" placeholder="Suchen …">
+        <div id="img-models-count" class="img-models-count"></div>
+        <div id="img-models-list" class="img-models-list" role="listbox"></div>
+      </div>
+    </div>
+  </div>
   <div class="modal" id="bag-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -1707,6 +1724,8 @@
 
   Object.assign(I18N.de, {"img_p_arliai": "ArliAI (txt2img, SD.Next)", "img_p_a1111": "Automatic1111 / Forge / SD.Next / Draw Things (lokal)", "img_p_openai": "OpenAI (gpt-image / DALL-E)", "img_p_oaicompat": "OpenAI-kompatibel (eigene URL, z. B. sd.cpp, LocalAI)", "img_p_together": "Together AI", "img_p_nanogpt": "NanoGPT", "img_p_aimlapi": "AI/ML API", "img_p_electronhub": "Electron Hub", "img_p_xai": "xAI (Grok Image)", "img_p_openrouter": "OpenRouter (Bild-Modelle)", "img_p_google": "Google Gemini API (Imagen)", "img_p_stability": "Stability AI (Stable Image)", "img_p_huggingface": "Hugging Face Inference", "img_p_fal": "fal.ai", "img_p_novelai": "NovelAI (V3-Modelle)", "img_p_horde": "AI Horde (Community)", "img_p_pollinations": "Pollinations (extern, ohne Key)", "img_p_comfy": "ComfyUI – Workflow nötig", "img_p_bfl": "Black Forest Labs – kein CORS", "img_p_chutes": "Chutes – Proxy nötig", "img_p_workersai": "Cloudflare Workers AI – kein CORS", "img_p_zai": "Z.AI – Proxy nötig", "img_p_extras": "SillyTavern Extras – veraltet", "img_e_auth": "Zugriff verweigert ({s}): API-Key prüfen.", "img_e_pay": "Guthaben/Abo reicht nicht ({s}).", "img_e_404": "Nicht gefunden ({s}) – Endpunkt, Modell oder Sampler prüfen.", "img_rec": "Empfehlung des Modells übernommen: {s}, {n} Schritte, CFG {c}.", "img_e_rate": "Zu viele Anfragen ({s}) – kurz warten.", "img_e_srv": "Fehler beim Bild-Server ({s}).", "img_e_bad": "Anfrage abgelehnt ({s}).", "img_e_http": "HTTP-Fehler {s}.", "img_e_net": "Keine Verbindung zum Bild-Anbieter (Netzwerk oder CORS). Lokale Server mit CORS starten, z. B. A1111: --api --cors-allow-origins=*", "img_e_model": "Bitte ein Bild-Modell wählen (bei ArliAI Pflicht: sd_model_checkpoint) – 📋 lädt die Liste.", "img_e_noprompt": "Die Spielleitung hat keinen Bild-Prompt geliefert.", "img_e_nomsg": "Noch keine Szene im Chat – erst eine Antwort der Spielleitung abwarten.", "img_cancelled": "Abgebrochen.", "img_off": "Bilder sind aus – System → 🧪 Profi-Werkzeuge → Bilder.", "img_using": "Anbieter: {p} · Modell: {m} · {s}", "img_go": "✨ Prompt schreiben & Bild erzeugen", "img_go_custom": "🎨 Bild aus eigenem Prompt erzeugen", "img_cancel": "Abbrechen", "img_st_write": "✍️ 1/2 – Spielleitung schreibt den Bild-Prompt …", "img_st_gen": "🎨 2/2 – Bild wird erzeugt …", "img_st_queue": "🎨 2/2 – In der Warteschlange: Platz {q}, ca. {s} s", "img_na_group": "Nicht direkt im Browser (Proxy/Workflow nötig)", "img_key_reused": "leer = ArliAI-Chat-Key aus deinem Profil", "img_key_none": "kein ArliAI-Chat-Key gefunden – hier eintragen", "img_key_notneeded": "kein Key nötig", "img_key_opt": "optional", "img_h_arliai": "Laut ArliAI-Doku: POST /sdapi/v1/txt2img, Modell (sd_model_checkpoint) ist Pflicht, max. 40 Schritte. 📋 lädt die Modelle.", "img_h_a1111": "Lokal: WebUI mit --api --cors-allow-origins=* starten (Draw Things: HTTP-API aktivieren).", "img_h_horde": "Ohne Key anonym (langsam, Warteschlange). Ein eigener Key bringt Vorrang.", "img_h_novelai": "Nur V3-Modelle (nai-diffusion-3, nai-diffusion-furry-3); V4 nutzt ein anderes Format.", "img_h_openrouter": "Bild über chat/completions mit modalities [image, text].", "img_h_oaicompat": "Jeder Server mit /v1/images/generations (z. B. stable-diffusion.cpp, LocalAI).", "img_models_loading": "Modelle werden geladen …", "img_models_ok": "{n} Modelle geladen – im Feld „Modell“ auswählen.", "img_models_fail": "Modell-Liste fehlgeschlagen: {e} – Modell bitte von Hand eintragen.", "img_test_ok": "✅ Verbindung funktioniert:", "img_prompt": "Prompt", "img_edit_redo": "✏️ Prompt bearbeiten & neu erzeugen", "img_fab": "Szenenbild erzeugen", "img_reuse": "ArliAI-Chat-Key wiederverwenden, wenn leer", "img_models_btn": "Modell-Liste laden", "img_size": "Größe / Format", "img_steps": "Schritte", "img_seed": "Seed (−1 = zufällig)", "img_neg": "Negativ-Prompt (Standard)", "img_style": "Stil-Präfix (vor jedem Prompt)", "img_test": "🧪 Verbindung testen (Testbild)", "img_title": "🎨 Szenenbild", "img_mode": "Was soll ins Bild?", "img_m_scene": "Aktuelle Szene", "img_m_last": "Letzte Nachricht", "img_m_portrait": "Porträt einer Figur", "img_m_custom": "Eigener Prompt", "img_char": "Figur", "img_pos": "Positiv", "img_negp": "Negativ", "img_redo": "🎨 Mit diesem Prompt neu erzeugen", "p2_img_nokey": "Für den Bild-Anbieter fehlt der API-Key (System → 🧪 Profi-Werkzeuge → Bilder)."});
   Object.assign(I18N.en, {"img_p_arliai": "ArliAI (txt2img, SD.Next)", "img_p_a1111": "Automatic1111 / Forge / SD.Next / Draw Things (local)", "img_p_openai": "OpenAI (gpt-image / DALL-E)", "img_p_oaicompat": "OpenAI-compatible (own URL, e.g. sd.cpp, LocalAI)", "img_p_together": "Together AI", "img_p_nanogpt": "NanoGPT", "img_p_aimlapi": "AI/ML API", "img_p_electronhub": "Electron Hub", "img_p_xai": "xAI (Grok Image)", "img_p_openrouter": "OpenRouter (image models)", "img_p_google": "Google Gemini API (Imagen)", "img_p_stability": "Stability AI (Stable Image)", "img_p_huggingface": "Hugging Face Inference", "img_p_fal": "fal.ai", "img_p_novelai": "NovelAI (V3 models)", "img_p_horde": "AI Horde (Community)", "img_p_pollinations": "Pollinations (external, no key)", "img_p_comfy": "ComfyUI – needs a workflow", "img_p_bfl": "Black Forest Labs – no CORS", "img_p_chutes": "Chutes – needs a proxy", "img_p_workersai": "Cloudflare Workers AI – no CORS", "img_p_zai": "Z.AI – needs a proxy", "img_p_extras": "SillyTavern Extras – deprecated", "img_e_auth": "Access denied ({s}): check the API key.", "img_e_pay": "Insufficient credits/plan ({s}).", "img_e_404": "Not found ({s}) – check endpoint, model or sampler.", "img_rec": "Applied the model’s recommendation: {s}, {n} steps, CFG {c}.", "img_e_rate": "Too many requests ({s}) – wait a moment.", "img_e_srv": "Image server error ({s}).", "img_e_bad": "Request rejected ({s}).", "img_e_http": "HTTP error {s}.", "img_e_net": "Cannot reach the image provider (network or CORS). Start local servers with CORS, e.g. A1111: --api --cors-allow-origins=*", "img_e_model": "Please choose an image model (required for ArliAI: sd_model_checkpoint) – 📋 loads the list.", "img_e_noprompt": "The game master returned no image prompt.", "img_e_nomsg": "No scene in the chat yet – wait for a game master reply first.", "img_cancelled": "Cancelled.", "img_off": "Images are off – System → 🧪 Power tools → Images.", "img_using": "Provider: {p} · Model: {m} · {s}", "img_go": "✨ Write prompt & generate image", "img_go_custom": "🎨 Generate from my prompt", "img_cancel": "Cancel", "img_st_write": "✍️ 1/2 – The game master is writing the image prompt …", "img_st_gen": "🎨 2/2 – Generating image …", "img_st_queue": "🎨 2/2 – Queued: position {q}, about {s} s", "img_na_group": "Not directly in the browser (proxy/workflow needed)", "img_key_reused": "empty = ArliAI chat key from your profile", "img_key_none": "no ArliAI chat key found – enter one here", "img_key_notneeded": "no key needed", "img_key_opt": "optional", "img_h_arliai": "Per ArliAI docs: POST /sdapi/v1/txt2img, the model (sd_model_checkpoint) is required, max 40 steps. 📋 loads the models.", "img_h_a1111": "Local: start the WebUI with --api --cors-allow-origins=* (Draw Things: enable the HTTP API).", "img_h_horde": "Anonymous without a key (slow, queued). Your own key gives priority.", "img_h_novelai": "V3 models only (nai-diffusion-3, nai-diffusion-furry-3); V4 uses a different format.", "img_h_openrouter": "Image via chat/completions with modalities [image, text].", "img_h_oaicompat": "Any server with /v1/images/generations (e.g. stable-diffusion.cpp, LocalAI).", "img_models_loading": "Loading models …", "img_models_ok": "{n} models loaded – pick one in the “Model” field.", "img_models_fail": "Model list failed: {e} – please type the model by hand.", "img_test_ok": "✅ Connection works:", "img_prompt": "Prompt", "img_edit_redo": "✏️ Edit prompt & regenerate", "img_fab": "Generate scene image", "img_reuse": "Reuse the ArliAI chat key when empty", "img_models_btn": "Load model list", "img_size": "Size / aspect", "img_steps": "Steps", "img_seed": "Seed (−1 = random)", "img_neg": "Negative prompt (default)", "img_style": "Style prefix (before every prompt)", "img_test": "🧪 Test connection (test image)", "img_title": "🎨 Scene image", "img_mode": "What should the image show?", "img_m_scene": "Current scene", "img_m_last": "Last message", "img_m_portrait": "Character portrait", "img_m_custom": "Custom prompt", "img_char": "Character", "img_pos": "Positive", "img_negp": "Negative", "img_redo": "🎨 Regenerate with this prompt", "p2_img_nokey": "The image provider needs an API key (System → 🧪 Power tools → Images)."});
+  Object.assign(I18N.de, {"img_models_pick": "Bild-Modell wählen", "img_models_search": "Suchen …", "img_models_count": "{n} von {t} Modellen", "img_models_none": "Kein Treffer.", "img_models_ok2": "{n} Modelle geladen – zum Auswählen antippen.", "img_models_set": "Modell gewählt: {m}", "img_models_empty": "Der Server hat keine Modelle geliefert.", "img_models_nokey_arli": "Kein API-Key: weder im Bild-Key-Feld noch ein ArliAI-Chat-Key im Profil (Basis-URL mit arliai.com). Key eintragen und erneut 📋 tippen.", "img_models_cors": "Keine Antwort lesbar (Netzwerk oder CORS). Server {u} muss Anfragen von {o} erlauben; Internetverbindung und Basis-URL prüfen.", "img_e_nomodel": "Modell „{m}“ gibt es beim Anbieter nicht.", "img_e_sugg": "Meintest du: {s}? (📋 öffnet die Liste)", "img_e_pick": "Bitte mit 📋 ein Modell aus der Liste wählen.", "img_model_fixed": "Modellname korrigiert: {m}"});
+  Object.assign(I18N.en, {"img_models_pick": "Choose image model", "img_models_search": "Search …", "img_models_count": "{n} of {t} models", "img_models_none": "No match.", "img_models_ok2": "{n} models loaded – tap one to select.", "img_models_set": "Model selected: {m}", "img_models_empty": "The server returned no models.", "img_models_nokey_arli": "No API key: neither in the image key field nor an ArliAI chat key in the profile (base URL with arliai.com). Enter a key and tap 📋 again.", "img_models_cors": "No readable response (network or CORS). Server {u} must allow requests from {o}; check the connection and base URL.", "img_e_nomodel": "Model “{m}” does not exist at this provider.", "img_e_sugg": "Did you mean: {s}? (📋 opens the list)", "img_e_pick": "Please pick a model from the list with 📋.", "img_model_fixed": "Model name corrected: {m}"});
   Object.assign(I18N.de, {"btn_close": "Schließen", "img_src": "Prompt-Quelle", "img_src_gm": "Spielleitung schreibt Prompt", "img_src_d1": "Direkt aus letzter Nachricht", "img_src_dn": "Direkt aus letzten {n} Nachrichten", "img_src_hint": "Hinweis: SD-Modelle verstehen Deutsch schlecht – für beste Ergebnisse „Spielleitung schreibt Prompt“.", "img_fallback": "⚠️ Die Spielleitung lieferte keinen brauchbaren Prompt ({e}). Prompt wurde lokal aus der Szene gebaut – bitte prüfen/bearbeiten.", "img_e_gmempty": "leere Antwort (finish={f}, HTTP {s}): {x}", "img_e_gmtimeout": "GM: Zeitüberschreitung", "img_e_gmnet": "GM: keine Verbindung", "img_e_gmcut": "GM: Verbindung während der Antwort abgebrochen"});
   Object.assign(I18N.en, {"btn_close": "Close", "img_src": "Prompt source", "img_src_gm": "Game master writes the prompt", "img_src_d1": "Directly from the last message", "img_src_dn": "Directly from the last {n} messages", "img_src_hint": "Note: SD models understand German poorly – for best results use “Game master writes the prompt”.", "img_fallback": "⚠️ The game master returned no usable prompt ({e}). The prompt was built locally from the scene – please check/edit.", "img_e_gmempty": "empty reply (finish={f}, HTTP {s}): {x}", "img_e_gmtimeout": "GM: timeout", "img_e_gmnet": "GM: no connection", "img_e_gmcut": "GM: connection dropped during the reply"});
   Object.assign(I18N.de, {"img_share": "Teilen/Speichern", "img_dl": "Herunterladen", "img_dl_ok": "Gespeichert als {f}"});
@@ -9617,7 +9636,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     let d = ""; try { const j = JSON.parse(text); const e = (typeof j.error === "string" && (j.detail || j.message)) ? (j.detail || j.message) : (j.error || j.errors || j); d = typeof e === "string" ? e : (e.message || e.detail || e.msg || j.message || j.detail || (Array.isArray(e) ? e.map(x => x.message || x).join("; ") : JSON.stringify(e))); } catch (_) { d = String(text || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(); }
     if (key) d = d.split(key).join("••••");
     const k = status === 401 || status === 403 ? "img_e_auth" : status === 402 ? "img_e_pay" : status === 404 ? "img_e_404" : status === 429 ? "img_e_rate" : status >= 500 ? "img_e_srv" : status === 400 || status === 422 ? "img_e_bad" : "img_e_http";
-    const e = new Error(tf(k, { s: status }) + (d ? " – " + String(d).slice(0, 220) : "")); e.status = status; return e;
+    const e = new Error(tf(k, { s: status }) + (d ? " – " + String(d).slice(0, 220) : "")); e.status = status; e.detail = String(d || ""); return e;
   }
   async function imgJson(url, opt, key, sig) {
     let r; try { r = await fetch(url, { ...opt, signal: sig }); } catch (e) { if (e.name === "AbortError") throw e; throw new Error(t("img_e_net")); }
@@ -9637,10 +9656,18 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
   async function imgSdRun(c, P, sig, needModel, path) {
     if (needModel && !c.model) throw new Error(t("img_e_model"));
     try { return await imgSdRun1(c, P, sig, needModel, path); }
-    catch (e) { if (!(e.status === 404 && /sampler/i.test(e.message)) || c._retry) throw e;
+    catch (e) {
+      if ((e.status === 404 || e.status === 400 || e.status === 422) && /model|checkpoint/i.test(e.detail || "") && /does not exist|not\s*found|unknown|invalid|no such/i.test(e.detail || "") && !/sampler/i.test(e.detail || "") && !c._fixModel) {
+        let L = IMG.models[c.prov]; if (!L || !L.length) { try { L = IMG.models[c.prov] = await imgSdModels(c, sig); } catch (_) { L = []; } }
+        const r = imgModelMatch(c.model, L);
+        if (r.exact && r.exact !== c.model) { console.warn("Modellname korrigiert:", c.model, "→", r.exact); imgFixSavedModel(c.prov, r.exact); return imgSdRun({ ...c, model: r.exact, _fixModel: true }, P, sig, needModel, path); }
+        const err = new Error(tf("img_e_nomodel", { m: c.model }) + (r.sugg.length ? " " + tf("img_e_sugg", { s: r.sugg.join(", ") }) : " " + t("img_e_pick"))); err.status = e.status; throw err;
+      }
+      if (!(e.status === 404 && /sampler/i.test(e.detail || "")) || c._retry) throw e;
       const meta = (IMG.models[c.prov] || []).find(m => m.id === c.model), alt = (meta && meta.rec && meta.rec.sampler_name) || "Default"; if (alt === c.sampler) throw e;
       console.warn("Sampler abgelehnt, erneut mit", alt); return imgSdRun1({ ...c, sampler: alt, _retry: true }, P, sig, needModel, path); }
   }
+  function imgFixSavedModel(prov, id) { try { const o = state.user.img && state.user.img.p && state.user.img.p[prov]; if (o) { o.model = id; saveState(); } const el = document.getElementById("p2-img-model"); if (el && imgCfg().prov === prov) el.value = id; showToast(tf("img_model_fixed", { m: id }), "info"); } catch (_) {} }
   async function imgSdRun1(c, P, sig, needModel, path) {
     const j = await imgJson(imgBase(c) + (path || "/sdapi/v1/txt2img"), { method: "POST", headers: { "Content-Type": "application/json", ...imgAuth(c) }, body: JSON.stringify(imgSdBody(c, P, needModel)) }, c.key, sig);
     if (!j.images || !j.images[0]) throw new Error(t("p2_img_empty") + (j.error ? " – " + (j.error.message || j.error) : "")); return imgB64Blob(j.images[0]);
@@ -9938,7 +9965,6 @@ NEGATIVE: <short ${tags ? "tag list" : "comma list"} of things to avoid>`;
     const f = new Set(c.def.f.split(" ")); document.querySelectorAll("#p2-img-box [data-f]").forEach(el => { el.hidden = !f.has(el.dataset.f); });
     g("p2-img-key-row").hidden = c.def.key === "none"; g("img-models-btn").hidden = !c.def.models;
     g("p2-img-ext").hidden = !c.def.ext; g("img-hint").textContent = t("img_h_" + c.prov) === "img_h_" + c.prov ? "" : t("img_h_" + c.prov); g("img-hint").hidden = !g("img-hint").textContent;
-    g("img-models-dl").innerHTML = (IMG.models[c.prov] || []).map(m => `<option value="${escapeHTML(m.id)}">${escapeHTML(m.type)}</option>`).join("");
     g("p2-img-max").value = c.maxMB; g("p2-img-exp").checked = state.settings.exportImages === true; imgFab();
   }
   function imgSaveSettings(ev) {
@@ -9953,11 +9979,48 @@ NEGATIVE: <short ${tags ? "tag list" : "comma list"} of things to avoid>`;
       if (meta && meta.rec) { const o = I.p[cur.prov]; if (meta.rec.sampler_name) o.sampler = meta.rec.sampler_name; if (meta.rec.steps) o.steps = Math.min(40, meta.rec.steps); if (meta.rec.cfg_scale !== undefined) o.cfg = meta.rec.cfg_scale; showToast(tf("img_rec", { s: o.sampler, n: o.steps, c: o.cfg }), "info"); } }
     saveState(); imgRenderSettings(); renderChat(); renderCharacters();
   }
+  function imgModelsStatus(msg, err) { const el = document.getElementById("img-models-status"); if (!el) return; el.textContent = msg || ""; el.hidden = !msg; el.classList.toggle("err", !!err); }
+  function imgModelsErr(e, c) {   // sichtbare Fehlermeldung mit HTTP-Status bzw. CORS-/Netzwerk-Hinweis
+    if (e && e.name === "AbortError") return t("img_cancelled");
+    const m = imgErrMsg(e); if (e && e.status) return m;
+    return m + "\n" + tf("img_models_cors", { u: imgBase(c), o: location.origin && location.origin !== "null" ? location.origin : location.protocol });
+  }
   async function imgLoadModels() {
-    const c = imgCfg(), out = document.getElementById("img-test-out"); if (!c.def.models) return;
-    out.textContent = t("img_models_loading");
-    try { const L = await c.def.models(c); IMG.models[c.prov] = L; imgRenderSettings(); out.textContent = tf("img_models_ok", { n: L.length }); if (!c.model && L[0]) { document.getElementById("p2-img-model").value = L[0].id; imgSaveSettings(); } }
-    catch (e) { out.textContent = tf("img_models_fail", { e: imgErrMsg(e).slice(0, 200) }); }
+    const g = id => document.getElementById(id);
+    if (g("p2-img-key")) imgSaveSettings();   // aktuelle Feldwerte übernehmen (Android: change kommt nicht immer vor dem Tap)
+    const c = imgCfg(), out = g("img-test-out"); if (!c.def.models) return;
+    if (c.def.key === "req" && !c.key) { const m = c.prov === "arliai" ? t("img_models_nokey_arli") : t("p2_img_nokey"); imgModelsStatus(m, true); if (out) out.textContent = m; return; }
+    imgModelsStatus(t("img_models_loading")); if (out) out.textContent = t("img_models_loading");
+    const b = g("img-models-btn"); if (b) b.disabled = true;
+    try { const L = await c.def.models(c); IMG.models[c.prov] = L;
+      if (!L.length) throw new Error(t("img_models_empty"));
+      const ok = tf("img_models_ok2", { n: L.length }); imgModelsStatus(ok); if (out) out.textContent = ok; imgModelsOpen(); }
+    catch (e) { const m = tf("img_models_fail", { e: imgModelsErr(e, c).slice(0, 400) }); imgModelsStatus(m, true); if (out) out.textContent = m; }
+    finally { if (b) b.disabled = false; }
+  }
+  function imgModelsOpen() {
+    const g = id => document.getElementById(id), c = imgCfg(), L = IMG.models[c.prov] || [], q = g("img-models-search");
+    q.value = ""; imgModelsRender(); g("img-models-modal").classList.add("active");
+    setTimeout(() => { const s = g("img-models-list").querySelector(".sel"); if (s) s.scrollIntoView({ block: "center" }); }, 30);
+  }
+  function imgModelsRender() {
+    const g = id => document.getElementById(id), c = imgCfg(), L = IMG.models[c.prov] || [], q = imgNorm(g("img-models-search").value), cur = g("p2-img-model").value.trim();
+    const hit = L.filter(m => !q || imgNorm(m.id + " " + m.type).includes(q));
+    g("img-models-count").textContent = tf("img_models_count", { n: hit.length, t: L.length });
+    g("img-models-list").innerHTML = hit.map(m => `<button type="button" role="option" data-id="${escapeHTML(m.id)}" class="${m.id === cur ? "sel" : ""}" aria-selected="${m.id === cur}"><span>${escapeHTML(m.id)}</span><small>${escapeHTML(m.type)}</small></button>`).join("") || `<div class="img-models-count">${escapeHTML(t("img_models_none"))}</div>`;
+  }
+  function imgModelsPick(id) {
+    const g = id2 => document.getElementById(id2), el = g("p2-img-model"); el.value = id;
+    imgSaveSettings({ target: el }); g("img-models-modal").classList.remove("active"); imgModelsStatus(tf("img_models_set", { m: id }));
+  }
+  // Nachsichtiger Modellname: Groß/Klein, I/l/1 und O/0, Trennzeichen egal
+  const imgNorm = s => String(s || "").toLowerCase().replace(/[il1|]/g, "l").replace(/0/g, "o").replace(/[\s_\-.:]+/g, "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+  function imgModelMatch(name, L) {
+    const n = imgNorm(name), ids = (L || []).map(m => m.id || m); if (!n) return { exact: null, sugg: [] };
+    if (ids.includes(name)) return { exact: name, sugg: [] };
+    const eq = ids.filter(id => imgNorm(id) === n); if (eq.length === 1) return { exact: eq[0], sugg: [] };
+    const sc = id => { const a = imgNorm(id); if (a.includes(n) || n.includes(a)) return 0; let d = 0; const m = Math.max(a.length, n.length); for (let i = 0; i < m; i++) if (a[i] !== n[i]) d++; return 1 + d / m; };
+    return { exact: null, sugg: ids.map(id => [id, sc(id)]).filter(x => x[1] < 1.5).sort((a, b) => a[1] - b[1]).slice(0, 5).map(x => x[0]) };
   }
   async function imgTest() {
     const out = document.getElementById("img-test-out"), c = imgCfg(); out.textContent = t("img_st_gen");
@@ -9974,6 +10037,10 @@ NEGATIVE: <short ${tags ? "tag list" : "comma list"} of things to avoid>`;
     if (g("p2-basic-reset")) g("p2-basic-reset").onclick = () => { state.settings.basicUrls = {}; saveState(); showToast(t("p2_basic_cleared"), "info"); };
     ["p2-img-on", "p2-img-prov", "p2-img-url", "p2-img-key", "p2-img-model", "p2-img-max", "p2-img-exp", "img-reuse", "img-size", "img-steps", "img-cfg", "img-sampler", "img-seed", "img-neg", "img-style"].forEach(id => { if (g(id)) g(id).onchange = imgSaveSettings; });
     if (g("img-models-btn")) g("img-models-btn").onclick = imgLoadModels;
+    if (g("img-models-search")) g("img-models-search").oninput = imgModelsRender;
+    if (g("img-models-list")) g("img-models-list").onclick = e => { const b = e.target.closest("button[data-id]"); if (b) imgModelsPick(b.dataset.id); };
+    if (g("img-models-close")) g("img-models-close").onclick = () => g("img-models-modal").classList.remove("active");
+    if (g("img-models-modal")) g("img-models-modal").addEventListener("click", e => { if (e.target.id === "img-models-modal") e.target.classList.remove("active"); });
     if (g("img-test-btn")) g("img-test-btn").onclick = imgTest;
     if (g("img-fab")) g("img-fab").onclick = () => imgOpen();
     if (g("img-mode")) g("img-mode").onchange = imgModeUI;
