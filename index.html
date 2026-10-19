@@ -1136,6 +1136,7 @@
           </div>
         </div>
         <div class="form-group"><label data-i18n="lbl_char_prompt">System-Prompt / Persönlichkeit</label><textarea id="char-prompt" rows="3"></textarea></div>
+        <div class="form-group"><label data-i18n="lbl_char_imgtags">Bild-Aussehen (fest)</label><textarea id="char-imgtags" rows="2" placeholder="leer = automatisch aus der Karte, z. B.: adult woman, (elf:1.2), tall, slender, (short silver hair:1.2), violet eyes, grey wool coat"></textarea></div>
         <details style="border:1px dashed var(--border); border-radius:8px; padding:8px; background:rgba(0,0,0,0.15);">
           <summary style="font-size:12px; font-weight:600; color:var(--gold); cursor:pointer; user-select:none;" data-i18n="char_expert_box">⚙️ API & Modell-Parameter (Experten)</summary>
           <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
@@ -1544,7 +1545,7 @@
       first_msg_title: "🎬 Szenen-Auftakt", lbl_first_msg_author: "Urheber des Auftakts",
       lbl_scene_text: "Szenentext", ph_scene_text: "Wie beginnt die Szene?...",
       btn_start_scene: "Abenteuer mit dieser Szene starten", char_modal_title: "Charakter anlegen",
-      lbl_role_avatar: "Rolle & Avatar", lbl_char_prompt: "System-Prompt / Persönlichkeit",
+      lbl_role_avatar: "Rolle & Avatar", lbl_char_prompt: "System-Prompt / Persönlichkeit", lbl_char_imgtags: "Bild-Aussehen (fest)",
       char_expert_box: "⚙️ API & Modell-Parameter (Experten)", btn_save: "Speichern",
       lore_modal_title: "Lorebook-Eintrag", lbl_lore_folder: "Ordner / Kategorie",
       lbl_title: "Titel", lore_constant_chk: "📌 Dauerhaft aktiv (Immer im Kontext / Pinned)",
@@ -1662,7 +1663,7 @@
       first_msg_title: "🎬 Opening scene", lbl_first_msg_author: "Who opens the scene",
       lbl_scene_text: "Scene text", ph_scene_text: "How does the scene begin?...",
       btn_start_scene: "Start the adventure with this scene", char_modal_title: "Create character",
-      lbl_role_avatar: "Role & avatar", lbl_char_prompt: "System prompt / personality",
+      lbl_role_avatar: "Role & avatar", lbl_char_prompt: "System prompt / personality", lbl_char_imgtags: "Image appearance (locked)",
       char_expert_box: "⚙️ API & model settings (advanced)", btn_save: "Save",
       lore_modal_title: "Lorebook entry", lbl_lore_folder: "Folder / category",
       lbl_title: "Title", lore_constant_chk: "📌 Always active (always in context / pinned)",
@@ -8614,7 +8615,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
       document.getElementById("char-reasoning").value = "auto";
       document.getElementById("char-thinkbudget").value = String(RS_DEFAULT_BUDGET);
       document.getElementById("thinkbudget-val").innerText = String(RS_DEFAULT_BUDGET);
-      document.getElementById("char-prompt").value = "";
+      document.getElementById("char-prompt").value = ""; document.getElementById("char-imgtags").value = "";
       pvRefreshForms();
       const modal = document.getElementById("char-modal");
       if (modal) modal.classList.add("active");
@@ -8650,7 +8651,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     document.getElementById("char-reasoning").value = rsMode(c);
     document.getElementById("char-thinkbudget").value = String(rsBudget(c));
     document.getElementById("thinkbudget-val").innerText = String(rsBudget(c));
-    document.getElementById("char-prompt").value = c.prompt || "";
+    document.getElementById("char-prompt").value = c.prompt || ""; document.getElementById("char-imgtags").value = c.imgTags || "";
     pvRefreshForms();
     const modal = document.getElementById("char-modal");
     if (modal) modal.classList.add("active");
@@ -8681,6 +8682,7 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
         thinkBudget: rsBudget({ thinkBudget: document.getElementById("char-thinkbudget")?.value }),
         prompt: String(document.getElementById("char-prompt")?.value || "").trim()
       };
+      { const it = String(document.getElementById("char-imgtags")?.value || "").replace(/\s+/g, " ").trim().slice(0, 600); if (it) newChar.imgTags = it; }
       [["char-minp", "minP"], ["char-topk", "topK"], ["char-freqp", "freqPenalty"], ["char-presp", "presPenalty"], ["char-maxtok", "maxTokens"]].forEach(([id, f]) => { const v = parseFloat(document.getElementById(id)?.value); if (!isNaN(v)) newChar[f] = v; });
       if (document.getElementById("char-basic")?.checked) newChar.basicParams = true;
 
@@ -10032,45 +10034,134 @@ Beginne mit ${k === "modern" ? "der Stadt (Typ Region)" : "dem Sektor (Typ Sekto
     const k = n || 70, lw = imgWords(imgCleanText(look), Math.round(k * 0.65)), ww = imgWords(imgCleanText(wear), k - lw.split(" ").length);
     return [kind && !/spieler|player/i.test(kind) ? kind.trim() : "", lw, ww ? "Kleidung: " + ww : ""].filter(Boolean).join(". ");
   }
+  function imgVisualLore(text, skip) {   // Lore zu Ort/Objekten/Figuren der Szene (Schlüsselwörter im Szenentext), kurz, ohne Geheimes
+    const low = String(text || "").toLowerCase(), out = [];
+    (state.lorebook || []).forEach(l => {
+      if (!l || l.secret || l.ai || skip.has(String(l.title || "").toLowerCase())) return;
+      const keys = String(l.keys || "").split(/[,;]/).concat(l.title || "").map(k => k.trim().toLowerCase()).filter(k => k.length > 2);
+      const hits = keys.filter(k => low.includes(k)).length; if (hits) out.push([hits * 10 + (+l.priority || 0) / 10, l]);
+    });
+    return out.sort((a, b) => b[0] - a[0]).slice(0, 4).map(([, l]) => `- ${l.title}: ${imgWords(imgCleanText(l.content || ""), 60)}`).join("\n");
+  }
+  // ---------- Festes Bild-Aussehen: deterministische Tag-Zeile pro Figur (manuelles Feld hat Vorrang) ----------
+  const IMG_COL = { schwarz: "black", silber: "silver", weiß: "white", weiss: "white", platin: "platinum blonde", honigblond: "honey blonde", blond: "blonde", rotbraun: "auburn", kastanienbraun: "chestnut brown", kupfer: "copper", braun: "brown", rot: "red", grau: "grey", blau: "blue", grün: "green", violett: "violet", lila: "purple", rosa: "pink", gold: "golden", bernstein: "amber", smaragd: "emerald green", creme: "cream", black: "black", silver: "silver", white: "white", blonde: "blonde", brown: "brown", red: "red", grey: "grey", gray: "grey", blue: "blue", green: "green", purple: "purple", pink: "pink", golden: "golden", amber: "amber" };
+  const IMG_SPECIES = [[/lamia/, "lamia, snake lower body"], [/kentaur|centaur/, "centaur, horse lower body"], [/kuhfrau|minotaur|cow ?girl/, "cow girl, cow ears, cow horns, cow tail"], [/kitsune|fuchsfrau/, "kitsune, fox ears, fox tail"], [/harpyie|harpy/, "harpy, feathered wings"], [/werwolf|werwölfin|werewolf/, "werewolf girl, wolf ears, wolf tail"], [/arachne/, "arachne, spider lower body"], [/hasen|häsin|bunny|rabbit/, "rabbit ears"], [/bärin|bear ?girl/, "bear ears"], [/zwerg|dwarf/, "dwarf"], [/\bork|\borc/, "orc, green skin, tusks"], [/elf|elfe|elfin/, "elf, pointed ears"], [/dämon|demon/, "demon, horns"], [/drach|dragon/, "dragon girl, horns, scales"]];
+  const IMG_BUILD = { zierlich: "petite", schlank: "slender", athletisch: "athletic build", muskulös: "muscular", kräftig: "sturdy build", kurvig: "curvy", üppig: "voluptuous", mollig: "plump", hager: "lanky", breitschultrig: "broad shoulders", slender: "slender", athletic: "athletic build", muscular: "muscular", curvy: "curvy", petite: "petite" };
+  const IMG_WEAR = { mantel: "coat", umhang: "cloak", kapuze: "hood", hemd: "shirt", weste: "vest", harnisch: "armor", rüstung: "armor", stiefel: "boots", kleid: "dress", tracht: "dirndl", schürze: "apron", rock: "skirt", hose: "trousers", gürtel: "belt", halsband: "collar", glöckchen: "bell", brosche: "brooch", schmuck: "jewelry", kette: "necklace", ring: "ring", speer: "spear", schwert: "sword", bogen: "bow", dolch: "dagger", stab: "staff", tasche: "bag", hut: "hat", handschuhe: "gloves", tunika: "tunic", robe: "robe", schal: "scarf", brille: "glasses" };
+  const IMG_MAT = { leder: "leather", woll: "wool", leinen: "linen", silber: "silver", gold: "gold", seiden: "silk", seide: "silk", eisen: "iron", stahl: "steel", fell: "fur", samt: "velvet", knapp: "revealing", fluss: "river-stone", kiesel: "pebble" };
+  function imgW(t, w, on) { return on && w ? `(${t}:${w})` : t; }
+  function imgColOf(word) { const w = String(word || "").toLowerCase(); const k = Object.keys(IMG_COL).sort((a, b) => b.length - a.length).find(k => w.startsWith(k) || w.includes(k)); return k ? IMG_COL[k] : ""; }
+  function imgLockAuto(x, weights, cur) {   // fixed: unveränderliche Merkmale; cur: veränderliche (Bau, Frisur, Kleidung …) nur als Ausgangswert
+    const fx = [], cu = []; let out = fx;
+    const src = String((x && (x.appearance || x.anatomy)) || "") + "\n" + String((x && (x.persona || x.prompt)) || "");
+    const lines = src.split("\n"), first = (lines.find(l => l.trim()) || "").toLowerCase();
+    const look = lines.filter(l => /^\s*(?:\*\*)?\s*(?:aussehen|äußeres|appearance|looks|kleidung|clothing|outfit|ausrüstung|equipment)\b[^:：]{0,25}[:：]/i.test(l)).join(", ").replace(/^[^:：]*[:：]/, "") || (x && x.appearance) || "";
+    const low = (first + ", " + look).toLowerCase(), segs = look.toLowerCase().split(/[,;.]|\bund\b|\band\b/).map(z => z.trim()).filter(Boolean);
+    const g = imgGender(x), age = +((first.match(/(\d{2})\s*(?:jahre|years|-jährig)/) || [])[1] || 0);
+    out.push((age && age < 23 ? "young adult " : age > 45 ? "mature " : "adult ") + (g === "girl" ? "woman" : g === "boy" ? "man" : "person"));
+    const sp = IMG_SPECIES.filter(([re]) => re.test(low)).map(([, t]) => t); if (sp.length) out.push(imgW(sp[0].split(", ")[0], 1.2, weights), ...sp[0].split(", ").slice(1));
+    const hm = (look.match(/(\d+(?:[.,]\d+)?)\s*m\b/) || [])[1]; out = cu; if (hm) { const h = parseFloat(hm.replace(",", ".")); out.push(h >= 2.5 ? imgW("towering height", 1.2, weights) + ", giant" : h >= 1.95 ? "very tall" : h >= 1.75 ? "tall" : h < 1.55 ? "short" : "average height"); }
+    Object.keys(IMG_BUILD).forEach(k => { if (new RegExp("(^|[^a-zäöü])" + k).test(low)) cu.push(IMG_BUILD[k]); });
+    segs.forEach(z => {
+      const words = z.split(/\s+/);
+      if (/(haar|haare|locken|mähne|zopf|zöpfe|\bhair\b)/.test(z)) {
+        const col = words.map(imgColOf).find(Boolean) || "";
+        const len = /hüftlang|waist/.test(z) ? "waist-length" : /schulterlang|shoulder/.test(z) ? "shoulder-length" : /kurz|short/.test(z) ? "short" : /lang|long/.test(z) ? "long" : "";
+        const sty = [/lock|curl/.test(z) && "curly", /geflocht|zopf|zöpfe|braid/.test(z) && "braided", /zerzaust|messy/.test(z) && "messy", /glatt|straight/.test(z) && "straight", /wellig|wavy/.test(z) && "wavy"].filter(Boolean).join(" ");
+        if (col) fx.push(imgW(col + " hair", 1.2, weights)); if (len || sty) cu.push([len, sty, "hair"].filter(Boolean).join(" ")); return; }
+      out = fx;
+      if (/(augen|\beyes?\b)/.test(z)) { const col = words.map(w => /schlitz/.test(w) ? "" : imgColOf(w)).find(Boolean); if (col) out.push(imgW(col + " eyes", 1.2, weights)); if (/schlitz|slit/.test(z)) out.push("slit pupils"); return; }
+      if (/(haut|\bskin\b)/.test(z)) { const t = /blass|pale/.test(z) ? "pale skin" : /dunkel|dark/.test(z) ? "dark skin" : /gebräunt|tan/.test(z) ? "tan skin" : /oliv/.test(z) ? "olive skin" : (imgColOf(z) ? imgColOf(z) + " skin" : ""); if (t) out.push(t); }
+      if (/sommersprossen|freckles/.test(z)) out.push("freckles");
+      if (/narbe|scar/.test(z)) out.push("scar" + (/schulter|shoulder/.test(z) ? " on shoulder" : /gesicht|face/.test(z) ? " on face" : ""));
+      if (/(sehr|extrem|riesig)\w*\s+große?n?\s+brüst|huge breasts|very large breasts/.test(z)) cu.push("very large breasts"); else if (/große?n?\s+brüst|large breasts/.test(z)) cu.push("large breasts");
+      if (/hörner|horns/.test(z) && !sp.length) out.push((imgColOf(z) ? imgColOf(z) + " " : "") + "horns");
+      if (/gespaltene zunge|forked tongue/.test(z)) out.push("forked tongue");
+      if (/schlangenleib/.test(z)) { const c2 = words.map(imgColOf).find(Boolean); if (c2) out.push(c2 + " snake tail"); }
+      if (/pferdeleib|horse body/.test(z)) { const c2 = words.map(imgColOf).find(Boolean); if (c2) out.push(c2 + " horse body"); }
+      if (/gefleckt|spotted/.test(z) && /schwanz|tail/.test(z)) out.push("black and white spotted tail");
+      words.forEach((w, i) => { const k = Object.keys(IMG_WEAR).find(k => w.endsWith(k) && !(k === "ring" && w !== "ring") && !(k === "rock" && w !== "rock") && !(k === "bogen" && w !== "bogen"));
+        if (!k) return; const pre = w.slice(0, -k.length), adj = words.slice(Math.max(0, i - 2), i).join(" ") + " " + pre;
+        const mat = Object.keys(IMG_MAT).filter(m => adj.includes(m)).map(m => IMG_MAT[m]), col = adj.split(/\s+/).map(imgColOf).find(Boolean);
+        cu.push([...new Set([col, ...mat])].filter(Boolean).concat(IMG_WEAR[k]).join(" ")); });
+    });
+    return [...new Set(cur ? cu : fx)].join(", ");
+  }
+  const IMG_LOOK_RE = /haar|frisur|zopf|kleid|trägt|anzieh|umgezogen|mantel|umhang|rüstung|harnisch|stiefel|narbe|wunde|verletz|verband|verwandel|gewachsen|größer|kleiner|muskel|kurvig|schuppen|fell|hörner|flügel|tattoo|hair|wear|dress|cloak|armor|armour|scar|wound|bandage|transform|grew|taller|muscle|wings/i;
+  function imgChronicleLook(x) {   // Chronik (KI-Einträge): nur die neuesten aussehens-relevanten Einträge zu dieser Figur
+    const n = String((x && x.name) || "").trim(); if (n.length < 2) return "";
+    const re = new RegExp("(^|[^\\p{L}])(" + escapeRegex(n) + "|" + escapeRegex(n.split(/\s+/)[0]) + ")(?=$|[^\\p{L}])", "iu");
+    return (state.lorebook || []).filter(l => l && l.ai && re.test(String(l.content || "") + " " + (l.title || "")) && IMG_LOOK_RE.test(String(l.content || ""))).slice(-2).reverse()
+      .map(l => imgWords(imgCleanText(String(l.content || "").split(/(?<=[.!?])\s+/).filter(z => IMG_LOOK_RE.test(z) && (re.test(z) || !/[A-ZÄÖÜ][a-zäöü]+ /.test(z.slice(1)))).join(" ") || l.content), 35)).join(" / ");
+  }
+  function imgCurrent(x) {   // veränderliche Merkmale, neueste Quelle zuerst: Status-Tracker > Chronik > Karte (die Erzählung gewinnt per Anweisung)
+    const isU = x === state.user, p = (x && typeof getProgressionFor === "function" && getProgressionFor(isU ? "user" : x.id)) || {}, st = [];
+    if (p.level && p.level !== "1" && typeof stLevels === "function" && stLevels()) st.push("level " + p.level);
+    (p.status || []).slice(0, 4).forEach(z => st.push(z));
+    (p.wounds || []).slice(0, 4).forEach(z => st.push("wound: " + z));
+    const wear = (p.inventory || []).filter(z => IMG_LOOK_RE.test(z) || Object.keys(IMG_WEAR).some(k => String(z).toLowerCase().includes(k))).slice(0, 5); if (wear.length) st.push("gear: " + wear.join(", "));
+    const ch = imgChronicleLook(x), card = imgLockAuto(x, false, true);
+    return [st.length ? "STATUS: " + st.join("; ").slice(0, 300) : "", ch ? "CHRONICLE: " + ch : "", card ? "CARD: " + card : ""].filter(Boolean).join(" ; ");
+  }
+  function imgLock(x, weights) { const own = String((x && x.imgTags) || "").replace(/\s+/g, " ").trim(); const t = own || imgLockAuto(x, weights); return weights ? t : t.replace(/\(([^():]+):[\d.]+\)/g, "$1"); }
+  const IMG_HAIRS = ["blonde", "black", "brown", "red", "silver", "white", "pink", "blue", "green", "purple", "grey"];
+  function imgAutoNeg(visible, total, weights) {   // szenenspezifisches Negativ: falsche Haarfarben, Extra-Personen, Abwesende, falsche Epoche
+    const locks = visible.map(v => imgLock(v, false).toLowerCase()).join(", "), neg = [];
+    if (visible.length) { const hairs = IMG_HAIRS.filter(h => !(h === "red" && /auburn|copper/.test(locks)) && !(h === "grey" && /silver|platinum/.test(locks)) && !(h === "white" && /silver|platinum/.test(locks)) && !new RegExp(h + "[^,]*hair|" + (h === "blonde" ? "blonde|golden hair" : h)).test(locks.replace(/[^,]*eyes|[^,]*skin|[^,]*tail|[^,]*body|[^,]*dress|[^,]*coat|[^,]*armor/g, ""))); if (hairs.length) neg.push(hairs.map(h => h + " hair").join(", ")); }
+    if (total) neg.push(imgW("extra people", 1.2, weights), total === 1 ? "multiple people, crowd" : "crowd");
+    const vs = new Set(visible.map(v => v.id)), absent = (state.characters || []).filter(c => c && c.role === "companion" && !isNpcVoiceChar(c) && !vs.has(c.id));
+    absent.forEach(c => { const sp = IMG_SPECIES.find(([re]) => re.test(String(c.prompt || c.appearance || "").toLowerCase().slice(0, 300))); if (sp && !visible.some(v => IMG_SPECIES.find(([re]) => re.test(String(v.prompt || v.appearance || "").toLowerCase().slice(0, 300))) === sp)) neg.push(sp[1].split(", ")[0]); });
+    if (stKind() !== "modern" && stKind() !== "scifi") neg.push("modern clothing, car, smartphone, firearm, neon");
+    return [...new Set(neg.join(", ").split(",").map(z => z.trim()).filter(Boolean))].join(", ");
+  }
+  function imgVisibleChars(txt) {
+    const m = String(txt || "").match(/VISIBLE\s*[:：]\s*([^\n]*)/i); if (!m) return [];
+    const all = [state.user, ...(state.characters || []).filter(c => c && c.role === "companion")].filter(Boolean), norm = z => String(z || "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+    return m[1].split(",").map(norm).filter(Boolean).map(w => all.find(c => { const n = norm(c.name); return n === w || n.split(" ")[0] === w.split(" ")[0]; })).filter((c, i, a) => c && a.indexOf(c) === i);
+  }
   function imgSceneContext(mode, charId) {
     const w = state.world || {}, style = IMG_STYLE[stKind()] || IMG_STYLE.fantasy;
     const present = (state.characters || []).filter(c => c && c.role === "companion" && c.active !== false && c.present !== false).slice(0, 4);
-    const who = present.map(c => `- ${c.name}${c.location ? " (" + c.location + ")" : ""}: ${imgLook(c)}`).filter(x => x.length > 4).join("\n");
-    const user = state.user ? `- ${state.user.name || "Player"} (the player, "du"/"you" in the text): ${imgLook(state.user, 90)}` : "";
+    const who = present.map(c => `- ${c.name}${c.location ? " (" + c.location + ")" : ""}: LOCKED: ${imgLock(c, false)} | CURRENT: ${imgCurrent(c) || "-"} | card: ${imgLook(c, 60)}`).filter(x => x.length > 4).join("\n");
+    const away = (state.characters || []).filter(c => c && c.role === "companion" && !isNpcVoiceChar(c) && !present.includes(c)).map(c => c.name).join(", ");
+    const user = state.user ? `- ${state.user.name || "Player"} (the player, "du"/"you" in the text): LOCKED: ${imgLock(state.user, false)} | CURRENT: ${imgCurrent(state.user) || "-"} | card: ${imgLook(state.user, 50)}` : "";
     const ch = mode === "portrait" ? (state.characters || []).find(c => c && c.id === charId) : null;
-    if (ch) return [`[STYLE]: ${style}`, `[PORTRAIT]: ${ch.name}: ${imgLook(ch, 90)}`].join("\n");
+    if (ch) return [`[STYLE]: ${style}`, `[PORTRAIT]: ${ch.name}: LOCKED: ${imgLock(ch, false)} | CURRENT: ${imgCurrent(ch) || "-"} | card: ${imgLook(ch, 80)}`].join("\n");
     const all = (state.messages || []).filter(Boolean), tgt = mode === "last" ? imgTarget() : ([...all].reverse().find(m => m.type !== "user") || null);
     const ti = tgt ? all.indexOf(tgt) : all.length, prevUser = [...all.slice(0, ti)].reverse().find(m => m.type === "user");
     const main = tgt ? imgCleanText(p2MsgPlain(tgt)) : "", cut = (x, k) => x.length > k ? x.slice(0, k).replace(/\s+\S*$/, "") + " …" : x;
     const h = tgt ? imgMsgHidden(tgt) : {};
     const parts = [];
     if (mode !== "last" && prevUser) parts.push("[PLAYER ACTION BEFORE]: " + cut(imgCleanText(p2MsgPlain(prevUser)), 300));
+    { const prior = tgt ? [...all.slice(0, ti)].reverse().find(m => m.type !== "user") : null;   // vorige Erzählung: Ort/Positionen, die noch gelten
+      if (prior) parts.push("[EARLIER SCENE – only for setting and positions still valid]: " + cut(imgCleanText(p2MsgPlain(prior)), 400)); }
     parts.push("[CURRENT SCENE TEXT – the image shows THIS moment]:\n" + (cut(main, 1500) || "-"));
     if (h.tags) parts.push("[HIDDEN TAGS]: " + h.tags);
     if (h.think) parts.push("[GM NOTES]: " + h.think.slice(0, 300));
     const lore = imgLastLoreSnippet(); if (lore) parts.push("[LORE USED LAST TURN]:\n" + lore.slice(0, 500));
     const loc = [w.location, w.time, w.weather].filter(Boolean).join(", ");
-    return [`[LOCATION]: ${loc || "(see scene text)"}`, `[PEOPLE WHO MAY APPEAR – include only those the scene text shows as visible]:\n${[user, who].filter(Boolean).join("\n") || "-"}`, parts.join("\n\n"), "[TASK]: Do not continue the story. Output only the POSITIVE and NEGATIVE lines for the image of the current scene."].filter(Boolean).join("\n\n");
+    const vl = imgVisualLore([main, loc].join(" "), new Set(present.map(c => String(c.name || "").toLowerCase())));
+    return [`[LOCATION / TIME / WEATHER]: ${loc || "(see scene text)"}`, `[PEOPLE WHO MAY APPEAR – include only those the scene text shows as visible; use these looks exactly]:\n${[user, who].filter(Boolean).join("\n") || "-"}`, away ? `[ABSENT – never draw]: ${away}` : "", vl ? `[WORLD LORE for place, architecture, objects – use for exact details, do not contradict]:\n${vl}` : "", parts.join("\n\n"), "[TASK]: Do not continue the story. Output only the POSITIVE and NEGATIVE lines for the image of the current scene."].filter(Boolean).join("\n\n");
   }
   function imgWriterSys(c, mode) {   // immer kurze SD/booru-Tags: konkrete sichtbare Fakten extrahieren, nichts erfinden, nicht denken
     const extra = imgIsTags(c) ? "" : " (natural-language model: still short tag-like phrases, no full sentences)";
     return `You are an image-prompt writer for Stable Diffusion / booru-style prompts${extra}. Task: SUMMARIZE the current scene text and COMPRESS it into short prompt tags (Zusammenfassen und zu Tags komprimieren, nichts Neues erfinden). The scene text may be German and written in second person: "du"/"you" is the player character described under PEOPLE. The player is only in the image if the text describes his own body, pose or position (e.g. "Du liegst auf Moos"); if someone just looks at or talks to "you", the image is from the player's point of view (pov) and he is NOT counted. Extract ONLY concrete visual facts that the text states: who is visible and how many, their looks and clothing, pose (e.g. lying on back, sitting, standing), the exact setting and its objects, lighting, time of day, and a fitting camera framing. Never add people, actions, objects or moods that are not in the text; a character who is only heard (a voice, a sound, "somewhere above you") or hidden is NOT visible: leave them out of VISIBLE and of the tags. Answer immediately, do not think or reason.
 Output ONLY three lines, nothing else:
 VISIBLE: comma-separated names (as written under PEOPLE) of the people visible in the image, or "none"
-POSITIVE: comma-separated short English tags (1-4 words each), max 30. The first tags are the subject count: count every visible person including the player (e.g. "1boy, solo" or "1boy, 2girls"), then for EACH visible person: kind/species (e.g. lamia, centaur, cow girl), hair, eyes and clothing tags taken from PEOPLE (e.g. messy brown hair, linen shirt, leather vest), then the main subject's looks and pose, then setting objects (attach where they are, e.g. "glowing runes on standing stones", so nothing ends up on a body), lighting, time of day, framing.
-NEGATIVE: only generic quality/artifact tags (e.g. lowres, bad anatomy, extra limbs, blurry, text, watermark) plus things that would contradict the scene (e.g. extra people when solo). No mood or genre words.
+POSITIVE: one line of dense comma-separated English descriptive phrases (1-6 words each), 35-60 phrases, most important first, no sentences, no filler (no "the image shows"). Order: 1) subject count for every visible person incl. the player (e.g. "1boy, 2girls"); 2) LOCKED tags under PEOPLE are permanent traits (face, eye/hair colour, skin, species, marks) inserted by the program verbatim: never repeat, paraphrase, generalize ("woman", "monster") or contradict them; for EACH visible person then write their CURRENT traits (build and proportions, hairstyle, clothing, injuries, state) as precise English tags, all of them required; priority from newest to oldest: the scene text (then EARLIER SCENE) > STATUS > CHRONICLE > CARD, so the most recent description wins on conflicts (new clothes, wet, torn, hair untied, wounded, transformed); never add attributes that are neither listed nor in the text; then pose, expression and action in THIS moment; 3) positions relative to each other (e.g. "lamia coiled behind him, centaur standing at left"); 4) location with architecture, era and materials from WORLD LORE and the text (e.g. "medieval timber barn, straw floor"); 5) important objects and where they are (e.g. "glowing runes on standing stones", so nothing ends up on a body); 6) time of day, lighting, weather, mood; 7) camera framing and angle (e.g. full body, wide shot, low angle, pov). Never draw anyone listed under ABSENT.
+NEGATIVE: only generic quality/artifact tags (e.g. lowres, bad anatomy, extra limbs, blurry, text, watermark) plus things that would contradict the scene (e.g. extra people when solo); the program adds wrong-trait negatives itself. No mood or genre words.
 No sentences, no explanations, no story.`;
   }
   function imgParse(txt) {   // tolerant: JSON, beschriftete Zeilen (auch **Positive prompt:**), Code-Zäune, sonst ganzer Text = positiv
     let s = noThink(String(txt || "")).replace(/```[a-z]*\n?|```/gi, "").replace(/\r/g, "").trim();
     const clean = x => String(x || "").replace(/\*\*|__|^["'`\s]+|["'`\s]+$/g, "").replace(/\s+/g, " ").trim();
-    try { const m = s.match(/\{[\s\S]*\}/); if (m) { const j = JSON.parse(m[0]), p = j.positive || j.prompt || j.positive_prompt, n = j.negative || j.negative_prompt; if (p) return { pos: clean(p).slice(0, 1800), neg: clean(n).slice(0, 600) }; } } catch (_) {}
+    try { const m = s.match(/\{[\s\S]*\}/); if (m) { const j = JSON.parse(m[0]), p = j.positive || j.prompt || j.positive_prompt, n = j.negative || j.negative_prompt; if (p) return { pos: clean(p).slice(0, 2600), neg: clean(n).slice(0, 600) }; } } catch (_) {}
     const L = "(?:\\*\\*)?\\s*", P = new RegExp(`(?:^|\\n)\\s*[-#>*\\s]*${L}(?:positive(?:\\s*prompt)?|prompt|positiv)${L}\\s*[:：]${L}([\\s\\S]*?)(?=\\n\\s*[-#>*\\s]*${L}(?:negative|negativ)|$)`, "i"), N = new RegExp(`(?:^|\\n)\\s*[-#>*\\s]*${L}(?:negative(?:\\s*prompt)?|negativ)${L}\\s*[:：]${L}([\\s\\S]*)$`, "i");
     const p = s.match(P), n = s.match(N);
-    if (p && clean(p[1])) return { pos: clean(p[1]).slice(0, 1800), neg: clean(n && n[1]).split("\n")[0].slice(0, 600) };
+    if (p && clean(p[1])) return { pos: clean(p[1]).slice(0, 2600), neg: clean(n && n[1]).split("\n")[0].slice(0, 600) };
     if (n) s = s.slice(0, n.index);
     s = s.replace(/^(?:sure|here(?:'s| is)[^:\n]*|okay)[^\n]*:\s*\n/i, "");
-    return { pos: clean(s).slice(0, 1800), neg: n ? clean(n[1]).slice(0, 600) : "" };
+    return { pos: clean(s).slice(0, 2600), neg: n ? clean(n[1]).slice(0, 600) : "" };
   }
   const IMG_GM = { ms: +window.__IMG_GM_MS || 45000 };   // Gesamtbudget für den Prompt-Schritt (Warten + alle Versuche), nicht pro Versuch
   function imgNoThinkPayload(payload, url) {   // Denken hart aus: alle Reasoning-Felder raus, nur noch „aus“-Schalter
@@ -10085,7 +10176,7 @@ No sentences, no explanations, no story.`;
     const url = resolveEndpoint(ch.baseUrl), key = String(ch.apiKey || "").trim().replace(/^Bearer\s+/i, ""), model = String(ch.model || "").trim();
     const end = deadline || (Date.now() + IMG_GM.ms);
     const go = async drop => {
-      const payload = { model, messages: [{ role: "system", content: sys }, { role: "user", content: user }], temperature: 0.35, max_tokens: Math.min(300, maxT || 300), stream: !noStream };
+      const payload = { model, messages: [{ role: "system", content: sys }, { role: "user", content: user }], temperature: 0.35, max_tokens: Math.min(600, maxT || 300), stream: !noStream };
       if (!drop) imgNoThinkPayload(payload, url);   // kein Denkbudget in max_tokens, egal was am GM eingestellt ist
       const headers = { "Content-Type": "application/json" }; if (key) headers.Authorization = "Bearer " + key;
       const ctl = new AbortController(); let timedOut = false;
@@ -10177,7 +10268,7 @@ No sentences, no explanations, no story.`;
     for (const w of want) { const ch = all.find(c => { const n = norm(c.name); return n === w || n.split(" ")[0] === w.split(" ")[0]; }); if (!ch) return null; const g = imgGender(ch); if (!g) return null; cnt[g]++; }
     return cnt;
   }
-  function imgTagFix(pos, names, vis) {   // Anzahl-Tags zusammenfassen (1girl, 1girl → 2girls), Namen/Fantasie-Zähler raus, mehrdeutige Booru-Tags entschärfen
+  function imgTagFix(pos, names, vis, locks) {   // Anzahl-Tags zusammenfassen (1girl, 1girl → 2girls), Namen/Fantasie-Zähler raus, mehrdeutige Booru-Tags entschärfen
     const N = new Set((names || []).flatMap(n => [n, n.split(/\s+/)[0]]).map(n => String(n || "").toLowerCase()).filter(Boolean));
     const cnt = { girl: 0, boy: 0, other: 0 }, rest = [], seen = new Set();
     String(pos || "").split(",").map(x => x.trim()).filter(Boolean).forEach(x => {
@@ -10185,12 +10276,14 @@ No sentences, no explanations, no story.`;
       if (m) { cnt[m[2]] += +m[1]; return; }
       if (/^\d+\s*[a-zäöü]+$/.test(l) && !/^\d+\s*(k|d|years?|m)$/.test(l)) return;   // „1knecht“, „1centaur“
       if (N.has(l) || l === "solo" || l === "solo focus") return;
+      if (locks && locks.length && (/^(adult |young |mature )?(woman|man|girl|boy|person|monster|creature)$/.test(l) || /\b(eyes|skin)\b/.test(l) || (/\bhair\b/.test(l) && IMG_HAIRS.some(h => l.includes(h))))) return;   // feste Merkmale nur aus der festen Zeile; veränderliche bleiben
       rest.push(l === "cowgirl" ? "cow girl" : x);
     });
     if (vis && !vis.none) { cnt.girl = vis.girl; cnt.boy = vis.boy; cnt.other = vis.other; }   // Anzahl aus VISIBLE (Code) statt aus den Tags des Modells
     const total = cnt.girl + cnt.boy + cnt.other, head = Object.entries(cnt).filter(([, n]) => n).map(([k, n]) => n + k + (n > 1 ? "s" : ""));
-    if (total === 1) head.push("solo");
-    return [...head, ...rest].filter(x => { const k = x.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; }).join(", ");
+    if (total === 1) head.push("solo"); else if (total > 1 && locks && locks.length === 1) head.push("solo focus");
+    const lk = (locks || []).flatMap(z => z.split(/,\s*/)).filter(Boolean);
+    return [...head, ...lk, ...rest].filter(x => { const k = x.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; }).join(", ");
   }
   async function imgWritePrompt(mode, charId, sig, onTick) {
     const c = imgCfg(), gm = state.characters.find(x => x && x.role === "gm" && x.model) || state.characters.find(x => x && x.role !== "editor" && x.model);
@@ -10203,11 +10296,14 @@ No sentences, no explanations, no story.`;
       const tCall = Date.now();
       try {
         if (onTick) onTick("write", 0);
-        const pm = imgPromptBot(gm, IMG.pmBad); const r = await imgChat(pm, sys, ctx.slice(0, 3500), sig, 300, deadline, !IMG.streamPrompt);   // ohne Stream: ArliAI bricht Streams unter Last mitten im Text ab (Lab: 0 von 9 abgeschnitten ohne, ~1/3 mit Stream)
+        const pm = imgPromptBot(gm, IMG.pmBad); const r = await imgChat(pm, sys, ctx.slice(0, 6000), sig, 520, deadline, !IMG.streamPrompt);   // ohne Stream: ArliAI bricht Streams unter Last mitten im Text ab (Lab: 0 von 9 abgeschnitten ohne, ~1/3 mit Stream)
         const P = imgParse(r.text);
         if (r.fin === "cut" && !/NEGATIVE\s*:/i.test(r.text)) { why.push(t("img_e_gmcut")); continue; }
         P.pos = String(P.pos || "").replace(/^\s*(?:positive(?:\s*prompt)?|positiv)\s*[:：]\s*/i, "").trim();
-        if (P.pos && P.pos.length >= 8 && ((P.pos.match(/,/g) || []).length >= 2 || P.pos.length < 250) && !/[„“”»«]|^(?:i'?m sorry|i cannot|sorry)/i.test(P.pos)) { P.style = IMG_STYLE[stKind()] || IMG_STYLE.fantasy; if (imgIsTags(c)) P.pos = imgTagFix(P.pos, [state.user && state.user.name, ...(state.characters || []).map(x => x && x.name)], imgVisibleCount(r.text)); if (P.neg) { const nm = [state.user && state.user.name, ...(state.characters || []).map(x => x && x.name)].filter(Boolean).flatMap(n => [String(n).toLowerCase(), String(n).toLowerCase().split(/\s+/)[0]]); P.neg = P.neg.split(",").map(x => x.trim()).filter(x => x && !nm.includes(x.toLowerCase())).join(", "); } return P; }   // Namen auch aus dem Negativ-Prompt; Tags statt Geschichte/Absage
+        if (P.pos && P.pos.length >= 8 && ((P.pos.match(/,/g) || []).length >= 2 || P.pos.length < 250) && !/[„“”»«]|^(?:i'?m sorry|i cannot|sorry)/i.test(P.pos)) { P.style = IMG_STYLE[stKind()] || IMG_STYLE.fantasy; const vis = mode === "portrait" ? [(state.characters || []).find(x => x && x.id === charId)].filter(Boolean) : imgVisibleChars(r.text), tg = imgIsTags(c);
+          if (tg) P.pos = imgTagFix(P.pos, [state.user && state.user.name, ...(state.characters || []).map(x => x && x.name)], mode === "portrait" ? null : imgVisibleCount(r.text), vis.map(v => imgLock(v, true)));
+          else if (vis.length) P.pos = [...vis.map(v => imgLock(v, false)), P.pos].join(", ");
+          P.neg = [P.neg, imgAutoNeg(vis, vis.length, tg)].filter(Boolean).join(", "); if (P.neg) { const nm = [state.user && state.user.name, ...(state.characters || []).map(x => x && x.name)].filter(Boolean).flatMap(n => [String(n).toLowerCase(), String(n).toLowerCase().split(/\s+/)[0]]); P.neg = P.neg.split(",").map(x => x.trim()).filter(x => x && !nm.includes(x.toLowerCase())).join(", "); } return P; }   // Namen auch aus dem Negativ-Prompt; Tags statt Geschichte/Absage
         why.push(tf("img_e_gmempty", { f: r.fin || "?", s: r.status, x: (r.text || (r.reason ? "nur Denken, kein Inhalt" : "") || r.snippet).slice(0, 80) }));
         if (tried >= 2 || Date.now() - tCall > 8000) break;   // leere Antwort: höchstens ein zweiter Versuch
       } catch (e) {
